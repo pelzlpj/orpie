@@ -31,6 +31,7 @@ open Interface;;
 open Interface_draw;;
 
 
+exception Interrupt_exception;;
 
 
 
@@ -1249,6 +1250,38 @@ let handle_command_call (iface : interface_state_t) calc_command =
          assert (doupdate ())
 
 
+(* handle a call to an interruptible function *)
+let handle_interr_function_call (iface : interface_state_t) calc_function =
+   try
+      if iface.has_entry then
+         push_entry iface
+      else
+         ();
+      draw_message iface "Working...";
+      assert (doupdate ());
+      assert (nodelay iface.scr.entry_win true);
+      while not (calc_function ()) do
+         let key = wgetch iface.scr.entry_win in
+         if key != ~-1 then
+            raise Interrupt_exception
+         else
+            ()
+      done;
+      assert (nodelay iface.scr.entry_win false);
+      draw_update_stack iface
+   with
+      |Invalid_argument error_msg ->
+         assert (nodelay iface.scr.entry_win false);
+         draw_error iface error_msg;
+         assert (doupdate ())
+      |Interrupt_exception ->
+         assert (nodelay iface.scr.entry_win false);
+         iface.calc#abort_computation ();
+         draw_message iface "Computation aborted.";
+         assert (doupdate ())
+
+
+
 let process_function (iface : interface_state_t) ff =
    begin match ff with
    |Add ->
@@ -1341,6 +1374,11 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#store
    |Purge ->
       handle_function_call iface iface.calc#purge
+   |Gcd ->
+      handle_interr_function_call iface iface.calc#gcd
+   |FactInt ->
+      handle_interr_function_call iface iface.calc#fact_int
+
    end
 
 

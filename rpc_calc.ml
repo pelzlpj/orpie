@@ -23,6 +23,10 @@ open Rpc_stack;;
 open Gsl_assist;;
 open Big_int;;
 
+type interruptable_args_t =
+   | Gcd_args of big_int * big_int * orpie_data * orpie_data
+   | Fact_args of big_int * big_int * orpie_data
+   | NoArgs;;
 
 let pi = 3.14159265358979323846;;
 
@@ -32,6 +36,7 @@ class rpc_calc =
       val mutable backup_stack = new rpc_stack
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
       val mutable variables = Hashtbl.create 10
+      val mutable interr_args = NoArgs
 
       method backup () =
          backup_stack <- stack#backup ()
@@ -91,6 +96,18 @@ class rpc_calc =
          modes     <- m;
          variables <- v;
          self#backup ()
+
+      method abort_computation () =
+         match interr_args with
+         |Gcd_args (a, b, el1, el2) ->
+            stack#push el1;
+            stack#push el2;
+            interr_args <- NoArgs
+         |Fact_args (num, acc, el) ->
+            stack#push el;
+            interr_args <- NoArgs
+         |NoArgs ->
+            ()
 
       method add () =
          Add.add stack self#backup self#evaln
@@ -1375,6 +1392,101 @@ class rpc_calc =
                raise (Invalid_argument "only variables can be purged")
          end else
             raise (Invalid_argument "empty stack")
+
+
+      (* exact integer factorial
+       * This is an interruptible computation, and should be
+       * called multiple times until it returns true.
+       * If computation is aborted, the interface should call
+       * abort_computation() to clean up. *)
+      method fact_int () =
+         match interr_args with
+         |Fact_args (num, acc, el) ->
+            if eq_big_int num zero_big_int then begin
+               stack#push (RpcInt acc);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let next_num = pred_big_int num
+               and next_acc = mult_big_int acc num in
+               interr_args <- Fact_args (next_num, next_acc, el);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               begin match gen_el with
+               |RpcInt n ->
+                  if sign_big_int n >= 0 then begin
+                     interr_args <- Fact_args (n, unit_big_int, gen_el);
+                     false
+                  end else begin
+                     stack#push gen_el;
+                     raise (Invalid_argument "exact factorial requires non-negative argument")
+                  end
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "exact factorial requires integer argument")
+               end
+            end else
+               raise (Invalid_argument "empty stack")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
+
+
+
+
+      (* greatest common divisor
+       * This is an interruptible computation, and should be
+       * called multiple times until it returns true.
+       * If computation is aborted, the interface should call
+       * abort_computation() to clean up. *)
+      method gcd () =
+         match interr_args with
+         |Gcd_args (a, b, el1, el2) ->
+            if eq_big_int b zero_big_int then begin
+               stack#push (RpcInt a);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let a_mod_b = mod_big_int a b in
+               interr_args <- Gcd_args (b, a_mod_b, el1, el2);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 1 then begin
+               self#backup ();
+               self#evaln 2;
+               let gen_el2 = stack#pop () in
+               let gen_el1 = stack#pop () in
+               begin match gen_el1 with
+               |RpcInt a ->
+                  begin match gen_el2 with
+                  |RpcInt b ->
+                     interr_args <- Gcd_args (a, b, gen_el1, gen_el2);
+                     false
+                  |_ ->
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "gcd requires integer arguments")
+                  end
+               |_ ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "gcd requires integer arguments")
+               end
+            end else
+               raise (Invalid_argument "insufficient arguments for gcd")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
+            
+
 
 
 

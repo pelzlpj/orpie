@@ -642,11 +642,9 @@ let draw_help (iface : interface_state_t) =
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
 
-
-(* write an error message to the stack window *)
-let draw_error (iface : interface_state_t) msg =
+let draw_message (iface : interface_state_t) msg =
    draw_update_stack iface;
-   let error_lines = Utility.wordwrap ("Error: " ^ msg) (iface.scr.sw_cols-2) in
+   let error_lines = Utility.wordwrap msg (iface.scr.sw_cols-2) in
    let trunc_error_lines = 
       if List.length error_lines > 4 then
          (List.nth error_lines 0) :: (List.nth error_lines 1) ::
@@ -671,6 +669,10 @@ let draw_error (iface : interface_state_t) msg =
    assert (wnoutrefresh iface.scr.stack_win);
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
+
+(* write an error message to the stack window *)
+let draw_error (iface : interface_state_t) msg =
+   draw_message iface ("Error: " ^ msg)
 
 
 (* display the "about" screen *)
