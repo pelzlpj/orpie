@@ -1,18 +1,13 @@
-%define pkg_name        orpie
-%define pkg_ver         1.2.0
-%define pkg_rel         1
-%define pkg_copy        GPL
-
+Name:           orpie
+Version:        1.4.0
+Release:        1
 Summary:        A fullscreen console-based RPN calculator application.
-Source:         %{pkg_name}-%{pkg_ver}.tar.gz
 URL:            http://www.eecs.umich.edu/~pelzlpj/orpie/
 Group:          Utilities/Math
-Name:           %{pkg_name}
-Version:        %{pkg_ver}
-Release:        %atrelease %{pkg_rel}
-Copyright:      %{pkg_copy}
-BuildRoot:      /var/tmp/%{pkg_name}-root
-Requires:       ocaml, gsl, ncurses
+License:        GPL
+Source:         %{name}-%{version}.tar.gz
+BuildRoot:      /var/tmp/%{name}-root
+Requires:       ocaml >= 3.07, gsl >= 1.4, ncurses
 BuildRequires:  ocaml, gsl-devel, ncurses-devel
 
 %description
@@ -60,6 +55,8 @@ install -D -m 644 doc/orpierc.5            %{buildroot}%{_mandir}/man5/orpierc.5
 %doc doc/manual.html doc/manual.pdf doc/manual.tex.in doc/TODO README COPYING ChangeLog
 
 %changelog
+* Mon Aug 2  2004 Chris Petersen <rpm@forevermore.net>
+- Minor changes to spec format for better consistency and readability
 * Tue Jun 15  2004 Chris Petersen <rpm@forevermore.net>
 - Update RPM for 1.2rc1, and include orpie-curses-keys man info
 * Tue Apr 6  2004 Chris Petersen <rpm@forevermore.net>
