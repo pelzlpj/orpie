@@ -3,7 +3,7 @@ Orpie To-Do List (roughly in order of priority)
 
 * fix display of the 'about' screen when the number of columns is < 80
 
-* implement named variables
+* document the user-defined variable usage
 
 * support parallel make (maybe use a hand-edited dependency tree to get around
   the ocamldep issues)

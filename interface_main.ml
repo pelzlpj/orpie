@@ -899,11 +899,20 @@ let handle_begin_extended (iface : interface_state_t) =
 
 (* begin entry of a variable name *)
 let handle_begin_variable (iface : interface_state_t) =
-   Printf.fprintf stderr "beginning variable mode\n";
    if iface.interface_mode != VarEditMode then begin
       iface.interface_mode <- VarEditMode;
       iface.entry_type <- VarEntry;
       iface.help_mode <- VarHelp;
+      (* FIXME: generation of the sorted variable list can be done far
+       * more efficiently *)
+      let add_variable var_str var_binding var_list =
+         var_str :: var_list
+      in
+      let all_variables = 
+         Hashtbl.fold add_variable (iface.calc#get_variables ()) []
+      in
+      iface.sorted_variable_list <- List.stable_sort String.compare all_variables;
+      iface.matched_variable_entry_list <- iface.sorted_variable_list;
       draw_help iface;
       draw_update_entry iface
    end else
@@ -1535,12 +1544,12 @@ let handle_exit_variable (iface : interface_state_t) =
    if iface.interface_mode = VarEditMode then begin
       iface.interface_mode <- StandardEntryMode;
       iface.help_mode <- Standard;
+      iface.entry_type <- FloatEntry;
       iface.variable_entry_buffer <- "";
       draw_help iface;
       draw_update_entry iface
    end else
       ()
-
 
 
 (* search through a list of variables and find all that match
@@ -1579,33 +1588,43 @@ let handle_variable_backspace (iface : interface_state_t) =
 
 (* handle entry of an arbitrary character in extended mode *)
 let handle_variable_character (iface : interface_state_t) key =
-   let ch = char_of_int key in
-   let test_buffer = iface.variable_entry_buffer ^ (String.make 1 ch) in
-   (* search through the list of variables for the first one that matches
-    * iface.variable_entry_buffer *)
-   begin try
-      iface.matched_variable_entry_list <- match_variable_buffer iface test_buffer;
-      iface.variable_entry_buffer <- test_buffer;
-      draw_help iface;
-      draw_update_entry iface
-   with
-      Not_found ->
-         iface.matched_variable_entry_list <- [];
-         iface.variable_entry_buffer <- test_buffer;
-         draw_help iface;
-         draw_update_entry iface
-   end
+   (* variables with long strings simply aren't useful, and
+    * it's possible that deleting them could become difficult. *)
+   if String.length iface.variable_entry_buffer < 25 then
+      let allowable_regex = Str.regexp "[-a-zA-Z0-9_]" in
+      let ch = char_of_int key in
+      let ss = String.make 1 ch in
+      if Str.string_match allowable_regex ss 0 then
+         let test_buffer = iface.variable_entry_buffer ^ ss in
+         (* search through the list of variables for the first one that matches
+          * iface.variable_entry_buffer *)
+         begin try
+            iface.matched_variable_entry_list <- match_variable_buffer iface test_buffer;
+            iface.variable_entry_buffer <- test_buffer;
+            draw_help iface;
+            draw_update_entry iface
+         with
+            Not_found ->
+               iface.matched_variable_entry_list <- [];
+               iface.variable_entry_buffer <- test_buffer;
+               draw_help iface;
+               draw_update_entry iface
+         end
+      else
+         let _ = beep () in ()
+   else
+      ()
 
 
 (* enter an variable entry *)
 let handle_enter_variable (iface : interface_state_t) =
    if iface.interface_mode = VarEditMode then begin
-      iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- Standard;
       if String.length iface.variable_entry_buffer > 0 then
          push_entry iface
       else
-         ();
+         iface.entry_type <- FloatEntry;
+      iface.interface_mode <- StandardEntryMode;
+      iface.help_mode <- Standard;
       iface.variable_entry_buffer <- "";
       draw_help iface;
       draw_stack iface;

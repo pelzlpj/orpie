@@ -63,6 +63,9 @@ class rpc_calc =
       method mode_hex () =
          modes <- {angle = modes.angle; base = Hex; complex = modes.complex}
 
+      method get_variables () =
+         variables
+
       method toggle_angle_mode () =
          match modes.angle with
          |Rad -> self#mode_deg ()

@@ -157,9 +157,9 @@ let draw_entry (iface : interface_state_t) =
       let len_str = String.length str in
       begin
          if len_str > iface.scr.ew_cols - 1 then
-            let trunc_str = String.sub str (len_str - iface.scr.ew_cols + 5) 
-            (iface.scr.ew_cols - 5) in
-            assert (mvwaddstr iface.scr.entry_win 1 0 ("... " ^ trunc_str))
+            let trunc_str = String.sub str (len_str - iface.scr.ew_cols + 4) 
+            (iface.scr.ew_cols - 4) in
+            assert (mvwaddstr iface.scr.entry_win 1 0 ("..." ^ trunc_str))
          else
             if highlight_len <= len_str then
                begin
@@ -345,9 +345,6 @@ let generate_abbrev_help () =
       (get_abbr (Function Sq))        ^ "  " ^ 
       (get_abbr (Function Sqrt))      ^ "  " ^ 
       (get_abbr (Function Inv))       ^ "  " ^ 
-      (get_abbr (Function Sinh))      ^ "  " ^ 
-      (get_abbr (Function Cosh))      ^ "  " ^ 
-      (get_abbr (Function Tanh))      ^ "  " ^ 
       (get_abbr (Function Gamma))     ^ "  " ^ 
       (get_abbr (Function LnGamma))   ^ "  " ^ 
       (get_abbr (Function Erf))       ^ "  " ^ 
@@ -359,7 +356,10 @@ let generate_abbrev_help () =
       (get_abbr (Function Floor))     ^ "  " ^
       (get_abbr (Function Ceiling))   ^ "  " ^
       (get_abbr (Function ToInt))     ^ "  " ^
-      (get_abbr (Function ToFloat))
+      (get_abbr (Function ToFloat))   ^ "  " ^
+      (get_abbr (Function Eval))      ^ "  " ^
+      (get_abbr (Function Store))     ^ "  " ^
+      (get_abbr (Function Purge))
    in
    let functions_str_wrap = trunc_list 
    (Utility.wordwrap_nspace functions_str 34 2) 5 in
@@ -513,7 +513,7 @@ let draw_help (iface : interface_state_t) =
             assert (wnoutrefresh win)
          |StandardInt ->
             wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Integer Editing Operations:");
+            mvwaddstr_safe win 5 0 "Integer Editing Operations:";
             wattroff win WA.bold;
             mvwaddstr_safe win 6 2 ("enter    : " ^
             try_find Rcfile.key_of_edit (Edit Enter));
@@ -566,23 +566,59 @@ let draw_help (iface : interface_state_t) =
                               (* highlight the first 'highlight_len' characters *)
                               wattron win WA.bold;
                               let len_str = String.length m in
-                              assert (mvwaddstr win v_pos 2
-                                 (Str.string_before m (highlight_len)));
+                              mvwaddstr_safe win v_pos 2
+                                 (Str.string_before m (highlight_len));
                               wattroff win WA.bold;
-                              assert (mvwaddstr win v_pos (2 + highlight_len)
-                                 (Str.string_after m (highlight_len)));
+                              mvwaddstr_safe win v_pos (2 + highlight_len)
+                                 (Str.string_after m (highlight_len));
                               draw_matches (succ v_pos) tail
                            end
                         end
                      else
                         ()
                   in
-                  draw_matches 7 iface.matched_extended_entry_list;
+                  draw_matches 6 iface.matched_extended_entry_list;
                   assert (wnoutrefresh win)
                end 
          |VarHelp ->
-            ()
-         end
+            wattron win WA.bold;
+            mvwaddstr_safe win 5 0 "Variable Mode Commands:";
+            wattroff win WA.bold;
+            mvwaddstr_safe win 6 2 ("enter variable: " ^
+            try_find Rcfile.key_of_varedit (VarEdit EnterVarEdit));
+            mvwaddstr_safe win 7 2 ("cancel entry  : " ^
+            try_find Rcfile.key_of_varedit (VarEdit ExitVarEdit));
+            wattron win WA.bold;
+            mvwaddstr_safe win 9 0 "Matched variables:";
+            wattroff win WA.bold;
+            let highlight_len = String.length iface.variable_entry_buffer in
+            let rec draw_matches v_pos match_list =
+               if v_pos < iface.scr.hw_lines then
+                  begin match match_list with
+                  |[] ->
+                     ()
+                  |m :: tail ->
+                     begin
+                        (* highlight the first 'highlight_len' characters *)
+                        wattron win WA.bold;
+                        let len_str = String.length m in
+                        mvwaddstr_safe win v_pos 2
+                           (Str.string_before m (highlight_len));
+                        wattroff win WA.bold;
+                        mvwaddstr_safe win v_pos (2 + highlight_len)
+                           (Str.string_after m (highlight_len));
+                        draw_matches (succ v_pos) tail
+                     end
+                  end
+               else
+                  ()
+            in
+            if List.length iface.matched_variable_entry_list = 0 then
+               mvwaddstr_safe win 10 2 "(none)"
+            else
+               draw_matches 10 iface.matched_variable_entry_list;
+            assert (wnoutrefresh win)
+         end 
       end
    |None ->
       ()
