@@ -996,6 +996,12 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#acos
    |Atan ->
       handle_function_call iface iface.calc#atan
+   |Asinh ->
+      handle_function_call iface iface.calc#asinh
+   |Acosh ->
+      handle_function_call iface iface.calc#acosh
+   |Atanh ->
+      handle_function_call iface iface.calc#atanh
    |Re ->
       handle_function_call iface iface.calc#re
    |Im ->

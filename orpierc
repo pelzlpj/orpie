@@ -92,6 +92,9 @@ abbrev "tan"     function_tan
 abbrev "sinh"    function_sinh
 abbrev "cosh"    function_cosh
 abbrev "tanh"    function_tanh
+abbrev "asinh"   function_asinh
+abbrev "acosh"   function_acosh
+abbrev "atanh"   function_atanh
 abbrev "asin"    function_asin
 abbrev "acos"    function_acos
 abbrev "atan"    function_atan

@@ -607,6 +607,66 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      method asinh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_math.asinh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_math.asinh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.arcsinh el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method acosh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_math.acosh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_math.acosh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.arccosh el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method atanh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_math.atanh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_math.atanh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.arctanh el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
       (* real part of complex (or complex matrix) *)
       method re () =
          if stack#length > 0 then

@@ -50,13 +50,13 @@ all: $(BUILD_TYPE)
 CMO = gsl_error.cmo gsl_blas.cmo gsl_complex.cmo gsl_matrix.cmo gsl_matrix_complex.cmo \
 		gsl_vector.cmo gsl_vector_complex.cmo gsl_vectmat.cmo gsl_vector_flat.cmo \
 		gsl_matrix_flat.cmo gsl_vector_complex_flat.cmo gsl_matrix_complex_flat.cmo \
-		gsl_permut.cmo gsl_linalg.cmo gsl_fun.cmo
+		gsl_permut.cmo gsl_linalg.cmo gsl_fun.cmo gsl_math.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA =
 CMXA = $(CMA:.cma=.cmxa)
 COBJ = mlgsl_error.o mlgsl_blas.o mlgsl_blas_complex.o mlgsl_complex.o \
 		 mlgsl_matrix_complex.o mlgsl_matrix_double.o mlgsl_vector_double.o mlgsl_permut.o \
-		 mlgsl_linalg.o mlgsl_linalg_complex.o mlgsl_fun.o
+		 mlgsl_linalg.o mlgsl_linalg_complex.o mlgsl_fun.o mlgsl_math.o
 
 GENERATED = version.ml
 

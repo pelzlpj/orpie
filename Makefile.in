@@ -73,7 +73,7 @@ GSL_CMO = gsl_error.cmo gsl_blas.cmo gsl_complex.cmo gsl_matrix.cmo gsl_matrix_c
 GSL_CMX = $(GSL_CMO:.cmo=.cmx)
 GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o \
 		 gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_vector_double.o gsl/mlgsl_permut.o \
-		 gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o 
+		 gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o gsl/mlgsl_math.o
 GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
 GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
