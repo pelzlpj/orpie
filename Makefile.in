@@ -341,10 +341,10 @@ dist-clean distclean:: clean
 depend::
 	$(MAKE) txtin_lexer.ml
 	$(MAKE) txtin_parser.ml
-	$(OCAMLDEP) $(OFLAGS) *.ml *.mli > depend
+	$(OCAMLDEP) -pp camlp4o $(INCLUDES) *.ml *.mli > depend
+	$(OCAMLDEP) -pp camlp4o $(INCLUDES) units/*.ml units/*.mli >> depend
 	$(OCAMLDEP) -pp cpp -I ./curses curses/*.ml curses/*.mli >> depend
 	$(OCAMLDEP) -I ./gsl gsl/*.ml gsl/*.mli >> depend
-
 
 include depend
 

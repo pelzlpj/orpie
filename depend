@@ -1,15 +1,23 @@
 add.cmo: gsl_assist.cmo ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
-    rpc_stack.cmo 
+    rpc_stack.cmo ./units/units.cmo 
 add.cmx: gsl_assist.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
-    rpc_stack.cmx 
-curses-keys.cmo: ./curses/curses.cmi utility.cmo 
-curses-keys.cmx: ./curses/curses.cmx utility.cmx 
+    rpc_stack.cmx ./units/units.cmx 
+calc_test.cmo: rpc_calc.cmo rpc_stack.cmo txtin_lexer.cmo txtin_parser.cmi 
+calc_test.cmx: rpc_calc.cmx rpc_stack.cmx txtin_lexer.cmx txtin_parser.cmx 
+const.cmo: ./units/constants.cmo 
+const.cmx: ./units/constants.cmx 
+curses-keys.cmo: ./curses/curses.cmi curses_assist.cmo 
+curses-keys.cmx: ./curses/curses.cmx curses_assist.cmx 
+curses_assist.cmo: ./curses/curses.cmi 
+curses_assist.cmx: ./curses/curses.cmx 
 div.cmo: gsl_assist.cmo ./gsl/gsl_blas.cmi ./gsl/gsl_error.cmi \
     ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
-    ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi rpc_stack.cmo 
+    ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi rpc_stack.cmo \
+    ./units/units.cmo 
 div.cmx: gsl_assist.cmx ./gsl/gsl_blas.cmx ./gsl/gsl_error.cmx \
     ./gsl/gsl_linalg.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
-    ./gsl/gsl_permut.cmx ./gsl/gsl_vectmat.cmx rpc_stack.cmx 
+    ./gsl/gsl_permut.cmx ./gsl/gsl_vectmat.cmx rpc_stack.cmx \
+    ./units/units.cmx 
 gsl_assist.cmo: ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi \
     ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi \
     ./gsl/gsl_vector_complex.cmi ./gsl/gsl_vector_complex_flat.cmi 
@@ -22,61 +30,77 @@ interface_draw.cmo: ./curses/curses.cmi interface.cmo operations.cmo \
     rcfile.cmo rpc_calc.cmo rpc_stack.cmo utility.cmo 
 interface_draw.cmx: ./curses/curses.cmx interface.cmx operations.cmx \
     rcfile.cmx rpc_calc.cmx rpc_stack.cmx utility.cmx 
-interface_main.cmo: big_int_str.cmo ./curses/curses.cmi ./gsl/gsl_matrix.cmi \
-    ./gsl/gsl_matrix_complex.cmi interface.cmo interface_draw.cmo \
-    operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo txtin_lexer.cmo \
-    txtin_parser.cmi utility.cmo 
-interface_main.cmx: big_int_str.cmx ./curses/curses.cmx ./gsl/gsl_matrix.cmx \
-    ./gsl/gsl_matrix_complex.cmx interface.cmx interface_draw.cmx \
-    operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx txtin_lexer.cmx \
-    txtin_parser.cmx utility.cmx 
+interface_main.cmo: big_int_str.cmo const.cmo ./curses/curses.cmi \
+    ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi interface.cmo \
+    interface_draw.cmo operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo \
+    statefile.cmo txtin_lexer.cmo txtin_parser.cmi ./units/units.cmo \
+    utility.cmo 
+interface_main.cmx: big_int_str.cmx const.cmx ./curses/curses.cmx \
+    ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx interface.cmx \
+    interface_draw.cmx operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx \
+    statefile.cmx txtin_lexer.cmx txtin_parser.cmx ./units/units.cmx \
+    utility.cmx 
 inv.cmo: gsl_assist.cmo ./gsl/gsl_error.cmi ./gsl/gsl_linalg.cmi \
     ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_permut.cmi \
-    ./gsl/gsl_vectmat.cmi ./gsl/gsl_vector.cmi rpc_stack.cmo 
+    ./gsl/gsl_vectmat.cmi ./gsl/gsl_vector.cmi rpc_stack.cmo \
+    ./units/units.cmo 
 inv.cmx: gsl_assist.cmx ./gsl/gsl_error.cmx ./gsl/gsl_linalg.cmx \
     ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_permut.cmx \
-    ./gsl/gsl_vectmat.cmx ./gsl/gsl_vector.cmx rpc_stack.cmx 
+    ./gsl/gsl_vectmat.cmx ./gsl/gsl_vector.cmx rpc_stack.cmx \
+    ./units/units.cmx 
 main.cmo: ./curses/curses.cmi ./gsl/gsl_error.cmi interface.cmo \
     interface_main.cmo rcfile.cmo rpc_calc.cmo 
 main.cmx: ./curses/curses.cmx ./gsl/gsl_error.cmx interface.cmx \
     interface_main.cmx rcfile.cmx rpc_calc.cmx 
 mult.cmo: gsl_assist.cmo ./gsl/gsl_blas.cmi ./gsl/gsl_matrix.cmi \
-    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo 
+    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo ./units/units.cmo 
 mult.cmx: gsl_assist.cmx ./gsl/gsl_blas.cmx ./gsl/gsl_matrix.cmx \
-    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx 
-pow.cmo: gsl_assist.cmo rpc_stack.cmo 
-pow.cmx: gsl_assist.cmx rpc_stack.cmx 
-rcfile.cmo: ./curses/curses.cmi install.cmo operations.cmo 
-rcfile.cmx: ./curses/curses.cmx install.cmx operations.cmx 
+    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx ./units/units.cmx 
+pow.cmo: gsl_assist.cmo rpc_stack.cmo ./units/units.cmo 
+pow.cmx: gsl_assist.cmx rpc_stack.cmx ./units/units.cmx 
+rcfile.cmo: ./curses/curses.cmi install.cmo operations.cmo utility.cmo 
+rcfile.cmx: ./curses/curses.cmx install.cmx operations.cmx utility.cmx 
 rpc_calc.cmo: add.cmo div.cmo gsl_assist.cmo ./gsl/gsl_blas.cmi \
     ./gsl/gsl_complex.cmi ./gsl/gsl_error.cmi ./gsl/gsl_math.cmi \
     ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_sf.cmo \
-    inv.cmo mult.cmo pow.cmo rpc_stack.cmo solvelin.cmo sub.cmo 
+    inv.cmo mult.cmo pow.cmo rpc_stack.cmo solvelin.cmo sub.cmo \
+    ./units/units.cmo 
 rpc_calc.cmx: add.cmx div.cmx gsl_assist.cmx ./gsl/gsl_blas.cmx \
     ./gsl/gsl_complex.cmx ./gsl/gsl_error.cmx ./gsl/gsl_math.cmx \
     ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_sf.cmx \
-    inv.cmx mult.cmx pow.cmx rpc_stack.cmx solvelin.cmx sub.cmx 
+    inv.cmx mult.cmx pow.cmx rpc_stack.cmx solvelin.cmx sub.cmx \
+    ./units/units.cmx 
 rpc_stack.cmo: big_int_str.cmo ./gsl/gsl_matrix.cmi \
-    ./gsl/gsl_matrix_complex.cmi rcfile.cmo utility.cmo 
+    ./gsl/gsl_matrix_complex.cmi ./units/units.cmo 
 rpc_stack.cmx: big_int_str.cmx ./gsl/gsl_matrix.cmx \
-    ./gsl/gsl_matrix_complex.cmx rcfile.cmx utility.cmx 
+    ./gsl/gsl_matrix_complex.cmx ./units/units.cmx 
 solvelin.cmo: gsl_assist.cmo ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi \
-    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_vector_complex.cmi rpc_stack.cmo 
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_vector_complex.cmi rpc_stack.cmo \
+    ./units/units.cmo 
 solvelin.cmx: gsl_assist.cmx ./gsl/gsl_linalg.cmx ./gsl/gsl_matrix.cmx \
-    ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_vector_complex.cmx rpc_stack.cmx 
+    ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_vector_complex.cmx rpc_stack.cmx \
+    ./units/units.cmx 
+statefile.cmo: operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo \
+    utility.cmo 
+statefile.cmx: operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx \
+    utility.cmx 
 sub.cmo: gsl_assist.cmo ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
-    rpc_stack.cmo 
+    rpc_stack.cmo ./units/units.cmo 
 sub.cmx: gsl_assist.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
-    rpc_stack.cmx 
+    rpc_stack.cmx ./units/units.cmx 
 txtin_lexer.cmo: txtin_parser.cmi 
 txtin_lexer.cmx: txtin_parser.cmx 
 txtin_parser.cmo: big_int_str.cmo ./gsl/gsl_matrix.cmi \
-    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo utility.cmo txtin_parser.cmi 
+    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo ./units/units.cmo utility.cmo \
+    txtin_parser.cmi 
 txtin_parser.cmx: big_int_str.cmx ./gsl/gsl_matrix.cmx \
-    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx utility.cmx txtin_parser.cmi 
-utility.cmo: ./curses/curses.cmi 
-utility.cmx: ./curses/curses.cmx 
+    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx ./units/units.cmx utility.cmx \
+    txtin_parser.cmi 
 txtin_parser.cmi: rpc_stack.cmo 
+units/constants.cmo: ./units/units.cmo 
+units/constants.cmx: ./units/units.cmx 
+units/test.cmo: ./units/units.cmo 
+units/test.cmx: ./units/units.cmx 
 curses/curses.cmo: curses/curses.cmi 
 curses/curses.cmx: curses/curses.cmi 
 curses/test.cmo: ./curses/curses.cmi 
