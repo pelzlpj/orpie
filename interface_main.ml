@@ -366,18 +366,12 @@ let push_entry (iface : interface_state_t) =
 (* handle an 'enter' keypress *)
 let handle_enter (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
-   begin match iface.help_mode with
-   |StandardIntHelp ->
-      iface.help_mode <- StandardHelp;
-      draw_help iface
-   |_ ->
-      ()
-   end;
+   draw_help iface;
    try
-      (if iface.has_entry then
+      if iface.has_entry then
          push_entry iface
       else
-         raise Not_handled);
+         raise Not_handled;
       draw_update_stack iface
    with Invalid_argument error_msg ->
       draw_error iface error_msg;
@@ -390,7 +384,6 @@ let handle_begin_int (iface : interface_state_t) =
       (iface.entry_type <- IntEntry;
       iface.interface_mode <- IntEditMode;
       iface.int_entry_buffer <- "";
-      iface.help_mode <- StandardIntHelp;
       draw_help iface;
       draw_update_entry iface)
    else
@@ -527,7 +520,6 @@ let handle_angle (iface : interface_state_t) =
 let handle_exit_int (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
    iface.entry_type <- FloatEntry;
-   iface.help_mode <- StandardHelp;
    iface.is_entering_base <- false;
    iface.int_base_string <- "";
    if (String.length iface.gen_buffer.(0).re_mantissa > 0) or
@@ -910,7 +902,6 @@ let handle_digit (iface : interface_state_t) key =
 let handle_begin_abbrev (iface : interface_state_t) =
    if iface.interface_mode <> AbbrevEntryMode then begin
       iface.interface_mode <- AbbrevEntryMode;
-      iface.help_mode <- AbbrevHelp;
       iface.abbrev_or_const <- IsAbbrev;
       draw_help iface;
       draw_update_entry iface
@@ -922,7 +913,6 @@ let handle_begin_abbrev (iface : interface_state_t) =
 let handle_begin_const (iface : interface_state_t) =
    if iface.interface_mode <> AbbrevEntryMode then begin
       iface.interface_mode <- AbbrevEntryMode;
-      iface.help_mode <- AbbrevHelp;
       iface.abbrev_or_const <- IsConst;
       draw_help iface;
       draw_update_entry iface
@@ -936,7 +926,6 @@ let handle_begin_variable (iface : interface_state_t) =
    if iface.interface_mode <> VarEditMode then begin
       iface.interface_mode <- VarEditMode;
       iface.entry_type <- VarEntry;
-      iface.help_mode <- VarHelp;
       (* FIXME: generation of the sorted variable list can be done far
        * more efficiently *)
       let add_variable var_str var_binding var_list =
@@ -1619,14 +1608,13 @@ let process_command (iface : interface_state_t) cc =
 
 (* exit abbrev entry *)
 let handle_exit_abbrev (iface : interface_state_t) =
-   if iface.interface_mode = AbbrevEntryMode then
-      (iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- StandardHelp;
+   if iface.interface_mode = AbbrevEntryMode then begin
+      iface.interface_mode <- StandardEntryMode;
       iface.abbrev_entry_buffer <- "";
       iface.matched_abbrev_entry <- "";
       draw_help iface;
-      draw_update_entry iface)
-   else
+      draw_update_entry iface
+   end else
       ()
 
 
@@ -1725,7 +1713,6 @@ let handle_abbrev_character (iface : interface_state_t) key =
 let handle_enter_abbrev (iface : interface_state_t) =
    if iface.interface_mode = AbbrevEntryMode then begin
       iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- StandardHelp;
       begin try
          iface.matched_abbrev_entry_list <- 
             match_abbrev_buffer iface iface.abbrev_entry_buffer;
@@ -1770,7 +1757,6 @@ let handle_enter_abbrev (iface : interface_state_t) =
 let handle_exit_variable (iface : interface_state_t) =
    if iface.interface_mode = VarEditMode then begin
       iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- StandardHelp;
       iface.entry_type <- FloatEntry;
       iface.variable_entry_buffer <- "";
       draw_help iface;
@@ -1851,7 +1837,6 @@ let handle_enter_variable (iface : interface_state_t) =
       else
          iface.entry_type <- FloatEntry;
       iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- StandardHelp;
       iface.completion <- None;
       iface.variable_entry_buffer <- "";
       draw_help iface;

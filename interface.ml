@@ -32,8 +32,6 @@ type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
    mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
    mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
 
-type help_mode_t = | StandardHelp | StandardIntHelp | AbbrevHelp | VarHelp;;
-
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;
 
@@ -76,7 +74,6 @@ type interface_state_t =
    mutable stack_selection             : int;                           (* in stack browsing mode, this item is selected *)
    mutable interface_mode              : interface_mode_t;              (* standard mode or stack browsing mode *)
    mutable horiz_scroll                : int;                           (* controls how far an element is scrolled left/right *)
-   mutable help_mode                   : help_mode_t;                   (* controls the mode of context-sensitive help *)
    mutable help_page                   : int;                           (* which help page is being viewed *)
    mutable has_entry                   : bool;                          (* whether or not the entry buffer has anything in it *)
    mutable entry_type                  : entry_t;                       (* the current type of data being entered *)
@@ -117,7 +114,6 @@ let make (c : rpc_calc) (std : screen_t) =
       stack_selection = 1;
       interface_mode = StandardEntryMode;
       horiz_scroll = 0;
-      help_mode = StandardHelp;
       help_page = 0;
       has_entry = false;
       entry_type = FloatEntry;
