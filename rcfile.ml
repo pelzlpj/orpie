@@ -269,6 +269,7 @@ let operation_of_string command_str =
    |"function_erf"                  -> (Function Erf)
    |"function_erfc"                 -> (Function Erfc)
    |"function_factorial"            -> (Function Fact)
+   |"function_transpose"            -> (Function Transpose)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

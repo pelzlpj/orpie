@@ -883,6 +883,32 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* matrix transpose *)
+      method transpose () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix el ->
+                  let n, m = (Gsl_matrix.dims el) in
+                  let trans_mat = Gsl_matrix.create m n in
+                  Gsl_matrix.transpose trans_mat el;
+                  stack#push (RpcFloatMatrix trans_mat)
+               |RpcComplexMatrix el ->
+                  let n, m = (Gsl_matrix_complex.dims el) in
+                  let trans_mat = Gsl_matrix_complex.create m n in
+                  Gsl_matrix_complex.transpose trans_mat el;
+                  stack#push (RpcComplexMatrix trans_mat)
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "transpose requires a matrix argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+
       method enter_pi () =
          stack#push (RpcFloat pi)
 

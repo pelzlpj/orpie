@@ -106,6 +106,7 @@ abbrev "lngamma" function_lngamma
 abbrev "erf"     function_erf
 abbrev "erfc"    function_erfc
 abbrev "fact"    function_factorial
+abbrev "trans"   function_transpose
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

@@ -29,7 +29,8 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Ten_x | Log10 | Conj | Sin | Cos | Tan 
                           | Asin | Acos | Atan | Sinh | Cosh | Tanh
                           | Asinh | Acosh | Atanh | Re | Im 
-                          | Gamma | LnGamma | Erf | Erfc | Fact;;
+                          | Gamma | LnGamma | Erf | Erfc | Fact
+                          | Transpose;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit
