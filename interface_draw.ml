@@ -745,7 +745,7 @@ let draw_help (iface : interface_state_t) =
 
 
 let draw_message (iface : interface_state_t) msg =
-   draw_update_stack iface;
+   draw_stack iface;
    let error_lines = Utility.wordwrap msg (iface.scr.sw_cols-2) in
    let trunc_error_lines = 
       if List.length error_lines > 4 then

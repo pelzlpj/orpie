@@ -1689,8 +1689,10 @@ let handle_enter_abbrev (iface : interface_state_t) =
             begin match operation with
             |Function ff -> 
                process_function iface ff
-            |Command cc  -> process_command iface cc
-            |_ -> failwith 
+            |Command cc  -> 
+               process_command iface cc
+            |_ -> 
+               failwith 
                "found abbrev command that is neither Function nor Command"
             end;
             (* check whether ff should be autobound *)
@@ -1708,7 +1710,6 @@ let handle_enter_abbrev (iface : interface_state_t) =
       end;
       iface.abbrev_entry_buffer <- "";
       draw_help iface;
-      draw_stack iface;
       draw_update_entry iface
    end else
       ()
