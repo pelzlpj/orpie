@@ -57,8 +57,8 @@ let hide_help = ref false;;
 (* Whether or not to conserve memory in favor of faster display *)
 let conserve_memory = ref false;;
 (* Autobinding keys *)
-let autobind_keys_list : (string * function_operation option * int) list ref = ref [];;
-let autobind_keys = ref (Array.of_list [("", None, 0)]);;
+let autobind_keys_list : (int * string * function_operation option * int) list ref = ref [];;
+let autobind_keys = ref (Array.make 1 (0, "", None, 0));;
 
 
 let function_of_key key =
@@ -221,76 +221,67 @@ let decode_single_key_string key_string =
 
 
 
-
 (* Register a key binding.  This adds hash table entries for translation
  * between curses chtypes and commands (in both directions). *)
+let register_binding_internal k k_string op =
+   match op with
+   |Function _ ->
+      Hashtbl.add table_key_function k op;
+      Hashtbl.add table_function_key op k_string
+   |Command _ ->
+      Hashtbl.add table_key_command k op;
+      Hashtbl.add table_command_key op k_string
+   |Edit _ ->
+      Hashtbl.add table_key_edit k op;
+      Hashtbl.add table_edit_key op k_string
+   |Browse _ ->
+      Hashtbl.add table_key_browse k op;
+      Hashtbl.add table_browse_key op k_string
+   |Extend _ ->
+      Hashtbl.add table_key_extended k op;
+      Hashtbl.add table_extended_key op k_string
+   |IntEdit _ ->
+      Hashtbl.add table_key_intedit k op;
+      Hashtbl.add table_intedit_key op k_string
+   |VarEdit _ ->
+      Hashtbl.add table_key_varedit k op;
+      Hashtbl.add table_varedit_key op k_string
+
+
+
+(* convenience routine for previous *)
 let register_binding key_string op =
-   let make_entries k k_string =
-      begin
-  (*       Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
-         flush stderr; *)
-         match op with
-         |Function _ ->
-            Hashtbl.add table_key_function k op;
-            Hashtbl.add table_function_key op k_string
-         |Command _ ->
-            Hashtbl.add table_key_command k op;
-            Hashtbl.add table_command_key op k_string
-         |Edit _ ->
-            Hashtbl.add table_key_edit k op;
-            Hashtbl.add table_edit_key op k_string
-         |Browse _ ->
-            Hashtbl.add table_key_browse k op;
-            Hashtbl.add table_browse_key op k_string
-         |Extend _ ->
-            Hashtbl.add table_key_extended k op;
-            Hashtbl.add table_extended_key op k_string
-         |IntEdit _ ->
-            Hashtbl.add table_key_intedit k op;
-            Hashtbl.add table_intedit_key op k_string
-         |VarEdit _ ->
-            Hashtbl.add table_key_varedit k op;
-            Hashtbl.add table_varedit_key op k_string
-      end
-   in
    (* given a string that represents a character, find the associated
     * curses chtype *)
    let k, string_rep = decode_single_key_string key_string in
-   make_entries k string_rep
+   register_binding_internal k string_rep op
 
 
 
 (* Remove a key binding. *)
-let remove_binding key_string op =
-   let remove_entries k k_string =
-      match op with
-      |Function _ ->
-         Hashtbl.remove table_key_function k;
-         Hashtbl.remove table_function_key op
-      |Command _ ->
-         Hashtbl.remove table_key_command k;
-         Hashtbl.remove table_command_key op
-      |Edit _ ->
-         Hashtbl.remove table_key_edit k;
-         Hashtbl.remove table_edit_key op
-      |Browse _ ->
-         Hashtbl.remove table_key_browse k;
-         Hashtbl.remove table_browse_key op
-      |Extend _ ->
-         Hashtbl.remove table_key_extended k;
-         Hashtbl.remove table_extended_key op
-      |IntEdit _ ->
-         Hashtbl.remove table_key_intedit k;
-         Hashtbl.remove table_intedit_key op
-      |VarEdit _ ->
-         Hashtbl.remove table_key_varedit k;
-         Hashtbl.remove table_varedit_key op
-   in
-   (* given a string that represents a character, find the associated
-    * curses chtype *)
-   let k, string_rep = decode_single_key_string key_string in
-   remove_entries k string_rep
-
+let remove_binding k op =
+   match op with
+   |Function _ ->
+      Hashtbl.remove table_key_function k;
+      Hashtbl.remove table_function_key op
+   |Command _ ->
+      Hashtbl.remove table_key_command k;
+      Hashtbl.remove table_command_key op
+   |Edit _ ->
+      Hashtbl.remove table_key_edit k;
+      Hashtbl.remove table_edit_key op
+   |Browse _ ->
+      Hashtbl.remove table_key_browse k;
+      Hashtbl.remove table_browse_key op
+   |Extend _ ->
+      Hashtbl.remove table_key_extended k;
+      Hashtbl.remove table_extended_key op
+   |IntEdit _ ->
+      Hashtbl.remove table_key_intedit k;
+      Hashtbl.remove table_intedit_key op
+   |VarEdit _ ->
+      Hashtbl.remove table_key_varedit k;
+      Hashtbl.remove table_varedit_key op
 
 
 (* Register a macro.  This parses the macro string and divides it into multiple
@@ -405,6 +396,7 @@ let operation_of_string command_str =
    |"command_about"                 -> (Command About)
    |"command_enter_pi"              -> (Command EnterPi)
    |"command_edit_input"            -> (Command EditInput)
+   |"command_cycle_help"            -> (Command CycleHelp)
    |"browse_end"                    -> (Browse EndBrowse)
    |"browse_scroll_left"            -> (Browse ScrollLeft)
    |"browse_scroll_right"           -> (Browse ScrollRight)
@@ -475,14 +467,16 @@ let parse_line line_stream =
    | [< 'Kwd "autobind" >] ->
       begin match line_stream with parser
       | [< 'String k >] -> 
-         autobind_keys_list := (k, None, 1) :: !autobind_keys_list
+         let key, key_string = decode_single_key_string k in
+         autobind_keys_list := (key, key_string, None, 1) :: !autobind_keys_list
       | [< 'Ident "\\" >] ->
          begin match line_stream with parser
          | [< 'Int octal_int >] ->
             begin
                try
                   let octal_digits = "0o" ^ (string_of_int octal_int) in
-                  autobind_keys_list := (octal_digits, None, 1) :: !autobind_keys_list
+                  let key, key_string = decode_single_key_string octal_digits in
+                  autobind_keys_list := (key, key_string, None, 1) :: !autobind_keys_list
                with 
                   (Failure "int_of_string") -> config_failwith "Expected octal digits after \"\\\""
             end
@@ -594,14 +588,14 @@ let parse_line line_stream =
 (* obtain a valid autobinding array, eliminating duplicate keys *)
 let generate_autobind_array () =
    let candidates = Array.of_list (List.rev !autobind_keys_list) in
-   let temp_arr = Array.make (Array.length candidates) ("", None, 0) in
+   let temp_arr = Array.make (Array.length candidates) (0, "", None, 0) in
    let pointer = ref 0 in
    for i = 0 to pred (Array.length candidates) do
-      let (c_ss, c_bound_f, c_age) = candidates.(i) in
+      let (c_k, c_ss, c_bound_f, c_age) = candidates.(i) in
       let matched = ref false in
       for j = 0 to !pointer do
-         let (t_ss, t_bound_f, t_age) = temp_arr.(j) in
-         if c_ss = t_ss then matched := true else ()
+         let (t_k, t_ss, t_bound_f, t_age) = temp_arr.(j) in
+         if c_k = t_k then matched := true else ()
       done;
       if not !matched then begin
          temp_arr.(!pointer) <- candidates.(i);

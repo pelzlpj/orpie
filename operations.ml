@@ -43,7 +43,7 @@ type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | SetBin | SetOct | SetDec | SetHex
                           | ToggleAngleMode | ToggleComplexMode | CycleBase
                           | View | About | Refresh | EnterPi 
-                          | EditInput;;
+                          | EditInput | CycleHelp;;
 
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix

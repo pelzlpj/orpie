@@ -1210,6 +1210,16 @@ let handle_about (iface : interface_state_t) =
    handle_refresh iface
 
 
+(* cycle the help screen *)
+let handle_cycle_help (iface : interface_state_t) =
+   if iface.help_page < 1 then
+      iface.help_page <- succ iface.help_page
+   else
+      iface.help_page <- 0;
+   draw_help iface;
+   assert (doupdate ())
+
+
 (* quit the calculator *)
 let handle_quit (iface : interface_state_t) =
    iface.calc#save_state ();
@@ -1231,23 +1241,23 @@ let register_autobinding (iface : interface_state_t) (ff : function_operation)=
    let oldest     = ref 0 in
    let oldest_age = ref (-1) in
    for i = 0 to pred (Array.length !Rcfile.autobind_keys) do
-      let (key, bound_f, age) = !Rcfile.autobind_keys.(i) in
+      let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(i) in
       if age > !oldest_age then begin
          oldest     := i;
          oldest_age := age
       end else
          ();
       (* make all autobindings "older" *)
-      !Rcfile.autobind_keys.(i) <- (key, bound_f, (succ age))
+      !Rcfile.autobind_keys.(i) <- (key, key_string, bound_f, (succ age))
    done;
    if Array.length !Rcfile.autobind_keys > 0 then begin
-      let (key, bound_f, age) = !Rcfile.autobind_keys.(!oldest) in
+      let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(!oldest) in
       begin match bound_f with
       |None         -> ()
       |Some func_op -> Rcfile.remove_binding key (Function func_op)
       end;
-      Rcfile.register_binding key (Function ff);
-      !Rcfile.autobind_keys.(!oldest) <- (key, Some ff, 0) 
+      Rcfile.register_binding_internal key key_string (Function ff);
+      !Rcfile.autobind_keys.(!oldest) <- (key, key_string, Some ff, 0) 
    end else
       ()
 
@@ -1519,6 +1529,8 @@ let process_command (iface : interface_state_t) cc =
       handle_command_call iface iface.calc#enter_pi
    |EditInput ->
       handle_edit_input iface
+   |CycleHelp ->
+      handle_cycle_help iface
    end
 
 

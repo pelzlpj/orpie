@@ -474,43 +474,71 @@ let draw_help (iface : interface_state_t) =
       |_ ->
          begin match iface.help_mode with
          |Standard ->
-            wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Common Operations:");
-            wattroff win WA.bold;
-            mvwaddstr_safe win 6 2  ("enter    : " ^
-            try_find Rcfile.key_of_edit (Edit Enter));
-            mvwaddstr_safe win 7 2  ("drop     : " ^
-            try_find Rcfile.key_of_command (Command Drop));
-            mvwaddstr_safe win 8 2  ("swap     : " ^
-            try_find Rcfile.key_of_command (Command Swap));
-            mvwaddstr_safe win 9 2  ("backspace: " ^
-            try_find Rcfile.key_of_edit (Edit Backspace));
-            mvwaddstr_safe win 10 2 ("add      : " ^
-            try_find Rcfile.key_of_function (Function Add));
-            mvwaddstr_safe win 11 2 ("subtract : " ^
-            try_find Rcfile.key_of_function (Function Sub));
-            mvwaddstr_safe win 12 2 ("multiply : " ^
-            try_find Rcfile.key_of_function (Function Mult));
-            mvwaddstr_safe win 13 2 ("divide   : " ^
-            try_find Rcfile.key_of_function (Function Div));
-            mvwaddstr_safe win 14 2 ("x^y      : " ^
-            try_find Rcfile.key_of_function (Function Pow));
-            mvwaddstr_safe win 15 2 ("negation : " ^
-            try_find Rcfile.key_of_function (Function Neg));
-            wattron win WA.bold;
-            mvwaddstr_safe win 16 0 "Miscellaneous:";
-            wattroff win WA.bold;
-            mvwaddstr_safe win 17 2 ("scientific notation : " ^
-            Rcfile.key_of_edit (Edit SciNotBase));
-            mvwaddstr_safe win 18 2 ("extended entry mode : " ^
-            Rcfile.key_of_command  (Command BeginExtended));
-            mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
-            Rcfile.key_of_command (Command BeginBrowse));
-            mvwaddstr_safe win 20 2 ("refresh display     : " ^
-            Rcfile.key_of_command (Command Refresh));
-            mvwaddstr_safe win 21 2 ("quit                : " ^
-            Rcfile.key_of_command (Command Quit));
-            assert (wnoutrefresh win)
+            if iface.help_page = 0 then begin
+               wattron win WA.bold;
+               assert (mvwaddstr win 5 0 "Common Operations:");
+               wattroff win WA.bold;
+               mvwaddstr_safe win 6 2  ("enter    : " ^
+               try_find Rcfile.key_of_edit (Edit Enter));
+               mvwaddstr_safe win 7 2  ("drop     : " ^
+               try_find Rcfile.key_of_command (Command Drop));
+               mvwaddstr_safe win 8 2  ("swap     : " ^
+               try_find Rcfile.key_of_command (Command Swap));
+               mvwaddstr_safe win 9 2  ("backspace: " ^
+               try_find Rcfile.key_of_edit (Edit Backspace));
+               mvwaddstr_safe win 10 2 ("add      : " ^
+               try_find Rcfile.key_of_function (Function Add));
+               mvwaddstr_safe win 11 2 ("subtract : " ^
+               try_find Rcfile.key_of_function (Function Sub));
+               mvwaddstr_safe win 12 2 ("multiply : " ^
+               try_find Rcfile.key_of_function (Function Mult));
+               mvwaddstr_safe win 13 2 ("divide   : " ^
+               try_find Rcfile.key_of_function (Function Div));
+               mvwaddstr_safe win 14 2 ("x^y      : " ^
+               try_find Rcfile.key_of_function (Function Pow));
+               mvwaddstr_safe win 15 2 ("negation : " ^
+               try_find Rcfile.key_of_function (Function Neg));
+               wattron win WA.bold;
+               mvwaddstr_safe win 16 0 "Miscellaneous:";
+               wattroff win WA.bold;
+               mvwaddstr_safe win 17 2 ("scientific notation : " ^
+               Rcfile.key_of_edit (Edit SciNotBase));
+               mvwaddstr_safe win 18 2 ("extended entry mode : " ^
+               Rcfile.key_of_command  (Command BeginExtended));
+               mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
+               Rcfile.key_of_command (Command BeginBrowse));
+               mvwaddstr_safe win 20 2 ("refresh display     : " ^
+               Rcfile.key_of_command (Command Refresh));
+               mvwaddstr_safe win 21 2 ("quit                : " ^
+               Rcfile.key_of_command (Command Quit));
+               assert (wnoutrefresh win)
+            end else begin
+               let adjust_len s len =
+                  if String.length s < len then
+                     s ^ (String.make (len - (String.length s)) ' ')
+                  else
+                     Str.string_before s len
+               in
+               let make_string colon_pos key_string abbr =
+                  (adjust_len key_string colon_pos) ^ ": " ^ abbr
+               in
+               wattron win WA.bold;
+               mvwaddstr_safe win 5 0 "Autobindings:";
+               wattroff win WA.bold;
+               if Array.length !Rcfile.autobind_keys <= 0 then
+                  mvwaddstr_safe win 6 2 "(none)"
+               else
+                  for i = 0 to pred (min (iface.scr.hw_lines - 6) (Array.length
+                  !Rcfile.autobind_keys)) do
+                     let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(i) in
+                     let abbr = match bound_f with
+                        |None    -> "(none)"
+                        |Some ff -> Rcfile.abbrev_of_operation (Function ff)
+                     in
+                     mvwaddstr_safe win (i + 6) 2 (make_string 12 key_string abbr)
+                  done;
+               assert (wnoutrefresh win)
+            end
          |StandardInt ->
             wattron win WA.bold;
             mvwaddstr_safe win 5 0 "Integer Editing Operations:";

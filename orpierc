@@ -62,6 +62,7 @@ bind "v" command_view
 bind "\\Cl" command_refresh
 bind "P" command_enter_pi
 bind "E" command_edit_input
+bind "h" command_cycle_help
 bind "Q" command_quit
 
 # keys for "browse" operations, which are active during
