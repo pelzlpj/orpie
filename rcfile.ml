@@ -445,7 +445,12 @@ let open_rcfile () =
       let homedir = Unix.getenv "HOME" in
       homedir ^ "/.orpierc"
    in
-   let prefix_rcfile = Install.prefix ^ "/etc/orpierc" in
+   let prefix_rcfile = 
+      if Install.prefix = "/usr" || Install.prefix = "/usr/" then
+         "/etc/orpierc"
+      else
+         Install.prefix ^ "/etc/orpierc" 
+   in
    try (open_in home_rcfile, home_rcfile)
    with Sys_error error_str ->
       begin

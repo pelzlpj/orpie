@@ -142,7 +142,10 @@ install-indep:
 	mkdir -p $(BINDIR)
 	mkdir -p $(MANDIR)/man1
 	cp -f $(NAME).1 $(MANDIR)/man1
-	install -m 644 orpierc $(prefix)/etc
+	if test "$(prefix)" = "/usr"; then \
+   install -m 644 orpierc /etc; \
+	else install -m 644 orpierc $(prefix)/etc ;
+	fi
 
 install: install-indep
 	cp -f $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
