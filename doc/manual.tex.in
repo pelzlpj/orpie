@@ -580,6 +580,7 @@ The following functions are available as abbreviations:
 %END LATEX
 %@% END-IF %@%
       \texttt{trans} & matrix transpose \\
+      \texttt{trace} & trace of a matrix \\
       \texttt{solvelin} & solve a linear system of the form Ax = b \\
       \texttt{mod} & element 2 mod element 1 \\
       \texttt{floor} & floor function \\
@@ -1467,6 +1468,8 @@ to a real number, and as such the arithmetic will no longer be exact.
    \item \texttt{function\_total} \\
       Sum each of the columns of a real NxM matrix, returning a
       1xM matrix as a result.
+   \item \texttt{function\_trace} \\
+      Compute the trace of a square matrix.
    \item \texttt{function\_transpose} \\
       Compute the matrix transpose of the last stack element.
    \item \texttt{function\_unit\_value} \\
