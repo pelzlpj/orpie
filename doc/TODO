@@ -1,7 +1,10 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* loading and saving of autobindings
+* implement methods to include/source orpierc files, remove bindings, etc.
+
+* rework some of the documentation, using "abbreviation" rather than the
+  more confusing "extended command"...
 
 * add additional statistical functions (multivariate, distributions, ...)
 

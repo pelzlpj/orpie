@@ -59,6 +59,8 @@ let conserve_memory = ref false;;
 (* Autobinding keys *)
 let autobind_keys_list : (int * string * operation_t option * int) list ref = ref [];;
 let autobind_keys = ref (Array.make 1 (0, "", None, 0));;
+(* List of included rc files *)
+let included_rcfiles : (string list) ref = ref [];;
 
 
 let function_of_key key =
@@ -448,6 +450,13 @@ let operation_of_string command_str =
  *)
 let parse_line line_stream = 
    match line_stream with parser
+   | [< 'Kwd "include" >] ->
+      begin match line_stream with parser
+      | [< 'String include_file >] ->
+         included_rcfiles := include_file :: !included_rcfiles
+      | [< >] ->
+         config_failwith ("Expected a filename string after \"include\"")
+      end
    | [< 'Kwd "bind" >] -> 
       let bind_key key = 
          begin match line_stream with parser
@@ -663,33 +672,40 @@ let validate_saved_autobindings saved_autobind =
 
 (* try opening the rc file, first looking at $HOME/.orpierc, 
  * then looking at $PREFIX/etc/orpierc *)
-let open_rcfile () =
-   let home_rcfile =
-      let homedir = Sys.getenv "HOME" in
-      homedir ^ "/.orpierc"
-   in
-   let prefix_rcfile = 
-      if Install.prefix = "/usr" || Install.prefix = "/usr/" then
-         "/etc/orpierc"
-      else
-         Install.prefix ^ "/etc/orpierc" 
-   in
-   try (open_in home_rcfile, home_rcfile)
-   with Sys_error error_str ->
-      begin
-         try (open_in prefix_rcfile, prefix_rcfile)
+let open_rcfile rcfile_op =
+   match rcfile_op with
+   |None ->
+      let home_rcfile =
+         let homedir = Sys.getenv "HOME" in
+         homedir ^ "/.orpierc"
+      in
+      let prefix_rcfile = 
+         if Install.prefix = "/usr" || Install.prefix = "/usr/" then
+            "/etc/orpierc"
+         else
+            Install.prefix ^ "/etc/orpierc" 
+      in
+      begin try (open_in home_rcfile, home_rcfile)
+      with Sys_error error_str ->
+         begin try (open_in prefix_rcfile, prefix_rcfile)
          with Sys_error error_str -> failwith 
-         ("Could not find configuration file \"" ^ home_rcfile ^ "\" or \"" ^ 
-         prefix_rcfile ^ "\" .")
+            ("Could not open configuration file \"" ^ home_rcfile ^ "\" or \"" ^ 
+            prefix_rcfile ^ "\" .")
+         end
       end
+   |Some file ->
+      try (Utility.expand_open_in_ascii file, file)
+      with Sys_error error_str -> config_failwith
+      ("Could not open configuration file \"" ^ file ^ "\".")
 
 
-let process_rcfile () =
+
+let rec process_rcfile rcfile_op =
    let line_lexer line = 
-      make_lexer ["bind"; "autobind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
+      make_lexer ["include"; "bind"; "autobind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
-   let config_stream, rcfile_filename = open_rcfile () in
+   let config_stream, rcfile_filename = open_rcfile rcfile_op in
    let line_num = ref 0 in
    try
       while true do
@@ -703,7 +719,14 @@ let process_rcfile () =
          else
             try
                let line_stream = line_lexer line_string in
-               parse_line line_stream
+               parse_line line_stream;
+               (* process any included rcfiles as they are encountered *)
+               begin match !included_rcfiles with
+               |[] -> ()
+               |head :: tail -> 
+                  included_rcfiles := tail;
+                  process_rcfile (Some head)
+               end
             with
                |Config_failure s ->
                   (let error_str = Printf.sprintf "Syntax error on line %d of \"%s\": %s"
