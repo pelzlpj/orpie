@@ -3,10 +3,19 @@ Orpie ChangeLog
 
 v1.4
 
+   2004-08-23        Deprecated "extended_" operation identifiers in
+                     favor of somewhat more clear "abbrev_" 
+                     identifiers.
+
+                     Added methods to include (i.e. source) rcfiles
+                     within each other, remove key bindings, and remove
+                     operation abbreviations.
+
    2004-07-19        Implemented automatic key bindings.
 
-                     Changed operation "function_rand" to "command_rand"
-                     because it does not take an argument.
+                     Deprecated operation "function_rand" in favor of
+                     "command_rand" because it does not take an 
+                     argument.
 
 
 v1.3

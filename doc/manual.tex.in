@@ -391,7 +391,7 @@ The input parser will discard whitespace where possible, so feel free to add
 any form of whitespace between matrix rows, matrix elements, real and complex
 components, etc.  
 
-\subsection{Performing Basic Function Operations}
+\subsection{Executing Basic Function Operations}
 %@% IF LATEX %@%
 \label{functionops}
 %@% END-IF %@%
@@ -444,26 +444,26 @@ As an additional shortcut, any variable names used as function arguments will
 be evaluated before application of the function.  In other words, it is not necessary
 to evaluate variables before performing arithmetic operations on them.
 
-\subsection{Performing Extended Function Operations}
+\subsection{Executing Function Abbreviations}
 %@% IF LATEX %@%
-\label{extendedfunctions}
+\label{abbrevfunctions}
 %@% END-IF %@%
 One could bind nearly all calculator operations to specific keypresses, but this
 would rapidly get confusing since the PC keyboard is not labeled as nicely as a
 calculator keyboard is.  For this reason, Orpie includes an 
-\emph{extended command} syntax.
+\emph{abbreviation} syntax.
 
-To activate an extended command, press '\texttt{'}' (quote key), followed by the
-first few letters/digits of the command, then hit enter.  Orpie offers an
-autocompletion feature for extended commands, so you only need to type enough of
-the command to identify it uniquely.  The matching extended commands will appear
+To activate an abbreviation, press '\texttt{'}' (quote key), followed by the
+first few letters/digits of the abbreviation, then hit enter.  Orpie offers an
+autocompletion feature for abbreviations, so you only need to type enough of
+the operation to identify it uniquely.  The matching abbreviations will appear
 in the left panel of the display, to assist you in finding the appropriate
-command.
+operation.
 
-To avoid interface conflicts, extended commands may be entered only when the
+To avoid interface conflicts, abbreviations may be entered only when the
 entry buffer (the bottom line of the screen) is empty.
 
-The following functions are available as extended commands:
+The following functions are available as abbreviations:
 %@% IF LATEX %@%
 \begin{center}
    \begin{tabular}[t]{|l|l|}
@@ -471,7 +471,7 @@ The following functions are available as extended commands:
 \begin{Table}{2}
 %@% END-IF %@%
       \hline 
-      Extended Commands & Functions \\
+      Abbreviations & Functions \\
       \hline
       \texttt{inv} & inverse function \\
       \texttt{pow} & raise element 2 to the power of element 1 \\
@@ -519,7 +519,7 @@ The following functions are available as extended commands:
 \begin{center}
    \begin{tabular}[t]{|l|l|}
       \hline 
-      Extended Commands (con't) & Functions \\
+      Abbreviations (con't) & Functions \\
       \hline
 %END LATEX
 %@% END-IF %@%
@@ -556,12 +556,12 @@ The following functions are available as extended commands:
 \end{Table}
 %@% END-IF %@%
 
-The extended command abbreviations can become tedious when performing repetitive calculations.
+Entering abbreviations can become tedious when performing repetitive calculations.
 To save some keystrokes, Orpie will automatically bind recently-used operations with no prexisting
 binding to keys \texttt{<f5>-<f12>}.  The current autobindings can be viewed by pressing \texttt{'h'}
 to cycle between the various pages of the help panel.
 
-\subsection{Performing Basic Command Operations}
+\subsection{Executing Basic Command Operations}
 %@% IF LATEX %@%
 \label{rectpolar}
 \label{anglemode}
@@ -571,7 +571,7 @@ In addition to the function operations listed in
 %@% IF LATEX %@%
 Section \ref{functionops},
 %@% ELSE %@%
-the section PERFORMING BASIC FUNCTION OPERATIONS,
+the section EXECUTING BASIC FUNCTION OPERATIONS,
 %@% END-IF %@%
 a number of basic calculator commands have been bound to single keypresses:
 %@% IF LATEX %@%
@@ -617,15 +617,15 @@ a number of basic calculator commands have been bound to single keypresses:
 \end{Table}
 %@% END-IF %@%
 
-\subsection{Performing Extended Command Operations}
+\subsection{Executing Command Abbreviations}
 In addition to the function operations listed in 
 %@% IF LATEX %@%
-Section \ref{extendedfunctions}, 
+Section \ref{abbrevfunctions}, 
 %@% ELSE %@%
-the section PERFORMING EXTENDED FUNCTION OPERATIONS,
+the section EXECUTING FUNCTION ABBREVIATIONS,
 %@% END-IF %@%
 there are a large number of calculator commands that
-have been implemented using the extended command syntax:
+have been implemented using the abbreviation syntax:
 %@% IF LATEX %@%
 \begin{center}
    \begin{tabular}[t]{|l|l|}
@@ -633,7 +633,7 @@ have been implemented using the extended command syntax:
 \begin{Table}{2}
 %@% END-IF %@%
       \hline 
-      Extended Commands & Calculator Operation \\
+      Abbreviations & Calculator Operation \\
       \hline
       \texttt{drop} & drop last element \\
       \texttt{clear} & clear all stack elements \\
@@ -728,7 +728,7 @@ the \texttt{orpierc} file provided with Orpie
 %@% ELSE %@%
 (see INCLUDING OTHER RCFILES),
 %@% END-IF %@%
-and add or removing settings as desired.
+and add or remove settings as desired.
 
 %@% IF LATEX %@%
 \subsection{\texttt{orpierc} Syntax}
@@ -763,7 +763,7 @@ Syntax: include \emph{filename\_string} \\ \\
 This syntax can be used to include one run-configuration file within another.
 This command could be used to load the default \texttt{orpierc} file (probably
 found in \texttt{/etc/orpierc}) within your personalized rcfile,
-\texttt{\~{}/.orpierc}.
+\texttt{\~{}/.orpierc}.  The filename string should be enclosed in quotes.
 
 %@% IF LATEX %@%
 \subsubsection{Setting Configuration Variables}
@@ -851,7 +851,7 @@ Syntax: \\
 \texttt{unbind\_command \emph{key\_identifier}} \\
 \texttt{unbind\_edit \emph{key\_identifier}} \\
 \texttt{unbind\_browse \emph{key\_identifier}} \\
-\texttt{unbind\_extended \emph{key\_identifier}} \\
+\texttt{unbind\_abbrev \emph{key\_identifier}} \\
 \texttt{unbind\_variable \emph{key\_identifier}} \\
 \texttt{unbind\_integer \emph{key\_identifier}} \\ \\
 These commands will remove key bindings associated with the various entry
@@ -867,8 +867,8 @@ should be defined using the syntax described in the previous section.
 %@% END-IF %@%
 Syntax: \texttt{autobind \emph{key\_identifier}} \\ \\
 In order to make repetitive calculations more pleasant, Orpie offers an automatic key
-binding feature.  When an operation (function or command) is executed using its extended 
-command abbreviation, one of the keys selected by the \texttt{autobind} syntax will be 
+binding feature.  When a function or command is executed using its abbreviation, 
+one of the keys selected by the \texttt{autobind} syntax will be 
 automatically bound to that operation (unless the operation has already been bound 
 to a key).  The current set of autobindings can be viewed in the help panel by executing
 \texttt{command\_cycle\_help} (bound to \texttt{'h'} by default).
@@ -877,40 +877,39 @@ The syntax for the key identifiers is provided in the previous section.
 
 
 %@% IF LATEX %@%
-\subsubsection{Creating Extended Command Abbreviations}
+\subsubsection{Creating Operation Abbreviations}
 \label{abbreviations}
 %@% ELSE %@%
-\subsection{Creating Extended Command Abbreviations}
+\subsection{Creating Operation Abbreviations}
 %@% END-IF %@%
-Syntax: \texttt{abbrev \emph{command\_abbreviation operation}} \\ \\
-You can use this syntax to set the extended command abbreviations used within
-Orpie to represent the various operations.  A list of available operations may
-be found in 
+Syntax: \texttt{abbrev \emph{operation\_abbreviation operation}} \\ \\
+You can use this syntax to set the abbreviations used within Orpie to represent the 
+various functions and commands.  A list of available operations may be found in 
 %@% IF LATEX %@%
 Section \ref{operationslist}.
 %@% ELSE %@%
 the CALCULATOR OPERATIONS section.
 %@% END-IF %@%
-The command abbreviations should be quoted strings, for example \texttt{"sin"}
+The operation abbreviations should be quoted strings, for example \texttt{"sin"}
 or \texttt{"log"}.
 
-Orpie performs autocompletion on these command abbreviations, allowing you to type
+Orpie performs autocompletion on these abbreviations, allowing you to type
 usually just a few letters in order to select the desired command.  The order of the
 autocompletion matches will be the same as the order in which the abbreviations are
-registered by the rcfile--so you may wish to place the more commonly used command
+registered by the rcfile--so you may wish to place the more commonly used operation
 abbreviations earlier in the list.
 
-Multiple command abbreviations may be bound to the same operation, if desired.
+Multiple abbreviations may be bound to the same operation, if desired.
 
 
 %@% IF LATEX %@%
-\subsubsection{Removing Extended Command Abbreviations}
+\subsubsection{Removing Operation Abbreviations}
 \label{unabbreviations}
 %@% ELSE %@%
-\subsection{Removing Extended Command Abbreviations}
+\subsection{Removing Operation Abbreviations}
 %@% END-IF %@%
-Syntax: \texttt{unabbrev \emph{command\_abbreviation}} \\ \\
-This syntax can be used to remove an extended command abbreviation.  The command abbreviations
+Syntax: \texttt{unabbrev \emph{operation\_abbreviation}} \\ \\
+This syntax can be used to remove an operation abbreviation.  The operation abbreviations
 should be quoted strings, as described in the previous section.
 
 
@@ -940,7 +939,7 @@ as well as ``register'' variable shortcuts (\texttt{<f1>} to \texttt{<f12>}).
 Macros may call other macros recursively.  However, take care that a macro does
 not call \emph{itself} recursively; Orpie will not trap the infinite loop.
 
-Note that extended commands may be accessed within macros.  For example,
+Note that operation abbreviations may be accessed within macros.  For example,
 \texttt{macro "A" "' a b o u t <return>"} would bind \texttt{A} to display
 the ``about Orpie'' screen.
 
@@ -991,7 +990,7 @@ described in
 %@% IF LATEX %@%
 Sections \ref{bindings} and \ref{abbreviations}.  
 %@% ELSE %@%
-the sections on CREATING KEY BINDINGS and CREATING EXTENDED COMMAND ABBREVIATIONS.
+the sections on CREATING KEY BINDINGS and CREATING OPERATION ABBREVIATIONS.
 %@% END-IF %@%
 The following is a list of every available operation.
 
@@ -1207,8 +1206,8 @@ they do not take an argument.  Many calculator interface settings are implemente
       Display a nifty ``about Orpie'' credits screen.
    \item \texttt{command\_begin\_browsing} \\
       Enter stack browsing mode.
-   \item \texttt{command\_begin\_extended} \\
-      Begin entry of an extended command abbreviation.
+   \item \texttt{command\_begin\_abbrev} \\
+      Begin entry of an operation abbreviation.
    \item \texttt{command\_begin\_variable} \\
       Begin entry of a variable name.
    \item \texttt{command\_bin} \\
@@ -1277,8 +1276,8 @@ they do not take an argument.  Many calculator interface settings are implemente
 \subsection{Edit Operations}
 %@% END-IF %@%
 The following operations are related to editing during data entry.  These
-commands cannot be made available as extended commands, since extended
-commands are not accessible while entering data.  These operations should
+commands cannot be made available as operation abbreviations, since
+abbreviations are not accessible while entering data.  These operations should
 be made available as single keypresses using the \texttt{bind} keyword.
 \begin{itemize}
    \item \texttt{edit\_angle} \\
@@ -1314,7 +1313,7 @@ be made available as single keypresses using the \texttt{bind} keyword.
 \subsection{Browsing Operations}
 %@% END-IF %@%
 The following list of operations is available only in stack browsing mode.
-As extended commands are unavailable while browsing the stack, these operations
+As abbreviations are unavailable while browsing the stack, these operations
 should be bound to single keypresses using the \texttt{bind} keyword.
 \begin{itemize}
    \item \texttt{browse\_echo} \\
@@ -1353,21 +1352,21 @@ should be bound to single keypresses using the \texttt{bind} keyword.
 \end{itemize}
 
 %@% IF LATEX %@%
-\subsubsection{Extended Entry Operations}
-\label{extendedoperations}
+\subsubsection{Abbreviation Entry Operations}
+\label{abbrevoperations}
 %@% ELSE %@%
-\subsection{Extended Entry Operations}
+\subsection{Abbreviation Entry Operations}
 %@% END-IF %@%
-The following list of operations is available only while entering an extended
-function or command.  These operations must be bound to single keypresses using 
+The following list of operations is available only while entering a function or
+command abbreviation.  These operations must be bound to single keypresses using 
 the \texttt{bind} keyword.
 \begin{itemize}
-   \item \texttt{extended\_backspace} \\
-      Delete a character from the extended entry string.
-   \item \texttt{extended\_enter} \\
-      Execute the selected extended function or command.
-   \item \texttt{extended\_exit} \\
-      Cancel extended entry.
+   \item \texttt{abbrev\_backspace} \\
+      Delete a character from the abbreviation string.
+   \item \texttt{abbrev\_enter} \\
+      Execute the operation associated with the selected abbreviation.
+   \item \texttt{abbrev\_exit} \\
+      Cancel abbreviation entry.
 \end{itemize}
 
 %@% IF LATEX %@%
@@ -1377,7 +1376,7 @@ the \texttt{bind} keyword.
 \subsection{Variable Entry Operations}
 %@% END-IF %@%
 The following list of operations is available only while entering a variable
-name.  As extended commands are unavailable while entering variables, these operations
+name.  As abbreviations are unavailable while entering variables, these operations
 should be bound to single keypresses using the \texttt{bind} keyword.
 \begin{itemize}
    \item \texttt{variable\_backspace} \\
@@ -1477,7 +1476,7 @@ make Orpie possible.
 
       The biggest usability enhancement would be the rcfile for keybindings.
       The context-sensitive help panel is new, as is user-defined variable
-      support.  Integer data may be
+      support and autobindings.  Integer data may be
       entered and manipulated with arbitrary precision (thanks to the Nums 
       library that ships with Ocaml).  The error messages provided by
       Orpie are, on average, more informative than those provided by rpc;
