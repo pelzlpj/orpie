@@ -1,0 +1,4 @@
+curses.cmo: curses.cmi 
+curses.cmx: curses.cmi 
+test.cmo: curses.cmi 
+test.cmx: curses.cmx 

@@ -1,0 +1,45 @@
+add.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+add.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+curses-keys.cmo: subdirs_byte utility.cmo 
+curses-keys.cmx: subdirs_opt utility.cmx 
+div.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+div.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+interface.cmo: subdirs_byte operations.cmo rpc_calc.cmo 
+interface.cmx: subdirs_opt operations.cmx rpc_calc.cmx 
+interface_draw.cmo: subdirs_byte interface.cmo operations.cmo rcfile.cmo rpc_calc.cmo \
+    rpc_stack.cmo utility.cmo 
+interface_draw.cmx: subdirs_opt interface.cmx operations.cmx rcfile.cmx rpc_calc.cmx \
+    rpc_stack.cmx utility.cmx 
+interface_main.cmo: subdirs_byte big_int_str.cmo interface.cmo interface_draw.cmo \
+    operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo utility.cmo 
+interface_main.cmx: subdirs_opt big_int_str.cmx interface.cmx interface_draw.cmx \
+    operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx utility.cmx 
+inv.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+inv.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+main.cmo: subdirs_byte interface.cmo interface_main.cmo rcfile.cmo rpc_calc.cmo 
+main.cmx: subdirs_opt interface.cmx interface_main.cmx rcfile.cmx rpc_calc.cmx 
+mult.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+mult.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+pow.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+pow.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+rcfile.cmo: subdirs_byte install.cmo operations.cmo 
+rcfile.cmx: subdirs_opt install.cmx operations.cmx 
+rpc_calc.cmo: subdirs_byte add.cmo div.cmo gsl_assist.cmo inv.cmo mult.cmo pow.cmo \
+    rpc_stack.cmo solvelin.cmo sub.cmo 
+rpc_calc.cmx: subdirs_opt add.cmx div.cmx gsl_assist.cmx inv.cmx mult.cmx pow.cmx \
+    rpc_stack.cmx solvelin.cmx sub.cmx 
+rpc_stack.cmo: subdirs_byte big_int_str.cmo rcfile.cmo utility.cmo 
+rpc_stack.cmx: subdirs_opt big_int_str.cmx rcfile.cmx utility.cmx 
+solvelin.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+solvelin.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+sub.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
+sub.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
+txtin_lexer.cmo: subdirs_byte txtin_parser.cmi 
+txtin_lexer.cmx: subdirs_opt txtin_parser.cmx 
+txtin_parser.cmo: subdirs_byte big_int_str.cmo rpc_stack.cmo utility.cmo txtin_parser.cmi 
+txtin_parser.cmx: subdirs_opt big_int_str.cmx rpc_stack.cmx utility.cmx txtin_parser.cmi 
+txtin_parser.cmi: subdirs_byte rpc_stack.cmo 
+gsl_assist.cmo: subdirs_byte
+gsl_assist.cmx: subdirs_opt
+utility.cmo: subdirs_byte
+utility.cmx: subdirs_opt

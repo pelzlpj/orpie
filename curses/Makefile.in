@@ -119,16 +119,9 @@ clean::
 	rm -f $(GENERATED) parser.output
 
 dist-clean distclean:: clean
-	rm -f Makefile .depend
+	rm -f Makefile
 
-# depend
-########
-
-.depend depend:: $(GENERATED)
-	rm -f .depend
-	$(OCAMLDEP) $(INCLUDES) -pp cpp *.ml *.mli > .depend
-
-include .depend
+include depend
 
 
 

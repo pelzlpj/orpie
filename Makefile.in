@@ -254,16 +254,12 @@ clean:: partly-clean
 dist-clean distclean:: clean
 	cd curses && $(MAKE) distclean
 	cd gsl && $(MAKE) distclean
-	rm -f Makefile .depend config.cache config.log config.status install.ml
+	rm -f Makefile config.cache config.log config.status install.ml
 
 # depend
 ########
 
-.depend depend:: $(GENERATED)
-	rm -f .depend
-	$(OCAMLDEP) $(DEPFLAGS) $(INCLUDES) *.ml *.mli > .depend
-
-include .depend
+include depend
 
 
 # arch-tag: DO_NOT_CHANGE_bdb62873-ffd0-4d79-819e-880467e18f28 

@@ -785,7 +785,7 @@ let handle_digit (iface : interface_state_t) key =
          else buffer.re_mantissa
       in 
       let has_decimal =
-         let dot_regex = Str.regexp "^.*\..*$" in
+         let dot_regex = Str.regexp "^.*\\..*$" in
          Str.string_match dot_regex mantissa_buffer 0
       in
       begin
