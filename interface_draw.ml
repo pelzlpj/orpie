@@ -687,26 +687,37 @@ let draw_about (iface : interface_state_t) =
    (* draw the text *)
    let vert_center  = (iface.scr.lines - 2) / 2
    and horiz_center = iface.scr.cols / 2 in
-   let left_shift = 30 in
+   let left_shift = 17 in
    attron A.bold;
-   assert (mvaddstr (vert_center - 4) (horiz_center - left_shift) 
+   assert (mvaddstr (vert_center - 6) (horiz_center - left_shift) 
    ("Orpie v" ^ iface.version));
    attroff A.bold;
-   assert (mvaddstr (vert_center - 3) (horiz_center - left_shift) 
+   assert (mvaddstr (vert_center - 5) (horiz_center - left_shift) 
    "Copyright (C) 2004 Paul Pelzl");
-   assert (mvaddstr (vert_center - 1) (horiz_center - left_shift)
-   "\"Because, frankly, GUI calculator programs are pure evil.");
+   assert (mvaddstr (vert_center - 3) (horiz_center - left_shift)
+   "\"Because, frankly, GUI calculator");
+   assert (mvaddstr (vert_center - 2) (horiz_center - left_shift) 
+   " programs are pure evil.  ");
    attron A.bold;
-   assert (mvaddstr (vert_center + 0) (horiz_center - left_shift) " Orpie");
+   assert (mvaddstr (vert_center - 2) (horiz_center - left_shift + 26) 
+   "Orpie");
    attroff A.bold;
-   assert (mvaddstr (vert_center + 0) (horiz_center - left_shift + 6)
-   ", on the other hand, is only a little bit evil.\"");
+   assert (mvaddstr (vert_center - 2) (horiz_center - left_shift + 31) 
+   ", on");
+   assert (mvaddstr (vert_center - 1) (horiz_center - left_shift)
+   " the other hand, is only a little");
+   assert (mvaddstr (vert_center + 0) (horiz_center - left_shift)
+   " bit evil.\"");
+   assert (mvaddstr (vert_center + 2) (horiz_center - left_shift)
+   "Orpie comes with ABSOLUTELY NO");
    assert (mvaddstr (vert_center + 3) (horiz_center - left_shift)
-   "Orpie comes with ABSOLUTELY NO WARRANTY.  This is free software,");
+   "WARRANTY.  This is free software,");
    assert (mvaddstr (vert_center + 4) (horiz_center - left_shift)
-   "and you are welcome to redistribute it under certain");
+   "and you are welcome to redistribute");
    assert (mvaddstr (vert_center + 5) (horiz_center - left_shift)
-   "conditions; see 'COPYING' for details.");
+   "it under certain conditions; see");
+   assert (mvaddstr (vert_center + 6) (horiz_center - left_shift)
+   "'COPYING' for details.");
    assert (mvaddstr (iface.scr.lines - 4) (horiz_center - 12)
    "Press any key to continue.");
    assert (move (iface.scr.lines - 1) (iface.scr.cols - 1));
