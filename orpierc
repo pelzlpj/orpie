@@ -71,11 +71,7 @@ bind "<backspace>" extended_backspace
 
 
 # extended command abbreviations
-abbrev "add"     function_add
-abbrev "sub"     function_sub
-abbrev "mult"    function_mult
-abbrev "div"     function_div
-abbrev "neg"     function_neg
+# these should be given in the desired order of matching precedence
 abbrev "inv"     function_inv
 abbrev "pow"     function_pow
 abbrev "sq"      function_sq
@@ -113,9 +109,14 @@ abbrev "oct"     command_oct
 abbrev "dec"     command_dec
 abbrev "hex"     command_hex
 abbrev "view"    command_view
-abbrev "about"   command_about
 abbrev "refresh" command_refresh
 abbrev "pi"      command_enter_pi
+abbrev "add"     function_add
+abbrev "sub"     function_sub
+abbrev "mult"    function_mult
+abbrev "div"     function_div
+abbrev "neg"     function_neg
+abbrev "about"   command_about
 
 
 
