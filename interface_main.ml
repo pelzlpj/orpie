@@ -888,7 +888,7 @@ let handle_digit (iface : interface_state_t) key =
 
 (* begin abbrev entry *)
 let handle_begin_abbrev (iface : interface_state_t) =
-   if iface.interface_mode != AbbrevEntryMode then begin
+   if iface.interface_mode <> AbbrevEntryMode then begin
       iface.interface_mode <- AbbrevEntryMode;
       iface.help_mode <- AbbrevHelp;
       draw_help iface;
@@ -900,7 +900,7 @@ let handle_begin_abbrev (iface : interface_state_t) =
 
 (* begin entry of a variable name *)
 let handle_begin_variable (iface : interface_state_t) =
-   if iface.interface_mode != VarEditMode then begin
+   if iface.interface_mode <> VarEditMode then begin
       iface.interface_mode <- VarEditMode;
       iface.entry_type <- VarEntry;
       iface.help_mode <- VarHelp;
@@ -1303,7 +1303,7 @@ let handle_interr_function_call (iface : interface_state_t) calc_function =
       assert (nodelay iface.scr.entry_win true);
       while not (calc_function ()) do
          let key = wgetch iface.scr.entry_win in
-         if key != ~-1 then
+         if key <> ~-1 then
             raise Interrupt_exception
          else
             ()

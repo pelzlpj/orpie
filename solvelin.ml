@@ -32,17 +32,17 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
       begin match gen_el2 with
       |RpcFloatMatrix el2 ->
          let n1, m1 = Gsl_matrix.dims el1 in
-         if n1 != m1 then
+         if n1 <> m1 then
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "multiplier matrix must be square"))
          else
             let n2, m2 = Gsl_matrix.dims el2 in
-            if m2 != 1 then
+            if m2 <> 1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument "resultant matrix must be a column"))
-            else if n2 != m1 then
+            else if n2 <> m1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument ("dimensions of multiplier and " ^ 
@@ -55,17 +55,17 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
             end
       |RpcComplexMatrix el2 ->
          let n1, m1 = Gsl_matrix.dims el1 in
-         if n1 != m1 then
+         if n1 <> m1 then
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "multiplier matrix must be square"))
          else
             let n2, m2 = Gsl_matrix_complex.dims el2 in
-            if m2 != 1 then
+            if m2 <> 1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument "resultant matrix must be a column"))
-            else if n2 != m1 then
+            else if n2 <> m1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument ("dimensions of multiplier and" ^ 
@@ -87,17 +87,17 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
       begin match gen_el2 with
       |RpcFloatMatrix el2 ->
          let n1, m1 = Gsl_matrix_complex.dims el1 in
-         if n1 != m1 then
+         if n1 <> m1 then
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "multiplier matrix must be square"))
          else
             let n2, m2 = Gsl_matrix.dims el2 in
-            if m2 != 1 then
+            if m2 <> 1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument "resultant matrix must be a column"))
-            else if n2 != m1 then
+            else if n2 <> m1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument ("dimensions of multiplier and" ^ 
@@ -112,17 +112,17 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
             end
       |RpcComplexMatrix el2 ->
          let n1, m1 = Gsl_matrix_complex.dims el1 in
-         if n1 != m1 then
+         if n1 <> m1 then
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "multiplier matrix must be square"))
          else
             let n2, m2 = Gsl_matrix_complex.dims el2 in
-            if m2 != 1 then
+            if m2 <> 1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument "resultant matrix must be a column"))
-            else if n2 != m1 then
+            else if n2 <> m1 then
                (stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument ("dimensions of multiplier and" ^ 

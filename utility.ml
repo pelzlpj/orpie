@@ -82,7 +82,7 @@ let join_path dirname filename =
    and file_first = filename.[0] in
    if dir_last = '/' && file_first = '/' then
       dirname ^ (Str.string_after filename 1)
-   else if dir_last != '/' && file_first != '/' then
+   else if dir_last <> '/' && file_first <> '/' then
       dirname ^ "/" ^ filename
    else
       dirname ^ filename

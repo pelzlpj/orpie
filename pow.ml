@@ -31,7 +31,7 @@ let pow (stack : rpc_stack) (evaln : int -> unit) =
    |RpcInt el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         if (sign_big_int el2) != (-1) then
+         if (sign_big_int el2) <> (-1) then
             stack#push (RpcInt 
                (power_big_int_positive_big_int el1 el2))
          else
