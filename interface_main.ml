@@ -1279,7 +1279,7 @@ let handle_cycle_help (iface : interface_state_t) =
 
 (* quit the calculator *)
 let handle_quit (iface : interface_state_t) =
-   iface.calc#save_state ();
+   Statefile.save_state (iface.calc#get_state ());
    iface.run_calc <- false
 
 
@@ -2094,7 +2094,7 @@ let run (iface : interface_state_t) =
 
    begin
       try
-         iface.calc#load_state ();
+         iface.calc#set_state (Statefile.load_state ());
          draw_stack iface;
          draw_help iface;
          draw_update_entry iface;

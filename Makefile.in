@@ -57,10 +57,10 @@ all: $(OCAMLBEST)
 # bytecode and native-code compilation
 ######################################
 
-CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo rcfile.cmo \
+CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo \
 	   version.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo pow.cmo \
-		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo const.cmo interface.cmo \
-		interface_draw.cmo interface_main.cmo main.cmo
+		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo const.cmo rcfile.cmo \
+		statefile.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma threads.cma
 CMXA = $(CMA:.cma=.cmxa)
@@ -85,7 +85,7 @@ GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 UNITS_CMO = units/units.cmo units/constants.cmo
 UNITS_CMX = $(UNITS_CMO:.cmo=.cmx)
 
-TEST_CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo rcfile.cmo \
+TEST_CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo \
 	   version.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo pow.cmo \
 		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo calc_test.cmo
 TEST_CMX = $(TEST_CMO:.cmo=.cmx)
@@ -106,14 +106,14 @@ static: $(NAME).static-opt $(NAME2).static-opt
 $(NAME).byte: $(CURSES_BOBJS) $(GSL_BOBJS) $(UNITS_CMO) $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(UNITS_CMO) $(CMO) 
 
-$(NAME2).byte: $(CURSES_BOBJS) utility.cmo curses-keys.cmo
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.cmo curses-keys.cmo
+$(NAME2).byte: $(CURSES_BOBJS) curses_assist.cmo curses-keys.cmo
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses_assist.cmo curses-keys.cmo
 
 $(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(CMX) $(OLFLAGS)
 
-$(NAME2).opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx
-	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx $(OLFLAGS)
+$(NAME2).opt: $(CURSES_OOBJS) curses_assist.cmx curses-keys.cmx
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses_assist.cmx curses-keys.cmx $(OLFLAGS)
 
 # static build seems to require mashing all the C objects into a library
 $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
@@ -131,8 +131,8 @@ my-static-libs:
 	ar cr libmygsl.a gsl/*.o
 
 # calculator testing program
-test.opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
-	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX) $(OLFLAGS)
+test.opt: $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX) -cclib '$(GSL_LIB) -lm'
 
 
 VERSION=1.4.0

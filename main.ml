@@ -33,7 +33,7 @@ let initialize_screen () =
 
 
 (* Global: this is the interface state variable used for the calculator *)
-let calc = new Rpc_calc.rpc_calc;;
+let calc = new Rpc_calc.rpc_calc !Rcfile.conserve_memory;;
 let iface = Interface.make calc (initialize_screen ());;
 
 (* initialize the error handler *)

@@ -22,8 +22,6 @@
  *
  * miscellaneous helper functions that don't really fit elsewhere *)
 
-open Curses
-
 (* for some reason this is unrecognized if I leave it in txtin_parser.mly *)
 exception Txtin_error of string
 
@@ -164,69 +162,6 @@ let expand_open_in_ascii filename =
    expand_open_in_gen false filename
 
 
-
-(* translate a curses key to a printable string *)
-let string_of_chtype ch =
-   let display_string_of_keyname str =
-      match str with
-      |"KEY_LEFT" -> "<left>"
-      |"KEY_RIGHT" -> "<right>"
-      |"KEY_UP" -> "<up>"
-      |"KEY_DOWN" -> "<down>"
-      |"KEY_BACKSPACE" -> "<backspace>"
-      |"KEY_IC" -> "<insert>"
-      |"KEY_DC" -> "<delete>"
-      |"KEY_HOME" -> "<home>"
-      |"KEY_END" -> "<end>"
-      |"KEY_PPAGE" -> "<pageup>"
-      |"KEY_NPAGE" -> "<pagedown>"
-      |" " -> "<space>"
-      |"KEY_F(1)" -> "<f1>"
-      |"KEY_F(2)" -> "<f2>"
-      |"KEY_F(3)" -> "<f3>"
-      |"KEY_F(4)" -> "<f4>"
-      |"KEY_F(5)" -> "<f5>"
-      |"KEY_F(6)" -> "<f6>"
-      |"KEY_F(7)" -> "<f7>"
-      |"KEY_F(8)" -> "<f8>"
-      |"KEY_F(9)" -> "<f9>"
-      |"KEY_F(10)" -> "<f10>"
-      |"KEY_F(11)" -> "<f11>"
-      |"KEY_F(12)" -> "<f12>"
-      |"KEY_ENTER" -> "<enter>"
-      |"\\" -> "\\\\"
-      |_ -> str
-   in
-   (* regexp to check for meta and/or ctrl prefixes
-    * matches either "M-^" or "M-" or "^" followed by some character string *)
-   let mc_re = Str.regexp "^\\(\\(M-\\^\\)\\|\\(M-\\)\\|\\(\\^\\)\\)?\\(.+\\)" 
-   and key_string = (keyname ch) in
-   if Str.string_match mc_re key_string 0 then
-      let has_meta_ctrl = 
-         try let _ = Str.matched_group 2 key_string in true
-         with Not_found -> false
-      and has_meta =
-         try let _ = Str.matched_group 3 key_string in true
-         with Not_found -> false
-      and has_ctrl = 
-         try let _ = Str.matched_group 4 key_string in true
-         with Not_found -> false
-      and main_key = Str.matched_group 5 key_string in
-      if has_meta_ctrl then
-         "\\\\M\\\\C" ^ (display_string_of_keyname main_key)
-      else if has_meta then
-         "\\\\M" ^ (display_string_of_keyname main_key)
-      else if has_ctrl then
-         if main_key = "J" then
-            "<return>"
-         else if main_key = "I" then
-            "<tab>"
-         else
-            "\\\\C" ^ (display_string_of_keyname main_key)
-      else
-         display_string_of_keyname main_key
-   else
-      Printf.sprintf "\\%.3o" ch
 
 
 (* arch-tag: DO_NOT_CHANGE_a87790db-2dd0-496c-9620-ed968f3253fd *)

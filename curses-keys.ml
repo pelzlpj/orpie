@@ -33,7 +33,7 @@ end;
 while true do
    let k = getch () in
    let s1 = Printf.sprintf " octal: \\%.3o" k and
-   s2 = Printf.sprintf     "string: \"%s\"" (Utility.string_of_chtype k) in
+   s2 = Printf.sprintf     "string: \"%s\"" (Curses_assist.string_of_chtype k) in
    (assert (move 2 0);
    clrtoeol ();
    assert (addstr s1);

@@ -58,7 +58,7 @@
 open Rpc_calc;;
 open Rpc_stack;;
 
-let calc = new Rpc_calc.rpc_calc in
+let calc = new Rpc_calc.rpc_calc false in
 
 (* load data into the calculator using its string representation *)
 let load_data (data_str : string) =

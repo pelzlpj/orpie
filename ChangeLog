@@ -6,6 +6,9 @@ v1.5
    2004-09-09        Made a minor Makefile change to correct linking
                      errors under Gentoo (maybe others).
 
+                     Numerous code cleanups.  Calculator code has
+                     been better separated from interface code.
+
    2004-09-07        Support --sysconfdir configure option.  (Anyone
                      packaging for the filesystem hierarchy standard
                      will now need to use something like "./configure

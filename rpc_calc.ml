@@ -20,11 +20,7 @@
 
 (* rpc_calc.ml
  * This file defines Orpie's underlying calculator object.  All calculator
- * functions and commands have a corresponding method in this object.
- *
- * Ideally, this object should be completely separated from the curses-based
- * interface; it should be possible to plug it into a GUI, for example.
- * I'll fix this eventually. *)
+ * functions and commands have a corresponding method in this object. *)
 
 open Rpc_stack;;
 open Gsl_assist;;
@@ -42,10 +38,10 @@ type interruptable_args_t =
 
 let pi = 3.14159265358979323846;;
 
-class rpc_calc =
+class rpc_calc conserve_memory =
    object(self)
-      val mutable stack = new rpc_stack
-      val mutable backup_stack = new rpc_stack
+      val mutable stack = new rpc_stack conserve_memory
+      val mutable backup_stack = new rpc_stack conserve_memory
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
       val mutable variables = Hashtbl.create 10
       val mutable interr_args = NoArgs
@@ -100,11 +96,14 @@ class rpc_calc =
          |Dec -> self#mode_hex ()
          |Hex -> self#mode_bin ()
 
-      method save_state () =
-         stack#save_state modes variables
+      method get_state () =
+         (modes, variables, stack#get_state ())
 
-      method load_state () =
-         let m, v = stack#load_state () in
+      method set_state (m, v, s_op) =
+         begin match s_op with
+         |Some st -> stack#set_state st
+         |None    -> ()
+         end;
          modes     <- m;
          variables <- v;
          self#backup ()

@@ -171,89 +171,28 @@ type calculator_modes = {angle : angle_mode; base : base_mode;
 let size_inc = 100
 let pi = 3.14159265358979323846
 
-class rpc_stack =
+class rpc_stack conserve_memory_in =
    object(self)
       val mutable len = 0
       val mutable stack = Array.make size_inc (stack_data_of_orpie_data
       (RpcFloatUnit (funit_of_float 0.0)))
+      val conserve_memory = conserve_memory_in
       val render_stack = Stack.create ()
 
 
       method length = len
 
 
-      (* save to a datafile using the Marshal module *)
-      method save_state (modes : calculator_modes) 
-      (variables : (string, orpie_data_t) Hashtbl.t) =
-         try
-            let version_file = Utility.join_path !(Rcfile.datadir) "version" in
-            let version_channel = Utility.open_or_create_out_bin version_file in
-            output_string version_channel Version.version;
-            close_out version_channel;
-            let save_file = Utility.join_path !(Rcfile.datadir) "calc_state" in
-            let save_channel = Utility.open_or_create_out_bin save_file in
-            Marshal.to_channel save_channel 
-            (modes, variables, !Rcfile.autobind_keys, stack, len) [];
-            close_out save_channel
-         with
-            |Sys_error ss -> raise (Invalid_argument "can't open data file for writing")
-            |Failure ff   -> raise (Invalid_argument "can't serialize calculator data to file")
+      method get_state () = (stack, len)
 
-      (* load from a datafile using the Marshal module *)
-      (* FIXME: if the datafile is corrupted, this can segfault... *)
-      method load_state () =
-         try
-            (* check whether the version file exists *)
-            let version_file = Utility.join_path !(Rcfile.datadir) "version" in
-            if Sys.file_exists (Utility.expand_file version_file) then begin
-               (* if it does exist, try loading it *)
-               let version_channel = 
-                  Utility.expand_open_in_ascii version_file
-               in
-               let ver_string = input_line version_channel in
-               close_in version_channel;
-               (* if the version strings match, then assume it's okay to use
-                * Marshal. *)
-               if ver_string = Version.version then begin
-                  (* check whether the state file exists *)
-                  let datafile = Utility.join_path !(Rcfile.datadir) "calc_state" in
-                  if Sys.file_exists (Utility.expand_file datafile) then begin
-                     (* if it does exist, try loading it *)
-                     let load_channel = Utility.expand_open_in_bin datafile in
-                     let data_modes, data_variables, data_autobind_keys, data_stack, data_len = 
-                        (Marshal.from_channel load_channel : calculator_modes * 
-                        ((string, orpie_data_t) Hashtbl.t) * 
-                        (int * string * Operations.operation_t option * int) array *
-                        (stack_data_t array) * int)
-                     in
-                     close_in load_channel;
-                     stack <- data_stack;
-                     len <- data_len;
-                     Rcfile.validate_saved_autobindings data_autobind_keys;
-                     data_modes, data_variables
-                  end else
-                     (* if the datafile is missing, do nothing as it will be
-                      * created later *)
-                     ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
-               end else
-                  (* if the version strings don't match, don't try loading anything *)
-                  ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
-            end else
-               (* if the version file does not exist, don't try loading anything *)
-                  ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
-         with
-            (* this gets raised if, for example, we don't have read permission
-             * on the state data file *)
-            |Sys_error ss -> raise (Invalid_argument "can't open calculator state data file")
-            (* this shouldn't happen unless the data file gets corrupted. *)
-            |Failure ff -> raise (Invalid_argument "can't deserialize calculator data from file")
+      method set_state (s, l) =
+         stack <- s;
+         len   <- l
 
-            
       method backup () =
          let b_stack = Array.copy stack 
          and b_len = len in
          {< len = b_len; stack = b_stack >}
-
 
 
       method private expand_size () =
@@ -273,7 +212,7 @@ class rpc_stack =
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
          len <- len + 1;
-         if !Rcfile.conserve_memory then ()
+         if conserve_memory then ()
          else Stack.push new_el render_stack
 
 
@@ -663,7 +602,7 @@ class rpc_stack =
             let s = string_of_big_int_base ii 2 in
             let line = "# " ^ s ^ "`b"
             and fs   = "#" ^ s ^ "`b" in
-            if !Rcfile.conserve_memory then () else begin
+            if conserve_memory then () else begin
                ii_str.i_bin_line <- Some line;
                ii_str.i_bin_fs   <- Some fs
             end;
@@ -675,7 +614,7 @@ class rpc_stack =
             let s = string_of_big_int_base ii 8 in
             let line = "# " ^ s ^ "`o"
             and fs   = "#" ^ s ^ "`o" in
-            if !Rcfile.conserve_memory then () else begin
+            if conserve_memory then () else begin
                ii_str.i_oct_line <- Some line;
                ii_str.i_oct_fs   <- Some fs
             end;
@@ -687,7 +626,7 @@ class rpc_stack =
             let s = string_of_big_int_base ii 16 in
             let line = "# " ^ s ^ "`h"
             and fs   = "#" ^ s ^ "`h" in
-            if !Rcfile.conserve_memory then () else begin
+            if conserve_memory then () else begin
                ii_str.i_hex_line <- Some line;
                ii_str.i_hex_fs   <- Some fs
             end;
@@ -699,7 +638,7 @@ class rpc_stack =
             let s = string_of_big_int_base_gen ii 10 in
             let line = "# " ^ s ^ "`d"
             and fs   = "#" ^ s ^ "`d" in
-            if !Rcfile.conserve_memory then () else begin
+            if conserve_memory then () else begin
                ii_str.i_dec_line <- Some line;
                ii_str.i_dec_fs   <- Some fs
             end;
@@ -718,7 +657,7 @@ class rpc_stack =
             else
                sprintf "%.15g" fu.Units.coeff.Complex.re 
          in
-         if !Rcfile.conserve_memory then () 
+         if conserve_memory then () 
          else fu_str.fu <- Some s;
          s
 
@@ -737,7 +676,7 @@ class rpc_stack =
             let s = append_units 
             (sprintf "(%.15g, %.15g)" cc.Units.coeff.Complex.re 
             cc.Units.coeff.Complex.im) in
-            if !Rcfile.conserve_memory then () 
+            if conserve_memory then () 
             else cc_str.c_rect <- Some s;
             s
          |Polar ->
@@ -748,13 +687,13 @@ class rpc_stack =
             begin match calc_modes.angle with
             |Rad ->
                let s = append_units (sprintf "(%.15g <%.15g)" r theta) in
-               if !Rcfile.conserve_memory then () 
+               if conserve_memory then () 
                else cc_str.c_pol_rad <- Some s;
                s
             |Deg ->
                let s = append_units 
                (sprintf "(%.15g <%.15g)" r (180.0 /. pi *. theta)) in
-               if !Rcfile.conserve_memory then () 
+               if conserve_memory then () 
                else cc_str.c_pol_deg <- Some s;
                s
             end
@@ -787,7 +726,7 @@ class rpc_stack =
                !line
             in
             let ss = append_units s in
-            if !Rcfile.conserve_memory then () 
+            if conserve_memory then () 
             else fm_str.fmat_line <- Some ss;
             ss
          |Fullscreen ->
@@ -827,7 +766,7 @@ class rpc_stack =
                !line
             in
             let ss = append_units s in
-            if !Rcfile.conserve_memory then () 
+            if conserve_memory then () 
             else fm_str.fmat_fs <- Some ss;
             ss
 
@@ -893,7 +832,7 @@ class rpc_stack =
                !line
             in
             let ss = append_units s in
-            if !Rcfile.conserve_memory then 
+            if conserve_memory then 
                () 
             else
                begin match calc_modes.complex with
@@ -1011,7 +950,7 @@ class rpc_stack =
                !line
             in
             let ss = append_units s in
-            if !Rcfile.conserve_memory then 
+            if conserve_memory then 
                () 
             else
                begin match calc_modes.complex with
@@ -1032,7 +971,7 @@ class rpc_stack =
       method private create_var_string disp_mode vv vv_str =
          let line = "@ " ^ vv
          and fs   = "@" ^ vv in
-         if !Rcfile.conserve_memory then 
+         if conserve_memory then 
             () 
          else begin
             vv_str.v_line <- Some line;
