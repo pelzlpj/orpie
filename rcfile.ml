@@ -242,6 +242,8 @@ let parse_line line_stream =
                            register_binding key (Edit BeginMatrix)
                         |"edit_separator" ->
                            register_binding key (Edit Separator)
+                        |"edit_angle" ->
+                           register_binding key (Edit Angle)
                         |"edit_minus" ->
                            register_binding key (Edit Minus)
                         |"edit_backspace" ->

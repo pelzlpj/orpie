@@ -18,6 +18,7 @@ bind "#" edit_integer
 bind "(" edit_complex
 bind "[" edit_matrix
 bind "," edit_separator
+bind "<" edit_angle
 
 # keys for "function" operations, which operate on an argument
 bind "+" function_add

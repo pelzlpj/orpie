@@ -45,7 +45,8 @@ type rpc_interface_mode = | StandardEntryMode | ExtendedEntryMode | BrowsingMode
 
 type complex_entry_element = 
    {mutable re_mantissa : string; mutable re_exponent : string;
-    mutable im_mantissa : string; mutable im_exponent : string};;
+    mutable im_mantissa : string; mutable im_exponent : string; 
+    mutable is_polar : bool};;
 
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
@@ -134,7 +135,7 @@ object(self)
       state of a single complex number. *)
    val mutable gen_buffer = Array.make max_matrix_size
       {re_mantissa = ""; re_exponent = "";
-      im_mantissa = ""; im_exponent = ""}
+      im_mantissa = ""; im_exponent = ""; is_polar = false}
    val mutable current_buffer = 0
    val mutable is_entering_imag = false
    val mutable matrix_cols = 1
@@ -164,7 +165,7 @@ object(self)
       for i = 1 to pred max_matrix_size do
          gen_buffer.(i) <- 
             {re_mantissa = ""; re_exponent = "";
-            im_mantissa = ""; im_exponent = ""}
+            im_mantissa = ""; im_exponent = ""; is_polar = false}
       done;
 
       begin
@@ -317,8 +318,8 @@ object(self)
             else
                "# " ^ int_entry_buffer
          |FloatEntry ->
-            let mantissa_str = gen_buffer.(0).re_mantissa and
-            exponent_str = gen_buffer.(0).re_exponent in
+            let mantissa_str = gen_buffer.(0).re_mantissa
+            and exponent_str = gen_buffer.(0).re_exponent in
             get_float_str true mantissa_str exponent_str
          |ComplexEntry ->
             let buffer = gen_buffer.(0) in
@@ -329,7 +330,11 @@ object(self)
                   else "0"
                in
                let im_str = get_float_str true buffer.im_mantissa buffer.im_exponent in
-               "(" ^ re_str ^ ", " ^ im_str ^ ")"
+               match buffer.is_polar with
+               |false ->
+                  "(" ^ re_str ^ ", " ^ im_str ^ ")"
+               |true ->
+                  "(" ^ re_str ^ " <" ^ im_str ^ ")"
             else
                let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
                "(" ^ re_str ^ ")"
@@ -357,16 +362,28 @@ object(self)
                temp_im = get_float_str false gen_buffer.(el).im_mantissa
                gen_buffer.(el).im_exponent in
                (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
-                  ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]["
+                  match gen_buffer.(el).is_polar with
+                  |false ->
+                     ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]["
+                  |true ->
+                     ss := !ss ^ "(" ^ temp_re ^ " <" ^ temp_im ^ ")]["
                else
-                  ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), ")
+                  match gen_buffer.(el).is_polar with
+                  |false ->
+                     ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), "
+                  |true ->
+                     ss := !ss ^ "(" ^ temp_re ^ " <" ^ temp_im ^ "), ")
             done;
             (if is_entering_imag then
                let temp_re = get_float_str false gen_buffer.(current_buffer).re_mantissa
                gen_buffer.(current_buffer).re_exponent and
                temp_im = get_float_str true gen_buffer.(current_buffer).im_mantissa
                gen_buffer.(current_buffer).im_exponent in
-               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]]"
+               match gen_buffer.(current_buffer).is_polar with
+               |false ->
+                  ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]]"
+               |true ->
+                  ss := !ss ^ "(" ^ temp_re ^ " <" ^ temp_im ^ ")]]"
             else
                let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
                gen_buffer.(current_buffer).re_exponent in
@@ -588,11 +605,29 @@ object(self)
          begin
             let buffer = gen_buffer.(0) in
             try
-               let real_part = get_float_el buffer.re_mantissa
-               buffer.re_exponent and
-               imag_part = get_float_el buffer.im_mantissa
-               buffer.im_exponent in
-               RpcComplex {re = real_part; im = imag_part}
+               begin match buffer.is_polar with
+               |false ->
+                  let real_part = get_float_el buffer.re_mantissa 
+                  buffer.re_exponent
+                  and imag_part = get_float_el buffer.im_mantissa
+                  buffer.im_exponent in
+                  RpcComplex {re = real_part; im = imag_part}
+               (* if is_polar==true, then the data in the buffer represents
+                * polar data... so convert it to rect notation before storing
+                * it as a complex number. *)
+               |true ->
+                  let r = get_float_el buffer.re_mantissa
+                  buffer.re_exponent
+                  and theta = 
+                     match (calc#get_modes ()).angle with
+                     |Rad ->
+                        get_float_el buffer.im_mantissa buffer.im_exponent
+                     |Deg ->
+                        (pi /. 180.0 *. (get_float_el buffer.im_mantissa
+                        buffer.im_exponent))
+                  in
+                  RpcComplex {re = r *. (cos theta); im = r *. (sin theta)}
+               end
             with Failure "float_of_string" ->
                raise (Invalid_argument "improperly formatted complex floating-point data")
          end
@@ -626,11 +661,32 @@ object(self)
             {re = 0.0; im = 0.0} in
             try
                for i = 0 to current_buffer do
-                  let re_part = get_float_el gen_buffer.(i).re_mantissa
-                  gen_buffer.(i).re_exponent and
-                  im_part = get_float_el gen_buffer.(i).im_mantissa
-                  gen_buffer.(i).im_exponent in
-                  temp_arr.(i) <- {re = re_part; im = im_part}
+                  begin match gen_buffer.(i).is_polar with
+                  |false ->
+                     let re_part = get_float_el gen_buffer.(i).re_mantissa
+                     gen_buffer.(i).re_exponent 
+                     and im_part = get_float_el gen_buffer.(i).im_mantissa
+                     gen_buffer.(i).im_exponent in
+                     temp_arr.(i) <- {re = re_part; im = im_part}
+                  (* if is_polar==true, then the data in the buffer represents
+                   * polar data... so convert it to rect notation before storing
+                   * it as a complex number. *)
+                  |true ->
+                     let r = get_float_el gen_buffer.(i).re_mantissa
+                     gen_buffer.(i).re_exponent
+                     and theta =
+                        match (calc#get_modes ()).angle with
+                        |Rad ->
+                           get_float_el gen_buffer.(i).im_mantissa
+                           gen_buffer.(i).im_exponent
+                        |Deg ->
+                           (pi /. 180.0 *. (get_float_el
+                           gen_buffer.(i).im_mantissa
+                           gen_buffer.(i).im_exponent))
+                     in
+                     temp_arr.(i) <- {re = r *. (cos theta); 
+                     im = r *. (sin theta)}
+                  end
                done;
                RpcComplexMatrix (Gsl_matrix_complex.of_array temp_arr matrix_rows matrix_cols)
             with Failure "float_of_string" ->
@@ -654,7 +710,7 @@ object(self)
          for i = 0 to pred max_matrix_size do
             gen_buffer.(i) <- 
                {re_mantissa = ""; re_exponent = "";
-               im_mantissa = ""; im_exponent = ""}
+               im_mantissa = ""; im_exponent = ""; is_polar = false}
          done;
          current_buffer <- 0;
          is_entering_imag <- false;
@@ -835,6 +891,8 @@ object(self)
                         self#handle_begin_matrix ()
                      |Separator ->
                         self#handle_separator ()
+                     |Angle ->
+                        self#handle_angle ()
                      |SciNotBase ->
                         self#handle_scientific_notation ()
                   end
@@ -1045,6 +1103,31 @@ object(self)
          ()
 
 
+
+   (* handle an 'angle' keypress *)
+   method private handle_angle () =
+      match entry_type with
+      |ComplexEntry ->
+         if not is_entering_imag then
+            (is_entering_imag <- true;
+            gen_buffer.(current_buffer).is_polar <- true;
+            is_entering_exponent <- false;
+            self#draw_update_entry ())
+         else
+            ()
+      |ComplexMatrixEntry ->
+         if is_entering_imag then
+            ()
+         else
+            (is_entering_imag <- true;
+            gen_buffer.(current_buffer).is_polar <- true;
+            is_entering_exponent <- false;
+            self#draw_update_entry ())
+      |_ ->
+         ()
+
+
+
    (* handle a 'backspace' keypress *)
    method private handle_backspace () =
       let buffer = gen_buffer.(current_buffer) in
@@ -1094,13 +1177,14 @@ object(self)
             else
                begin
                   is_entering_imag <- false;
+                  buffer.is_polar <- false;
                   (if String.length buffer.re_exponent > 0 then
                      is_entering_exponent <- true
                   else
                      ());
                   self#draw_update_entry ()
                end
-         (* not entering imag *)
+         (* not entering imag/angle *)
          else if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
@@ -1165,13 +1249,14 @@ object(self)
             else
                begin
                   is_entering_imag <- false;
+                  buffer.is_polar <- false;
                   (if String.length buffer.re_exponent > 0 then
                      is_entering_exponent <- true
                   else
                      () );
                   self#draw_update_entry ()
                end
-         (* not entering imag *)
+         (* not entering imag/angle *)
          else if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
@@ -1521,7 +1606,6 @@ object(self)
 
    (* enter an extended entry *)
    method private handle_enter_extended () =
-      (* FIXME: obviously this needs stuff added *)
       if interface_mode = ExtendedEntryMode then
          (interface_mode <- StandardEntryMode;
          help_mode <- Standard;

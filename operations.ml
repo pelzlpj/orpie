@@ -16,7 +16,7 @@ type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | View | About | Refresh;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
-                          | Separator;;
+                          | Separator | Angle;;
 type browse_operation   = | EndBrowse
                           | ScrollLeft | ScrollRight | RollDown | RollUp
                           | PrevLine | NextLine | Echo | ViewEntry;;
