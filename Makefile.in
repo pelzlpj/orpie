@@ -150,6 +150,7 @@ install-indep:
 		install -m 644 orpierc $(DESTDIR)/$(prefix)/etc; \
 	fi
 	install -m 644 -D doc/orpie.1 $(MANDIR)/man1/orpie.1
+	install -m 644 -D doc/orpie-curses-keys.1 $(MANDIR)/man1/orpie-curses-keys.1
 	install -m 644 -D doc/orpierc.5 $(MANDIR)/man5/orpierc.5
 
 install: install-indep
@@ -172,6 +173,7 @@ uninstall:
 	else rm -f $(DESTDIR)/$(prefix)/etc/orpierc; \
 	fi
 	rm -f $(MANDIR)/man1/orpie.1
+	rm -f $(MANDIR)/man1/orpie-curses-keys.1
 	rm -f $(MANDIR)/man5/orpierc.5
 
 

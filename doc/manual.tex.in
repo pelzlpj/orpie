@@ -1183,7 +1183,7 @@ donations.  Please see \\
 \end{Table}
 
 \section{See Also}
-\Cmd{orpierc}{5}
+\Cmd{orpierc}{5}, \Cmd{orpie-curses-keys}{1}
 %@% END-IF %@%
 
 %@% END-IF %@%
@@ -1192,7 +1192,10 @@ donations.  Please see \\
 %@% IF !LATEX %@%
    %@% IF ORPIERC %@%
 \section{See Also}
-\Cmd{orpie}{1}
+\Cmd{orpie}{1}, \Cmd{orpie-curses-keys}{1}
+
+\section{Author}
+This manpage is written by Paul J. Pelzl <pelzlpj@eecs.umich.edu>.
    %@% END-IF %@%
 \LatexManEnd
 %@% END-IF %@%

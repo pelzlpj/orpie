@@ -1,5 +1,5 @@
 # Orpie documentation makefile
-all:	manual.pdf manual.html post-build-cleanup orpie.1 orpierc.5
+all:	manual.pdf manual.html post-build-cleanup orpie.1 orpierc.5 orpie-curses-keys.1
 
 manual.ps: dvi
 	dvips -tletterSize -Ppdf -G0 manual.dvi
@@ -26,11 +26,14 @@ orpie.1: manual.tex.stripped
 orpierc.5: manual.tex.stripped
 	latex2man -CORPIERC -M manual.tex.stripped orpierc.5
 
-post-build-cleanup: manual.pdf manual.html orpie.1 orpierc.5
+orpie-curses-keys.1: orpie-curses-keys.tex
+	latex2man -M orpie-curses-keys.tex orpie-curses-keys.1
+
+post-build-cleanup: manual.pdf manual.html orpie.1 orpierc.5 orpie-curses-keys.1
 	rm -f *.aux *.log *.dvi *.ps *.stripped manual.tex
 
 clean:
-	rm -f manual.tex *.aux *.log *.dvi *.ps *.pdf *.html *.stripped orpie.1 orpierc.5
+	rm -f manual.tex *.aux *.log *.dvi *.ps *.pdf *.html *.stripped orpie.1 orpierc.5 orpie-curses-keys.1
 
 
 # arch-tag: DO_NOT_CHANGE_a5d62ea3-3a73-4de2-a2b3-a70bb310823f 
