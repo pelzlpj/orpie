@@ -1,9 +1,9 @@
 open Big_int
-type rpc_data = [ `Int of Big_int.big_int
-                | `Float of float
-                | `Complex of Complex.t
-                | `FloatMatrix of Gsl_matrix.matrix 
-                | `ComplexMatrix of Gsl_matrix_complex.matrix ]
+type rpc_data = | RpcInt of Big_int.big_int
+                | RpcFloat of float
+                | RpcComplex of Complex.t
+                | RpcFloatMatrix of Gsl_matrix.matrix 
+                | RpcComplexMatrix of Gsl_matrix_complex.matrix 
 
 
 class rpc_stack =
@@ -18,18 +18,18 @@ class rpc_stack =
             begin
                count := !count + 1;
                match gen_el with
-               |`Int el ->
+               |RpcInt el ->
                   let line = Printf.sprintf "%2d: # %sd" !count
                      (string_of_big_int el) in
                   display_lines := line :: !display_lines
-               |`Float el ->
+               |RpcFloat el ->
                   let line = Printf.sprintf "%2d: %g" !count el in
                   display_lines := line :: !display_lines
-               |`Complex el ->
+               |RpcComplex el ->
                   let line = Printf.sprintf "%2d: (%g, %g)" !count
                   el.Complex.re el.Complex.im in
                   display_lines := line :: !display_lines
-               |`FloatMatrix el ->
+               |RpcFloatMatrix el ->
                   (* looks like [[ a11, a12 ][ a21, a22 ]] *)
                   let mat = el in
                   let rows, cols = (Gsl_matrix.dims mat) in
@@ -44,7 +44,7 @@ class rpc_stack =
                   done;
                   line := !line ^ "]";
                   display_lines := !line :: !display_lines
-               |`ComplexMatrix el ->
+               |RpcComplexMatrix el ->
                   (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
                      a21im), (a22re, a22im) ] *)
                   let mat = el in

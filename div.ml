@@ -8,64 +8,64 @@ let div (stack : rpc_stack) =
       let gen_el2 = stack#pop in
       let gen_el1 = stack#pop in
       match gen_el1 with
-      |`Int el1 -> (
+      |RpcInt el1 -> (
          match gen_el2 with
-         |`Int el2 ->
-            stack#push (`Int (div_big_int el1 el2))
-         |`Float el2 ->
-            stack#push (`Float ((float_of_big_int el1) /. el2))
-         |`Complex el2 ->
+         |RpcInt el2 ->
+            stack#push (RpcInt (div_big_int el1 el2))
+         |RpcFloat el2 ->
+            stack#push (RpcFloat ((float_of_big_int el1) /. el2))
+         |RpcComplex el2 ->
             let c_el1 = cmpx_of_int el1 in
-            stack#push (`Complex (Complex.div c_el1 el2))
+            stack#push (RpcComplex (Complex.div c_el1 el2))
          |_ ->
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "incompatible types"))
          )
-      |`Float el1 -> (
+      |RpcFloat el1 -> (
          match gen_el2 with
-         |`Int el2 ->
-            stack#push (`Float (el1 /. float_of_big_int el2))
-         |`Float el2 ->
-            stack#push (`Float (el1 /. el2))
-         |`Complex el2 ->
+         |RpcInt el2 ->
+            stack#push (RpcFloat (el1 /. float_of_big_int el2))
+         |RpcFloat el2 ->
+            stack#push (RpcFloat (el1 /. el2))
+         |RpcComplex el2 ->
             let c_el1 = cmpx_of_float el1 in
-            stack#push (`Complex (Complex.div c_el1 el2))
+            stack#push (RpcComplex (Complex.div c_el1 el2))
          |_ ->
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "incompatible types"))
          )
-      |`Complex el1 -> (
+      |RpcComplex el1 -> (
          match gen_el2 with
-         |`Int el2 ->
+         |RpcInt el2 ->
             let c_el2 = cmpx_of_int el2 in
-            stack#push (`Complex (Complex.div el1 c_el2))
-         |`Float el2 ->
+            stack#push (RpcComplex (Complex.div el1 c_el2))
+         |RpcFloat el2 ->
             let c_el2 = cmpx_of_float el2 in
-            stack#push (`Complex (Complex.div el1 c_el2))
-         |`Complex el2 ->
-            stack#push (`Complex (Complex.div el1 el2))
+            stack#push (RpcComplex (Complex.div el1 c_el2))
+         |RpcComplex el2 ->
+            stack#push (RpcComplex (Complex.div el1 el2))
          |_ ->
             (stack#push gen_el2;
             stack#push gen_el1;
             raise (Invalid_argument "incompatible types"))
          )
-      |`FloatMatrix el1 -> (
+      |RpcFloatMatrix el1 -> (
          match gen_el2 with
-         |`Int el2 ->
+         |RpcInt el2 ->
             let result = Gsl_matrix.copy el1 in
             (Gsl_matrix.scale result (1.0 /. float_of_big_int el2);
-            stack#push (`FloatMatrix result))
-         |`Float el2 ->
+            stack#push (RpcFloatMatrix result))
+         |RpcFloat el2 ->
             let result = Gsl_matrix.copy el1 in
             (Gsl_matrix.scale result (1.0 /. el2);
-            stack#push (`FloatMatrix result))
-         |`Complex el2 ->
+            stack#push (RpcFloatMatrix result))
+         |RpcComplex el2 ->
             let c_el1 = cmat_of_fmat el1 in
             (Gsl_matrix_complex.scale c_el1 (Complex.inv el2);
-            stack#push (`ComplexMatrix c_el1))
-         |`FloatMatrix el2 ->
+            stack#push (RpcComplexMatrix c_el1))
+         |RpcFloatMatrix el2 ->
             let n1, m1 = (Gsl_matrix.dims el1) and
             n2, m2     = (Gsl_matrix.dims el2) in
             if n2 = m2 then
@@ -79,7 +79,7 @@ let div (stack : rpc_stack) =
                      let result = Gsl_matrix.create n1 m2 in
                      Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
                         1.0 el1 inv 0.0 result;
-                     stack#push (`FloatMatrix result))
+                     stack#push (RpcFloatMatrix result))
                   with Gsl_exn _ -> 
                      (stack#push gen_el2;
                      stack#push gen_el1;
@@ -92,7 +92,7 @@ let div (stack : rpc_stack) =
                (stack#push gen_el2;
                stack#push gen_el1;
                raise (Invalid_argument "non-square matrix"))
-         |`ComplexMatrix el2 ->
+         |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
             if n2 = m2 then
@@ -109,7 +109,7 @@ let div (stack : rpc_stack) =
                      Gsl_blas.Complex.gemm Gsl_blas.NoTrans
                         Gsl_blas.NoTrans Complex.one (cmat_of_fmat el1) inv
                         Complex.zero result;
-                     stack#push (`ComplexMatrix result))
+                     stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
                      (stack#push gen_el2;
                      stack#push gen_el1;
@@ -123,20 +123,20 @@ let div (stack : rpc_stack) =
                stack#push gen_el1;
                raise (Invalid_argument "non-square matrix"))
          )
-      |`ComplexMatrix el1 -> (
+      |RpcComplexMatrix el1 -> (
          match gen_el2 with
-         |`Int el2 ->
+         |RpcInt el2 ->
             let c_el2 = cmpx_of_int el2 in
             (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
-            stack#push (`ComplexMatrix el1))
-         |`Float el2 ->
+            stack#push (RpcComplexMatrix el1))
+         |RpcFloat el2 ->
             let c_el2 = cmpx_of_float el2 in
             (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
-            stack#push (`ComplexMatrix el1))
-         |`Complex el2 ->
+            stack#push (RpcComplexMatrix el1))
+         |RpcComplex el2 ->
             (Gsl_matrix_complex.scale el1 (Complex.inv el2);
-            stack#push (`ComplexMatrix el1))
-         |`FloatMatrix el2 ->
+            stack#push (RpcComplexMatrix el1))
+         |RpcFloatMatrix el2 ->
             let n1, m1 = (Gsl_matrix_complex.dims el1) and
             n2, m2     = (Gsl_matrix.dims el2) in
             if n2 = m2 then
@@ -151,7 +151,7 @@ let div (stack : rpc_stack) =
                      Gsl_blas.Complex.gemm Gsl_blas.NoTrans
                         Gsl_blas.NoTrans Complex.one el1 (cmat_of_fmat inv)
                         Complex.zero result;
-                     stack#push (`ComplexMatrix result))
+                     stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
                      (stack#push gen_el2;
                      stack#push gen_el1;
@@ -164,7 +164,7 @@ let div (stack : rpc_stack) =
                (stack#push gen_el2;
                stack#push gen_el1;
                raise (Invalid_argument "non-square matrix"))
-         |`ComplexMatrix el2 ->
+         |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix_complex.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
             if n2 = m2 then
@@ -181,7 +181,7 @@ let div (stack : rpc_stack) =
                      let result = Gsl_matrix_complex.create n1 m2 in
                      Gsl_blas.Complex.gemm Gsl_blas.NoTrans
                         Gsl_blas.NoTrans Complex.one el1 inv Complex.zero result;
-                     stack#push (`ComplexMatrix result))
+                     stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
                      (stack#push gen_el2;
                      stack#push gen_el1;
@@ -197,4 +197,6 @@ let div (stack : rpc_stack) =
          )
    else
       raise (Invalid_argument "insufficient arguments")
+
+
 (* arch-tag: DO_NOT_CHANGE_c2535853-756a-4574-8f36-1103a81d053b *)
