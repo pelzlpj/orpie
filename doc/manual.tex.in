@@ -557,6 +557,10 @@ The following functions are available as extended commands:
 \end{Table}
 %@% END-IF %@%
 
+The extended command abbreviations can become tedious when performing repetitive calculations.
+To save some keystrokes, Orpie will automatically bind recently-used functions with no prexisting
+binding to keys \texttt{<f5>-<f12>}.  The current autobindings can be viewed by pressing \texttt{'h'}
+to cycle between the various pages of the help panel.
 
 \subsection{Performing Basic Command Operations}
 %@% IF LATEX %@%
@@ -592,6 +596,7 @@ a number of basic calculator commands have been bound to single keypresses:
       \texttt{r} & toggle angle mode between degrees and radians \\
       \texttt{p} & toggle complex display mode between rectangular and polar \\
       \texttt{b} & cycle base display mode between binary, octal, decimal, hex \\
+      \texttt{h} & cycle through multiple help windows \\
       \texttt{v} & view last stack element in a fullscreen editor \\
       \texttt{E} & create a new stack element using an external editor \\
 %@% IF LATEX %@%
@@ -814,6 +819,24 @@ the key identifiers associated with keypresses.  You may find it useful when cus
 \texttt{orpierc}.
 
 Multiple keys may be bound to the same operation, if desired.
+
+
+%@% IF LATEX %@%
+\subsubsection{Creating Key Auto-Bindings}
+\label{autobindings}
+%@% ELSE %@%
+\subsection{Creating Key Auto-Bindings}
+%@% END-IF %@%
+Syntax: \texttt{autobind \emph{key\_identifier}} \\ \\
+In order to make repetitive calculations more pleasant, Orpie offers an automatic key
+binding feature.  When a function is executed using its extended command abbreviation,
+one of the keys selected by the \texttt{autobind} syntax will be automatically bound to 
+that function (unless the function has already been bound to a key).  The
+current set of autobindings can be viewed in the help panel by executing
+\texttt{command\_cycle\_help} (bound to \texttt{'h'} by default).
+
+The syntax for the key identifiers is provided in the previous section.
+
 
 %@% IF LATEX %@%
 \subsubsection{Creating Extended Command Abbreviations}
@@ -1148,6 +1171,9 @@ they do not take an argument.  Many calculator interface settings are implemente
    \item \texttt{command\_cycle\_base} \\
       Cycle the base of integer constant representation between 2, 8,
       10, and 16 (bin, oct, dec, and hex).
+   \item \texttt{command\_cycle\_help} \\
+      Cycle through multiple help pages.  The first page displays commonly used
+      bindings, and the second page displays the current autobindings.
    \item \texttt{command\_dec} \\
       Set the base of integer constant representation to 10 (decimal).
    \item \texttt{command\_deg} \\
