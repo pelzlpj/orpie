@@ -3,6 +3,8 @@
 # Make all the last-minute changes to prepare the sources for packaging
 # in a release tarball
 
+echo "Loading curses bindings..."
+tla build-config dist.arch
 echo "Removing {arch}/ ..."
 rm -rf "{arch}"
 echo "Generating ./configure ..."

@@ -1532,10 +1532,13 @@ Interested developers are advised to track Orpie development via my public
 archive: \\
 %@% IF LATEX %@%
 \hspace*{2cm}\texttt{pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
-\hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004}   
+\hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004} \\
 %@% ELSE %@%
-pelzlpj@eecs.umich.edu--2004 http://www-personal.engin.umich.edu/\Tilde pelzlpj/tla/2004 
+pelzlpj@eecs.umich.edu--2004 http://www-personal.engin.umich.edu/\Tilde pelzlpj/tla/2004 \\
 %@% END-IF %@%
+Orpie uses tla's ``configs'' support.  After getting a copy of the source, run \\
+\texttt{"tla build-config dist.arch"} in the project tree root to grab the 
+extra packages that Orpie depends on.
 
 Do you feel compelled to compensate me for writing Orpie?  As a \emph{poor, starving} 
 graduate student, I will gratefully accept 
