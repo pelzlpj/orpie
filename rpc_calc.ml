@@ -947,14 +947,7 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcFloat el ->
-                  let adjusted_el =
-                     if el < 0.0 then
-                        el -. 1.0
-                     else
-                        el
-                  in
-                  stack#push (RpcFloat (float_of_int (int_of_float
-                  adjusted_el)))
+                  stack#push (RpcFloat (floor el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "floor can only be applied to real data"))
@@ -971,14 +964,7 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcFloat el ->
-                  let adjusted_el =
-                     if el < 0.0 then
-                        el
-                     else
-                        el +. 1.0
-                  in
-                  stack#push (RpcFloat (float_of_int (int_of_float
-                  adjusted_el)))
+                  stack#push (RpcFloat (ceil el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "ceiling can only be applied to real data"))
