@@ -44,8 +44,6 @@ rule token =
       INTEGER int_str}
 
    | ((sign? digit+ ('.' digit*)?) | (sign? digit* '.' digit+)) ('e' sign? digit+)? {
-      Printf.fprintf stderr "float string: '%s'\n" (Lexing.lexeme lexbuf);
-      flush stderr;
       FLOAT (Lexing.lexeme lexbuf)}
 
    | '(' 

@@ -42,7 +42,6 @@ let decode_float_complex_matrix mat =
    let flt_array = Array.make_matrix num_rows num_cols 0.0
    and cpx_array = Array.make_matrix num_rows num_cols Complex.zero in
    let has_complex = ref false in
-   Printf.fprintf stderr "matrix:\n";
    for i = 0 to pred num_rows do
       if Array.length mat.(i) != num_cols then
          raise (Utility.Txtin_error "inconsistent number of columns in input matrix")
@@ -51,19 +50,13 @@ let decode_float_complex_matrix mat =
             for j = 0 to pred num_cols do
                begin match mat.(i).(j) with
                |F el ->
-                  Printf.fprintf stderr "F: %8.5g " el;
-                  flush stderr;
                   flt_array.(i).(j) <- el;
                   cpx_array.(i).(j) <- {Complex.re = el; Complex.im = 0.0}
                |C el -> 
-                  Printf.fprintf stderr "C: (%8.5g, %8.5g) " el.Complex.re
-                  el.Complex.im;
-                  flush stderr;
                   has_complex := true;
                   cpx_array.(i).(j) <- el
                end
             done;
-            Printf.fprintf stderr "\n"
          end
    done;
    if !has_complex then
@@ -84,8 +77,6 @@ let rect_of_polar_deg r theta =
 
 (* convert an integer string to an RpcInt *)
 let decode_integer i_str =
-   Printf.fprintf stderr "integer: %s\n" i_str;
-   flush stderr;
    let int_str = i_str in
    let str_len = String.length int_str in
    let digits  = Str.string_before int_str (str_len - 2) in
@@ -108,23 +99,13 @@ let decode_integer i_str =
 
 (* convert a floating point string to an RpcFloat *)
 let decode_float f_str =
-   Printf.fprintf stderr "FLOAT float string: '%s'\n" f_str;
-   flush stderr;
-   Printf.fprintf stderr "float: %g\n" (float_of_string f_str);
-   flush stderr;
    Rpc_stack.RpcFloat (float_of_string f_str)
 
 
 (* convert a cartesian complex number string to an RpcComplex *)
 let decode_complex_rect re_str im_str =
-   Printf.fprintf stderr "COMPLEX1 float string: '%s'\n" re_str;
-   flush stderr;
-   Printf.fprintf stderr "COMPLEX2 float string: '%s'\n" im_str;
-   flush stderr;
    let f1 = float_of_string re_str
    and f2 = float_of_string im_str in
-   Printf.fprintf stderr "complex: (%g, %g)\n" f1 f2;
-   flush stderr;
    Rpc_stack.RpcComplex {Complex.re = f1; Complex.im = f2}
 
 
@@ -132,14 +113,8 @@ let decode_complex_rect re_str im_str =
  * RpcComplex.  The rect_of_polar argument should take care of
  * any necessary degrees/radians conversion. *)
 let decode_complex_polar rect_of_polar mag_str ang_str = 
-   Printf.fprintf stderr "COMPLEX1 float string: '%s'\n" mag_str;
-   flush stderr;
-   Printf.fprintf stderr "COMPLEX2 float string: '%s'\n" ang_str;
-   flush stderr;
    let mag = float_of_string mag_str
    and ang = float_of_string ang_str in
-   Printf.fprintf stderr "complex: (%g <%g)\n" mag ang;
-   flush stderr;
    Rpc_stack.RpcComplex (rect_of_polar mag ang)
 
 
@@ -160,8 +135,6 @@ let decode_matrix mat_rows =
     * is a list of elements; create a 2d array 
     * from these lists, and generate the appropriate
     * orpie_data from the 2d array. *)
-   Printf.fprintf stderr "matched matrix toplevel\n";
-   flush stderr;
    let num_rows = List.length mat_rows in
    let num_cols = List.length (List.hd mat_rows) in
    let mat = Array.make_matrix num_rows num_cols (F 0.0) in
