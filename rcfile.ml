@@ -75,8 +75,8 @@ let key_of_extended ex_op =
 let register_binding key_string op =
    let make_entries k k_string =
       begin
-         Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
-         flush stderr;
+  (*       Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
+         flush stderr; *)
          match op with
          |Function f ->
             (Hashtbl.add table_key_function k op;
@@ -395,7 +395,7 @@ let parse_line line_stream =
                   begin
                      match line_stream with parser
                      | [< 'String file >] ->
-                        (Printf.fprintf stderr "using datafile \"%s\"\n" file;
+                        ( (* Printf.fprintf stderr "using datafile \"%s\"\n" file; *)
                         datafile := file)
                      | [< >] ->
                         config_failwith ("Expected a datafile string after " ^
@@ -411,7 +411,7 @@ let parse_line line_stream =
                   begin
                      match line_stream with parser
                      | [< 'String file >] ->
-                        (Printf.fprintf stderr "using bufferfile \"%s\"\n" file;
+                        ( (* Printf.fprintf stderr "using bufferfile \"%s\"\n" file; *)
                         fullscreenfile := file)
                      | [< >] ->
                         config_failwith ("Expected a buffer file string after " ^
@@ -427,7 +427,7 @@ let parse_line line_stream =
                   begin
                      match line_stream with parser
                      | [< 'String executable >] ->
-                        (Printf.fprintf stderr "using editor \"%s\"\n" executable;
+                        ( (* Printf.fprintf stderr "using editor \"%s\"\n" executable; *)
                         editor := executable)
                      | [< >] ->
                         config_failwith ("Expected an executable filename string after " ^
@@ -474,8 +474,8 @@ let process_rcfile () =
       while true do
          line_num := succ !line_num;
          let line_string = input_line config_stream in
-         Printf.fprintf stderr "read line %2d: %s\n" !line_num line_string;
-         flush stderr;
+         (* Printf.fprintf stderr "read line %2d: %s\n" !line_num line_string;
+         flush stderr; *)
          if Str.string_match empty_regexp line_string 0 then
             (* do nothing on an empty line *)
             ()

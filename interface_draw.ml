@@ -54,8 +54,6 @@ let draw_stack (iface : interface_state_t) =
    in
    for line = iface.stack_bottom_row to 
    pred (iface.stack_bottom_row + iface.scr.sw_lines) do
-      fprintf stderr "fetching display line %d\n" line;
-      flush stderr;
       let s = iface.calc#get_display_line line in
       let len = String.length s in
       assert (wmove iface.scr.stack_win 

@@ -739,8 +739,8 @@ let handle_begin_extended (iface : interface_state_t) =
 (* begin stack browsing *)
 let handle_begin_browse (iface : interface_state_t) =
    if iface.calc#get_stack_size () > 0 then
-      (fprintf stderr "beginning browse\n";
-      flush stderr;
+      ( (* fprintf stderr "beginning browse\n";
+      flush stderr; *)
       iface.interface_mode <- BrowsingMode;
       iface.calc#backup ();
       draw_update_stack iface)
