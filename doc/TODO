@@ -17,12 +17,22 @@ Orpie To-Do List (roughly in order of priority)
 
 * refactor do_main_loop, draw_help, maybe other massive functions
 
-* i18n
+* separate out UI from calculator object
+   - Rpc_stack depends on Rcfile, which is really part of the UI
+   - Rpc_stack.get_display_string() and related routines (arguably)
+     should be provided as an interface module.  Rpc_stack could either
+     pass data to the interface and let the interface worry about
+     rendering, or (probably simpler) a rendering function could be
+     passed to Rpc_stack at initialization time.
+
+* i18n (maybe via http://saucecode.org/localcaml/ ?)
 
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
 
-* detect ill-conditioned complex matrices when performing inversion
+* detect ill-conditioned complex matrices when performing inversion 
+  (unfortunately GSL lacks a condition number estimator for complex 
+  matrices)
 
 
 
