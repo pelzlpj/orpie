@@ -3,6 +3,12 @@ Orpie ChangeLog
 
 v1.2
 
+   2004-06-15        Fixed crash due to displaying 'about' screen in
+                     a very small terminal window.
+
+   2004-06-14        Implemented user-defined variables and
+                     autocompletion routines.
+
    2004-06-13        mod() now checks properly for >1 stack elements
 
    2004-04-22        Orpie no longer generates an error message if
