@@ -37,16 +37,35 @@ let inv (stack : rpc_stack) (do_backup : unit -> unit) =
          |RpcFloatMatrix el ->
             let n, m = (Gsl_matrix.dims el) in
             if n = m then
-               let copy_el = Gsl_vectmat.mat_convert ~protect:true (`M el) and
-               perm = Gsl_permut.create m and
-               inv = Gsl_matrix.create m m in
-               try
-                  let sign = Gsl_linalg._LU_decomp copy_el perm in
-                  (Gsl_linalg._LU_invert copy_el perm (`M inv);
-                  stack#push (RpcFloatMatrix inv))
-               with Gsl_exn _ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "cannot invert singular matrix"))
+               let copy_el1 = Gsl_matrix.copy el
+               and copy_el2 = Gsl_matrix.copy el
+               and perm     = Gsl_permut.create m
+               and inv      = Gsl_matrix.create m m
+               and vv       = Gsl_matrix.create m m
+               and ss       = Gsl_vector.create m
+               and work     = Gsl_vector.create m in
+               begin
+                  (* test for singular matrix *)
+                  (* first factor out matrix norm, since the GSL SVD algorithm has
+                   * issues with large magnitude matrices *)
+                  let norm = Gsl_assist.one_norm copy_el1 in
+                  Gsl_matrix.scale copy_el1 (1.0 /. norm);
+                  (* now compute condition number as largest singular value
+                   * divided by smallest singular value *)
+                  Gsl_linalg._SV_decomp (`M copy_el1) (`M vv) (`V ss) (`V work);
+                  let condition_number = 
+                     (Gsl_vector.get ss 0) /. (Gsl_vector.get ss (pred m)) 
+                  in
+                  (* if the condition number is too large for machine precision,
+                   * then abort with error *)
+                  if condition_number > 1e14 then
+                     (stack#push gen_el;
+                     raise (Invalid_argument "cannot invert ill-conditioned matrix"))
+                  else
+                     let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
+                     (Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
+                     stack#push (RpcFloatMatrix inv))
+               end
             else
                (stack#push gen_el;
                raise (Invalid_argument "cannot invert non-square matrix"))

@@ -32,4 +32,26 @@ let cmat_of_fmat fm =
 
 
 
+(* 1-norm of matrix *)
+let one_norm mat =
+   let n, m = Gsl_matrix.dims mat in
+   let maxval = ref (-1.0) in
+   let sum = ref 0.0 in
+   for j = 0 to pred m do
+      sum := 0.0;
+      for i = 0 to pred n do
+         sum := !sum +. (abs_float mat.{i, j})
+      done;
+      if !sum > !maxval then
+         maxval := !sum
+      else
+         ()
+   done;
+   !maxval
+
+
+
+
+
+
 (* arch-tag: DO_NOT_CHANGE_a19e0df2-6d6b-4925-87eb-be2a2926ffbb *)
