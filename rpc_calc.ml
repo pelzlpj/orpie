@@ -252,7 +252,6 @@ class rpc_calc =
 
 
 
-
       method sqrt () = self#check_args 1 "sqrt" self#internal_sqrt
 
       method private internal_sqrt () =
@@ -1650,35 +1649,19 @@ class rpc_calc =
 
          (* single-variable statistics: bias-corrected sample variance *)
          method private internal_variance_unbiased () =
-            self#evaln 1;
-            let gen_el = stack#pop () in
+            let gen_el = stack#peek 1 in
             match gen_el with
             |RpcFloatMatrix mat ->
                let n, m = Gsl_matrix.dims mat in
-               if n > 1 then begin
-                  let means = Array.make m 1.0 in
-                  let result = Gsl_matrix.create 1 m in
-                  let float_n   = float_of_int n in
-                  let float_nm1 = float_n -. 1.0 in
-                  for col = 0 to pred m do
-                     means.(col) <- 0.0;
-                     result.{0, col} <- 0.0;
-                     for row = 0 to pred n do
-                        means.(col) <- means.(col) +. (mat.{row, col} /.  float_n);
-                        result.{0, col} <- result.{0, col} +. 
-                        (mat.{row, col} *. mat.{row, col} /. float_nm1);
-                     done;
-                     result.{0, col} <- result.{0, col} -. 
-                     (means.(col) *. means.(col) *. float_n /. float_nm1)
-                  done;
-                  stack#push (RpcFloatMatrix result)
-               end else begin
-                  stack#push gen_el;
-                  raise (Invalid_argument "insufficient rows to compute unbiased variance")
-               end
+               if n >= 2 then begin
+                  self#internal_variance_biased ();
+                  let n_over_nm1 = (float_of_int n) /. (float_of_int (pred n)) in
+                  stack#push (RpcFloat n_over_nm1);
+                  self#internal_mult ()
+               end else
+                  raise (Invalid_argument "insufficient matrix rows for unbiased sample variance")
             |_ ->
-               stack#push gen_el;
-               raise (Invalid_argument "var can only be applied to real matrices")
+               raise (Invalid_argument "varbias can only be applied to real matrices")
 
 
          method variance_biased () = self#check_args 1 "varbias"
@@ -1687,27 +1670,21 @@ class rpc_calc =
          (* single-variable statistics: sample variance (biased) *)
          method private internal_variance_biased () =
             self#evaln 1;
-            let gen_el = stack#pop () in
+            let gen_el = stack#peek 1 in
             match gen_el with
             |RpcFloatMatrix mat ->
                let n, m = Gsl_matrix.dims mat in
-               let means = Array.make m 1.0 in
-               let result = Gsl_matrix.create 1 m in
                let float_n = float_of_int n in
-               for col = 0 to pred m do
-                  means.(col) <- 0.0;
-                  result.{0, col} <- 0.0;
-                  for row = 0 to pred n do
-                     means.(col) <- means.(col) +. (mat.{row, col} /. float_n);
-                     result.{0, col} <- result.{0, col} +. 
-                     (mat.{row, col} *. mat.{row, col} /. float_n);
-                  done;
-                  result.{0, col} <- result.{0, col} -. 
-                  (means.(col) *. means.(col))
-               done;
-               stack#push (RpcFloatMatrix result)
+               (* computes variance as E[X^2] - E[X]^2 *)
+               self#internal_dup ();
+               self#internal_sum_squares ();
+               stack#push (RpcFloat float_n);
+               self#internal_div ();
+               self#internal_swap ();
+               self#internal_mean ();
+               self#internal_sum_squares ();
+               self#internal_sub ()
             |_ ->
-               stack#push gen_el;
                raise (Invalid_argument "var can only be applied to real matrices")
 
 
@@ -1750,32 +1727,14 @@ class rpc_calc =
          method minimum () = self#check_args 1 "min" self#internal_minimum
 
          (* single-variable statistics: minimum of set *)
-         method private internal_minimum () =
-            self#evaln 1;
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcFloatMatrix mat ->
-               let n, m = Gsl_matrix.dims mat in
-               let result = Gsl_matrix.create 1 m in
-               for col = 0 to pred m do
-                  result.{0, col} <- mat.{0, col};
-                  for row = 1 to pred n do
-                     if mat.{row, col} < result.{0, col} then
-                        result.{0, col} <- mat.{row, col}
-                     else
-                        ()
-                  done
-               done;
-               stack#push (RpcFloatMatrix result)
-            |_ ->
-               stack#push gen_el;
-               raise (Invalid_argument "min can only be applied to real matrices")
-
+         method private internal_minimum () = self#min_or_max true ()
 
          method maximum () = self#check_args 1 "max" self#internal_maximum
 
          (* single-variable statistics: maximum of set *)
-         method private internal_maximum () =
+         method private internal_maximum () = self#min_or_max false ()
+
+         method private min_or_max operation_is_min () =
             self#evaln 1;
             let gen_el = stack#pop () in
             match gen_el with
@@ -1785,17 +1744,22 @@ class rpc_calc =
                for col = 0 to pred m do
                   result.{0, col} <- mat.{0, col};
                   for row = 1 to pred n do
-                     if mat.{row, col} > result.{0, col} then
-                        result.{0, col} <- mat.{row, col}
+                     if operation_is_min then
+                        if mat.{row, col} < result.{0, col} then
+                           result.{0, col} <- mat.{row, col}
+                        else
+                           ()
                      else
-                        ()
+                        if mat.{row, col} > result.{0, col} then
+                           result.{0, col} <- mat.{row, col}
+                        else
+                           ()
                   done
                done;
                stack#push (RpcFloatMatrix result)
             |_ ->
                stack#push gen_el;
                raise (Invalid_argument "min can only be applied to real matrices")
-
 
 
 (*      method print_stack () =
