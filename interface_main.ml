@@ -625,9 +625,10 @@ let handle_backspace (iface : interface_state_t) =
             else
                ())
          end
-      else
-         (iface.entry_type <- FloatEntry;
-         iface.has_entry <- false)
+      else begin
+         iface.entry_type <- FloatEntry;
+         iface.has_entry <- false
+      end
    |ComplexMatrixEntry ->
       if iface.is_entering_imag then
          if iface.is_entering_exponent then
@@ -672,9 +673,10 @@ let handle_backspace (iface : interface_state_t) =
             else
                ())
          end
-      else
+      else begin
          iface.entry_type <- FloatEntry;
          iface.has_entry <- false
+      end
    |_ ->
       failwith "caught unhandled backspace"
    end;
