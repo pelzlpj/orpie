@@ -1,7 +1,11 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* put together some kind of testing framework
+* add additional test cases for the rpc_calc object.  I could really use
+  help with this; it's not difficult, just time-consuming.  Have a look
+  at calc_test.ml if you're interested in lending a hand.  (Please grab
+  the latest source from my Arch archive, as the test script may be changing
+  rapidly in the near future.)
 
 * add additional statistical functions (multivariate, distributions, ...)
 

@@ -1842,6 +1842,10 @@ Orpie uses tla's ``configs'' support.  After getting a copy of the source, run \
 \texttt{"tla build-config dist.arch"} in the project tree root to grab the 
 extra packages that Orpie depends on.
 
+At the moment, I would really appreciate help writing additional test cases for
+the calculator object.  It's not terribly difficult, just time-consuming.  Have a look
+at \texttt{calc\_test.ml} if you're interested in lending a hand.
+
 Do you feel compelled to compensate me for writing Orpie?  As a \emph{poor, starving} 
 graduate student, I will gratefully accept 
 %BEGIN LATEX
