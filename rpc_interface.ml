@@ -50,7 +50,7 @@ type complex_entry_element =
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
-    "drop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg");;
+    "drop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -87,6 +87,8 @@ Hashtbl.add command_abbrev_table "undo" (Command Undo);;
 Hashtbl.add command_abbrev_table "quit" (Command Quit);;
 Hashtbl.add command_abbrev_table "rad" (Command SetRadians);;
 Hashtbl.add command_abbrev_table "deg" (Command SetDegrees);;
+Hashtbl.add command_abbrev_table "rect" (Command SetRect);;
+Hashtbl.add command_abbrev_table "polar" (Command SetPolar);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -679,10 +681,21 @@ object(self)
             self#handle_quit ()
          |SetRadians ->
             self#handle_command_call calc#mode_rad;
-            self#draw_help ()
+            self#draw_help ();
+            self#draw_stack ()
          |SetDegrees ->
             self#handle_command_call calc#mode_deg;
-            self#draw_help ()
+            self#draw_help ();
+            self#draw_stack ()
+         |SetRect ->
+            self#handle_command_call calc#mode_rect;
+            self#draw_help ();
+            self#draw_stack ()
+         |SetPolar ->
+            self#handle_command_call calc#mode_polar;
+            self#draw_help ();
+            self#draw_stack ()
+
       end
 
 
@@ -780,6 +793,10 @@ object(self)
                         self#handle_scroll_left ()
                      |ScrollRight ->
                         self#handle_scroll_right ()
+                     |RollDown ->
+                        self#handle_rolldown ()
+                     |RollUp ->
+                        self#handle_rollup ()
                      |PrevLine ->
                         self#handle_prev_line ()
                      |NextLine ->
@@ -1188,6 +1205,7 @@ object(self)
          (fprintf stderr "beginning browse\n";
          flush stderr;
          interface_mode <- BrowsingMode;
+         calc#backup ();
          self#draw_stack ())
       else
          ()
@@ -1219,6 +1237,18 @@ object(self)
          horiz_scroll <- succ horiz_scroll
       else
          ());
+      self#draw_stack ()
+
+
+   (* handle cyclic rolldown in browsing mode *)
+   method private handle_rolldown () =
+      calc#rolldown stack_selection;
+      self#draw_stack ()
+
+
+   (* handle cyclic rollup in browsing mode *)
+   method private handle_rollup () =
+      calc#rollup stack_selection;
       self#draw_stack ()
 
 

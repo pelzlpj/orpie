@@ -49,6 +49,7 @@ type calculator_modes = {angle : angle_mode; base : base_mode;
                          complex : complex_mode};;
 
 let size_inc = 100;;
+let pi = 3.14159265358979323846;;
 
 class rpc_stack =
    object(self)
@@ -97,6 +98,32 @@ class rpc_stack =
          end
 
 
+      (* cyclically roll all stack elements downward (i.e. towards the top
+       * of the stack), starting below element number 'num' (inclusive). *)
+      method rolldown num =
+         if num <= len then
+            let temp = stack.(pred len) in
+            for i = pred len downto len - num + 1 do
+               stack.(i) <- stack.(pred i)
+            done;
+            stack.(len - num) <- temp
+         else
+            raise (Stack_error "insufficient stack elements")
+
+
+      (* cyclically roll all stack elements upward (i.e. away from the top
+       * of the stack), starting below element number 'num' (inclusive). *)
+      method rollup num =
+         if num <= len then
+            let temp = stack.(len - num) in
+            for i = len - num to len - 2 do
+               stack.(i) <- stack.(succ i)
+            done;
+            stack.(pred len) <- temp
+         else
+            raise (Stack_error "insufficient stack elements")
+
+
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =
@@ -139,7 +166,22 @@ class rpc_stack =
                      |RpcFloat el ->
                         sprintf "%.15g" el
                      |RpcComplex el ->
-                        sprintf "(%.15g, %.15g)" el.Complex.re el.Complex.im
+                        begin
+                           match calc_modes.complex with
+                           |Rect ->
+                              sprintf "(%.15g, %.15g)" el.Complex.re el.Complex.im
+                           |Polar ->
+                              begin
+                                 let r = sqrt (el.Complex.re *. el.Complex.re +.
+                                 el.Complex.im *. el.Complex.im)
+                                 and theta = atan2 el.Complex.im el.Complex.re in
+                                 match calc_modes.angle with
+                                 |Rad ->
+                                    sprintf "(%.15g <%.15g)" r theta
+                                 |Deg ->
+                                    sprintf "(%.15g <%.15g)" r (180.0 /. pi *. theta)
+                              end
+                        end
                      |RpcFloatMatrix el ->
                         (* looks like [[ a11, a12 ][ a21, a22 ]] *)
                         let rows, cols = (Gsl_matrix.dims el) in
@@ -163,11 +205,43 @@ class rpc_stack =
                         for n = 0 to rows - 1 do
                            line := !line ^ "[ ";
                            for m = 0 to cols - 2 do
-                              line := !line ^ (sprintf "(%.15g, %.15g), " 
-                                 el.{n, m}.Complex.re el.{n, m}.Complex.im)
+                              match calc_modes.complex with
+                              |Rect ->
+                                 line := !line ^ (sprintf "(%.15g, %.15g), " 
+                                    el.{n, m}.Complex.re el.{n, m}.Complex.im)
+                              |Polar ->
+                                 begin
+                                    let rr = el.{n, m}.Complex.re
+                                    and ii = el.{n, m}.Complex.im in
+                                    let r = sqrt (rr *. rr +. ii *. ii)
+                                    and theta = atan2 ii rr in
+                                    match calc_modes.angle with
+                                    |Rad ->
+                                       line := !line ^ (sprintf "(%.15g <%.15g), " 
+                                       r theta)
+                                    |Deg ->
+                                       line := !line ^ (sprintf "(%.15g <%.15g), " 
+                                       r (180.0 /. pi *. theta))
+                                 end
                            done;
-                           line := !line ^ (sprintf "(%.15g, %.15g) ]" 
-                              el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
+                           match calc_modes.complex with
+                           |Rect ->
+                              line := !line ^ (sprintf "(%.15g, %.15g) ]" 
+                                 el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
+                           |Polar ->
+                              begin
+                                 let rr = el.{n, cols-1}.Complex.re
+                                 and ii = el.{n, cols-1}.Complex.im in
+                                 let r = sqrt (rr *. rr +. ii *. ii)
+                                 and theta = atan2 ii rr in
+                                 match calc_modes.angle with
+                                 |Rad ->
+                                    line := !line ^ (sprintf "(%.15g <%.15g) ]" 
+                                    r theta)
+                                 |Deg ->
+                                    line := !line ^ (sprintf "(%.15g <%.15g) ]" 
+                                    r (180.0 /. pi *. theta))
+                              end
                         done;
                         line := !line ^ "]";
                         !line

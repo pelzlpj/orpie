@@ -260,6 +260,10 @@ let parse_line line_stream =
                            register_binding key (Command SetRadians)
                         |"command_deg" ->
                            register_binding key (Command SetDegrees)
+                        |"command_rect" ->
+                           register_binding key (Command SetRect)
+                        |"command_polar" ->
+                           register_binding key (Command SetPolar)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->
@@ -272,6 +276,10 @@ let parse_line line_stream =
                            register_binding key (Browse NextLine)
                         |"browse_echo" ->
                            register_binding key (Browse Echo)
+                        |"browse_rolldown" ->
+                           register_binding key (Browse RollDown)
+                        |"browse_rollup" ->
+                           register_binding key (Browse RollUp)
                         |"extended_exit" ->
                            register_binding key (Extend ExitExtended)
                         |"extended_enter" ->

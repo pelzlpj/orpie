@@ -9,12 +9,12 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Asin | Acos | Atan | Sinh | Cosh | Tanh;;
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit
-                          | SetRadians | SetDegrees;;
+                          | SetRadians | SetDegrees | SetRect | SetPolar;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;
 type browse_operation   = | EndBrowse
-                          | ScrollLeft | ScrollRight
+                          | ScrollLeft | ScrollRight | RollDown | RollUp
                           | PrevLine | NextLine | Echo;;
 type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 

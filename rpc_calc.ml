@@ -43,6 +43,12 @@ class rpc_calc =
       method mode_deg () =
          modes <- {angle = Deg; base = modes.base; complex = modes.complex}
 
+      method mode_rect () =
+         modes <- {angle = modes.angle; base = modes.base; complex = Rect}
+
+      method mode_polar () =
+         modes <- {angle = modes.angle; base = modes.base; complex = Polar}
+
       method add () =
          Add.add stack self#backup
 
@@ -461,7 +467,7 @@ class rpc_calc =
                            180.0 /. pi *. acos el
                      end)
                |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arcsin el))
+                  stack#push (RpcComplex (Gsl_complex.arccos el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -495,7 +501,7 @@ class rpc_calc =
                            180.0 /. pi *. atan el
                      end)
                |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arcsin el))
+                  stack#push (RpcComplex (Gsl_complex.arctan el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -605,6 +611,12 @@ class rpc_calc =
             stack#push el
          else
             raise (Invalid_argument "cannot echo nonexistant element")
+
+      method rolldown i =
+         stack#rolldown i
+
+      method rollup i =
+         stack#rollup i
 
       method enter_int i =
          stack#push (RpcInt i)
