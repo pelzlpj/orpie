@@ -40,18 +40,20 @@ type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry
                                | FloatMatrixEntry | ComplexMatrixEntry;;
 
 type rpc_bindings = {
-   begin_int     : int;
-   begin_complex : int;
-   begin_matrix  : int;
-   enter         : int
+   begin_int           : int;
+   begin_complex       : int;
+   begin_matrix        : int;
+   enter               : int;
+   scientific_notation : int
 };;
 
 
 let bindings = {
-   begin_int     = int_of_char '#';
-   begin_complex = int_of_char '(';
-   begin_matrix  = int_of_char '[';
-   enter         = 10   (* standard enter key *)
+   begin_int           = int_of_char '#';
+   begin_complex       = int_of_char '(';
+   begin_matrix        = int_of_char '[';
+   enter               = 10;   (* standard enter key *)
+   scientific_notation = int_of_char ' '
 };;
 
 
@@ -65,6 +67,8 @@ object(self)
    val mutable is_extended_entry = false      (* is the current entry "extended" or not? *)
    val mutable entry_type = FloatEntry        (* the current type of data being entered *)
    val mutable int_entry_buffer = ""          (* holds characters entered for int data type *)
+   val mutable is_entering_base = false
+   val mutable int_base_string = ""
 
 
    method run () =
@@ -130,8 +134,12 @@ object(self)
       in
       match entry_type with
       |IntEntry ->
-         let s = "# " ^ int_entry_buffer in
-         draw_entry_string s
+         if is_entering_base then
+            let s = "# " ^ int_entry_buffer ^ " " ^ int_base_string in
+            draw_entry_string s
+         else
+            let s = "# " ^ int_entry_buffer in
+            draw_entry_string s
       |_ ->
          draw_entry_string int_entry_buffer
 
@@ -231,7 +239,17 @@ object(self)
    method push_entry () =
       match entry_type with
       |IntEntry ->
-         let base_mode = (calc#get_modes ()).base in
+         let base_mode = 
+            if is_entering_base then
+               match int_base_string with
+               |"b" -> Bin
+               |"o" -> Oct
+               |"d" -> Dec
+               |"h" -> Hex
+               |_ -> (calc#get_modes ()).base
+            else
+               (calc#get_modes ()).base
+         in
          let base = match base_mode with
          |Bin -> 2
          |Oct -> 8
@@ -247,8 +265,11 @@ object(self)
          end;
          entry_type <- FloatEntry;
          int_entry_buffer <- "";
+         int_base_string <- "";
+         is_entering_base <- false;
          self#draw_entry ()
       |_ ->
+         (* handle entry of other data types *)
          ()
 
 
@@ -273,19 +294,41 @@ object(self)
                      self#draw_entry ())
                   else
                      () 
+               else if key = bindings.scientific_notation then
+                  match entry_type with 
+                  |IntEntry ->
+                     is_entering_base <- true;
+                     self#draw_entry ()
+                  |_ ->
+                     (* handle scientific notation for types that use float *)
+                     ()
                else
                   match entry_type with
                   |IntEntry ->
-                     (let digits = "0123456789abcdefABCDEF" in
-                     try
-                        let c = char_of_int key in
-                        if String.contains digits c then
-                           (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
-                           self#draw_entry ())
+                     begin
+                        if is_entering_base then
+                           let base_chars = "bodh" in
+                           try
+                              let c = char_of_int key in
+                              if String.contains base_chars c then
+                                 (int_base_string <- String.make 1 c;
+                                 self#draw_entry ())
+                              else
+                                 ()
+                           with Invalid_argument "char_of_int" ->
+                              ()
                         else
-                           ()
-                     with Invalid_argument "char_of_int" ->
-                        ())
+                           let digits = "0123456789abcdefABCDEF" in
+                           try
+                              let c = char_of_int key in
+                              if String.contains digits c then
+                                 (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
+                                 self#draw_entry ())
+                              else
+                                 ()
+                           with Invalid_argument "char_of_int" ->
+                              ()
+                     end
                   |_ ->
                      (* handle other entry types *)
                      ()
