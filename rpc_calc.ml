@@ -148,14 +148,10 @@ class rpc_calc =
        * Therefore all operations need to leave the original stack elements
        * unaltered. *)
       method dup () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               (stack#push gen_el;
-               stack#push gen_el)
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            stack#dup ()
+         end else
             raise (Invalid_argument "empty stack")
 
       method neg () =
@@ -1269,25 +1265,18 @@ class rpc_calc =
          stack#launch_fill_in_thread ()
 
       method drop () = 
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let dummy = stack#pop () in 
-               ()
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            let dummy = stack#pop () in 
+            ()
+         end else
             raise (Invalid_argument "empty stack")
 
       method swap () =
-         if stack#length > 1 then
-            begin
-               self#backup ();
-               let gen_el1 = stack#pop () in
-               let gen_el2 = stack#pop () in
-               stack#push gen_el1;
-               stack#push gen_el2
-            end
-         else
+         if stack#length > 1 then begin
+            self#backup ();
+            stack#swap ()
+         end else
             raise (Invalid_argument "insufficient arguments for swap")
 
       method clear () =
@@ -1302,8 +1291,7 @@ class rpc_calc =
 
       method echo el_num =
          if el_num <= stack#length then
-            let el = stack#peek el_num in
-            stack#push el
+            stack#echo el_num
          else
             raise (Invalid_argument "cannot echo nonexistant element")
 

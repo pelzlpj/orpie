@@ -222,15 +222,20 @@ class rpc_stack =
          {< len = b_len; stack = b_stack >}
 
 
-      method push (v : orpie_data_t) =
+
+      method private expand_size () =
          (* allocate a new stack if necessary *)
          if len >= Array.length stack then begin
             let new_stack = Array.make ((Array.length stack) + size_inc)
-            (StackFloat (0.0, {f = None})) in
+            (stack_data_of_orpie_data (RpcFloat 0.0)) in
             Array.blit stack 0 new_stack 0 (Array.length stack);
             stack <- new_stack
          end else
-            ();
+            ()
+
+
+      method push (v : orpie_data_t) =
+         self#expand_size ();
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
          len <- len + 1;
@@ -255,6 +260,38 @@ class rpc_stack =
                raise (Stack_error "cannot pop empty stack");
          in
          pop_result
+
+
+
+      (* duplicate the top stack element *)
+      method dup () =
+         self#expand_size ();
+         if len > 0 then begin
+            stack.(len) <- stack.(pred len);
+            len <- succ len
+         end else
+            raise (Stack_error "cannot dup with empty stack")
+
+         
+      (* swap the top two stack elements *)
+      method swap () =
+         if len > 1 then begin
+            let temp = ref stack.(pred len) in
+            stack.(pred len) <- stack.(len - 2);
+            stack.(len - 2) <- !temp
+         end else
+            raise (Stack_error "cannot swap with less than two elements")
+
+
+      (* copy a stack element to the top of the stack *)
+      method echo el_num =
+         self#expand_size ();
+         if el_num <= len then begin
+            let actual_el_num = len - el_num in
+            stack.(len) <- stack.(actual_el_num);
+            len <- succ len
+         end else
+            raise (Invalid_argument "cannot echo nonexistant element")
 
 
       (* cyclically roll all stack elements downward (i.e. towards the top
