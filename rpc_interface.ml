@@ -1250,11 +1250,15 @@ object(self)
    (* search through the list of commands for the first one that matches
     * extended_entry_buffer *)
    method private match_extended_buffer buf =
-      let regex_str = "^" ^ buf ^ ".*$" in
-      let regex = Str.regexp regex_str in
-      let dummy = Str.search_forward regex extended_commands 0 in
-      let matched_command = Str.matched_string extended_commands in
-      matched_extended_entry <- matched_command;
+      if String.length buf > 0 then
+         (let regex_str = "^" ^ buf ^ ".*$" in
+         let regex = Str.regexp regex_str in
+         let dummy = Str.search_forward regex extended_commands 0 in
+         let matched_command = Str.matched_string extended_commands in
+         matched_extended_entry <- matched_command)
+      else
+         (matched_extended_entry <- "";
+         raise Not_found)
 
 
    (* backspace during extended entry *)
@@ -1263,7 +1267,8 @@ object(self)
       if len > 0 then
          (extended_entry_buffer <- Str.string_before extended_entry_buffer 
          (pred len);
-         self#match_extended_buffer extended_entry_buffer;
+         (try self#match_extended_buffer extended_entry_buffer
+         with Not_found -> ());
          (if len = 1 then
             matched_extended_entry <- ""
          else
