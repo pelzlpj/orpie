@@ -1,6 +1,12 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* do something about the error message that shows up when first running Orpie
+  (unable to open calculator state file)
+
+* support parallel make (maybe use a hand-edited dependency tree to get around
+  the ocamldep issues)
+
 * detect ill-conditioned complex matrices when performing inversion
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but
