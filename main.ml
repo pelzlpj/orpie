@@ -71,4 +71,12 @@ calc#add;;
 calc#print_stack;;
 
 
+open Rpc_interface;;
+let scr = initialize_screen;;
+test_screen scr;;
+
+(* For some reason this call fails if it is moved to rpc_interface... *)
+Curses.endwin ();;
+
+
 (* arch-tag: DO_NOT_CHANGE_eeac13df-e93f-4359-8b70-44fefc40e225 *)

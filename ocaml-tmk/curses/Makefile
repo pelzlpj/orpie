@@ -7,7 +7,7 @@ CPP=cpp
 
 CURSES=ncurses
 
-OCAMLLIB=/usr/lib/ocaml/3.06
+OCAMLLIB=/usr/lib/ocaml/3.07
 INSTALLDIR=$(OCAMLLIB)/curses
 PREFIX=/usr/local
 LIBDIR=$(PREFIX)/lib
