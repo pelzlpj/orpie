@@ -432,6 +432,252 @@ let generate_const_help () =
 
 
 
+(* draw the help page in standard entry mode *)
+let draw_help_standard iface win mvwaddstr_safe try_find =
+   if iface.help_page = 0 then begin
+      wattron win WA.bold;
+      assert (mvwaddstr win 5 0 "Common Operations:");
+      wattroff win WA.bold;
+      mvwaddstr_safe win 6 2  ("enter    : " ^
+      try_find Rcfile.key_of_edit (Edit Enter));
+      mvwaddstr_safe win 7 2  ("drop     : " ^
+      try_find Rcfile.key_of_command (Command Drop));
+      mvwaddstr_safe win 8 2  ("swap     : " ^
+      try_find Rcfile.key_of_command (Command Swap));
+      mvwaddstr_safe win 9 2  ("backspace: " ^
+      try_find Rcfile.key_of_edit (Edit Backspace));
+      mvwaddstr_safe win 10 2 ("add      : " ^
+      try_find Rcfile.key_of_function (Function Add));
+      mvwaddstr_safe win 11 2 ("subtract : " ^
+      try_find Rcfile.key_of_function (Function Sub));
+      mvwaddstr_safe win 12 2 ("multiply : " ^
+      try_find Rcfile.key_of_function (Function Mult));
+      mvwaddstr_safe win 13 2 ("divide   : " ^
+      try_find Rcfile.key_of_function (Function Div));
+      mvwaddstr_safe win 14 2 ("x^y      : " ^
+      try_find Rcfile.key_of_function (Function Pow));
+      mvwaddstr_safe win 15 2 ("negation : " ^
+      try_find Rcfile.key_of_function (Function Neg));
+      wattron win WA.bold;
+      mvwaddstr_safe win 16 0 "Miscellaneous:";
+      wattroff win WA.bold;
+      mvwaddstr_safe win 17 2 ("scientific notation     : " ^
+      try_find Rcfile.key_of_edit (Edit SciNotBase));
+      mvwaddstr_safe win 18 2 ("abbreviation entry mode : " ^
+      try_find Rcfile.key_of_command  (Command BeginAbbrev));
+      mvwaddstr_safe win 19 2 ("stack browsing mode     : " ^
+      try_find Rcfile.key_of_command (Command BeginBrowse));
+      mvwaddstr_safe win 20 2 ("refresh display         : " ^
+      try_find Rcfile.key_of_command (Command Refresh));
+      mvwaddstr_safe win 21 2 ("quit                    : " ^
+      try_find Rcfile.key_of_command (Command Quit));
+      assert (wnoutrefresh win)
+   end else begin
+      let adjust_len s len =
+         if String.length s < len then
+            s ^ (String.make (len - (String.length s)) ' ')
+         else
+            Str.string_before s len
+      in
+      let make_string colon_pos key_string abbr =
+         (adjust_len key_string colon_pos) ^ ": " ^ abbr
+      in
+      wattron win WA.bold;
+      mvwaddstr_safe win 5 0 "Autobindings:";
+      wattroff win WA.bold;
+      if Array.length !Rcfile.autobind_keys <= 0 then
+         mvwaddstr_safe win 6 2 "(none)"
+      else
+         for i = 0 to pred (min (iface.scr.hw_lines - 6) (Array.length
+         !Rcfile.autobind_keys)) do
+            let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(i) in
+            let abbr = match bound_f with
+               |None    -> "(none)"
+               |Some op -> Rcfile.abbrev_of_operation op
+            in
+            mvwaddstr_safe win (i + 6) 2 (make_string 12 key_string abbr)
+         done;
+      assert (wnoutrefresh win)
+   end
+
+
+(* draw help page in integer editing mode *)
+let draw_help_intedit iface win mvwaddstr_safe try_find =
+   wattron win WA.bold;
+   mvwaddstr_safe win 5 0 "Integer Editing Operations:";
+   wattroff win WA.bold;
+   mvwaddstr_safe win 6 2 ("enter    : " ^
+   try_find Rcfile.key_of_edit (Edit Enter));
+   mvwaddstr_safe win 7 2 ("set base : " ^
+   try_find Rcfile.key_of_edit (Edit SciNotBase));
+   mvwaddstr_safe win 8 2 ("cancel   : " ^
+   try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
+   assert (wnoutrefresh win)
+
+
+(* draw help page in abbrev/constant entry mode *)
+let draw_help_abbrev iface win mvwaddstr_safe try_find =
+   if String.length iface.abbrev_entry_buffer = 0 then begin
+      let abbr_strings = generate_abbrev_help () in
+      let const_strings = generate_const_help () in
+      let rec print_help_lines lines v_pos =
+         begin match lines with
+         |[] ->
+            ()
+         |head :: tail ->
+            mvwaddstr_safe win v_pos 2 head;
+            print_help_lines tail (succ v_pos)
+         end
+      in
+      begin match iface.abbrev_or_const with
+      |IsAbbrev ->
+         wattron win WA.bold;
+         mvwaddstr_safe win 5 0 "Abbreviations:";
+         wattroff win WA.bold;
+         mvwaddstr_safe win 6 1 "Common Functions:";
+         print_help_lines abbr_strings.functions 7;
+         mvwaddstr_safe win 13 1 "Change Modes:";
+         print_help_lines abbr_strings.modes 14;
+         mvwaddstr_safe win 17 1 "Miscellaneous:";
+         print_help_lines abbr_strings.misc 18;
+         mvwaddstr_safe win 20 1 ("execute abbreviation : " ^
+         try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+         mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
+         try_find Rcfile.key_of_abbrev (Abbrev ExitAbbrev));
+      |IsConst ->
+         wattron win WA.bold;
+         mvwaddstr_safe win 5 0 "Constants:";
+         wattroff win WA.bold;
+         print_help_lines const_strings 7;
+         mvwaddstr_safe win 12 1 ("enter constant : " ^
+         try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+      end;
+      assert (wnoutrefresh win)
+   end else begin
+      wattron win WA.bold;
+      assert (mvwaddstr win 5 0 "Matched Abbreviations:");
+      wattroff win WA.bold;
+      let highlight_len = String.length iface.abbrev_entry_buffer in
+      let rec draw_matches v_pos match_list =
+         if v_pos < iface.scr.hw_lines then
+            begin match match_list with
+            |[] ->
+               ()
+            |m :: tail ->
+               begin
+                  (* highlight the first 'highlight_len' characters *)
+                  wattron win WA.bold;
+                  let len_str = String.length m in
+                  mvwaddstr_safe win v_pos 2
+                     (Str.string_before m (highlight_len));
+                  wattroff win WA.bold;
+                  mvwaddstr_safe win v_pos (2 + highlight_len)
+                     (Str.string_after m (highlight_len));
+                  draw_matches (succ v_pos) tail
+               end
+            end
+         else
+            ()
+      in
+      draw_matches 6 iface.matched_abbrev_entry_list;
+      assert (wnoutrefresh win)
+   end 
+
+
+(* draw help page in variable editing mode *)
+let draw_help_varedit iface win mvwaddstr_safe try_find =
+   wattron win WA.bold;
+   mvwaddstr_safe win 5 0 "Variable Mode Commands:";
+   wattroff win WA.bold;
+   mvwaddstr_safe win 6 2 ("enter variable   : " ^
+   try_find Rcfile.key_of_varedit (VarEdit EnterVarEdit));
+   mvwaddstr_safe win 7 2 ("complete variable: " ^
+   try_find Rcfile.key_of_varedit (VarEdit CompleteVarEdit));
+   mvwaddstr_safe win 8 2 ("cancel entry     : " ^
+   try_find Rcfile.key_of_varedit (VarEdit ExitVarEdit));
+   wattron win WA.bold;
+   mvwaddstr_safe win 10 0 "Matched variables:";
+   wattroff win WA.bold;
+   let highlight_len = 
+      begin match iface.completion with
+      |None   -> String.length iface.variable_entry_buffer 
+      |Some _ -> 0
+      end
+   in
+   let rec draw_matches v_pos match_list count =
+      if v_pos < iface.scr.hw_lines then
+         begin match match_list with
+         |[] ->
+            ()
+         |m :: tail ->
+            begin match iface.completion with
+            |None ->
+               (* highlight the first 'highlight_len' characters *)
+               wattron win WA.bold;
+               let len_str = String.length m in
+               mvwaddstr_safe win v_pos 2
+                  (Str.string_before m (highlight_len));
+               wattroff win WA.bold;
+               mvwaddstr_safe win v_pos (2 + highlight_len)
+                  (Str.string_after m (highlight_len));
+            |Some num ->
+               (* highlight the entire selected match *)
+               if count = num then begin
+                  wattron win WA.bold;
+                  mvwaddstr_safe win v_pos 2 m;
+                  wattroff win WA.bold;
+               end else
+                  mvwaddstr_safe win v_pos 2 m;
+            end;
+            draw_matches (succ v_pos) tail (succ count)
+         end
+      else
+         ()
+   in
+   if List.length iface.matched_variables = 0 then
+      mvwaddstr_safe win 11 2 "(none)"
+   else
+      draw_matches 11 iface.matched_variables 0;
+   assert (wnoutrefresh win)
+
+
+(* draw help page in stack browsing mode *)
+let draw_help_browsing iface win mvwaddstr_safe try_find =
+   wattron win WA.bold;
+   mvwaddstr_safe win 5 0 "Browsing Operations:";
+   wattroff win WA.bold;
+   mvwaddstr_safe win 6 2  ("prev        : " ^
+   try_find Rcfile.key_of_browse (Browse PrevLine));
+   mvwaddstr_safe win 7 2  ("next        : " ^
+   try_find Rcfile.key_of_browse (Browse NextLine));
+   mvwaddstr_safe win 8 2  ("scroll left : " ^
+   try_find Rcfile.key_of_browse (Browse ScrollLeft));
+   mvwaddstr_safe win 9 2  ("scroll right: " ^
+   try_find Rcfile.key_of_browse (Browse ScrollRight));
+   mvwaddstr_safe win 10 2 ("roll down   : " ^
+   try_find Rcfile.key_of_browse (Browse RollDown));
+   mvwaddstr_safe win 11 2 ("roll up     : " ^
+   try_find Rcfile.key_of_browse (Browse RollUp));
+   mvwaddstr_safe win 12 2 ("dup         : " ^
+   try_find Rcfile.key_of_command (Command Dup));
+   mvwaddstr_safe win 13 2 ("view        : " ^
+   try_find Rcfile.key_of_browse (Browse ViewEntry));
+   mvwaddstr_safe win 14 2 ("edit        : " ^
+   try_find Rcfile.key_of_browse (Browse EditEntry));
+   mvwaddstr_safe win 15 2 ("drop        : " ^
+   try_find Rcfile.key_of_browse (Browse Drop1));
+   mvwaddstr_safe win 16 2 ("dropn       : " ^
+   try_find Rcfile.key_of_browse (Browse DropN));
+   mvwaddstr_safe win 17 2 ("keep        : " ^
+   try_find Rcfile.key_of_browse (Browse Keep));
+   mvwaddstr_safe win 18 2 ("keepn       : " ^
+   try_find Rcfile.key_of_browse (Browse KeepN));
+   mvwaddstr_safe win 20 1 ("exit browsing mode: " ^
+   try_find Rcfile.key_of_browse (Browse EndBrowse));
+   assert (wnoutrefresh win)
+
+
+
 (* display the help window *)
 let draw_help (iface : interface_state_t) =
    let mvwaddstr_safe w vert horiz st =
@@ -445,6 +691,8 @@ let draw_help (iface : interface_state_t) =
    in
    let modes = iface.calc#get_modes () in
    begin match iface.scr.help_win with
+   |None ->
+      ()
    |Some win ->
       wclear win;
       wattron win WA.bold;
@@ -479,242 +727,18 @@ let draw_help (iface : interface_state_t) =
          try fn el
          with Not_found -> "(N/A)"
       in
-      (* FIXME: this could be done more cleanly... shouldn't have
-       * to look at two completely different modes *)
       begin match iface.interface_mode with
-      |BrowsingMode ->
-         wattron win WA.bold;
-         assert (mvwaddstr win 5 0 "Browsing Operations:");
-         wattroff win WA.bold;
-         mvwaddstr_safe win 6 2  ("prev        : " ^
-         try_find Rcfile.key_of_browse (Browse PrevLine));
-         mvwaddstr_safe win 7 2  ("next        : " ^
-         try_find Rcfile.key_of_browse (Browse NextLine));
-         mvwaddstr_safe win 8 2  ("scroll left : " ^
-         try_find Rcfile.key_of_browse (Browse ScrollLeft));
-         mvwaddstr_safe win 9 2  ("scroll right: " ^
-         try_find Rcfile.key_of_browse (Browse ScrollRight));
-         mvwaddstr_safe win 10 2 ("roll down   : " ^
-         try_find Rcfile.key_of_browse (Browse RollDown));
-         mvwaddstr_safe win 11 2 ("roll up     : " ^
-         try_find Rcfile.key_of_browse (Browse RollUp));
-         mvwaddstr_safe win 12 2 ("dup         : " ^
-         try_find Rcfile.key_of_command (Command Dup));
-         mvwaddstr_safe win 13 2 ("view        : " ^
-         try_find Rcfile.key_of_browse (Browse ViewEntry));
-         mvwaddstr_safe win 14 2 ("edit        : " ^
-         try_find Rcfile.key_of_browse (Browse EditEntry));
-         mvwaddstr_safe win 15 2 ("drop        : " ^
-         try_find Rcfile.key_of_browse (Browse Drop1));
-         mvwaddstr_safe win 16 2 ("dropn       : " ^
-         try_find Rcfile.key_of_browse (Browse DropN));
-         mvwaddstr_safe win 17 2 ("keep        : " ^
-         try_find Rcfile.key_of_browse (Browse Keep));
-         mvwaddstr_safe win 18 2 ("keepn       : " ^
-         try_find Rcfile.key_of_browse (Browse KeepN));
-         mvwaddstr_safe win 20 1 ("exit browsing mode: " ^
-         try_find Rcfile.key_of_browse (Browse EndBrowse));
-         assert (wnoutrefresh win)
-      |StandardEntryMode | UnitEditMode ->
-         if iface.help_page = 0 then begin
-            wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Common Operations:");
-            wattroff win WA.bold;
-            mvwaddstr_safe win 6 2  ("enter    : " ^
-            try_find Rcfile.key_of_edit (Edit Enter));
-            mvwaddstr_safe win 7 2  ("drop     : " ^
-            try_find Rcfile.key_of_command (Command Drop));
-            mvwaddstr_safe win 8 2  ("swap     : " ^
-            try_find Rcfile.key_of_command (Command Swap));
-            mvwaddstr_safe win 9 2  ("backspace: " ^
-            try_find Rcfile.key_of_edit (Edit Backspace));
-            mvwaddstr_safe win 10 2 ("add      : " ^
-            try_find Rcfile.key_of_function (Function Add));
-            mvwaddstr_safe win 11 2 ("subtract : " ^
-            try_find Rcfile.key_of_function (Function Sub));
-            mvwaddstr_safe win 12 2 ("multiply : " ^
-            try_find Rcfile.key_of_function (Function Mult));
-            mvwaddstr_safe win 13 2 ("divide   : " ^
-            try_find Rcfile.key_of_function (Function Div));
-            mvwaddstr_safe win 14 2 ("x^y      : " ^
-            try_find Rcfile.key_of_function (Function Pow));
-            mvwaddstr_safe win 15 2 ("negation : " ^
-            try_find Rcfile.key_of_function (Function Neg));
-            wattron win WA.bold;
-            mvwaddstr_safe win 16 0 "Miscellaneous:";
-            wattroff win WA.bold;
-            mvwaddstr_safe win 17 2 ("scientific notation     : " ^
-            try_find Rcfile.key_of_edit (Edit SciNotBase));
-            mvwaddstr_safe win 18 2 ("abbreviation entry mode : " ^
-            try_find Rcfile.key_of_command  (Command BeginAbbrev));
-            mvwaddstr_safe win 19 2 ("stack browsing mode     : " ^
-            try_find Rcfile.key_of_command (Command BeginBrowse));
-            mvwaddstr_safe win 20 2 ("refresh display         : " ^
-            try_find Rcfile.key_of_command (Command Refresh));
-            mvwaddstr_safe win 21 2 ("quit                    : " ^
-            try_find Rcfile.key_of_command (Command Quit));
-            assert (wnoutrefresh win)
-         end else begin
-            let adjust_len s len =
-               if String.length s < len then
-                  s ^ (String.make (len - (String.length s)) ' ')
-               else
-                  Str.string_before s len
-            in
-            let make_string colon_pos key_string abbr =
-               (adjust_len key_string colon_pos) ^ ": " ^ abbr
-            in
-            wattron win WA.bold;
-            mvwaddstr_safe win 5 0 "Autobindings:";
-            wattroff win WA.bold;
-            if Array.length !Rcfile.autobind_keys <= 0 then
-               mvwaddstr_safe win 6 2 "(none)"
-            else
-               for i = 0 to pred (min (iface.scr.hw_lines - 6) (Array.length
-               !Rcfile.autobind_keys)) do
-                  let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(i) in
-                  let abbr = match bound_f with
-                     |None    -> "(none)"
-                     |Some op -> Rcfile.abbrev_of_operation op
-                  in
-                  mvwaddstr_safe win (i + 6) 2 (make_string 12 key_string abbr)
-               done;
-            assert (wnoutrefresh win)
-         end
+      |StandardEntryMode | UnitEditMode -> 
+         draw_help_standard iface win mvwaddstr_safe try_find
       |IntEditMode ->
-         wattron win WA.bold;
-         mvwaddstr_safe win 5 0 "Integer Editing Operations:";
-         wattroff win WA.bold;
-         mvwaddstr_safe win 6 2 ("enter    : " ^
-         try_find Rcfile.key_of_edit (Edit Enter));
-         mvwaddstr_safe win 7 2 ("set base : " ^
-         try_find Rcfile.key_of_edit (Edit SciNotBase));
-         mvwaddstr_safe win 8 2 ("cancel   : " ^
-         try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
-         assert (wnoutrefresh win)
+         draw_help_intedit iface win mvwaddstr_safe try_find
       |AbbrevEntryMode ->
-         if String.length iface.abbrev_entry_buffer = 0 then begin
-            let abbr_strings = generate_abbrev_help () in
-            let const_strings = generate_const_help () in
-            let rec print_help_lines lines v_pos =
-               begin match lines with
-               |[] ->
-                  ()
-               |head :: tail ->
-                  mvwaddstr_safe win v_pos 2 head;
-                  print_help_lines tail (succ v_pos)
-               end
-            in
-            begin match iface.abbrev_or_const with
-            |IsAbbrev ->
-               wattron win WA.bold;
-               mvwaddstr_safe win 5 0 "Abbreviations:";
-               wattroff win WA.bold;
-               mvwaddstr_safe win 6 1 "Common Functions:";
-               print_help_lines abbr_strings.functions 7;
-               mvwaddstr_safe win 13 1 "Change Modes:";
-               print_help_lines abbr_strings.modes 14;
-               mvwaddstr_safe win 17 1 "Miscellaneous:";
-               print_help_lines abbr_strings.misc 18;
-               mvwaddstr_safe win 20 1 ("execute abbreviation : " ^
-               try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
-               mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
-               try_find Rcfile.key_of_abbrev (Abbrev ExitAbbrev));
-            |IsConst ->
-               wattron win WA.bold;
-               mvwaddstr_safe win 5 0 "Constants:";
-               wattroff win WA.bold;
-               print_help_lines const_strings 7;
-               mvwaddstr_safe win 12 1 ("enter constant : " ^
-               try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
-            end;
-            assert (wnoutrefresh win)
-         end else begin
-            wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Matched Abbreviations:");
-            wattroff win WA.bold;
-            let highlight_len = String.length iface.abbrev_entry_buffer in
-            let rec draw_matches v_pos match_list =
-               if v_pos < iface.scr.hw_lines then
-                  begin match match_list with
-                  |[] ->
-                     ()
-                  |m :: tail ->
-                     begin
-                        (* highlight the first 'highlight_len' characters *)
-                        wattron win WA.bold;
-                        let len_str = String.length m in
-                        mvwaddstr_safe win v_pos 2
-                           (Str.string_before m (highlight_len));
-                        wattroff win WA.bold;
-                        mvwaddstr_safe win v_pos (2 + highlight_len)
-                           (Str.string_after m (highlight_len));
-                        draw_matches (succ v_pos) tail
-                     end
-                  end
-               else
-                  ()
-            in
-            draw_matches 6 iface.matched_abbrev_entry_list;
-            assert (wnoutrefresh win)
-         end 
+         draw_help_abbrev iface win mvwaddstr_safe try_find
       |VarEditMode ->
-         wattron win WA.bold;
-         mvwaddstr_safe win 5 0 "Variable Mode Commands:";
-         wattroff win WA.bold;
-         mvwaddstr_safe win 6 2 ("enter variable   : " ^
-         try_find Rcfile.key_of_varedit (VarEdit EnterVarEdit));
-         mvwaddstr_safe win 7 2 ("complete variable: " ^
-         try_find Rcfile.key_of_varedit (VarEdit CompleteVarEdit));
-         mvwaddstr_safe win 8 2 ("cancel entry     : " ^
-         try_find Rcfile.key_of_varedit (VarEdit ExitVarEdit));
-         wattron win WA.bold;
-         mvwaddstr_safe win 10 0 "Matched variables:";
-         wattroff win WA.bold;
-         let highlight_len = 
-            begin match iface.completion with
-            |None   -> String.length iface.variable_entry_buffer 
-            |Some _ -> 0
-            end
-         in
-         let rec draw_matches v_pos match_list count =
-            if v_pos < iface.scr.hw_lines then
-               begin match match_list with
-               |[] ->
-                  ()
-               |m :: tail ->
-                  begin match iface.completion with
-                  |None ->
-                     (* highlight the first 'highlight_len' characters *)
-                     wattron win WA.bold;
-                     let len_str = String.length m in
-                     mvwaddstr_safe win v_pos 2
-                        (Str.string_before m (highlight_len));
-                     wattroff win WA.bold;
-                     mvwaddstr_safe win v_pos (2 + highlight_len)
-                        (Str.string_after m (highlight_len));
-                  |Some num ->
-                     (* highlight the entire selected match *)
-                     if count = num then begin
-                        wattron win WA.bold;
-                        mvwaddstr_safe win v_pos 2 m;
-                        wattroff win WA.bold;
-                     end else
-                        mvwaddstr_safe win v_pos 2 m;
-                  end;
-                  draw_matches (succ v_pos) tail (succ count)
-               end
-            else
-               ()
-         in
-         if List.length iface.matched_variables = 0 then
-            mvwaddstr_safe win 11 2 "(none)"
-         else
-            draw_matches 11 iface.matched_variables 0;
-         assert (wnoutrefresh win)
-      end 
-   |None ->
-      ()
+         draw_help_varedit iface win mvwaddstr_safe try_find
+      |BrowsingMode ->
+         draw_help_browsing iface win mvwaddstr_safe try_find
+      end
    end; 
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
