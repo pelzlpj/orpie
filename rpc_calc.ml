@@ -987,6 +987,45 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* coerce to an integer type *)
+      method to_int () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push gen_el
+               |RpcFloat el ->
+                  if (abs_float el) < 1e9 then
+                     stack#push (RpcInt (big_int_of_int (int_of_float el)))
+                  else
+                     (stack#push gen_el;
+                     raise (Invalid_argument "value is too large to convert to integer"))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "to_int can only be applied to real data"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      (* coerce to a floating-point type *)
+      method to_float () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (float_of_big_int el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "to_float can only be applied to integer data"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
 
       method enter_pi () =
          stack#push (RpcFloat pi)

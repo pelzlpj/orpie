@@ -273,6 +273,8 @@ let operation_of_string command_str =
    |"function_mod"                  -> (Function Mod)
    |"function_floor"                -> (Function Floor)
    |"function_ceiling"              -> (Function Ceiling)
+   |"function_to_int"               -> (Function ToInt)
+   |"function_to_real"              -> (Function ToFloat)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

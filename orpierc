@@ -114,6 +114,8 @@ abbrev "trans"   function_transpose
 abbrev "mod"     function_mod
 abbrev "floor"   function_floor
 abbrev "ceil"    function_ceiling
+abbrev "toint"   function_to_int
+abbrev "toreal"  function_to_real
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

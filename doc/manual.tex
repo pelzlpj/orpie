@@ -255,6 +255,8 @@ The following functions are available as extended commands:
       {\tt mod} & element 2 mod element 1 \\
       {\tt floor} & floor function \\
       {\tt ceil} & ceiling function \\
+      {\tt toint} & convert a real number to an integer type \\
+      {\tt toreal} & convert an integer type to a real number \\
       {\tt add} & add last two elements \\
       {\tt sub} & subtract element 1 from element 2 \\
       {\tt mult} & multiply last two elements \\
@@ -546,6 +548,10 @@ to a real number, and as such the arithmetic will no longer be exact.
       angle mode of the calculator.
    \item {\tt function\_tanh} \\
       Compute the hyperbolic tangent of the last stack element.
+   \item {\tt function\_to\_int} \\
+      Convert a real number to an integer type.
+   \item {\tt function\_to\_real} \\
+      Convert an integer type to a real number.
    \item {\tt function\_transpose} \\
       Compute the matrix transpose of the last stack element.
 \end{itemize}

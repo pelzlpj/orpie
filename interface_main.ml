@@ -1073,6 +1073,10 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#floor
    |Ceiling ->
       handle_function_call iface iface.calc#ceiling
+   |ToInt ->
+      handle_function_call iface iface.calc#to_int
+   |ToFloat ->
+      handle_function_call iface iface.calc#to_float
    end
 
 
