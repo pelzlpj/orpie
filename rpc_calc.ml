@@ -2254,7 +2254,7 @@ class rpc_calc conserve_memory =
 
 
       (* obtain the magnitude of a dimensioned value *)
-      method convert_units () = self#check_args 1 "uconvert"
+      method convert_units () = self#check_args 2 "uconvert"
       self#internal_convert_units
 
       method private internal_convert_units () =
