@@ -12,7 +12,7 @@ manual.tex: manual.tex.in
 	latex2man -CLATEX -L manual.tex.in manual.tex
 
 manual.pdf: manual.ps
-	ps2pdf manual.ps
+	ps2pdf13 manual.ps
 
 manual.html: manual.tex
 	hevea manual.tex
