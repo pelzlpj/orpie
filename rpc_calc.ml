@@ -1303,7 +1303,7 @@ class rpc_calc =
                      eval_elements tail
                   with
                      |Not_found ->
-                        let err_msg = Printf.sprintf "variable \"%s\" is unbound" s in
+                        let err_msg = Printf.sprintf "variable \"%s\" is not bound" s in
                         List.iter stack#push el_lst;
                         raise (Invalid_argument err_msg)
                   end

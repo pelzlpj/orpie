@@ -154,7 +154,6 @@ let handle_resize (iface : interface_state_t) =
 
 
 
-
 (*******************************************************************)
 (* OBTAINING AN OBJECT FROM THE ENTRY BUFFER                       *)
 (*******************************************************************)
@@ -301,6 +300,8 @@ let get_entry_from_buffer (iface : interface_state_t) =
             raise (Invalid_argument "improperly formatted complex
             floating-point matrix data")
       end
+   |VarEntry ->
+      RpcVariable iface.variable_entry_buffer
 
 
 
@@ -324,6 +325,7 @@ let push_entry (iface : interface_state_t) =
       iface.is_entering_imag <- false;
       iface.matrix_cols <- 1;
       iface.has_multiple_rows <- false;
+      iface.variable_entry_buffer <- "";
       draw_update_entry iface
    in
    begin
@@ -653,6 +655,8 @@ let handle_backspace (iface : interface_state_t) =
       else
          iface.entry_type <- FloatEntry;
          iface.has_entry <- false
+   |_ ->
+      failwith "caught unhandled backspace"
    end;
    draw_update_entry iface
 
@@ -685,6 +689,8 @@ let handle_scientific_notation (iface : interface_state_t) =
             draw_update_entry iface)
          else
             ()
+   |_ ->
+      failwith "caught unhandled scientific notation"
    end;
    draw_update_entry iface
 
@@ -762,6 +768,8 @@ let handle_minus (iface : interface_state_t) =
                   ()
          end;
          draw_update_entry iface
+      |_ ->
+         failwith "caught unhandled minus key"
    else
       raise Not_handled
 
@@ -872,17 +880,33 @@ let handle_digit (iface : interface_state_t) key =
          process_float_digit buffer true
       else
          process_float_digit buffer false
+   |_ ->
+      failwith "caught unhandled digit"
+
 
 
 (* begin extended entry *)
 let handle_begin_extended (iface : interface_state_t) =
-   if iface.interface_mode != ExtendedEntryMode then
-      (iface.interface_mode <- ExtendedEntryMode;
+   if iface.interface_mode != ExtendedEntryMode then begin
+      iface.interface_mode <- ExtendedEntryMode;
       iface.help_mode <- Extended;
       draw_help iface;
-      draw_update_entry iface)
+      draw_update_entry iface
       (* do other cleanup stuff *)
-   else
+   end else
+      ()
+
+
+(* begin entry of a variable name *)
+let handle_begin_variable (iface : interface_state_t) =
+   Printf.fprintf stderr "beginning variable mode\n";
+   if iface.interface_mode != VarEditMode then begin
+      iface.interface_mode <- VarEditMode;
+      iface.entry_type <- VarEntry;
+      iface.help_mode <- VarHelp;
+      draw_help iface;
+      draw_update_entry iface
+   end else
       ()
 
 
@@ -1298,6 +1322,12 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#to_float
    |SolveLin ->
       handle_function_call iface iface.calc#solve_linear
+   |Eval ->
+      handle_function_call iface iface.calc#eval
+   |Store ->
+      handle_function_call iface iface.calc#store
+   |Purge ->
+      handle_function_call iface iface.calc#purge
    end
 
 
@@ -1318,6 +1348,8 @@ let process_command (iface : interface_state_t) cc =
       handle_begin_browse iface
    |BeginExtended ->
       handle_begin_extended iface
+   |BeginVar ->
+      handle_begin_variable iface
    |Quit ->
       handle_quit iface
    |SetRadians ->
@@ -1494,6 +1526,92 @@ let handle_enter_extended (iface : interface_state_t) =
       ()
 
 
+(****************************************************************)
+(* IMPLEMENTATION OF VARIABLE ENTRY SYSTEM                      *)
+(****************************************************************)
+
+(* exit variable entry *)
+let handle_exit_variable (iface : interface_state_t) =
+   if iface.interface_mode = VarEditMode then begin
+      iface.interface_mode <- StandardEntryMode;
+      iface.help_mode <- Standard;
+      iface.variable_entry_buffer <- "";
+      draw_help iface;
+      draw_update_entry iface
+   end else
+      ()
+
+
+
+(* search through a list of variables and find all that match
+ * iface.variable_entry_buffer.
+ * The list is built up in reverse order using Str.search_backward,
+ * so the head of the list is actually the first match. *)
+let match_variable_buffer (iface : interface_state_t) buf =
+   let buf_regex = Str.regexp (Str.quote buf) in
+   let rec match_aux var_lst matches_lst =
+      match var_lst with
+      |[] ->
+         matches_lst
+      |vv :: tail ->
+         if Str.string_match buf_regex vv 0 then
+            match_aux tail (vv :: matches_lst)
+         else
+            match_aux tail matches_lst
+   in
+   match_aux iface.sorted_variable_list []
+
+
+
+(* backspace during extended entry *)
+let handle_variable_backspace (iface : interface_state_t) =
+   let len = String.length iface.variable_entry_buffer in
+   if len > 0 then begin
+      iface.variable_entry_buffer <- Str.string_before iface.variable_entry_buffer 
+      (pred len);
+      iface.matched_variable_entry_list <- 
+         match_variable_buffer iface iface.variable_entry_buffer;
+      draw_help iface;
+      draw_update_entry iface
+   end else
+      ()
+
+
+(* handle entry of an arbitrary character in extended mode *)
+let handle_variable_character (iface : interface_state_t) key =
+   let ch = char_of_int key in
+   let test_buffer = iface.variable_entry_buffer ^ (String.make 1 ch) in
+   (* search through the list of variables for the first one that matches
+    * iface.variable_entry_buffer *)
+   begin try
+      iface.matched_variable_entry_list <- match_variable_buffer iface test_buffer;
+      iface.variable_entry_buffer <- test_buffer;
+      draw_help iface;
+      draw_update_entry iface
+   with
+      Not_found ->
+         iface.matched_variable_entry_list <- [];
+         iface.variable_entry_buffer <- test_buffer;
+         draw_help iface;
+         draw_update_entry iface
+   end
+
+
+(* enter an variable entry *)
+let handle_enter_variable (iface : interface_state_t) =
+   if iface.interface_mode = VarEditMode then begin
+      iface.interface_mode <- StandardEntryMode;
+      iface.help_mode <- Standard;
+      if String.length iface.variable_entry_buffer > 0 then
+         push_entry iface
+      else
+         ();
+      iface.variable_entry_buffer <- "";
+      draw_help iface;
+      draw_stack iface;
+      draw_update_entry iface
+   end else
+      ()
 
 
 (****************************************************************)
@@ -1632,6 +1750,24 @@ let do_main_loop (iface : interface_state_t) =
                   failwith "Non-Extended command found in Extended Hashtbl"
             with Not_found ->
                handle_extended_character iface key
+            end
+         |VarEditMode ->
+            begin try
+               let varedit_op = Rcfile.varedit_of_key key in
+               match varedit_op with
+               |VarEdit vv ->
+                  begin match vv with
+                  |ExitVarEdit ->
+                     handle_exit_variable iface
+                  |EnterVarEdit ->
+                     handle_enter_variable iface
+                  |VarEditBackspace ->
+                     handle_variable_backspace iface
+                  end
+               |_ ->
+                  failwith "Non-Variable command found in VarEdit Hashtbl"
+            with Not_found ->
+               handle_variable_character iface key
             end
          |BrowsingMode ->
             try

@@ -33,11 +33,13 @@ type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
    mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
    mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
 
-type help_mode_t = | Standard | StandardInt | Extended;;
-type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
-                   | FloatMatrixEntry | ComplexMatrixEntry;;
+type help_mode_t = | Standard | StandardInt | Extended | VarHelp;;
 
-type interface_mode_t = | StandardEntryMode | IntEditMode | ExtendedEntryMode | BrowsingMode;;
+type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
+                   | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;
+
+type interface_mode_t = | StandardEntryMode | IntEditMode | ExtendedEntryMode 
+                        | VarEditMode | BrowsingMode;;
 
 type complex_entry_element_t = 
    {mutable re_mantissa : string; mutable re_exponent : string;
@@ -84,6 +86,9 @@ type interface_state_t =
    mutable matched_extended_entry      : string;                        (* stores the command-completed extended entry *)
    mutable matched_extended_entry_list : string list;                   (* stores the list of all possible command completions *)
    gen_buffer                          : complex_entry_element_t array; (* storage for floating-point (array)-based types *)
+   mutable variable_entry_buffer       : string;                        (* stores characters entered in variable entry mode *)
+   mutable matched_variable_entry_list : string list;                   (* stores the list of all matching variable completions *)
+   mutable sorted_variable_list        : string list;                   (* stores an alphabetically sorted list of all variables *)
    mutable curr_buf                    : int;                           (* which element of gen_buffer is being edited *)
    mutable is_entering_imag            : bool;                          (* is the imaginary component being edited *)
    mutable matrix_cols                 : int;                           (* how many cols in the matrix being entered *)
@@ -115,6 +120,9 @@ let make (c : rpc_calc) (std : screen_t) =
       extended_entry_buffer = "";
       matched_extended_entry = "";
       matched_extended_entry_list = [];
+      variable_entry_buffer = "";
+      matched_variable_entry_list = [];
+      sorted_variable_list = [];
       gen_buffer = Array.make max_matrix_size
          {re_mantissa = ""; re_exponent = "";
          im_mantissa = ""; im_exponent = ""; is_polar = false};

@@ -54,6 +54,7 @@ bind "<return>" command_dup
 bind "u" command_undo
 bind "<up>" command_begin_browsing
 bind "'" command_begin_extended
+bind "\"" command_begin_variable
 bind "r" command_toggle_angle_mode
 bind "p" command_toggle_complex_mode
 bind "b" command_cycle_base
@@ -85,6 +86,11 @@ bind "E" browse_edit
 bind "'" extended_exit
 bind "<return>" extended_enter
 bind "<backspace>" extended_backspace
+
+# keys for variable edit mode operations
+bind "\"" variable_cancel
+bind "<return>" variable_enter
+bind "<backspace>" variable_backspace
 
 # extended command abbreviations
 # these should be given in the desired order of matching precedence
@@ -125,6 +131,9 @@ abbrev "ceil"    function_ceiling
 abbrev "toint"   function_to_int
 abbrev "toreal"  function_to_real
 abbrev "solvelin" function_solve_linear
+abbrev "eval"    function_eval
+abbrev "store"   function_store
+abbrev "purge"   function_purge
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

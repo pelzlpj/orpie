@@ -274,6 +274,8 @@ let draw_entry (iface : interface_state_t) =
             iface.gen_buffer.(iface.curr_buf).re_exponent in
             ss := !ss ^ "(" ^ temp_re ^ ")]]");
          !ss
+      |VarEntry ->
+         "var: " ^ iface.variable_entry_buffer
    in
    begin match iface.interface_mode with
    |StandardEntryMode ->
@@ -297,6 +299,11 @@ let draw_entry (iface : interface_state_t) =
             draw_entry_string iface.matched_extended_entry highlight_len
    |BrowsingMode ->
       ()
+   |VarEditMode ->
+      if String.length iface.variable_entry_buffer = 0 then
+         draw_entry_string "<enter variable name>" 0
+      else
+         draw_entry_string data_string 0
    end;
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
@@ -573,6 +580,8 @@ let draw_help (iface : interface_state_t) =
                   draw_matches 7 iface.matched_extended_entry_list;
                   assert (wnoutrefresh win)
                end 
+         |VarHelp ->
+            ()
          end
       end
    |None ->

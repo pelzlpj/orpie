@@ -44,6 +44,8 @@ let table_key_extended = Hashtbl.create 20;;
 let table_intedit_key  = Hashtbl.create 20;;
 let table_key_intedit  = Hashtbl.create 20;;
 let table_key_macro    = Hashtbl.create 20;;
+let table_key_varedit  = Hashtbl.create 20;;
+let table_varedit_key  = Hashtbl.create 20;;
 
 
 (* Default datafile for loading and saving state *)
@@ -84,6 +86,10 @@ let key_of_intedit edit_op =
    Hashtbl.find table_intedit_key edit_op;;
 let macro_of_key key =
    Hashtbl.find table_key_macro key;;
+let varedit_of_key key =
+   Hashtbl.find table_key_varedit key;;
+let key_of_varedit edit_op =
+   Hashtbl.find table_varedit_key edit_op;;
 
 
 (* abbreviations used in extended entry mode *)
@@ -223,24 +229,27 @@ let register_binding key_string op =
   (*       Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
          flush stderr; *)
          match op with
-         |Function f ->
-            (Hashtbl.add table_key_function k op;
-            Hashtbl.add table_function_key op k_string)
-         |Command c ->
-            (Hashtbl.add table_key_command k op;
-            Hashtbl.add table_command_key op k_string)
-         |Edit e ->
-            (Hashtbl.add table_key_edit k op;
-            Hashtbl.add table_edit_key op k_string)
-         |Browse b ->
-            (Hashtbl.add table_key_browse k op;
-            Hashtbl.add table_browse_key op k_string)
-         |Extend e ->
-            (Hashtbl.add table_key_extended k op;
-            Hashtbl.add table_extended_key op k_string)
-         |IntEdit i ->
-            (Hashtbl.add table_key_intedit k op;
-            Hashtbl.add table_intedit_key op k_string)
+         |Function _ ->
+            Hashtbl.add table_key_function k op;
+            Hashtbl.add table_function_key op k_string
+         |Command _ ->
+            Hashtbl.add table_key_command k op;
+            Hashtbl.add table_command_key op k_string
+         |Edit _ ->
+            Hashtbl.add table_key_edit k op;
+            Hashtbl.add table_edit_key op k_string
+         |Browse _ ->
+            Hashtbl.add table_key_browse k op;
+            Hashtbl.add table_browse_key op k_string
+         |Extend _ ->
+            Hashtbl.add table_key_extended k op;
+            Hashtbl.add table_extended_key op k_string
+         |IntEdit _ ->
+            Hashtbl.add table_key_intedit k op;
+            Hashtbl.add table_intedit_key op k_string
+         |VarEdit _ ->
+            Hashtbl.add table_key_varedit k op;
+            Hashtbl.add table_varedit_key op k_string
       end
    in
    (* given a string that represents a character, find the associated
@@ -310,6 +319,9 @@ let operation_of_string command_str =
    |"function_to_int"               -> (Function ToInt)
    |"function_to_real"              -> (Function ToFloat)
    |"function_solve_linear"         -> (Function SolveLin)
+   |"function_eval"                 -> (Function Eval)
+   |"function_store"                -> (Function Store)
+   |"function_purge"                -> (Function Purge)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)
@@ -326,6 +338,7 @@ let operation_of_string command_str =
    |"command_undo"                  -> (Command Undo)
    |"command_begin_browsing"        -> (Command BeginBrowse)
    |"command_begin_extended"        -> (Command BeginExtended)
+   |"command_begin_variable"        -> (Command BeginVar)
    |"command_quit"                  -> (Command Quit)
    |"command_rad"                   -> (Command SetRadians)
    |"command_deg"                   -> (Command SetDegrees)
@@ -361,6 +374,9 @@ let operation_of_string command_str =
    |"extended_enter"                -> (Extend EnterExtended)
    |"extended_backspace"            -> (Extend ExtBackspace)
    |"integer_cancel"                -> (IntEdit ExitIntEdit)
+   |"variable_cancel"               -> (VarEdit ExitVarEdit)
+   |"variable_enter"                -> (VarEdit EnterVarEdit)
+   |"variable_backspace"            -> (VarEdit VarEditBackspace)
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
    end
 

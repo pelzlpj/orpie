@@ -31,10 +31,11 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Asinh | Acosh | Atanh | Re | Im 
                           | Gamma | LnGamma | Erf | Erfc | Fact
                           | Transpose | Mod | Floor | Ceiling
-                          | ToInt | ToFloat | SolveLin;;
+                          | ToInt | ToFloat | SolveLin | Eval
+                          | Store | Purge;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
-                          | BeginBrowse | BeginExtended | Quit
+                          | BeginBrowse | BeginExtended | BeginVar | Quit
                           | SetRadians | SetDegrees | SetRect | SetPolar
                           | SetBin | SetOct | SetDec | SetHex
                           | ToggleAngleMode | ToggleComplexMode | CycleBase
@@ -55,12 +56,15 @@ type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 
 type integer_edit_operation = | ExitIntEdit;;
 
+type var_edit_operation  = | ExitVarEdit | EnterVarEdit | VarEditBackspace;;
+
 type operation = | Function of function_operation 
                  | Command of command_operation
                  | Edit of edit_operation
                  | Browse of browse_operation
                  | Extend of extended_operation
-                 | IntEdit of integer_edit_operation;;
+                 | IntEdit of integer_edit_operation
+                 | VarEdit of var_edit_operation;;
 
 
 
