@@ -1,6 +1,8 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* remove debugging messages from parser
+
 * detect ill-conditioned complex matrices when performing inversion
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but

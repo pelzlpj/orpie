@@ -929,7 +929,16 @@ let handle_browse_edit (iface : interface_state_t) =
       in ();
       let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
       let lexbuf = Lexing.from_channel edited_buf in
-      let data = Txtin_parser.data_list Txtin_lexer.token lexbuf in
+      let data = 
+         (* need to call completely different parsers when using degrees
+          * or when using radians *)
+         begin match (iface.calc#get_modes ()).angle with
+         |Rad ->
+            Txtin_parser.decode_data_rad Txtin_lexer.token lexbuf
+         |Deg ->
+            Txtin_parser.decode_data_deg Txtin_lexer.token lexbuf
+         end
+      in
       let rec push_data d =
          begin match d with
          |[] -> 
@@ -1015,7 +1024,16 @@ let handle_edit_input (iface : interface_state_t) =
       in ();
       let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
       let lexbuf = Lexing.from_channel edited_buf in
-      let data = Txtin_parser.data_list Txtin_lexer.token lexbuf in
+      let data = 
+         (* need to call completely different parsers when using degrees
+          * or when using radians *)
+         begin match (iface.calc#get_modes ()).angle with
+         |Rad ->
+            Txtin_parser.decode_data_rad Txtin_lexer.token lexbuf
+         |Deg ->
+            Txtin_parser.decode_data_deg Txtin_lexer.token lexbuf
+         end
+      in
       let rec push_data d =
          begin match d with
          |[] -> 

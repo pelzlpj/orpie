@@ -3,11 +3,14 @@ Orpie ChangeLog
 
 v1.1
 
+   2004-04-13        Created a parser and associated routines that
+                     enable Orpie to read data entered in an external
+                     editor.
+
    2004-04-10        Added a check for inversion of ill-conditioned
                      real matrices.
 
                      Implemented Mutt-like rcfile macros.
-
 
    2004-04-09        Added a configuration variable to enable
                      hiding the help panel.
