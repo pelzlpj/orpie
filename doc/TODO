@@ -7,6 +7,8 @@ Orpie To-Do List (roughly in order of priority)
   the latest source from my Arch archive, as the test script may be changing
   rapidly in the near future.)
 
+* add additional units
+
 * add additional statistical functions (multivariate, distributions, ...)
 
 * add finance functions

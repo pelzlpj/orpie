@@ -22,6 +22,40 @@
 (* calc_test.ml
  * a testing framework for the rpc_calc object *)
 
+(* The basic testing procedure is as follows:
+ *    - load some data on the stack using load_data(),
+ *      which supports the string syntax described in the manual
+ *      under "Entering Data With an External Editor."
+ *    - perform desired operations on the data using various
+ *      calculator functions provided by rpc_calc.ml
+ *    - compute a distortion metric between the calculator
+ *      result and the expected result, and raise an error
+ *      if it's not within tolerance
+ *    - repeat many many times
+ *
+ * Use "make test.opt" to build the testing executable.
+ *
+ * Writing test cases is a big job, and I would really appreciate
+ * some help with this.  It's a good project for other developers
+ * to chip away on, because
+ *    1) it doesn't require very deep knowledge of the calculator
+ *       internals
+ *    2) testing development can be done in parallel with development 
+ *       of the calculator itself
+ *    3) since the calculator object handles most of the dirty work,
+ *       relatively little OCaml knowledge is necessary
+ *
+ * If you're interested in lending a hand, please check out a copy
+ * of the latest development sources using GNU Arch (tla).  My archive is
+ *    pelzlpj@eecs.umich.edu--2004 \
+ *       http://www-personal.engin.umich.edu/~pelzlpj/tla/2004
+ * and you should tag off of branch orpie--main .  If you're uncomfortable
+ * using Arch, just drop me an email and I'll be happy to tar up a snapshot 
+ * of recent sources.
+ *)
+
+
+
 open Rpc_calc;;
 open Rpc_stack;;
 
@@ -86,7 +120,7 @@ let test_result_float_tolnorm (expected : float) (tol : float)
    test_result_float expected tol test_stage true
 in
 (* test whether the calculator result is a floating-point value
- * which is within the specified tolerance (normalized) *)
+ * which is within the specified tolerance (not normalized) *)
 let test_result_float_tol (expected : float) (tol : float)
 (test_stage : string) =
    test_result_float expected tol test_stage false
@@ -373,6 +407,11 @@ load_data "[[(-1, 2), (4, -100)][(-50, -10), (9, 30)]]_lb
 calc#sub ();
 mat_error ();
 test_result_float_tol 0.0 uprec "sub-cmat-cmat-2";
+
+calc#clear ();
+(************************************************)
+(* OTHER FUNCTIONS GO HERE :-)                  *)
+(************************************************)
 
 
 
