@@ -31,6 +31,7 @@ class rpc_calc =
       val mutable stack = new rpc_stack
       val mutable backup_stack = new rpc_stack
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
+      val mutable variables = Hashtbl.create 1
 
       method backup () =
          backup_stack <- stack#backup ()
@@ -87,22 +88,22 @@ class rpc_calc =
          self#backup ()
 
       method add () =
-         Add.add stack self#backup
+         Add.add stack self#backup self#evaln
 
       method sub () =
-         Sub.sub stack self#backup
+         Sub.sub stack self#backup self#evaln
 
       method mult () =
-         Mult.mult stack self#backup
+         Mult.mult stack self#backup self#evaln
 
       method div () =
-         Div.div stack self#backup
+         Div.div stack self#backup self#evaln
 
       method inv () =
-         Inv.inv stack self#backup
+         Inv.inv stack self#backup self#evaln
 
       method pow () =
-         Pow.pow stack self#backup
+         Pow.pow stack self#backup self#evaln
 
       method get_modes () =
          modes
@@ -125,267 +126,323 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
       method neg () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcInt (minus_big_int el))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (0.0 -. el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.negative el))
-               |RpcFloatMatrix el ->
-                  let copy = Gsl_matrix.copy el in
-                  (Gsl_matrix.scale copy (-1.0);
-                  stack#push (RpcFloatMatrix copy))
-               |RpcComplexMatrix el ->
-                  let copy = Gsl_matrix_complex.copy el in
-                  (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
-                  stack#push (RpcComplexMatrix copy))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcInt (minus_big_int el))
+            |RpcFloat el ->
+               stack#push (RpcFloat (0.0 -. el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.negative el))
+            |RpcFloatMatrix el ->
+               let copy = Gsl_matrix.copy el in
+               (Gsl_matrix.scale copy (-1.0);
+               stack#push (RpcFloatMatrix copy))
+            |RpcComplexMatrix el ->
+               let copy = Gsl_matrix_complex.copy el in
+               (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
+               stack#push (RpcComplexMatrix copy))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method sq () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcInt (mult_big_int el el))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (el *. el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Complex.mul el el))
-               |RpcFloatMatrix el ->
-                  let n, m = (Gsl_matrix.dims el) in
-                  if n = m then
-                     let result = Gsl_matrix.create n m in
-                     (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el el 0.0 result;
-                     stack#push (RpcFloatMatrix result))
-                  else
-                     (stack#push gen_el;
-                     raise (Invalid_argument "matrix is non-square"))
-               |RpcComplexMatrix el ->
-                  let n, m = (Gsl_matrix_complex.dims el) in
-                  if m = n then
-                     let result = Gsl_matrix_complex.create n m in
-                     (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-                        Complex.one el el Complex.zero result;
-                     stack#push (RpcComplexMatrix result))
-                  else
-                     (stack#push gen_el;
-                     raise (Invalid_argument "matrix is non-square"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcInt (mult_big_int el el))
+            |RpcFloat el ->
+               stack#push (RpcFloat (el *. el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Complex.mul el el))
+            |RpcFloatMatrix el ->
+               let n, m = (Gsl_matrix.dims el) in
+               if n = m then
+                  let result = Gsl_matrix.create n m in
+                  (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el el 0.0 result;
+                  stack#push (RpcFloatMatrix result))
+               else
+                  (stack#push gen_el;
+                  raise (Invalid_argument "matrix is non-square"))
+            |RpcComplexMatrix el ->
+               let n, m = (Gsl_matrix_complex.dims el) in
+               if m = n then
+                  let result = Gsl_matrix_complex.create n m in
+                  (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+                     Complex.one el el Complex.zero result;
+                  stack#push (RpcComplexMatrix result))
+               else
+                  (stack#push gen_el;
+                  raise (Invalid_argument "matrix is non-square"))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method sqrt () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcFloat el ->
-                  stack#push (RpcFloat (sqrt el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.sqrt el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloat el ->
+               stack#push (RpcFloat (sqrt el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.sqrt el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
+
       method abs () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcInt (abs_big_int el))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (abs_float el))
-               |RpcComplex el ->
-                  stack#push (RpcFloat (Gsl_complex.abs el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcInt (abs_big_int el))
+            |RpcFloat el ->
+               stack#push (RpcFloat (abs_float el))
+            |RpcComplex el ->
+               stack#push (RpcFloat (Gsl_complex.abs el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
       method arg () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcComplex el ->
-                  begin match modes.angle with
-                  |Rad ->
-                     stack#push (RpcFloat (Gsl_complex.arg el))
-                  |Deg ->
-                     stack#push (RpcFloat (180.0 /. pi *. (Gsl_complex.arg el)))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcComplex el ->
+               begin match modes.angle with
+               |Rad ->
+                  stack#push (RpcFloat (Gsl_complex.arg el))
+               |Deg ->
+                  stack#push (RpcFloat (180.0 /. pi *. (Gsl_complex.arg el)))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method exp () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (exp (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (exp el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.exp el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (exp (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (exp el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.exp el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method ln () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (log (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (log el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.log el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (log (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (log el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.log el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method ten_pow_x () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (10.0 ** (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (10.0 ** el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Complex.pow (cmpx_of_float 10.0) el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (10.0 ** (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (10.0 ** el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Complex.pow (cmpx_of_float 10.0) el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
             
 
       method log10 () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (log10 (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (log10 el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.log10 el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (log10 (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (log10 el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.log10 el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method conj () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcInt el)
-               |RpcFloat el ->
-                  stack#push (RpcFloat el)
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.conjugate el))
-               |RpcFloatMatrix el ->
-                  stack#push (RpcFloatMatrix el)
-               |RpcComplexMatrix el ->
-                  (* element-by-element conjugation *)
-                  let rows, cols = Gsl_matrix_complex.dims el and
-                  arr = Gsl_matrix_complex.to_array el in
-                  let conj_arr = Array.map Gsl_complex.conjugate arr in
-                  let conj_mat = Gsl_matrix_complex.of_array conj_arr rows cols in
-                  stack#push (RpcComplexMatrix conj_mat)
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcInt el)
+            |RpcFloat el ->
+               stack#push (RpcFloat el)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.conjugate el))
+            |RpcFloatMatrix el ->
+               stack#push (RpcFloatMatrix el)
+            |RpcComplexMatrix el ->
+               (* element-by-element conjugation *)
+               let rows, cols = Gsl_matrix_complex.dims el and
+               arr = Gsl_matrix_complex.to_array el in
+               let conj_arr = Array.map Gsl_complex.conjugate arr in
+               let conj_mat = Gsl_matrix_complex.of_array conj_arr rows cols in
+               stack#push (RpcComplexMatrix conj_mat)
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method sin () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat 
-                  begin
-                     match modes.angle with
-                     |Rad ->
-                        sin (float_of_big_int el)
-                     |Deg ->
-                        sin (pi /. 180.0 *. (float_of_big_int el))
-                  end)
-               |RpcFloat el ->
-                  stack#push (RpcFloat 
-                  begin
-                     match modes.angle with
-                     |Rad ->
-                        sin el
-                     |Deg ->
-                        sin (pi /. 180.0 *. el)
-                  end)
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.sin el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     sin (float_of_big_int el)
+                  |Deg ->
+                     sin (pi /. 180.0 *. (float_of_big_int el))
+               end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     sin el
+                  |Deg ->
+                     sin (pi /. 180.0 *. el)
+               end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.sin el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method cos () =
-         if stack#length > 0 then
-         begin
+         if stack#length > 0 then begin
             self#backup ();
+            self#evaln 1;
             let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
@@ -408,18 +465,23 @@ class rpc_calc =
                end)
             |RpcComplex el ->
                stack#push (RpcComplex (Gsl_complex.cos el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
             |_ ->
                (stack#push gen_el;
                raise (Invalid_argument "invalid argument"))
-         end
-      else
-         raise (Invalid_argument "empty stack")
+         end else
+            raise (Invalid_argument "empty stack")
 
 
       method tan () =
-         if stack#length > 0 then
-            begin
+         if stack#length > 0 then begin
             self#backup ();
+            self#evaln 1;
             let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
@@ -442,581 +504,697 @@ class rpc_calc =
                end)
             |RpcComplex el ->
                stack#push (RpcComplex (Gsl_complex.tan el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
             |_ ->
                (stack#push gen_el;
                raise (Invalid_argument "invalid argument"))
-            end
-         else
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method asin () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           asin (float_of_big_int el)
-                        |Deg ->
-                           180.0 /. pi *. asin (float_of_big_int el)
-                     end)
-               |RpcFloat el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           asin el
-                        |Deg ->
-                           180.0 /. pi *. asin el
-                     end)
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arcsin el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        asin (float_of_big_int el)
+                     |Deg ->
+                        180.0 /. pi *. asin (float_of_big_int el)
+                  end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        asin el
+                     |Deg ->
+                        180.0 /. pi *. asin el
+                  end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arcsin el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method acos () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           acos (float_of_big_int el)
-                        |Deg ->
-                           180.0 /. pi *. acos (float_of_big_int el)
-                     end)
-               |RpcFloat el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           acos el
-                        |Deg ->
-                           180.0 /. pi *. acos el
-                     end)
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arccos el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        acos (float_of_big_int el)
+                     |Deg ->
+                        180.0 /. pi *. acos (float_of_big_int el)
+                  end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        acos el
+                     |Deg ->
+                        180.0 /. pi *. acos el
+                  end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arccos el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method atan () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           atan (float_of_big_int el)
-                        |Deg ->
-                           180.0 /. pi *. atan (float_of_big_int el)
-                     end)
-               |RpcFloat el ->
-                  stack#push (RpcFloat 
-                     begin
-                        match modes.angle with
-                        |Rad ->
-                           atan el
-                        |Deg ->
-                           180.0 /. pi *. atan el
-                     end)
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arctan el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        atan (float_of_big_int el)
+                     |Deg ->
+                        180.0 /. pi *. atan (float_of_big_int el)
+                  end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        atan el
+                     |Deg ->
+                        180.0 /. pi *. atan el
+                  end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arctan el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method sinh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (sinh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (sinh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.sinh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (sinh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (sinh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.sinh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method cosh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (cosh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (cosh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.cosh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (cosh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (cosh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.cosh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method tanh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (tanh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (tanh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.tanh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (tanh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (tanh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.tanh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method asinh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_math.asinh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_math.asinh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arcsinh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (Gsl_math.asinh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (Gsl_math.asinh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arcsinh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method acosh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_math.acosh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_math.acosh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arccosh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (Gsl_math.acosh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (Gsl_math.acosh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arccosh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       method atanh () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_math.atanh (float_of_big_int el)))
-               |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_math.atanh el))
-               |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.arctanh el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (Gsl_math.atanh (float_of_big_int el)))
+            |RpcFloat el ->
+               stack#push (RpcFloat (Gsl_math.atanh el))
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.arctanh el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* real part of complex (or complex matrix) *)
       method re () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push gen_el
-               |RpcFloat el ->
-                  stack#push gen_el
-               |RpcComplex el ->
-                  stack#push (RpcFloat el.Complex.re)
-               |RpcFloatMatrix el ->
-                  stack#push gen_el
-               |RpcComplexMatrix el ->
-                  let n, m = Gsl_matrix_complex.dims el
-                  and carr = Gsl_matrix_complex.to_array el in
-                  let farr = Array.make (n * m) 0.0 in
-                  for i = 0 to pred (n * m) do
-                     farr.(i) <- carr.(i).Complex.re
-                  done;
-                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push gen_el
+            |RpcFloat el ->
+               stack#push gen_el
+            |RpcComplex el ->
+               stack#push (RpcFloat el.Complex.re)
+            |RpcFloatMatrix el ->
+               stack#push gen_el
+            |RpcComplexMatrix el ->
+               let n, m = Gsl_matrix_complex.dims el
+               and carr = Gsl_matrix_complex.to_array el in
+               let farr = Array.make (n * m) 0.0 in
+               for i = 0 to pred (n * m) do
+                  farr.(i) <- carr.(i).Complex.re
+               done;
+               stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* imaginary part of complex (or complex matrix) *)
       method im () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcInt zero_big_int)
-               |RpcFloat el ->
-                  stack#push (RpcFloat 0.0)
-               |RpcComplex el ->
-                  stack#push (RpcFloat el.Complex.im)
-               |RpcFloatMatrix el ->
-                  let n, m = Gsl_matrix.dims el in
-                  let farr = Array.make (n * m) 0.0 in
-                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
-               |RpcComplexMatrix el ->
-                  let n, m = Gsl_matrix_complex.dims el
-                  and carr = Gsl_matrix_complex.to_array el in
-                  let farr = Array.make (n * m) 0.0 in
-                  for i = 0 to pred (n * m) do
-                     farr.(i) <- carr.(i).Complex.im
-                  done;
-                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcInt zero_big_int)
+            |RpcFloat el ->
+               stack#push (RpcFloat 0.0)
+            |RpcComplex el ->
+               stack#push (RpcFloat el.Complex.im)
+            |RpcFloatMatrix el ->
+               let n, m = Gsl_matrix.dims el in
+               let farr = Array.make (n * m) 0.0 in
+               stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+            |RpcComplexMatrix el ->
+               let n, m = Gsl_matrix_complex.dims el
+               and carr = Gsl_matrix_complex.to_array el in
+               let farr = Array.make (n * m) 0.0 in
+               for i = 0 to pred (n * m) do
+                  farr.(i) <- carr.(i).Complex.im
+               done;
+               stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* Euler gamma function *)
       method gamma () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.gamma (float_of_big_int el)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |RpcFloat el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.gamma el))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.gamma (float_of_big_int el)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcFloat el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.gamma el))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* log_e of Euler gamma function *)
       method lngamma () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.lngamma (float_of_big_int el)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |RpcFloat el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.lngamma el))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.lngamma (float_of_big_int el)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcFloat el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.lngamma el))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* error function *)
       method erf () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.erf (float_of_big_int el)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |RpcFloat el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.erf el))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.erf (float_of_big_int el)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcFloat el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.erf el))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
 
       (* complementary error function *)
       method erfc () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.erfc (float_of_big_int el)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |RpcFloat el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.erfc el))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.erfc (float_of_big_int el)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcFloat el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.erfc el))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
 
       (* factorial (calls gamma function) *)
       method fact () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.gamma ((float_of_big_int el) +.
-                     1.0)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |RpcFloat el ->
-                  begin try
-                     stack#push (RpcFloat (Gsl_sf.gamma (el +. 1.0)))
-                  with
-                     Gsl_error.Gsl_exn (err, errstr) ->
-                        (stack#push gen_el;
-                        raise (Invalid_argument errstr))
-                  end
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "invalid argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.gamma ((float_of_big_int el) +.
+                  1.0)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcFloat el ->
+               begin try
+                  stack#push (RpcFloat (Gsl_sf.gamma (el +. 1.0)))
+               with
+                  Gsl_error.Gsl_exn (err, errstr) ->
+                     (stack#push gen_el;
+                     raise (Invalid_argument errstr))
+               end
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* matrix transpose *)
       method transpose () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcFloatMatrix el ->
-                  let n, m = (Gsl_matrix.dims el) in
-                  let trans_mat = Gsl_matrix.create m n in
-                  Gsl_matrix.transpose trans_mat el;
-                  stack#push (RpcFloatMatrix trans_mat)
-               |RpcComplexMatrix el ->
-                  let n, m = (Gsl_matrix_complex.dims el) in
-                  let trans_mat = Gsl_matrix_complex.create m n in
-                  Gsl_matrix_complex.transpose trans_mat el;
-                  stack#push (RpcComplexMatrix trans_mat)
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "transpose requires a matrix argument"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloatMatrix el ->
+               let n, m = (Gsl_matrix.dims el) in
+               let trans_mat = Gsl_matrix.create m n in
+               Gsl_matrix.transpose trans_mat el;
+               stack#push (RpcFloatMatrix trans_mat)
+            |RpcComplexMatrix el ->
+               let n, m = (Gsl_matrix_complex.dims el) in
+               let trans_mat = Gsl_matrix_complex.create m n in
+               Gsl_matrix_complex.transpose trans_mat el;
+               stack#push (RpcComplexMatrix trans_mat)
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "transpose requires a matrix argument"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* mod (remainder) *)
       method mod_int () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el2 = stack#pop () in
-               let gen_el1 = stack#pop () in
-               match gen_el1 with
-               |RpcInt el1 ->
-                  begin match gen_el2 with
-                  |RpcInt el2 ->
-                     stack#push (RpcInt (mod_big_int el1 el2))
-                  |_ ->
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument "mod can only be applied to arguments of type integer"))
-                  end
+         if stack#length > 1 then begin
+            self#backup ();
+            self#evaln 2;
+            let gen_el2 = stack#pop () in
+            let gen_el1 = stack#pop () in
+            match gen_el1 with
+            |RpcInt el1 ->
+               begin match gen_el2 with
+               |RpcInt el2 ->
+                  stack#push (RpcInt (mod_big_int el1 el2))
                |_ ->
                   (stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "mod can only be applied to arguments of type integer"))
-            end
-         else
+               end
+            |RpcVariable s ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* floor function *)
       method floor () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcFloat el ->
-                  stack#push (RpcFloat (floor el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "floor can only be applied to real data"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloat el ->
+               stack#push (RpcFloat (floor el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "floor can only be applied to real data"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* ceiling function *)
       method ceiling () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcFloat el ->
-                  stack#push (RpcFloat (ceil el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "ceiling can only be applied to real data"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloat el ->
+               stack#push (RpcFloat (ceil el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "ceiling can only be applied to real data"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* coerce to an integer type *)
       method to_int () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push gen_el
-               |RpcFloat el ->
-                  if (abs_float el) < 1e9 then
-                     stack#push (RpcInt (big_int_of_int (int_of_float el)))
-                  else
-                     (stack#push gen_el;
-                     raise (Invalid_argument "value is too large to convert to integer"))
-               |_ ->
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push gen_el
+            |RpcFloat el ->
+               if (abs_float el) < 1e9 then
+                  stack#push (RpcInt (big_int_of_int (int_of_float el)))
+               else
                   (stack#push gen_el;
-                  raise (Invalid_argument "to_int can only be applied to real data"))
-            end
-         else
+                  raise (Invalid_argument "value is too large to convert to integer"))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "to_int can only be applied to real data"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* coerce to a floating-point type *)
       method to_float () =
-         if stack#length > 0 then
-            begin
-               self#backup ();
-               let gen_el = stack#pop () in
-               match gen_el with
-               |RpcInt el ->
-                  stack#push (RpcFloat (float_of_big_int el))
-               |_ ->
-                  (stack#push gen_el;
-                  raise (Invalid_argument "to_float can only be applied to integer data"))
-            end
-         else
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1;
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat (float_of_big_int el))
+            |RpcVariable s ->
+               stack#push gen_el;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "to_float can only be applied to integer data"))
+         end else
             raise (Invalid_argument "empty stack")
 
 
       (* solve a linear system Ax = b, with input nxn matrix A and output nx1
        * matrix b *)
       method solve_linear () =
-         Solvelin.solve_linear stack self#backup
+         Solvelin.solve_linear stack self#backup self#evaln
 
 
       method enter_pi () =
@@ -1099,6 +1277,93 @@ class rpc_calc =
 
       method enter_cmat cm =
          stack#push (RpcComplexMatrix cm)
+
+      (* evaluate last n variables of the stack (internal use only) *)
+      method private evaln (num : int) =
+         (* grab the last n stack elements into a list *)
+         let rec grab_elements el_lst n =
+            if n > 0 then
+               let next_el = stack#pop () in
+               grab_elements (next_el :: el_lst) (pred n)
+            else
+               el_lst
+         in
+         (* eval the list elements one-by-one; if there
+          * is a lookup failure, push everything back on the stack. *)
+         let rec eval_elements el_lst =
+            match el_lst with
+            |[] ->
+               ()
+            |head :: tail ->
+               begin match head with
+               |RpcVariable s ->
+                  begin try
+                     let data = Hashtbl.find variables s in
+                     stack#push data;
+                     eval_elements tail
+                  with
+                     |Not_found ->
+                        let err_msg = Printf.sprintf "variable \"%s\" is unbound" s in
+                        List.iter stack#push el_lst;
+                        raise (Invalid_argument err_msg)
+                  end
+               |_ ->
+                  stack#push head;
+                  eval_elements tail
+               end
+         in
+         let raw_elements = grab_elements [] num in
+         eval_elements raw_elements
+
+
+      method eval () =
+         if stack#length > 0 then begin
+            self#backup ();
+            self#evaln 1
+         end else
+            raise (Invalid_argument "empty stack")
+         
+
+      (* store in a variable *)
+      method store () =
+         if stack#length > 1 then begin
+            self#backup ();
+            let gen_el2 = stack#pop () in
+            let gen_el1 = stack#pop () in
+            match gen_el2 with
+            |RpcVariable s ->
+               begin match gen_el1 with
+               |RpcVariable dummy ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "cannot store variables inside variables")
+               |_ ->
+                  Hashtbl.remove variables s;
+                  Hashtbl.add variables s gen_el1
+               end
+            |_ ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "cannot store inside non-variable")
+         end else
+            raise (Invalid_argument "insufficient arguments for store")
+
+
+      (* clear a variable *)
+      method purge () =
+         if stack#length > 0 then begin
+            self#backup ();
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcVariable s ->
+               Hashtbl.remove variables s
+            |_ ->
+               stack#push gen_el;
+               raise (Invalid_argument "only variables can be purged")
+         end else
+            raise (Invalid_argument "empty stack")
+
+
 
 (*      method print_stack () =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in

@@ -23,10 +23,11 @@ open Rpc_stack
 
 (* solve a linear system Ax = b, with input nxn matrix A and output nx1
  * matrix b *)
-let solve_linear (stack : rpc_stack) (do_backup : unit -> unit) =
+let solve_linear (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 1 then
       begin
          do_backup ();
+         evaln 2;
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el1 with

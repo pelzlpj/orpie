@@ -23,10 +23,11 @@ open Rpc_stack
 open Gsl_assist
 open Big_int
 
-let mult (stack : rpc_stack) (do_backup : unit -> unit) =
+let mult (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 1 then
       begin
          do_backup ();
+         evaln 2;
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el1 with
@@ -47,6 +48,10 @@ let mult (stack : rpc_stack) (do_backup : unit -> unit) =
                let c_el1 = cmpx_of_int el1 in
                (Gsl_matrix_complex.scale el2 c_el1;
                stack#push (RpcComplexMatrix el2))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for multiplication"))
             )
          |RpcFloat el1 -> (
             match gen_el2 with
@@ -65,6 +70,10 @@ let mult (stack : rpc_stack) (do_backup : unit -> unit) =
                let c_el1 = cmpx_of_float el1 in
                (Gsl_matrix_complex.scale el2 c_el1;
                stack#push (RpcComplexMatrix el2))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for multiplication"))
             )
          |RpcComplex el1 -> (
             match gen_el2 with
@@ -83,6 +92,10 @@ let mult (stack : rpc_stack) (do_backup : unit -> unit) =
             |RpcComplexMatrix el2 ->
                (Gsl_matrix_complex.scale el2 el1;
                stack#push (RpcComplexMatrix el2))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for multiplication"))
             )
          |RpcFloatMatrix el1 -> (
             match gen_el2 with
@@ -122,6 +135,10 @@ let mult (stack : rpc_stack) (do_backup : unit -> unit) =
                   (stack#push gen_el1; 
                   stack#push gen_el2;
                   raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for multiplication"))
             )
          |RpcComplexMatrix el1 -> (
             match gen_el2 with
@@ -161,7 +178,15 @@ let mult (stack : rpc_stack) (do_backup : unit -> unit) =
                   (stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for multiplication"))
             )
+         |_ ->
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for multiplication"))
       end
    else
       raise (Invalid_argument "insufficient arguments for multiplication")

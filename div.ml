@@ -24,10 +24,11 @@ open Gsl_error
 open Gsl_assist
 open Big_int
 
-let div (stack : rpc_stack) (do_backup : unit -> unit) =
+let div (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 1 then
       begin
          do_backup ();
+         evaln 2;
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el1 with
@@ -145,6 +146,10 @@ let div (stack : rpc_stack) (do_backup : unit -> unit) =
                   (stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "divisor matrix is non-square"))
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for division"))
             )
          |RpcComplexMatrix el1 -> (
             match gen_el2 with
@@ -217,7 +222,15 @@ let div (stack : rpc_stack) (do_backup : unit -> unit) =
                   (stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "divisor matrix is non-square"))
-            )
+            |_ ->
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible types for division"))
+               )
+         |_ ->
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for division"))
       end
    else
       raise (Invalid_argument "insufficient arguments for division")

@@ -39,6 +39,7 @@ type orpie_data = | RpcInt of Big_int.big_int
                   | RpcComplex of Complex.t
                   | RpcFloatMatrix of Gsl_matrix.matrix 
                   | RpcComplexMatrix of Gsl_matrix_complex.matrix
+                  | RpcVariable of string
 
 type angle_mode   = | Rad | Deg
 type base_mode    = | Bin | Oct | Hex | Dec
@@ -324,6 +325,8 @@ class rpc_stack =
                      done;
                      line := !line ^ "]";
                      !line
+                  |RpcVariable s ->
+                     "var: " ^ s
                   end
                in
                make_string stack.(index)

@@ -24,10 +24,11 @@ open Gsl_error
 open Gsl_assist
 
 
-let inv (stack : rpc_stack) (do_backup : unit -> unit) =
+let inv (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 0 then
       begin
          do_backup ();
+         evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloat el ->

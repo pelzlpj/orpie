@@ -23,10 +23,11 @@ open Rpc_stack
 open Gsl_assist
 open Big_int
 
-let pow (stack : rpc_stack) (do_backup : unit -> unit) =
+let pow (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 1 then
       begin
          do_backup ();
+         evaln 2;
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el1 with

@@ -23,10 +23,11 @@ open Rpc_stack
 open Gsl_assist
 open Big_int
 
-let sub (stack : rpc_stack) (do_backup: unit -> unit) =
+let sub (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
    if stack#length > 1 then
       begin
          do_backup ();
+         evaln 2;
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el1 with
@@ -140,6 +141,10 @@ let sub (stack : rpc_stack) (do_backup: unit -> unit) =
                stack#push gen_el2;
                raise (Invalid_argument "incompatible types for subtraction"))
             )
+         |_ ->
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
       end
    else
       raise (Invalid_argument "insufficient arguments for subtraction")
