@@ -841,6 +841,25 @@ Multiple keys may be bound to the same operation, if desired.
 
 
 %@% IF LATEX %@%
+\subsubsection{Removing Key Bindings}
+\label{unbindings}
+%@% ELSE %@%
+\subsection{Removing Key Bindings}
+%@% END-IF %@%
+Syntax: \\
+\texttt{unbind\_function \emph{key\_identifier}} \\
+\texttt{unbind\_command \emph{key\_identifier}} \\
+\texttt{unbind\_edit \emph{key\_identifier}} \\
+\texttt{unbind\_browse \emph{key\_identifier}} \\
+\texttt{unbind\_extended \emph{key\_identifier}} \\
+\texttt{unbind\_variable \emph{key\_identifier}} \\
+\texttt{unbind\_integer \emph{key\_identifier}} \\ \\
+These commands will remove key bindings associated with the various entry
+modes (functions, commands, editing operations, etc.).  The key identifiers
+should be defined using the syntax described in the previous section.
+
+
+%@% IF LATEX %@%
 \subsubsection{Creating Key Auto-Bindings}
 \label{autobindings}
 %@% ELSE %@%
@@ -882,6 +901,18 @@ registered by the rcfile--so you may wish to place the more commonly used comman
 abbreviations earlier in the list.
 
 Multiple command abbreviations may be bound to the same operation, if desired.
+
+
+%@% IF LATEX %@%
+\subsubsection{Removing Extended Command Abbreviations}
+\label{unabbreviations}
+%@% ELSE %@%
+\subsection{Removing Extended Command Abbreviations}
+%@% END-IF %@%
+Syntax: \texttt{unabbrev \emph{command\_abbreviation}} \\ \\
+This syntax can be used to remove an extended command abbreviation.  The command abbreviations
+should be quoted strings, as described in the previous section.
+
 
 %@% IF LATEX %@%
 \subsubsection{Creating Macros}

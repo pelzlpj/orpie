@@ -271,13 +271,71 @@ let register_binding_internal k k_string op =
       Hashtbl.add table_varedit_key op k_string
 
 
-
 (* convenience routine for previous *)
 let register_binding key_string op =
    (* given a string that represents a character, find the associated
     * curses chtype *)
    let k, string_rep = decode_single_key_string key_string in
    register_binding_internal k string_rep op
+
+
+(* Unregister key bindings. *)
+let unregister_function_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_function k in
+      Hashtbl.remove table_key_function k;
+      Hashtbl.remove table_function_key op
+   with Not_found -> ()
+
+let unregister_command_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_command k in
+      Hashtbl.remove table_key_command k;
+      Hashtbl.remove table_command_key op
+   with Not_found -> ()
+
+let unregister_edit_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_edit k in
+      Hashtbl.remove table_key_edit k;
+      Hashtbl.remove table_edit_key op
+   with Not_found -> ()
+
+let unregister_browse_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_browse k in
+      Hashtbl.remove table_key_browse k;
+      Hashtbl.remove table_browse_key op
+   with Not_found -> ()
+
+let unregister_extended_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_extended k in
+      Hashtbl.remove table_key_extended k;
+      Hashtbl.remove table_extended_key op
+   with Not_found -> ()
+
+let unregister_intedit_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_intedit k in
+      Hashtbl.remove table_key_intedit k;
+      Hashtbl.remove table_intedit_key op
+   with Not_found -> ()
+
+let unregister_varedit_binding key_string =
+   let k, _ = decode_single_key_string key_string in
+   try
+      let op = Hashtbl.find table_key_varedit k in
+      Hashtbl.remove table_key_varedit k;
+      Hashtbl.remove table_varedit_key op
+   with Not_found -> ()
+   
 
 
 
@@ -495,6 +553,55 @@ let parse_line line_stream =
          end
       | [< >] ->
          config_failwith "Expected a key string after keyword \"bind\""
+      end
+   | [< 'Kwd "unbind_function" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_function_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_function\"")
+      end
+   | [< 'Kwd "unbind_command" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_command_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_command\"")
+      end
+   | [< 'Kwd "unbind_edit" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_edit_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_edit\"")
+      end
+   | [< 'Kwd "unbind_browse" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_browse_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_browse\"")
+      end
+   | [< 'Kwd "unbind_extended" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_extended_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_extended\"")
+      end
+   | [< 'Kwd "unbind_integer" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_intedit_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_integer\"")
+      end
+   | [< 'Kwd "unbind_variable" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] ->
+         unregister_varedit_binding k
+      | [< >] ->
+         config_failwith ("Expected a key string after keyword \"unbind_variable\"")
       end
    | [< 'Kwd "autobind" >] ->
       begin match line_stream with parser
@@ -721,7 +828,11 @@ let open_rcfile rcfile_op =
 
 let rec process_rcfile rcfile_op =
    let line_lexer line = 
-      make_lexer ["include"; "bind"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; "#"] 
+      make_lexer 
+         ["include"; "bind"; "unbind_function"; "unbind_command";
+         "unbind_edit"; "unbind_browse"; "unbind_extended"; "unbind_integer";
+         "unbind_variable"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; 
+         "#"] 
       (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
