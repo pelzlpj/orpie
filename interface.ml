@@ -106,7 +106,7 @@ let max_matrix_size = 1000;;
 type interface_state_t =
    {version                            : string;                        (* program version string *)
    calc                                : rpc_calc;
-   scr                                 : screen_t;                      (* curses screen with two or three subwindows *)
+   mutable scr                         : screen_t;                      (* curses screen with two or three subwindows *)
    mutable run_calc                    : bool;                          (* exit when run_true becomes false *)
    mutable stack_bottom_row            : int;                           (* controls what portion of the stack is viewable *)
    mutable stack_selection             : int;                           (* in stack browsing mode, this item is selected *)

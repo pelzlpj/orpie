@@ -7,9 +7,6 @@ Definitely before release:
    * clean up the help panel; ideally, the hotkeys should be displayed
      in the main help window
 
-   * catch and handle SIGWINCH
-
-
 * create a parser that can read data structures entered into an ascii file,
   so I can use $EDITOR to enter big matrices (for example)
 

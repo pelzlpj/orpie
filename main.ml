@@ -76,27 +76,26 @@ calc#print_stack;;
 open Interface;;
 open Curses;;
 
-let initialize_screen () =
-   let std = initscr () in
-   assert (keypad std true);
-   assert (cbreak ());
-   assert (noecho ());
+
+
+(* create the subwindows corresponding to the different areas of the screen *)
+let create_windows screen =
    let height, width = get_size () in
    if height >= 24 then 
       if width >= 80 then
          (* full two-pane window provided *)
-         let left_win   = Some (subwin std (height - 2) 40 0 0) and
-         right_win  = subwin std (height - 2) 40 0 40 and
-         bottom_win = subwin std 2 80 (height - 2) 0 in
-         {stdscr = std; lines = height; cols = width; 
+         let left_win   = Some (subwin screen (height - 2) 40 0 0) and
+         right_win  = subwin screen (height - 2) 40 0 40 and
+         bottom_win = subwin screen 2 80 (height - 2) 0 in
+         {stdscr = screen; lines = height; cols = width; 
          help_win = left_win; hw_lines = (height - 2); hw_cols = 40;
          stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
          entry_win = bottom_win; ew_lines = 2; ew_cols = 80}
       else if width >= 40 then
          (* only the stack window is provided *)
-         let right_win = subwin std (height - 2) 40 0 0 and
-         bottom_win = subwin std 2 width (height - 2) 0 in
-         {stdscr = std; lines = height; cols = width; 
+         let right_win = subwin screen (height - 2) 40 0 0 and
+         bottom_win = subwin screen 2 width (height - 2) 0 in
+         {stdscr = screen; lines = height; cols = width; 
          help_win = None; hw_lines = 0; hw_cols = 0;
          stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
          entry_win = bottom_win; ew_lines = 2; ew_cols = 40}
@@ -108,7 +107,36 @@ let initialize_screen () =
       failwith "Orpie requires at least a 24 line window.")
 
 
+let initialize_screen () =
+   let std = initscr () in
+   assert (keypad std true);
+   assert (cbreak ());
+   assert (noecho ());
+   create_windows std
+
+
+
+(* Global: this is the interface state variable used for the calculator *)
 let iface = Interface.make calc (initialize_screen ());;
+
+
+(* FIXME: there is a bug here somewhere.  Randomly resizing the screen
+ * tends to cause a failed assertion somewhere in interface_main.ml.
+ * Hopefully Ocaml 3.07 will help to track this down. *)
+let handle_resize v =
+   (* reset ncurses *)
+   endwin ();
+   assert (refresh ());
+   (* reallocate the subwindows and refresh the screen *)
+   let windows = create_windows iface.scr.stdscr in
+   iface.scr <- windows;
+   Interface_main.handle_refresh iface
+
+
+let sigwinch = 28 in
+Sys.set_signal sigwinch (Sys.Signal_handle handle_resize)
+
+
 try
    Interface_main.run iface
 with error ->
@@ -116,7 +144,7 @@ with error ->
    Printf.fprintf stderr "Caught error at toplevel:\n%s\n" (Printexc.to_string error);;
 
 
-(* For some reason this call fails if it is moved to rpc_interface... *)
+(* For some reason this call fails if it is moved to interface_draw... *)
 endwin ();;
 
 
