@@ -1,14 +1,20 @@
 Name:           orpie
-Version:        1.4.0
+Version:        1.5.0
 Release:        1
 Summary:        A fullscreen console-based RPN calculator application.
-URL:            http://www.eecs.umich.edu/~pelzlpj/orpie/
+
 Group:          Utilities/Math
 License:        GPL
-Source:         %{name}-%{version}.tar.gz
-BuildRoot:      /var/tmp/%{name}-root
-Requires:       ocaml >= 3.07, gsl >= 1.4, ncurses
-BuildRequires:  ocaml, gsl-devel, ncurses-devel
+URL:            http://www.eecs.umich.edu/~pelzlpj/orpie/
+Source0:        %{name}-%{version}.tar.gz
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  ocaml
+BuildRequires:  gsl-devel
+BuildRequires:  ncurses-devel
+Requires:       ocaml >= 3.07
+Requires:       gsl >= 1.4
+Requires:       ncurses
 
 %description
 orpie is a fullscreen console-based RPN calculator that uses the curses
@@ -18,43 +24,37 @@ features include extensive scientific calculator functionality, command
 completion, and a visible interactive stack.
 
 %prep
+%setup -q
 
-%setup
 
 %build
+%configure
+make %{?_smp_mflags}
 
-CFLAGS="$RPM_OPT_FLAGS" LDFLAGS=-s %{configure}
-%{__make}
 
 %install
-[  %{buildroot} != "/" ] && rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
 
-
-install -D -m 755 orpie-curses-keys.opt %{buildroot}%{_bindir}/orpie-curses-keys
-install -D -m 755 orpie.opt             %{buildroot}%{_bindir}/orpie
-
-install -D -m 644 orpierc               %{buildroot}%{_sysconfdir}/orpierc
-
-install -D -m 644 doc/orpie.1              %{buildroot}%{_mandir}/man1/orpie.1
-install -D -m 644 doc/orpie-curses-keys.1  %{buildroot}%{_mandir}/man1/orpie-curses-keys.1
-install -D -m 644 doc/orpierc.5            %{buildroot}%{_mandir}/man5/orpierc.5
+%check || :
+#make test
+#make check
 
 %clean
-[  %{buildroot} != "/" ] && rm -rf %{buildroot}
+rm -rf $RPM_BUILD_ROOT
+
 
 %files
 %defattr(-, root, root)
-%{_bindir}/orpie-curses-keys
-%{_bindir}/orpie
-%{_mandir}/man1/orpie.1.gz
-%{_mandir}/man1/orpie-curses-keys.1.gz
-%{_mandir}/man5/orpierc.5.gz
-
 %config %{_sysconfdir}/orpierc
-
 %doc doc/manual.html doc/manual.pdf doc/manual.tex.in doc/TODO README COPYING ChangeLog
+%{_bindir}/*
+%{_mandir}/man[^3]/*
+
 
 %changelog
+* Mon Mar 21  2005 Chris Petersen <rpm@forevermore.net>
+- Update spec to match fedora guidelines
 * Mon Aug 2  2004 Chris Petersen <rpm@forevermore.net>
 - Minor changes to spec format for better consistency and readability
 * Tue Jun 15  2004 Chris Petersen <rpm@forevermore.net>
