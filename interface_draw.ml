@@ -248,7 +248,7 @@ let draw_entry (iface : interface_state_t) =
          draw_entry_string "<enter extended command>" 0
       else
          let is_function =
-            match (translate_extended_abbrev iface.matched_extended_entry) with
+            match (Rcfile.translate_extended_abbrev iface.matched_extended_entry) with
             |Function ff -> true
             |_ -> false
          in

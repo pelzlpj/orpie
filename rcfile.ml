@@ -405,10 +405,10 @@ let open_rcfile () =
       homedir ^ "/.orpierc"
    in
    let prefix_rcfile = Install.prefix ^ "/etc/orpierc" in
-   try open_in home_rcfile
+   try (open_in home_rcfile, home_rcfile)
    with Sys_error error_str ->
       begin
-         try open_in prefix_rcfile
+         try (open_in prefix_rcfile, prefix_rcfile)
          with Sys_error error_str -> failwith 
          ("Could not find configuration file \"" ^ home_rcfile ^ "\" or \"" ^ 
          prefix_rcfile ^ "\" .")
@@ -420,7 +420,7 @@ let process_rcfile () =
       make_lexer ["bind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
-   let config_stream = open_rcfile () in
+   let config_stream, rcfile_filename = open_rcfile () in
    let line_num = ref 0 in
    try
       while true do
@@ -437,12 +437,12 @@ let process_rcfile () =
                parse_line line_stream
             with
                |Config_failure s ->
-                  (let error_str = Printf.sprintf "Syntax error on line %d of \"orpierc\": %s"
-                  !line_num s in
+                  (let error_str = Printf.sprintf "Syntax error on line %d of \"%s\": %s"
+                  !line_num rcfile_filename s in
                   failwith error_str)
                |Stream.Failure ->
-                  failwith (Printf.sprintf "Syntax error on line %d of \"orpierc\"" 
-                  !line_num)
+                  failwith (Printf.sprintf "Syntax error on line %d of \"%s\"" 
+                  !line_num rcfile_filename)
 
       done
    with
