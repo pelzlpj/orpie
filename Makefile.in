@@ -99,10 +99,12 @@ $(NAME2).opt: subdirs_opt utility.cmx curses-keys.cmx
 $(NAME).static-opt: subdirs_opt $(CMX) my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
 	curses.cmx $(GSL_CMX) $(CMX)
+	strip $(NAME).static-opt
 
 $(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
 	utility.cmx curses-keys.cmx
+	strip $(NAME2).static-opt
 
 my-static-libs:
 	ar cr libmycurses.a curses/*.o
@@ -144,18 +146,20 @@ install-indep:
    install -m 644 orpierc /etc; \
 	else install -m 644 orpierc $(prefix)/etc; \
 	fi
+	install -m 644 -D doc/orpie.1 $(prefix)/man/man1/orpie.1
+	install -m 644 -D doc/orpierc.5 $(prefix)/man/man5/orpierc.5
 
 install: install-indep
-	cp -f $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
-	cp -f $(NAME2).$(OCAMLBEST) $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 -D $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 -D $(NAME2).$(OCAMLBEST) $(BINDIR)/$(NAME2)$(EXE)
 
 install-byte: install-indep
-	cp -f $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
-	cp -f $(NAME2).byte $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 -D $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 -D $(NAME2).byte $(BINDIR)/$(NAME2)$(EXE)
 
 install-opt: install-indep
-	cp -f $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
-	cp -f $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 -D $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 -D $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
 
 uninstall:
 	rm -f $(BINDIR)/$(NAME)$(EXE)
@@ -164,6 +168,8 @@ uninstall:
 	rm -f /etc/orpierc; \
 	else rm -f $(prefix)/etc/orpierc; \
 	fi
+	rm -f $(prefix)/man/man1/orpie.1
+	rm -f $(prefix)/man/man5/orpierc.5
 
 
 # generic rules
