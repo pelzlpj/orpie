@@ -78,7 +78,7 @@
   { RA4 r_##tr(f(a_##ta(aa),a_##tb(ab),a_##tc(ac),a_##td(ad))); }
 #define ML5(f,tr,ta,tb,tc,td,te) \
   value mlcurses_##f(value aa,value ab,value ac,value ad,value ae) \
-  { RA5 r_##tr(f(a_##ta(aa),a_##tb(ab),a_##tc(ac),a_##td(ad),a_##te(ad))); }
+  { RA5 r_##tr(f(a_##ta(aa),a_##tb(ab),a_##tc(ac),a_##td(ad),a_##te(ae))); }
 
 #define ML7(f,tr,ta,tb,tc,td,te,tf,tg) \
   value mlcurses_##f##_bytecode(value *a,int n) \
