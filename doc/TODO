@@ -13,8 +13,6 @@ Orpie To-Do List (roughly in order of priority)
 
 * add finance functions
 
-* refactor do_main_loop, draw_help, maybe other massive functions
-
 * separate out UI from calculator object
    - Rpc_stack depends on Rcfile, which is really part of the UI
    - Rpc_stack.get_display_string() and related routines (arguably)

@@ -94,44 +94,38 @@ let draw_stack (iface : interface_state_t) =
       assert (wmove iface.scr.stack_win 
       (iface.scr.sw_lines + iface.stack_bottom_row - 1 - line) 0);
       wclrtoeol iface.scr.stack_win;
-      begin
-         if line = iface.stack_selection && 
-         iface.interface_mode = BrowsingMode then
-            wattron iface.scr.stack_win WA.reverse
-         else
-            ()
-      end;
-      begin
-         if len > iface.scr.sw_cols - 7 then
-            (* need to truncate the string *)
-            let line_string =
-               if line = iface.stack_selection && 
-               iface.interface_mode = BrowsingMode then
-                  let sub_s = 
-                     if iface.horiz_scroll < len - iface.scr.sw_cols + 7 then
-                        String.sub s iface.horiz_scroll (iface.scr.sw_cols - 7)
-                     else
-                        String.sub s (len - iface.scr.sw_cols + 7) 
-                        (iface.scr.sw_cols - 7)
-                  in
-                  print_numbered_line line sub_s
-               else
-                  let sub_s = String.sub s 0 (iface.scr.sw_cols - 10) in
-                  print_numbered_line line (sub_s ^ "...")
-            in
-            assert (waddstr iface.scr.stack_win line_string)
-         else
-            let spacer = String.make (iface.scr.sw_cols - 7 - len) ' ' in
-            let line_string = print_numbered_line line (spacer ^ s) in 
-            assert (waddstr iface.scr.stack_win line_string)
-      end;
-      begin
-         if line = iface.stack_selection && 
-         iface.interface_mode = BrowsingMode then
-            wattroff iface.scr.stack_win WA.reverse
-         else
-            ()
-      end
+      if line = iface.stack_selection && 
+      iface.interface_mode = BrowsingMode then
+         wattron iface.scr.stack_win WA.reverse
+      else
+         ();
+      if len > iface.scr.sw_cols - 7 then begin
+         (* need to truncate the string *)
+         let line_string =
+            if line = iface.stack_selection && 
+            iface.interface_mode = BrowsingMode then
+               let sub_s = 
+                  if iface.horiz_scroll < len - iface.scr.sw_cols + 7 then
+                     String.sub s iface.horiz_scroll (iface.scr.sw_cols - 7)
+                  else
+                     String.sub s (len - iface.scr.sw_cols + 7) 
+                     (iface.scr.sw_cols - 7)
+               in
+               print_numbered_line line sub_s
+            else
+               let sub_s = String.sub s 0 (iface.scr.sw_cols - 10) in
+               print_numbered_line line (sub_s ^ "...")
+         in
+         assert (waddstr iface.scr.stack_win line_string)
+      end else
+         let spacer = String.make (iface.scr.sw_cols - 7 - len) ' ' in
+         let line_string = print_numbered_line line (spacer ^ s) in 
+         assert (waddstr iface.scr.stack_win line_string);
+      if line = iface.stack_selection && 
+      iface.interface_mode = BrowsingMode then
+         wattroff iface.scr.stack_win WA.reverse
+      else
+         ();
    done;
    assert (wnoutrefresh iface.scr.stack_win);
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
