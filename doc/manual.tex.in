@@ -721,6 +721,35 @@ abbreviations earlier in the list.
 Multiple command abbreviations may be bound to the same operation, if desired.
 
 %@% IF LATEX %@%
+\subsubsection{Creating Macros}
+\label{macros}
+%@% ELSE %@%
+\subsection{Creating Macros}
+%@% END-IF %@%
+Syntax: \texttt{macro \emph{key\_identifier macro\_string}} \\ \\
+You can use this syntax to cause a single keypress (the \emph{key\_identifier})
+to be interpreted as the series of keypresses listed in \emph{macro\_string}.
+The syntax for defining a keypress is the same as that defined in 
+%@% IF LATEX %@%
+Section \ref{bindings}.  
+%@% ELSE %@%
+the section on CREATING KEY BINDINGS.
+%@% END-IF %@%
+The macro string should be a list of whitespace-separated keypresses, e.g.
+\texttt{"2 <return> 2 +"} (including quotes).
+
+This macro syntax provides a way to create small programs; by way of example,
+the default orpierc file includes macros for the base 2 logarithm and the
+binary entropy function (bound to \texttt{L} and \texttt{H}, respectively).
+
+Macros may call other macros recursively.  However, take care that a macro does
+not call \emph{itself} recursively; Orpie will not trap the infinite loop.
+
+Note that extended commands may be accessed within macros.  For example,
+\texttt{macro "A" "' a b o u t <return>"} would bind \texttt{A} to display
+the ``about Orpie'' screen.
+
+%@% IF LATEX %@%
 \subsection{Configuration Variables}
 \label{variables}
 The following configuration variables may be set as described in Section \ref{setvar}:

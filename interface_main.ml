@@ -1392,6 +1392,19 @@ let do_main_loop (iface : interface_state_t) =
       if key = Key.resize then
          handle_resize iface
       else
+         (* check whether this keypress is a macro *)
+         try
+            let ch_list = Rcfile.macro_of_key key in
+            let rec push_macro chars =
+               match chars with
+               | [] -> ()
+               | head :: tail ->
+                  let _ = ungetch head in 
+                  push_macro tail
+            in
+            push_macro ch_list
+         with Not_found ->
+         (* if it's not a macro, go ahead and process it *)
          match iface.interface_mode with
          |StandardEntryMode ->
             begin

@@ -1,12 +1,10 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
-* detect singular matrices when performing inversion
-
-* implement rcfile macros; e.g. base 2 logarithm could be implemented as
-  macro "L" "'ln<enter>2<enter>'ln<enter>/"
 
 * create a parser that can read data structures entered into an ascii file,
   so one can use $EDITOR to enter big matrices (for example)
+
+* detect ill-conditioned complex matrices when performing inversion
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but
   "\"" -> extended entry of *any* command/operation (sin, cos, rad, rect, etc.)

@@ -43,6 +43,7 @@ let table_extended_key = Hashtbl.create 20;;
 let table_key_extended = Hashtbl.create 20;;
 let table_intedit_key  = Hashtbl.create 20;;
 let table_key_intedit  = Hashtbl.create 20;;
+let table_key_macro    = Hashtbl.create 20;;
 
 
 (* Default datafile for loading and saving state *)
@@ -79,6 +80,8 @@ let intedit_of_key key =
    Hashtbl.find table_key_intedit key;;
 let key_of_intedit edit_op =
    Hashtbl.find table_intedit_key edit_op;;
+let macro_of_key key =
+   Hashtbl.find table_key_macro key;;
 
 
 (* abbreviations used in extended entry mode *)
@@ -111,36 +114,10 @@ let abbrev_of_operation op =
    Hashtbl.find command_abbrev_table op;;
 
 
-(* Register a key binding.  This adds hash table entries for translation
- * between curses chtypes and commands (in both directions). *)
-let register_binding key_string op =
-   let make_entries k k_string =
-      begin
-  (*       Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
-         flush stderr; *)
-         match op with
-         |Function f ->
-            (Hashtbl.add table_key_function k op;
-            Hashtbl.add table_function_key op k_string)
-         |Command c ->
-            (Hashtbl.add table_key_command k op;
-            Hashtbl.add table_command_key op k_string)
-         |Edit e ->
-            (Hashtbl.add table_key_edit k op;
-            Hashtbl.add table_edit_key op k_string)
-         |Browse b ->
-            (Hashtbl.add table_key_browse k op;
-            Hashtbl.add table_browse_key op k_string)
-         |Extend e ->
-            (Hashtbl.add table_key_extended k op;
-            Hashtbl.add table_extended_key op k_string)
-         |IntEdit i ->
-            (Hashtbl.add table_key_intedit k op;
-            Hashtbl.add table_intedit_key op k_string)
-      end
-   (* given a string that represents a character, find the associated
-    * curses chtype *)
-   and decode_alias str =
+
+
+let decode_single_key_string key_string =
+   let decode_alias str =
       match str with
       |"<esc>" -> 27
       |"<tab>" -> 9
@@ -183,7 +160,7 @@ let register_binding key_string op =
    (* Note: is there a way to use raw strings here?  Getting tired of those
     * backslashes...*)
    let cm_re = Str.regexp
-   "^\\(\\(\\\\M\\\\C\\|\\\\C\\\\M\\)\\|\\(\\\\M\\)\\|\\(\\\\C\\)\\)?\\(.+\\)"
+   "^\\(\\(\\\\M\\\\C\\|\\\\C\\\\M\\)\\|\\(\\\\M\\)\\|\\(\\\\C\\)\\)?\\(<.+>\\|.\\)"
    in
    if Str.string_match cm_re key_string 0 then
       let has_meta_ctrl =
@@ -201,7 +178,7 @@ let register_binding key_string op =
             let uc_main_key = String.uppercase main_key in
             let mc_chtype = ((int_of_char uc_main_key.[0]) + 64) in
             let mc_str = "M-C-" ^ uc_main_key in
-            make_entries mc_chtype mc_str
+            (mc_chtype, mc_str)
          else
             config_failwith ("Cannot apply \\\\M\\\\C to key \"" ^ main_key ^ "\";\n" ^
                        "octal notation might let you accomplish this.")
@@ -209,7 +186,7 @@ let register_binding key_string op =
          if String.length main_key = 1 then
             let m_chtype = ((int_of_char main_key.[0]) + 128) in
             let m_str = "M-" ^ main_key in
-            make_entries m_chtype m_str
+            (m_chtype, m_str)
          else
             config_failwith ("Cannot apply \\\\M to key \"" ^ main_key ^ "\";\n" ^
                        "octal notation might let you accomplish this.")
@@ -218,7 +195,7 @@ let register_binding key_string op =
             let uc_main_key = String.uppercase main_key in
             let c_chtype = ((int_of_char uc_main_key.[0]) - 64) in
             let c_str = "C-" ^ uc_main_key in
-            make_entries c_chtype c_str
+            (c_chtype, c_str)
          else
             config_failwith ("Cannot apply \\\\C to key \"" ^ main_key ^ "\";\n" ^
                        "octal notation might let you accomplish this.")
@@ -226,11 +203,64 @@ let register_binding key_string op =
          let octal_regex = Str.regexp "^0o" in
          try
             let pos = Str.search_forward octal_regex key_string 0 in
-            make_entries (int_of_string key_string) ("\\" ^ Str.string_after key_string
-            2)
+            ((int_of_string key_string), ("\\" ^ Str.string_after key_string
+            2))
          with
-            _ -> make_entries (decode_alias main_key) main_key
+            _ -> ((decode_alias main_key), main_key)
+   else
+      config_failwith ("Unable to match binding string with standard regular expression.")
 
+
+
+
+(* Register a key binding.  This adds hash table entries for translation
+ * between curses chtypes and commands (in both directions). *)
+let register_binding key_string op =
+   let make_entries k k_string =
+      begin
+  (*       Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
+         flush stderr; *)
+         match op with
+         |Function f ->
+            (Hashtbl.add table_key_function k op;
+            Hashtbl.add table_function_key op k_string)
+         |Command c ->
+            (Hashtbl.add table_key_command k op;
+            Hashtbl.add table_command_key op k_string)
+         |Edit e ->
+            (Hashtbl.add table_key_edit k op;
+            Hashtbl.add table_edit_key op k_string)
+         |Browse b ->
+            (Hashtbl.add table_key_browse k op;
+            Hashtbl.add table_browse_key op k_string)
+         |Extend e ->
+            (Hashtbl.add table_key_extended k op;
+            Hashtbl.add table_extended_key op k_string)
+         |IntEdit i ->
+            (Hashtbl.add table_key_intedit k op;
+            Hashtbl.add table_intedit_key op k_string)
+      end
+   in
+   (* given a string that represents a character, find the associated
+    * curses chtype *)
+   let k, string_rep = decode_single_key_string key_string in
+   make_entries k string_rep
+
+
+
+(* Register a macro.  This parses the macro string and divides it into multiple
+ * whitespace-separated keypresses, then stores the list of keypresses in the
+ * appropriate hashtable. *)
+let register_macro key keys_string =
+   let macro_ch = fst (decode_single_key_string key) in
+   let split_regex = Str.regexp "[ \t]+" in
+   let keys_list = Str.split split_regex keys_string in
+   let ch_of_key_string k_string =
+      fst (decode_single_key_string k_string)
+   in
+   let ch_list = List.rev_map ch_of_key_string keys_list in
+   Hashtbl.add table_key_macro macro_ch ch_list
+      
 
 
 (* translate a command string to the command type it represents *)
@@ -376,9 +406,7 @@ let parse_line line_stream =
       | [< 'String key >] ->
          begin match line_stream with parser
          | [< 'String generated_keys >] ->
-            (Printf.fprintf stderr "registering macro \"%s\" -> \"%s\"\n"
-            key generated_keys;
-            flush stderr)
+            register_macro key generated_keys
          | [< >] ->
             config_failwith ("Expected a key string after \"macro \"" ^ key ^ "\"")
          end

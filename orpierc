@@ -144,5 +144,14 @@ abbrev "neg"     function_neg
 abbrev "about"   command_about
 
 
+# macro examples
+# base 2 logarithm
+macro "L" "l 2 l /"
+# or alternatively, using extended command syntax:
+#macro "L" "' l n <return> 2 <return> ' l n <return> /"
+
+# binary entropy function (makes use of the "L" macro)
+macro "H" "<return> 1 - n <return> L * <pageup> <return> L * + n"
+
 
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  
