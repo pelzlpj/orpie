@@ -37,7 +37,7 @@ type help_mode_t = | Standard | Extended;;
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry;;
 
-type interface_mode_t = | StandardEntryMode | ExtendedEntryMode | BrowsingMode;;
+type interface_mode_t = | StandardEntryMode | IntEditMode | ExtendedEntryMode | BrowsingMode;;
 
 type complex_entry_element_t = 
    {mutable re_mantissa : string; mutable re_exponent : string;

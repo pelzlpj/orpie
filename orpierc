@@ -14,11 +14,14 @@ bind "n" edit_minus
 bind "<backspace>" edit_backspace
 bind "<return>" edit_enter
 bind "<space>" edit_scientific_notation_base
-bind "#" edit_integer
+bind "#" edit_begin_integer
 bind "(" edit_complex
 bind "[" edit_matrix
 bind "," edit_separator
 bind "<" edit_angle
+
+# keys for "integer edit" operations
+bind "#" integer_cancel
 
 # keys for "function" operations, which operate on an argument
 bind "+" function_add

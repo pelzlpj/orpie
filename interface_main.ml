@@ -222,6 +222,7 @@ let push_entry (iface : interface_state_t) =
 
 (* handle an 'enter' keypress *)
 let handle_enter (iface : interface_state_t) =
+   iface.interface_mode <- StandardEntryMode;
    try
       (if iface.has_entry then
          push_entry iface
@@ -237,6 +238,7 @@ let handle_enter (iface : interface_state_t) =
 let handle_begin_int (iface : interface_state_t) =
    if iface.entry_type = FloatEntry then
       (iface.entry_type <- IntEntry;
+      iface.interface_mode <- IntEditMode;
       iface.int_entry_buffer <- "";
       draw_update_entry iface)
    else
@@ -537,6 +539,13 @@ let handle_scientific_notation (iface : interface_state_t) =
          else
             ()
    end;
+   draw_update_entry iface
+
+
+(* cancel integer entry mode *)
+let handle_exit_int (iface : interface_state_t) =
+   iface.interface_mode <- StandardEntryMode;
+   iface.entry_type <- FloatEntry;
    draw_update_entry iface
 
 
@@ -1298,28 +1307,27 @@ let do_main_loop (iface : interface_state_t) =
                let edit_op = Rcfile.edit_of_key key in
                match edit_op with
                |Edit ee ->
-                  begin
-                     match ee with
-                     |Digit ->
-                        handle_digit iface key
-                     |Enter ->
-                        handle_enter iface
-                     |Backspace ->
-                        handle_backspace iface
-                     |Minus ->
-                        handle_minus iface
-                     |BeginInteger ->
-                        handle_begin_int iface
-                     |BeginComplex ->
-                        handle_begin_complex iface
-                     |BeginMatrix ->
-                        handle_begin_matrix iface
-                     |Separator ->
-                        handle_separator iface
-                     |Angle ->
-                        handle_angle iface
-                     |SciNotBase ->
-                        handle_scientific_notation iface
+                  begin match ee with
+                  |Digit ->
+                     handle_digit iface key
+                  |Enter ->
+                     handle_enter iface
+                  |Backspace ->
+                     handle_backspace iface
+                  |Minus ->
+                     handle_minus iface
+                  |BeginInteger ->
+                     handle_begin_int iface
+                  |BeginComplex ->
+                     handle_begin_complex iface
+                  |BeginMatrix ->
+                     handle_begin_matrix iface
+                  |Separator ->
+                     handle_separator iface
+                  |Angle ->
+                     handle_angle iface
+                  |SciNotBase ->
+                     handle_scientific_notation iface
                   end
                |_ ->
                   failwith "Non-Edit operation found in Edit Hashtbl"
@@ -1347,6 +1355,41 @@ let do_main_loop (iface : interface_state_t) =
                            failwith "Non-Command operation found in Command Hashtbl"
                      with Not_found ->
                         handle_digit iface key
+            end
+         |IntEditMode ->
+            begin 
+               try 
+                  let edit_op = Rcfile.edit_of_key key in
+                  match edit_op with
+                  |Edit ee ->
+                     begin match ee with
+                     |Digit ->
+                        handle_digit iface key
+                     |Enter ->
+                        handle_enter iface
+                     |Backspace ->
+                        handle_backspace iface
+                     |Minus ->
+                        handle_minus iface
+                     |SciNotBase ->
+                        handle_scientific_notation iface
+                     |_ -> raise Not_handled
+                     end
+                  |_ ->
+                     failwith "Non-Edit operation found in Edit Hashtbl"
+               with Not_found | Not_handled ->
+                  try
+                     let intedit_op = Rcfile.intedit_of_key key in
+                     match intedit_op with
+                     |IntEdit ie ->
+                        begin match ie with
+                        |ExitIntEdit ->
+                           handle_exit_int iface
+                        end
+                     |_ ->
+                        failwith "Non-IntEdit operation found in IntEdit Hashtbl"
+                  with Not_found | Not_handled ->
+                     handle_digit iface key
             end
          |ExtendedEntryMode ->
             begin

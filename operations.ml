@@ -47,11 +47,14 @@ type browse_operation   = | EndBrowse
 
 type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 
+type integer_edit_operation = | ExitIntEdit;;
+
 type operation = | Function of function_operation 
                  | Command of command_operation
                  | Edit of edit_operation
                  | Browse of browse_operation
-                 | Extend of extended_operation;;
+                 | Extend of extended_operation
+                 | IntEdit of integer_edit_operation;;
 
 
 

@@ -41,6 +41,9 @@ let table_key_browse   = Hashtbl.create 20;;
 let table_browse_key   = Hashtbl.create 20;;
 let table_extended_key = Hashtbl.create 20;;
 let table_key_extended = Hashtbl.create 20;;
+let table_intedit_key  = Hashtbl.create 20;;
+let table_key_intedit  = Hashtbl.create 20;;
+
 
 (* Default datafile for loading and saving state *)
 let datafile = ref "~/.orpie/calc_state";;
@@ -70,6 +73,10 @@ let extended_of_key key =
    Hashtbl.find table_key_extended key;;
 let key_of_extended ex_op =
    Hashtbl.find table_extended_key ex_op;;
+let intedit_of_key key =
+   Hashtbl.find table_key_intedit key;;
+let key_of_intedit edit_op =
+   Hashtbl.find table_intedit_key edit_op;;
 
 
 (* abbreviations used in extended entry mode *)
@@ -125,6 +132,9 @@ let register_binding key_string op =
          |Extend e ->
             (Hashtbl.add table_key_extended k op;
             Hashtbl.add table_extended_key op k_string)
+         |IntEdit i ->
+            (Hashtbl.add table_key_intedit k op;
+            Hashtbl.add table_intedit_key op k_string)
       end
    (* given a string that represents a character, find the associated
     * curses chtype *)
@@ -245,7 +255,7 @@ let operation_of_string command_str =
    |"function_tanh"                 -> (Function Tanh)
    |"function_re"                   -> (Function Re)
    |"function_im"                   -> (Function Im)
-   |"edit_integer"                  -> (Edit BeginInteger)
+   |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)
    |"edit_separator"                -> (Edit Separator)
@@ -289,6 +299,7 @@ let operation_of_string command_str =
    |"extended_exit"                 -> (Extend ExitExtended)
    |"extended_enter"                -> (Extend EnterExtended)
    |"extended_backspace"            -> (Extend ExtBackspace)
+   |"integer_cancel"                -> (IntEdit ExitIntEdit)
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
    end
 

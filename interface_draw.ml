@@ -246,6 +246,8 @@ let draw_entry (iface : interface_state_t) =
    begin match iface.interface_mode with
    |StandardEntryMode ->
       draw_entry_string data_string 0
+   |IntEditMode ->
+      draw_entry_string data_string 0
    |ExtendedEntryMode ->
       let highlight_len = String.length iface.extended_entry_buffer in
       if highlight_len = 0 then
