@@ -10,34 +10,40 @@ Potential improvements for rpc2:
    * separate threads for GUI and calc, so computations
      can be interrupted
 
+   * slightly improved UI
 
 ------------------------------------------------------------------------
 
-What's good about OCaml:
+New interface ideas (see "design-sample.txt"):
 
-* Pretty syntax, for the most part.  The "let name = expr in" construct
-  is nice, as is pattern matching, class formulation, recursive
-  functions, etc.
+   * Design for 80 columns; separate window panels for stack (right
+     (side?) and some sort of status/help window (left side)
 
-* Strong typing/type safety.
+   * Reserve a function entry key.  The current behavior allows one
+     to just start typing a function name, e.g. "ex" -> exp( ).  This
+     behavior will not work well with custom keybindings.
 
-* Type inferrence.
+     New behavior: use a key such as 'f' to indicate function entry.
+     So the user types "fex" -> exp( ).  It involves more keypresses
+     initially, but there will be fewer key binding conflicts to worry
+     about.  Also, the extra keypresses could be factored away if some
+     sort of macro system is involved, e.g.
 
-* First-class functions.
+         macro "x" "fex<enter>"
 
-* Excellent (and fast!) standard library.
+     would permit the user to bind exp to a single press of 'x'.
 
+   * What about the status panel?  It should contain a list of
+     calculator flags, for one thing (integer arithmetic base, complex
+     display format, etc.), but this won't take up much room.  Perhaps a
+     list of common function names?
 
-What's not so good:
+   * Color is probably not very helpful; boldface seems to work well to
+     set things off.
 
-* Type safety requirements can be limiting; sometimes duplicate code is
-  required simply to satisfy the parser.  Polymorphism doesn't seem to
-  be as powerful as indicated, unless I'm doing it wrong.
+   * Provide smarter errors when possible, like "incompatible matrix
+     dimensions for MULT" or "incompatible arguments for ADD"
 
-* Error messages can be hard to decipher.
-
-* Imperative syntax is bit of a pain at times.  All too frequently
-  imperative blocks must be closed off with () or begin...end.
 
 
 
