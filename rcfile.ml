@@ -14,6 +14,8 @@ let table_function_key = Hashtbl.create 20;;
 let table_key_command  = Hashtbl.create 20;;
 let table_command_key  = Hashtbl.create 20;;
 let table_key_edit     = Hashtbl.create 20;;
+let table_key_browse   = Hashtbl.create 20;;
+let table_browse_key   = Hashtbl.create 20;;
 
 
 let function_of_key key =
@@ -26,6 +28,10 @@ let key_of_command command =
    Hashtbl.find table_command_key command;;
 let edit_of_key key =
    Hashtbl.find table_key_edit key;;
+let browse_of_key key =
+   Hashtbl.find table_key_browse key;;
+let key_of_browse browse_op =
+   Hashtbl.find table_browse_key browse_op;;
 
 
 
@@ -45,6 +51,9 @@ let register_binding key_string op =
             Hashtbl.add table_command_key op k_string)
          |Edit e ->
             Hashtbl.add table_key_edit k op
+         |Browse b ->
+            (Hashtbl.add table_key_browse k op;
+            Hashtbl.add table_browse_key op k_string)
       end
    (* given a string that represents a character, find the associated
     * curses chtype *)
@@ -205,6 +214,18 @@ let parse_line line_stream =
                            register_binding key (Command Swap)
                         |"command_dup" ->
                            register_binding key (Command Dup)
+                        |"command_begin_browsing" ->
+                           register_binding key (Command BeginBrowse)
+                        |"browse_end_browsing" ->
+                           register_binding key (Browse EndBrowse)
+                        |"browse_scroll_left" ->
+                           register_binding key (Browse ScrollLeft)
+                        |"browse_scroll_right" ->
+                           register_binding key (Browse ScrollRight)
+                        |"browse_prev_line" ->
+                           register_binding key (Browse PrevLine)
+                        |"browse_next_line" ->
+                           register_binding key (Browse NextLine)
                         |_ ->
                            config_failwith ("Unknown command name \"" ^ command ^ "\"")
                   end

@@ -159,7 +159,7 @@ class rpc_stack =
             else (* line_num > len *)
                ""
          else (* line_num <= 0 *)
-            raise (Stack_error ("cannot print nonexistent stack element" ^
+            raise (Stack_error ("cannot display nonexistent stack element " ^
                (string_of_int line_num)))
 
 

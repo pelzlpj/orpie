@@ -6,14 +6,18 @@
 type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Pow | Sqrt | Abs | Arg | Exp | Ln 
                           | Conj ;;
-type command_operation  = | Drop | Clear | Swap | Dup;;
+type command_operation  = | Drop | Clear | Swap | Dup | BeginBrowse;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
-                          | Separator ;;
+                          | Separator;;
+type browse_operation   = | EndBrowse
+                          | ScrollLeft | ScrollRight
+                          | PrevLine | NextLine;;
 
 type operation = | Function of function_operation 
                  | Command of command_operation
-                 | Edit of edit_operation;;
+                 | Edit of edit_operation
+                 | Browse of browse_operation;;
 
 
 

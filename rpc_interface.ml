@@ -41,6 +41,8 @@ type rpc_interface_help_mode = | Standard | Extended;;
 type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry 
                                | FloatMatrixEntry | ComplexMatrixEntry;;
 
+type rpc_interface_mode = | StandardMode | BrowsingMode;;
+
 type complex_entry_element = 
    {mutable re_mantissa : string; mutable re_exponent : string; mutable re_has_dot : bool; 
     mutable im_mantissa : string; mutable im_exponent : string; mutable im_has_dot : bool};;
@@ -92,6 +94,9 @@ object(self)
    val calc = c
    val mutable scr = std                      (* curses screen with two or three subwindows *)
    val mutable stack_bottom_row = 1           (* controls what portion of the stack is viewable *)
+   val mutable stack_selection = 1            (* in stack browsing mode, this item is selected *)
+   val mutable interface_mode = StandardMode  (* standard mode or stack browsing mode *)
+   val mutable horiz_scroll = 0
    val mutable help_mode = Extended           (* controls the mode of context-sensitive help *)
 
    val mutable has_entry = false              (* whether or not the entry buffer has anything in it *)
@@ -151,18 +156,44 @@ object(self)
       for line = stack_bottom_row to pred (stack_bottom_row + scr.sw_lines) do
          let s = calc#get_display_line line in
          let len = String.length s in
-         assert (wmove scr.stack_win (scr.sw_lines - line) 0);
+         assert (wmove scr.stack_win 
+         (scr.sw_lines + stack_bottom_row - 1 - line) 0);
          wclrtoeol scr.stack_win;
-         if len > scr.sw_cols - 7 then
-            (* need to truncate the string *)
-            let sub_s = String.sub s 0 (scr.sw_cols - 10) in 
-            let line_string = sprintf "%2d:   %s..." line sub_s in
-            assert (waddstr scr.stack_win line_string)
-         else
-            let spacer = String.make (scr.sw_cols - 7 - len) ' ' in
-            let line_num = sprintf "%2d:   " line in
-            let line_string = line_num ^ spacer ^ s in
-            assert (waddstr scr.stack_win line_string)
+         begin
+            if line = stack_selection && interface_mode = BrowsingMode then
+               wattron scr.stack_win WA.reverse
+            else
+               ()
+         end;
+         begin
+            if len > scr.sw_cols - 7 then
+               (* need to truncate the string *)
+               let line_string =
+                  if line = stack_selection && interface_mode = BrowsingMode then
+                     let sub_s = 
+                        if horiz_scroll < len - scr.sw_cols + 7 then
+                           String.sub s horiz_scroll (scr.sw_cols - 7)
+                        else
+                           String.sub s (len - scr.sw_cols + 7) (scr.sw_cols - 7)
+                     in
+                     sprintf "%2d:   %s" line sub_s
+                  else
+                     let sub_s = String.sub s 0 (scr.sw_cols - 10) in
+                     sprintf "%2d:   %s..." line sub_s
+               in
+               assert (waddstr scr.stack_win line_string)
+            else
+               let spacer = String.make (scr.sw_cols - 7 - len) ' ' in
+               let line_num = sprintf "%2d:   " line in
+               let line_string = line_num ^ spacer ^ s in
+               assert (waddstr scr.stack_win line_string)
+         end;
+         begin
+            if line = stack_selection && interface_mode = BrowsingMode then
+               wattroff scr.stack_win WA.reverse
+            else
+               ()
+         end
       done;
       assert (wrefresh scr.stack_win)
 
@@ -230,7 +261,6 @@ object(self)
             let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
             draw_entry_string ("(" ^ re_str ^ ")")
       |FloatMatrixEntry ->
-         (* FIXME: "[1[2" -> [[1, 2]] for some reason *)
          let ss = ref "[[" in
          begin
             for el = 0 to pred current_buffer do
@@ -515,96 +545,125 @@ object(self)
    method do_main_loop () =
       while true do
          let key = getch () in
-         (* editing operations take priority *)
-         try 
-            let edit_op = Rcfile.edit_of_key key in
-            match edit_op with
-            |Edit ee ->
-               begin
-                  match ee with
-                  |Digit ->
-                     self#handle_digit key
-                  |Enter ->
-                     self#handle_enter ()
-                  |Backspace ->
-                     self#handle_backspace ()
-                  |Minus ->
-                     self#handle_minus ()
-                  |BeginInteger ->
-                     self#handle_begin_int ()
-                  |BeginComplex ->
-                     self#handle_begin_complex ()
-                  |BeginMatrix ->
-                     self#handle_begin_matrix ()
-                  |Separator ->
-                     self#handle_separator ()
-                  |SciNotBase ->
-                     self#handle_scientific_notation ()
-               end
-            |_ ->
-               failwith "Non-Edit operation found in Edit Hashtbl"
-         with Not_found | Not_handled ->
-            (* next we try to match on functions *)
+         match interface_mode with
+         |StandardMode ->
+            begin
+            (* editing operations take priority *)
             try 
-               let function_op = Rcfile.function_of_key key in
-               match function_op with
-               |Function ff ->
+               let edit_op = Rcfile.edit_of_key key in
+               match edit_op with
+               |Edit ee ->
                   begin
-                     match ff with
-                     |Add ->
-                        self#handle_function_call calc#add
-                     |Sub ->
-                        self#handle_function_call calc#sub
-                     |Mult ->
-                        self#handle_function_call calc#mult
-                     |Div ->
-                        self#handle_function_call calc#div
-                     |Neg ->
-                        self#handle_function_call calc#neg
-                     |Inv ->
-                        self#handle_function_call calc#inv
-                     |Pow ->
-                        self#handle_function_call calc#pow
-                     |Sqrt ->
-                        self#handle_function_call calc#sqrt
-                     |Abs ->
-                        self#handle_function_call calc#abs
-                     |Arg ->
-                        self#handle_function_call calc#arg
-                     |Exp ->
-                        self#handle_function_call calc#exp
-                     |Ln ->
-                        self#handle_function_call calc#ln
-                     |Conj ->
-                        self#handle_function_call calc#conj
+                     match ee with
+                     |Digit ->
+                        self#handle_digit key
+                     |Enter ->
+                        self#handle_enter ()
+                     |Backspace ->
+                        self#handle_backspace ()
+                     |Minus ->
+                        self#handle_minus ()
+                     |BeginInteger ->
+                        self#handle_begin_int ()
+                     |BeginComplex ->
+                        self#handle_begin_complex ()
+                     |BeginMatrix ->
+                        self#handle_begin_matrix ()
+                     |Separator ->
+                        self#handle_separator ()
+                     |SciNotBase ->
+                        self#handle_scientific_notation ()
                   end
                |_ ->
-                  failwith "Non-Function operation found in Function Hashtbl"
-            with Not_found ->
-               if has_entry then
-                  (* finally we try entry of digits *)
-                  self#handle_digit key
-               else
-                  (* commands are only suitable when there is no entry *)
-                  try 
-                     let command_op = Rcfile.command_of_key key in
-                     match command_op with
-                     |Command cc ->
-                        begin
-                           match cc with
-                           |Drop ->
-                              self#handle_command_call calc#drop
-                           |Clear ->
-                              self#handle_command_call calc#clear
-                           |Swap ->
-                              self#handle_command_call calc#swap
-                           |Dup ->
-                              self#handle_command_call calc#dup
-                        end
-                     |_ ->
-                        failwith "Non-Command operation found in Command Hashtbl"
-                  with Not_found ->
+                  failwith "Non-Edit operation found in Edit Hashtbl"
+            with Not_found | Not_handled ->
+               (* next we try to match on functions *)
+               try 
+                  let function_op = Rcfile.function_of_key key in
+                  match function_op with
+                  |Function ff ->
+                     begin
+                        match ff with
+                        |Add ->
+                           self#handle_function_call calc#add
+                        |Sub ->
+                           self#handle_function_call calc#sub
+                        |Mult ->
+                           self#handle_function_call calc#mult
+                        |Div ->
+                           self#handle_function_call calc#div
+                        |Neg ->
+                           self#handle_function_call calc#neg
+                        |Inv ->
+                           self#handle_function_call calc#inv
+                        |Pow ->
+                           self#handle_function_call calc#pow
+                        |Sqrt ->
+                           self#handle_function_call calc#sqrt
+                        |Abs ->
+                           self#handle_function_call calc#abs
+                        |Arg ->
+                           self#handle_function_call calc#arg
+                        |Exp ->
+                           self#handle_function_call calc#exp
+                        |Ln ->
+                           self#handle_function_call calc#ln
+                        |Conj ->
+                           self#handle_function_call calc#conj
+                     end
+                  |_ ->
+                     failwith "Non-Function operation found in Function Hashtbl"
+               with Not_found ->
+                  if has_entry then
+                     (* finally we try entry of digits *)
                      self#handle_digit key
+                  else
+                     (* commands are only suitable when there is no entry *)
+                     try 
+                        let command_op = Rcfile.command_of_key key in
+                        match command_op with
+                        |Command cc ->
+                           begin
+                              match cc with
+                              |Drop ->
+                                 self#handle_command_call calc#drop
+                              |Clear ->
+                                 self#handle_command_call calc#clear
+                              |Swap ->
+                                 self#handle_command_call calc#swap
+                              |Dup ->
+                                 self#handle_command_call calc#dup
+                              |BeginBrowse ->
+                                 (interface_mode <- BrowsingMode;
+                                 self#draw_stack ())
+                           end
+                        |_ ->
+                           failwith "Non-Command operation found in Command Hashtbl"
+                     with Not_found ->
+                        self#handle_digit key
+            end
+         |BrowsingMode ->
+            try
+               let browse_op = Rcfile.browse_of_key key in
+               match browse_op with
+               |Browse bb ->
+                  begin
+                     match bb with
+                     |EndBrowse ->
+                        self#handle_end_browse ()
+                     |ScrollLeft ->
+                        self#handle_scroll_left ()
+                     |ScrollRight ->
+                        self#handle_scroll_right ()
+                     |PrevLine ->
+                        self#handle_prev_line ()
+                     |NextLine ->
+                        self#handle_next_line ()
+                  end
+               |_ ->
+                  failwith "Non-Browsing operation found in Browse Hashtbl"
+            with Not_found | Not_handled ->
+               ()
       done
 
 
@@ -994,6 +1053,63 @@ object(self)
             self#draw_entry ()
       else
          raise Not_handled
+
+
+   (* handle exit of browsing mode *)
+   method private handle_end_browse () =
+      horiz_scroll <- 0;
+      stack_selection <- 1;
+      stack_bottom_row <- 1;
+      interface_mode <- StandardMode;
+      self#draw_stack ()
+      
+
+   (* handle scrolling left in browsing mode *)
+   method private handle_scroll_left () =
+      (if horiz_scroll > 0 then
+         horiz_scroll <- pred horiz_scroll
+      else
+         ());
+      self#draw_stack ()
+
+
+   (* handle scrolling right in browsing mode *)
+   method private handle_scroll_right () =
+      let s = calc#get_display_line stack_selection in
+      let len = String.length s in
+      (if horiz_scroll < len - scr.sw_cols + 7 then
+         horiz_scroll <- succ horiz_scroll
+      else
+         ());
+      self#draw_stack ()
+
+
+   (* handle moving up a line in browsing mode *)
+   method private handle_prev_line () =
+      if stack_selection < calc#get_stack_size () then
+         (stack_selection <- succ stack_selection;
+         horiz_scroll <- 0;
+         (if stack_selection > pred (stack_bottom_row + scr.sw_lines) then
+            stack_bottom_row <- stack_selection - scr.sw_lines + 1
+         else
+            ());
+         self#draw_stack ())
+      else
+         ()
+
+
+   (* handle moving down a line in browsing mode *)
+   method private handle_next_line () =
+      if stack_selection > 1 then
+         (stack_selection <- pred stack_selection;
+         horiz_scroll <- 0;
+         (if stack_selection < stack_bottom_row then
+            stack_bottom_row <- stack_selection
+         else
+            ());
+         self#draw_stack ())
+      else
+         ()
 
 
    (* handle a call to a function (which first pushes the item in the

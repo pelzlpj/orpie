@@ -23,6 +23,26 @@ to do:
      (Need a doubly-linked list in the standard library!)
 
 
+Extended function entry notes:
+   * When entering an extended function, the characters that have been typed
+     should be boldfaced.  That way the user can differentiate between the part
+     that has been typed and the part that has been completed.
+
+   * Extended function entry is modal: either you are entering data, or you are
+     entering an extended function, not both.  Hitting the "escape extended
+     function" key will cancel it completely and put the user back in data entry
+     mode; hitting enter will immediately (1) push any data in the entry buffer
+     and (2) apply the extended function.
+
+   * An extended *command* can only be entered when there is no data in the
+     entry buffer.
+
+   * Hitting backspace during extended function entry will remove the last
+     character that was typed, and may generate a different matching function as
+     a result.
+
+   * regexps can be used to do the matching.
+
 
 Potential improvements for rpc2:
 

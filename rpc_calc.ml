@@ -50,6 +50,9 @@ class rpc_calc =
       method get_modes () =
          modes
 
+      method get_stack_size () =
+         stack#length
+
       (* Warning: dup() creates multiple references to the same object.
        * Therefore all operations need to leave the original stack elements
        * unaltered. *)
