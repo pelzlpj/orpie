@@ -59,7 +59,7 @@ let all_taglines = [| "RPN for the masses";
                       "swap drop dup view";
                       "I hate the mouse";
                       "now w/ 800% more stack";
-                      "powered by Ocaml";
+                      "powered by OCaml";
                       "compute _this_";
                       "interface as art";
                       "kick that data's ass";
