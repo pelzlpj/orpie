@@ -68,7 +68,10 @@ a high-performance functional programming language with a whole lot of nice
 features.  I highly recommend it.
 
 \section{Installation}
-This section describes how to install Orpie by compiling from source.
+This section describes how to install Orpie by compiling from source.  Volunteers have
+pre-packaged Orpie for several popular operating systems, so you may be able to save
+yourself some time by installing from those packages.  Please check the Orpie website for
+up-to-date package information.
 
 Before installing Orpie, you should have installed the 
 %BEGIN LATEX
@@ -82,8 +85,9 @@ ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}),
 %HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
 which is almost certainly already installed on your system.  Finally, OCaml
 3.07 or higher is required to compile the sources.  You will need the Nums
-library that is distributed with OCaml; at least on Debian, Nums is available
-as separate packages \texttt{libnums-ocaml} and \texttt{libnums-ocaml-dev}.
+library that is distributed with OCaml; if you install OCaml from binary packages
+distributed by your OS vendor, you may find that separate Nums packages must also be
+installed.
 
 I will assume you have received this program in the form of a source tarball, 
 e.g. ``\texttt{orpie-x.x.tar.gz}''.  You have undoubtedly extracted this archive 
