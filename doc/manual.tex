@@ -531,6 +531,61 @@ to a real number, and as such the arithmetic will no longer be exact.
 \end{itemize}
 
 
+\subsubsection{Commands}
+\label{commands}
+The following operations are referred to as commands; they differ from functions because
+they do not take an argument.  Many calculator interface settings are implemented as commands.
+
+\begin{itemize}
+   \item {\tt command\_about} \\
+      Display a nifty ``about Orpie'' credits screen.
+   \item {\tt command\_begin\_browsing} \\
+      Enter stack browsing mode.
+   \item {\tt command\_begin\_extended} \\
+      Begin entry of an extended command abbreviation.
+   \item {\tt command\_bin} \\
+      Set the base of integer constant representation to 2 (binary).
+   \item {\tt command\_clear} \\
+      Clear all elements from the stack.
+   \item {\tt command\_cycle\_base} \\
+      Cycle the base of integer constant representation between 2, 8,
+      10, and 16 (bin, oct, dec, and hex).
+   \item {\tt command\_dec} \\
+      Set the base of integer constant representation to 10 (decimal).
+   \item {\tt command\_deg} \\
+      Set the angle mode to degrees.
+   \item {\tt command\_drop} \\
+      Drop the last element off the stack.
+   \item {\tt command\_dup} \\
+      Duplicate the last stack element.
+   \item {\tt command\_enter\_pi} \\
+      Enter 3.1415\dots on the stack.
+   \item {\tt command\_hex} \\
+      Set the base of integer constant representation to 16 (hexadecimal).
+   \item {\tt command\_oct} \\
+      Set the base of integer constant representation to 8 (octal).
+   \item {\tt command\_polar} \\
+      Set the complex display mode to polar.
+   \item {\tt command\_rad} \\
+      Set the angle mode to radians.
+   \item {\tt command\_rect} \\
+      Set the complex display mode to rectangular (cartesian).
+   \item {\tt command\_refresh} \\
+      Refresh the display.
+   \item {\tt command\_swap} \\
+      Swap stack elements 1 and 2.
+   \item {\tt command\_quit} \\
+      Quit Orpie.
+   \item {\tt command\_toggle\_angle\_mode} \\
+      Toggle the angle mode between degrees and radians.
+   \item {\tt command\_toggle\_complex\_mode} \\
+      Toggle the complex display mode between rectangular and polar.
+   \item {\tt command\_undo} \\
+      Undo the last calculator operation.
+   \item {\tt command\_view} \\
+      View the last stack element in an external fullscreen editor.
+\end{itemize}
+
 \section{Licensing}
 Orpie has been made available under the GNU General Public License (GPL), 
 version 2.  You should have received a copy of the GPL along with this 
