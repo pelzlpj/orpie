@@ -44,61 +44,6 @@ type complex_entry_element_t =
     mutable im_mantissa : string; mutable im_exponent : string; 
     mutable is_polar : bool};;
 
-let extended_commands =
-   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
-    "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
-    "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n" ^
-    "bin\noct\ndec\nhex\nview\nabout\nrefresh\npi");;
-
-(* abbreviations used in extended entry mode *)
-let command_abbrev_table = Hashtbl.create 30;;
-Hashtbl.add command_abbrev_table "add" (Function Add);;
-Hashtbl.add command_abbrev_table "sub" (Function Sub);;
-Hashtbl.add command_abbrev_table "mult" (Function Mult);;
-Hashtbl.add command_abbrev_table "div" (Function Div);;
-Hashtbl.add command_abbrev_table "neg" (Function Neg);;
-Hashtbl.add command_abbrev_table "inv" (Function Inv);;
-Hashtbl.add command_abbrev_table "pow" (Function Pow);;
-Hashtbl.add command_abbrev_table "sq" (Function Sq);;
-Hashtbl.add command_abbrev_table "sqrt" (Function Sqrt);;
-Hashtbl.add command_abbrev_table "abs" (Function Abs);;
-Hashtbl.add command_abbrev_table "arg" (Function Arg);;
-Hashtbl.add command_abbrev_table "exp" (Function Exp);;
-Hashtbl.add command_abbrev_table "ln" (Function Ln);;
-Hashtbl.add command_abbrev_table "10^" (Function Ten_x);;
-Hashtbl.add command_abbrev_table "log10" (Function Log10);;
-Hashtbl.add command_abbrev_table "conj" (Function Conj);;
-Hashtbl.add command_abbrev_table "sin" (Function Sin);;
-Hashtbl.add command_abbrev_table "cos" (Function Cos);;
-Hashtbl.add command_abbrev_table "tan" (Function Tan);;
-Hashtbl.add command_abbrev_table "sinh" (Function Sinh);;
-Hashtbl.add command_abbrev_table "cosh" (Function Cosh);;
-Hashtbl.add command_abbrev_table "tanh" (Function Tanh);;
-Hashtbl.add command_abbrev_table "asin" (Function Asin);;
-Hashtbl.add command_abbrev_table "acos" (Function Acos);;
-Hashtbl.add command_abbrev_table "atan" (Function Atan);;
-Hashtbl.add command_abbrev_table "re" (Function Re);;
-Hashtbl.add command_abbrev_table "im" (Function Im);;
-Hashtbl.add command_abbrev_table "drop" (Command Drop);;
-Hashtbl.add command_abbrev_table "clear" (Command Clear);;
-Hashtbl.add command_abbrev_table "swap" (Command Swap);;
-Hashtbl.add command_abbrev_table "dup" (Command Dup);;
-Hashtbl.add command_abbrev_table "undo" (Command Undo);;
-Hashtbl.add command_abbrev_table "quit" (Command Quit);;
-Hashtbl.add command_abbrev_table "rad" (Command SetRadians);;
-Hashtbl.add command_abbrev_table "deg" (Command SetDegrees);;
-Hashtbl.add command_abbrev_table "rect" (Command SetRect);;
-Hashtbl.add command_abbrev_table "polar" (Command SetPolar);;
-Hashtbl.add command_abbrev_table "bin" (Command SetBin);;
-Hashtbl.add command_abbrev_table "oct" (Command SetOct);;
-Hashtbl.add command_abbrev_table "dec" (Command SetDec);;
-Hashtbl.add command_abbrev_table "hex" (Command SetHex);;
-Hashtbl.add command_abbrev_table "view" (Command View);;
-Hashtbl.add command_abbrev_table "about" (Command About);;
-Hashtbl.add command_abbrev_table "refresh" (Command Refresh);;
-Hashtbl.add command_abbrev_table "pi" (Command EnterPi);;
-let translate_extended_abbrev abb =
-   Hashtbl.find command_abbrev_table abb;;
 
 let max_matrix_size = 1000;;
 

@@ -72,6 +72,20 @@ let key_of_extended ex_op =
    Hashtbl.find table_extended_key ex_op;;
 
 
+(* abbreviations used in extended entry mode *)
+let extended_commands = ref "";;
+let command_abbrev_table = Hashtbl.create 30;;
+
+(* Register an abbreviation for an extended command.
+ * This updates the string used in regexp matching, and
+ * updates the hashtable used to find the corresponding operation. *)
+let register_abbrev abbr op =
+   extended_commands := !extended_commands ^ abbr ^ "\n";
+   Hashtbl.add command_abbrev_table abbr op;;
+
+let translate_extended_abbrev abb =
+   Hashtbl.find command_abbrev_table abb;;
+
 
 (* Register a key binding.  This adds hash table entries for translation
  * between curses chtypes and commands (in both directions). *)
@@ -325,7 +339,7 @@ let parse_line line_stream =
          begin match line_stream with parser
          | [< 'Ident command_str >] ->
             let command = operation_of_string command_str in
-            ()
+            register_abbrev abbr command
          | [< >] ->
             config_failwith ("Expected a command name after \"abbrev \"" ^ abbr ^ "\"")
          end

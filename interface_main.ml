@@ -1119,9 +1119,9 @@ let match_extended_buffer (iface : interface_state_t) buf =
       let rec find_matching_strings starting_pos matches_list =
          try
             let next_pos = 
-               Str.search_backward regex extended_commands starting_pos
+               Str.search_backward regex !Rcfile.extended_commands starting_pos
             in
-            let m = Str.matched_string extended_commands in
+            let m = Str.matched_string !Rcfile.extended_commands in
             if next_pos >= 1 then
                find_matching_strings (pred next_pos) (m :: matches_list)
             else
@@ -1136,7 +1136,7 @@ let match_extended_buffer (iface : interface_state_t) buf =
       in
       iface.matched_extended_entry <- "";
       let m_list =
-         find_matching_strings (pred (String.length extended_commands)) [];
+         find_matching_strings (pred (String.length !Rcfile.extended_commands)) [];
       in
       iface.matched_extended_entry <- List.hd m_list;
       m_list)
@@ -1189,7 +1189,7 @@ let handle_enter_extended (iface : interface_state_t) =
       (try
          iface.matched_extended_entry_list <- 
             match_extended_buffer iface iface.extended_entry_buffer;
-         match (translate_extended_abbrev iface.matched_extended_entry) with
+         match (Rcfile.translate_extended_abbrev iface.matched_extended_entry) with
          |Function ff -> process_function iface ff
          |Command cc  -> process_command iface cc
          |_ -> failwith 
