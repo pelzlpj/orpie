@@ -148,6 +148,7 @@ class rpc_stack =
       val mutable len = 0
       val mutable stack = Array.make size_inc (stack_data_of_orpie_data (RpcFloat 0.0))
       val stack_mutex = Mutex.create ()
+      val render_stack = Stack.create ()
 
 
       method length = len
@@ -241,6 +242,7 @@ class rpc_stack =
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
          len <- len + 1;
+         Stack.push new_el render_stack;
          Mutex.unlock stack_mutex
 
 
@@ -384,6 +386,10 @@ class rpc_stack =
          self#get_display_string_wrap Fullscreen line_num calc_modes
 
 
+
+
+
+
       (* perform a table lookup to obtain the string representation of
        * the desired stack element.  If the table lookup fails, then create
        * the representation. *)
@@ -511,6 +517,94 @@ class rpc_stack =
          in
          Mutex.unlock stack_mutex;
          lookup_result
+
+
+      (* render all string representations of a particular stack element. *)
+      method private render_all_strings stack_el =
+         match stack_el with
+         |StackInt (ii, ii_str) ->
+            let lookup_int_str d_mode c_mode record =
+               begin match record with
+               |None ->
+                  let _ = self#create_int_string d_mode c_mode ii ii_str in ()
+               |Some ss ->
+                  ()
+               end
+            in
+            lookup_int_str Line {angle = Rad; base = Dec; complex = Rect} 
+               ii_str.i_dec_line;
+            lookup_int_str Line {angle = Rad; base = Bin; complex = Rect} 
+               ii_str.i_bin_line;
+            lookup_int_str Line {angle = Rad; base = Oct; complex = Rect} 
+               ii_str.i_oct_line;
+            lookup_int_str Line {angle = Rad; base = Hex; complex = Rect} 
+               ii_str.i_hex_line
+            (* the remaining integer strings will get filled in as
+             * side-effects of the previous *)
+         |StackFloat (ff, ff_str) ->
+            begin match ff_str.f with
+            |None ->
+               let _ = self#create_float_string ff ff_str in ()
+            |Some ss ->
+               ()
+            end
+         |StackComplex (cc, cc_str) ->
+            let lookup_cmpx_str c_mode record =
+               begin match record with
+               |None ->
+                  let _ = self#create_cmpx_string c_mode cc cc_str in ()
+               |Some ss ->
+                  ()
+               end
+            in
+            lookup_cmpx_str {angle = Rad; base = Dec; complex = Rect} 
+               cc_str.c_rect;
+            lookup_cmpx_str {angle = Rad; base = Dec; complex = Polar} 
+               cc_str.c_pol_rad;
+            lookup_cmpx_str {angle = Deg; base = Dec; complex = Polar} 
+               cc_str.c_pol_deg
+         |StackFloatMatrix (fm, fm_str) ->
+            begin match fm_str.fmat_line with
+            |None ->
+               let _ = self#create_fmat_string Line fm fm_str in ()
+            |Some ss ->
+               ()
+            end;
+            begin match fm_str.fmat_fs with
+            |None ->
+               let _ = self#create_fmat_string Fullscreen fm fm_str in ()
+            |Some ss ->
+               ()
+            end
+         |StackComplexMatrix (cm, cm_str) ->
+            let lookup_cmat_str d_mode c_mode record =
+               begin match record with
+               |None ->
+                  let _ = self#create_cmat_string d_mode c_mode cm cm_str in ()
+               |Some ss ->
+                  ()
+               end
+            in
+            lookup_cmat_str Line {angle = Rad; base = Dec; complex = Rect}
+               cm_str.cmat_rect_line;
+            lookup_cmat_str Line {angle = Rad; base = Dec; complex = Polar}
+               cm_str.cmat_pol_rad_line;
+            lookup_cmat_str Line {angle = Deg; base = Dec; complex = Polar}
+               cm_str.cmat_pol_deg_line;
+            lookup_cmat_str Fullscreen {angle = Rad; base = Dec; complex = Rect}
+               cm_str.cmat_rect_fs;
+            lookup_cmat_str Fullscreen {angle = Rad; base = Dec; complex = Polar}
+               cm_str.cmat_pol_rad_fs;
+            lookup_cmat_str Fullscreen {angle = Deg; base = Dec; complex = Polar}
+               cm_str.cmat_pol_deg_fs
+         |StackVariable (vv, vv_str) ->
+            begin match vv_str.v_line with
+            |None ->
+               let _ = self#create_var_string Line vv vv_str in ()
+            |Some ss ->
+               ()
+            end
+            (* fullscreen is filled in as side-effect of previous *)
 
 
 
@@ -854,41 +948,15 @@ class rpc_stack =
 
       (* fill in any unknown string representations from the stack *)
       method private fill_in_all_strings () =
-         Mutex.lock stack_mutex;
-         let count = ref (pred len) in
-         Mutex.unlock stack_mutex;
-         while !count >= 0 do
-            self#fill_in_string !count;
-            count := pred !count
-         done
+         try
+            while true do
+               let unrendered_el = Stack.pop render_stack in
+               self#render_all_strings unrendered_el
+            done
+         with
+            Stack.Empty -> ()
 
-
-
-      (* fill in all string representations for a particular stack entry.
-       * FIXME: many redundant lookups are being performed. *)
-      method private fill_in_string index =
-         let disp_modes = [Line; Fullscreen]
-         and angles     = [Rad; Deg]
-         and bases      = [Bin; Oct; Dec; Hex]
-         and cpx_modes  = [Rect; Polar] in
-         let f_disp d =
-            let f_angle a =
-               let f_base b =
-                  let f_cpx c =
-                     let _ = self#lookup_or_create_string d
-                     {angle = a; base = b; complex = c} index in ()
-                  in
-                  List.iter f_cpx cpx_modes
-               in
-               List.iter f_base bases
-            in
-            List.iter f_angle angles
-         in
-         List.iter f_disp disp_modes
-
-
-   end
-
+end
 
 
 (* arch-tag: DO_NOT_CHANGE_59b80e87-dfde-4203-a7a2-8e1f95813151 *)
