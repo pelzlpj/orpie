@@ -1710,6 +1710,7 @@ let handle_enter_abbrev (iface : interface_state_t) =
       end;
       iface.abbrev_entry_buffer <- "";
       draw_help iface;
+      draw_stack iface;
       draw_update_entry iface
    end else
       ()
