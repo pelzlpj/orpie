@@ -24,9 +24,9 @@
 
 \begin{document}
 %@% IF LATEX %@%
-\title{Orpie v1.1 User Manual}
+\title{Orpie v1.2 User Manual}
 \author{Paul J. Pelzl}
-\date{April 13, 2004}
+\date{June 15, 2004}
 \maketitle
 
 \begin{center}
@@ -313,6 +313,35 @@ operations (addition, subtraction, multiplication, division) will be performed
 using exact arithmetic when both arguments are integers.
 
 %@% IF LATEX %@%
+\subsubsection{Entering Variable Names}
+%@% ELSE %@%
+\subsection{Entering Variable Names}
+%@% END-IF %@%
+A variable name may be entered by pressing '\texttt{@}' followed by the desired
+variable name string.  The string may contain alphanumeric characters, dashes, and
+underscores.  Example:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+      \texttt{@myvar} & \texttt{@ myvar}\\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+Orpie also supports autocompletion of variable names.  The help panel displays a
+list of pre-existing variables that partially match the name currently being entered.
+You can press '\texttt{<tab>}' to iterate through the list of matching variables.
+
+%@% IF LATEX %@%
 \subsubsection{Entering Data With an External Editor}
 \label{editor}
 %@% ELSE %@%
@@ -337,6 +366,7 @@ by the examples below:
       complex number   & \texttt{(1e10, 2)} or \texttt{(1 <90)} \\
       real matrix      & \texttt{[[1, 2][3.1, 4.5e10]]} \\
       complex matrix   & \texttt{[[(1, 0), 5][1e10, (2 <90)]]} \\
+      variable         & \texttt{@myvar} \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -392,6 +422,8 @@ default, the following keys have been bound to such operations:
       \texttt{c} & complex conjugate function \\
       \texttt{!} & factorial function  \\
       \texttt{\%} & element 2 mod element 1 \\
+      \texttt{S} & store element 2 into (variable) element 1 \\
+      \texttt{;} & evaluate variable to obtain contents \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -405,6 +437,9 @@ were in the process of entering.  So instead of the sequence
 \texttt{2<enter>2<enter>+}, you could type simply \texttt{2<enter>2+} and the second number
 would be entered before the addition operation is applied.
 
+As an additional shortcut, any variable names used as function arguments will
+be evaluated before application of the function.  In other words, it is not necessary
+to evaluate variables before performing arithmetic operations on them.
 
 \subsection{Performing Extended Function Operations}
 %@% IF LATEX %@%
@@ -480,6 +515,9 @@ The following functions are available as extended commands:
       \texttt{mult} & multiply last two elements \\
       \texttt{div} & divide element 2 by element 1 \\
       \texttt{neg} & negate last element \\
+      \texttt{store} & store element 2 into (variable) element 1 \\
+      \texttt{eval} & evaluate variable to obtain contents \\
+      \texttt{purge} & delete a variable \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -672,11 +710,11 @@ The backslash character must be represented by doubling it
 %@% END-IF %@%
 
 %@% IF LATEX %@%
-\subsubsection{Setting Variables}
+\subsubsection{Setting Configuration Variables}
 \label{setvar}
 Syntax: \texttt{set \emph{variable}=\emph{value\_string}} \\ \\
 %@% ELSE %@%
-\subsection{Setting Variables}
+\subsection{Setting Configuration Variables}
 Syntax: set \emph{variable}=\emph{value\_string} \\ \\
 %@% END-IF %@%
 Several configuration variables can be set using this syntax; see 
@@ -806,8 +844,8 @@ the ``about Orpie'' screen.
 The following configuration variables may be set as described in Section \ref{setvar}:
 %@% ELSE %@%
 \section{Configuration Variables}
-The following configuration variables may be set as described in the SETTING VARIABLES
-section.
+The following configuration variables may be set as described in the SETTING 
+CONFIGURATION VARIABLES section.
 %@% END-IF %@%
 \begin{itemize}
    \item \texttt{datafile} \\
@@ -818,6 +856,14 @@ section.
       \texttt{"\~{}/.orpie/calc\_state"}.
       %@% ELSE %@%
       "\Bs\Tilde /.orpie/calc\_state".
+      %@% END-IF %@%
+   \item \texttt{versionfile} \\
+      This variable should be set to the full path of a file which is used to
+      save the calculator version.  The default path is \\
+      %@% IF LATEX %@%
+      \texttt{"\~{}/.orpie/version"}.
+      %@% ELSE %@%
+      "\Bs\Tilde /.orpie/version".
       %@% END-IF %@%
    \item \texttt{buffer} \\
       This variable should be set to the full path of a buffer file that Orpie uses
@@ -921,6 +967,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       Compute the error function of the last stack element.
    \item \texttt{function\_erfc} \\
       Compute the complementary error function of the last stack element.
+   \item \texttt{function\_eval} \\
+      Obtain the contents of the variable in the last stack position.
    \item \texttt{function\_exp} \\
       Evaluate the exponential function of the last stack element.
    \item \texttt{function\_factorial} \\
@@ -952,6 +1000,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       Negate last stack element.
    \item \texttt{function\_pow} \\
       Raise element 2 to the power of element 1.
+   \item \texttt{function\_purge} \\
+      Delete the variable in the last stack position.
    \item \texttt{function\_re} \\
       Compute the real part of the last stack element.
    \item \texttt{function\_sin} \\
@@ -972,6 +1022,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       Square the last stack element.
    \item \texttt{function\_sqrt} \\
       Compute the square root of the last stack element.
+   \item \texttt{function\_store} \\
+      Store element 2 in variable element 1.
    \item \texttt{function\_sub} \\
       Subtract element 1 from element 2.
    \item \texttt{function\_tan} \\
@@ -1004,6 +1056,8 @@ they do not take an argument.  Many calculator interface settings are implemente
       Enter stack browsing mode.
    \item \texttt{command\_begin\_extended} \\
       Begin entry of an extended command abbreviation.
+   \item \texttt{command\_begin\_variable} \\
+      Begin entry of a variable name.
    \item \texttt{command\_bin} \\
       Set the base of integer constant representation to 2 (binary).
    \item \texttt{command\_clear} \\
@@ -1124,22 +1178,75 @@ should be bound to single keypresses using the \texttt{bind} keyword.
       Move the selection cursor up one line.
    \item \texttt{browse\_rolldown} \\
       Cyclically ``roll'' stack elements downward, below the 
-      selected element (inclusive)
+      selected element (inclusive).
    \item \texttt{browse\_rollup} \\
       Cyclically ``roll'' stack elements upward, below the selected
-      element (inclusive) 
+      element (inclusive) .
    \item \texttt{browse\_scroll\_left} \\
       Scroll the selected element to the left (for viewing very large
-      entries such as matrices)
+      entries such as matrices).
    \item \texttt{browse\_scroll\_right} \\
-      Scroll the selected element to the right
+      Scroll the selected element to the right.
    \item \texttt{browse\_view} \\
-      View the currently selected stack element in a fullscreen editor
+      View the currently selected stack element in a fullscreen editor.
    \item \texttt{browse\_edit} \\
-      Edit the currently selected stack element using an external editor
+      Edit the currently selected stack element using an external editor.
 \end{itemize}
-%@% END-IF %@%
 
+%@% IF LATEX %@%
+\subsubsection{Extended Entry Operations}
+\label{extendedoperations}
+%@% ELSE %@%
+\subsection{Extended Entry Operations}
+%@% END-IF %@%
+The following list of operations is available only while entering an extended
+function or command.  These operations must be bound to single keypresses using 
+the \texttt{bind} keyword.
+\begin{itemize}
+   \item \texttt{extended\_backspace} \\
+      Delete a character from the extended entry string.
+   \item \texttt{extended\_enter} \\
+      Execute the selected extended function or command.
+   \item \texttt{extended\_exit} \\
+      Cancel extended entry.
+\end{itemize}
+
+%@% IF LATEX %@%
+\subsubsection{Variable Entry Operations}
+\label{variableoperations}
+%@% ELSE %@%
+\subsection{Variable Entry Operations}
+%@% END-IF %@%
+The following list of operations is available only while entering a variable
+name.  As extended commands are unavailable while entering variables, these operations
+should be bound to single keypresses using the \texttt{bind} keyword.
+\begin{itemize}
+   \item \texttt{variable\_backspace} \\
+      Delete a character from the variable name.
+   \item \texttt{variable\_cancel} \\
+      Cancel entry of the variable name.
+   \item \texttt{variable\_complete} \\
+      Autocomplete the variable name.
+   \item \texttt{variable\_enter} \\
+      Enter the variable name on the stack.
+\end{itemize}
+
+
+%@% IF LATEX %@%
+\subsubsection{Integer Entry Operations}
+\label{browse}
+%@% ELSE %@%
+\subsection{Integer Entry Operations}
+%@% END-IF %@%
+The following operation is available only while entering an integer; it can be
+made accessible by binding it to a single keypress using the \texttt{bind} keyword.
+\begin{itemize}
+   \item \texttt{integer\_cancel} \\
+      Cancel entry of an integer.
+\end{itemize}
+
+% end ORPIERC
+%@% END-IF %@%
 
 %@% IF !ORPIERC %@%
 \section{Licensing}
@@ -1188,13 +1295,12 @@ make Orpie possible.
 
       \texttt{<rant>} \\
       C++ has had so many misfeatures bolted on that no one can possibly hold
-      the entire syntax in his head at one time.  In addition to being
-      prohibitively vast, the syntax is also horribly ugly,
-      especially when dealing with templates.  The ability to use pointers
-      presents many opportunities to shoot yourself in the foot.
-      Garbage collection and exceptions exist as afterthoughts.  In short, there
-      are few compelling reasons to consider C++ for any project that does not require
-      low-level hardware access. \\
+      the entire syntax in his head at one time.  The syntax is not only
+      prohibitively vast, but also horribly ugly--especially when dealing 
+      with templates.  The ability to use pointers presents many opportunities 
+      to shoot oneself in the foot.  Garbage collection and exceptions exist 
+      as afterthoughts.  In short, there are few compelling reasons to consider 
+      C++ for any project that does not require low-level hardware access. \\
       \texttt{</rant>} 
      
       I found Ocaml after searching for a Better Language that offers good
@@ -1211,7 +1317,8 @@ make Orpie possible.
    \item {\bf Does Orpie include any enhancements over the old \texttt{rpc}?}
 
       The biggest usability enhancement would be the rcfile for keybindings.
-      The context-sensitive help panel is also new.  Integer data may be
+      The context-sensitive help panel is new, as is user-defined variable
+      support.  Integer data may be
       entered and manipulated with arbitrary precision (thanks to the Nums 
       library that ships with Ocaml).  The error messages provided by
       Orpie are, on average, more informative than those provided by rpc;
@@ -1230,6 +1337,13 @@ make Orpie possible.
       \end{verbatim}
       before launching Orpie.  gnome-terminal sets \texttt{\$TERM} to \texttt{xterm}, but
       apparently does not behave like a real xterm with respect to the numeric keypad.
+
+   \item {\bf Orpie crashes with a segmentation fault on startup.  What can I do?}
+
+      Try deleting the calculator state file.  Orpie makes use of Ocaml's marshalling
+      feature, which is very convenient but doesn't respond well to corrupt
+      data files.
+      
 
 \end{enumerate}
 %@% END-IF %@%
