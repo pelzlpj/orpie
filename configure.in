@@ -3,7 +3,7 @@
 # Copyright (C) 2001 Jean-Christophe Filliâtre
 #   from a first script by Georges Mariano 
 #
-#   modified 10/26/03 by Paul Pelzl, for inclusion with rpc2
+#   modified 10/26/03 by Paul Pelzl, for inclusion with Orpie
 #   (added ocaml-gsl detection, removed unnecessary checks)
 # 
 # This library is free software; you can redistribute it and/or

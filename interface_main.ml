@@ -1,5 +1,5 @@
-(*  rpc2 -- a stack-based RPN calculator for the console
- *  Copyright (C) 2003  Paul Pelzl
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ open Interface_draw;;
 (* OBTAINING AN OBJECT FROM THE ENTRY BUFFER                       *)
 (*******************************************************************)
 
-(* parse the entry buffers to obtain an rpc object *)
+(* parse the entry buffers to obtain a stack object *)
 let get_entry_from_buffer (iface : interface_state_t) =
    (* get a float from strings representing the mantissa and exponent *)
    let get_float_el mantissa exponent =
@@ -180,7 +180,7 @@ let get_entry_from_buffer (iface : interface_state_t) =
 
 
 
-(* parse the entry buffers to obtain an rpc object, then stack#push it *)
+(* parse the entry buffers to obtain a stack object, then stack#push it *)
 let push_entry (iface : interface_state_t) =
    (* perform this cleanup routine after every entry, so we are prepared
       to receive a new object. *)
@@ -888,19 +888,19 @@ let handle_about (iface : interface_state_t) =
    let left_shift = 30 in
    attron A.bold;
    assert (mvaddstr (vert_center - 3) (horiz_center - left_shift) 
-   ("rpc2 v" ^ iface.version));
+   ("Orpie v" ^ iface.version));
    attroff A.bold;
    assert (mvaddstr (vert_center - 2) (horiz_center - left_shift) 
    "Copyright (C) 2004 Paul Pelzl");
    assert (mvaddstr (vert_center) (horiz_center - left_shift)
    "\"Because, frankly, GUI calculator programs are pure evil.");
    attron A.bold;
-   assert (mvaddstr (vert_center + 1) (horiz_center - left_shift) " rpc2");
+   assert (mvaddstr (vert_center + 1) (horiz_center - left_shift) " Orpie");
    attroff A.bold;
-   assert (mvaddstr (vert_center + 1) (horiz_center - left_shift + 5)
+   assert (mvaddstr (vert_center + 1) (horiz_center - left_shift + 6)
    ", on the other hand, is only a little bit evil.\"");
    assert (mvaddstr (vert_center + 4) (horiz_center - left_shift)
-   "rpc2 comes with ABSOLUTELY NO WARRANTY.  This is free software,");
+   "Orpie comes with ABSOLUTELY NO WARRANTY.  This is free software,");
    assert (mvaddstr (vert_center + 5) (horiz_center - left_shift)
    "and you are welcome to redistribute it under certain");
    assert (mvaddstr (vert_center + 6) (horiz_center - left_shift)

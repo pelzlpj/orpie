@@ -2,7 +2,7 @@
 # sample Makefile for Objective Caml
 # Copyright (C) 2001 Jean-Christophe FILLIATRE
 #
-# modified 10/26/2003 by Paul Pelzl, for the purpose of building rpc2
+# modified 10/26/2003 by Paul Pelzl, for the purpose of building Orpie
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -46,8 +46,8 @@ DEPFLAGS = -pp camlp4o
 # main target
 #############
 
-NAME = rpc2
-NAME2 = rpc2-curses-keys
+NAME = orpie
+NAME2 = orpie-curses-keys
 
 all: $(OCAMLBEST)
 

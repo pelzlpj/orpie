@@ -1,5 +1,5 @@
-(*  rpc2 -- a stack-based RPN calculator for the console
- *  Copyright (C) 2003  Paul Pelzl
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -102,10 +102,10 @@ let initialize_screen () =
          entry_win = bottom_win; ew_lines = 2; ew_cols = 40}
       else
          (endwin ();
-         failwith "rpc2 requires at least a 40 column window.")
+         failwith "Orpie requires at least a 40 column window.")
    else
       (endwin (); 
-      failwith "rpc2 requires at least a 24 line window.")
+      failwith "Orpie requires at least a 24 line window.")
 
 
 let iface = Interface.make calc (initialize_screen ());;

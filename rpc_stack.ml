@@ -1,5 +1,5 @@
-(*  rpc2 -- a stack-based RPN calculator for the console
- *  Copyright (C) 2003  Paul Pelzl
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,11 +35,11 @@ open Big_int;;
 open Big_int_str;;
 open Printf;;
 
-type rpc_data = | RpcInt of Big_int.big_int
-                | RpcFloat of float
-                | RpcComplex of Complex.t
-                | RpcFloatMatrix of Gsl_matrix.matrix 
-                | RpcComplexMatrix of Gsl_matrix_complex.matrix;;
+type orpie_data = | RpcInt of Big_int.big_int
+                  | RpcFloat of float
+                  | RpcComplex of Complex.t
+                  | RpcFloatMatrix of Gsl_matrix.matrix 
+                  | RpcComplexMatrix of Gsl_matrix_complex.matrix;;
 
 type angle_mode   = | Rad | Deg;;
 type base_mode    = | Bin | Oct | Hex | Dec;;
@@ -48,7 +48,7 @@ type complex_mode = | Rect | Polar;;
 type calculator_modes = {angle : angle_mode; base : base_mode; 
                          complex : complex_mode};;
 
-(* type datafile_t = ModesData of calculator_modes | StackData of rpc_data
+(* type datafile_t = ModesData of calculator_modes | StackData of orpie_data
  * array;; *)
 
 let size_inc = 100;;
@@ -78,7 +78,7 @@ class rpc_stack =
          try
             let load_file = Utility.expand_open_in_bin !(Rcfile.datafile) in
             let data_modes, data_stack, data_len = 
-               (Marshal.from_channel load_file : calculator_modes * (rpc_data
+               (Marshal.from_channel load_file : calculator_modes * (orpie_data
                array) * int)
             in
             (close_in load_file;

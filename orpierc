@@ -1,10 +1,10 @@
-# rpc2rc
-# default key bindings for rpc2 calculator
+# orpierc
+# default key bindings for the Orpie calculator
 
 # datafile for loading and saving calculator state
-set datafile="~/.rpc2/calc_state"
+set datafile="~/.orpie/calc_state"
 # buffer file used for fullscreen viewing of stack elements
-set buffer="~/.rpc2/fullscreen"
+set buffer="~/.orpie/fullscreen"
 # editor used for fullscreen viewing of stack elements
 set editor="vi"
 

@@ -1,3 +1,25 @@
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *  Please send bug reports, patches, etc. to Paul Pelzl at 
+ *  <pelzlpj@eecs.umich.edu>.
+ *)
+
+
 open Genlex;;
 open Curses;;
 open Operations;;
@@ -20,9 +42,9 @@ let table_extended_key = Hashtbl.create 20;;
 let table_key_extended = Hashtbl.create 20;;
 
 (* Default datafile for loading and saving state *)
-let datafile = ref "~/.rpc2/calc_state";;
+let datafile = ref "~/.orpie/calc_state";;
 (* Default datafile for a fullscreen viewing buffer *)
-let fullscreenfile = ref "~/.rpc2/fullscreen";;
+let fullscreenfile = ref "~/.orpie/fullscreen";;
 (* Default editor for fullscreen viewing *)
 let editor = ref "vi";;
 
@@ -161,7 +183,7 @@ let register_binding key_string op =
 
 
 
-(* Parse a line from an rpc2 configuration file.  This operates on a stream
+(* Parse a line from an Orpie configuration file.  This operates on a stream
  * corresponding to a non-empty line from the file.  It will match commands
  * of the form
  *    bind key command
@@ -431,9 +453,10 @@ let process_rcfile () =
    let empty_regexp = Str.regexp "^[\t ]*$" in
    let config_stream = 
       try
-         open_in "rpc2rc"
+         open_in "orpierc"
       with
-         Sys_error error_str -> failwith "Could not find configuration file \"rpc2rc\"."
+         Sys_error error_str -> failwith "Could not find configuration file
+         \"orpierc\"."
    in
    let line_num = ref 0 in
    try
@@ -451,11 +474,11 @@ let process_rcfile () =
                parse_line line_stream
             with
                |Config_failure s ->
-                  (let error_str = Printf.sprintf "Syntax error on line %d of \"rpc2rc\": %s"
+                  (let error_str = Printf.sprintf "Syntax error on line %d of \"orpierc\": %s"
                   !line_num s in
                   failwith error_str)
                |Stream.Failure ->
-                  failwith (Printf.sprintf "Syntax error on line %d of \"rpc2rc\"" 
+                  failwith (Printf.sprintf "Syntax error on line %d of \"orpierc\"" 
                   !line_num)
 
       done

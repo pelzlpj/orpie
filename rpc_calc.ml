@@ -1,5 +1,5 @@
-(*  rpc2 -- a stack-based RPN calculator for the console
- *  Copyright (C) 2003  Paul Pelzl
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -701,7 +701,7 @@ class rpc_calc =
             let dummy = stack#pop () in ()
          done
 
-      method push (v : rpc_data) =
+      method push (v : orpie_data) =
          self#backup ();
          stack#push v
 

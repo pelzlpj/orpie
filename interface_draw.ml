@@ -1,6 +1,5 @@
-
-(*  rpc2 -- a stack-based RPN calculator for the console
- *  Copyright (C) 2003  Paul Pelzl
+(*  Orpie -- a stack-based RPN calculator for the console
+ *  Copyright (C) 2003-2004  Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -278,7 +277,7 @@ let draw_help (iface : interface_state_t) =
    |Some win ->
       wclear win;
       wattron win WA.bold;
-      let s = sprintf "rpc2 v%s  --  Press '?' for help" iface.version in
+      let s = sprintf "Orpie v%s  --  Press '?' for help" iface.version in
       assert (mvwaddstr win 0 0 s);
       wattroff win WA.bold;
       assert (mvwaddstr win 1 0 "--------------------------------------");
