@@ -1443,8 +1443,6 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#maximum
    |Utpn ->
       handle_function_call iface iface.calc#upper_tail_prob_normal
-   |NoFunc ->
-      failwith "operation NoFunc found in Function Hashtbl"
    end
 
 
@@ -1527,8 +1525,6 @@ let process_command (iface : interface_state_t) cc =
       handle_edit_input iface
    |CycleHelp ->
       handle_cycle_help iface
-   |NoComm ->
-      failwith "operation NoComm found in Command Hashtbl"
    end
 
 
@@ -1838,8 +1834,6 @@ let do_main_loop (iface : interface_state_t) =
                      handle_angle iface
                   |SciNotBase ->
                      handle_scientific_notation iface
-                  |NoEdit ->
-                     failwith "operation NoEdit found in Edit Hashtbl"
                   end
                |_ ->
                   failwith "Non-Edit operation found in Edit Hashtbl"
@@ -1897,8 +1891,6 @@ let do_main_loop (iface : interface_state_t) =
                         begin match ie with
                         |ExitIntEdit ->
                            handle_exit_int iface
-                        |NoInt ->
-                           failwith "operation NoInt found in IntEdit Hashtbl"
                         end
                      |_ ->
                         failwith "Non-IntEdit operation found in IntEdit Hashtbl"
@@ -1921,11 +1913,9 @@ let do_main_loop (iface : interface_state_t) =
                         handle_enter_extended iface
                      |ExtBackspace ->
                         handle_extended_backspace iface
-                     |NoExt ->
-                        failwith "operation NoExt found in Extend Hashtbl"
                   end
                |_ ->
-                  failwith "Non-Extended command found in Extend Hashtbl"
+                  failwith "Non-Extended command found in Extended Hashtbl"
             with Not_found ->
                handle_extended_character iface key
             end
@@ -1943,8 +1933,6 @@ let do_main_loop (iface : interface_state_t) =
                      handle_variable_backspace iface
                   |CompleteVarEdit ->
                      handle_complete_variable iface
-                  |NoVarEdit ->
-                     failwith "operation NoVarEdit found in VarEdit Hashtbl"
                   end
                |_ ->
                   failwith "Non-Variable command found in VarEdit Hashtbl"
@@ -1986,8 +1974,6 @@ let do_main_loop (iface : interface_state_t) =
                         handle_browse_keepn iface
                      |EditEntry ->
                         handle_browse_edit iface
-                     |NoBrowse ->
-                        failwith "operation NoBrowse found in Browse Hashtbl"
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"
