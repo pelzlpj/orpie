@@ -585,10 +585,13 @@ let handle_minus (iface : interface_state_t) =
                else
                   ()
             else
-               match buffer.re_mantissa.[0] with
-               |'-' -> buffer.re_mantissa.[0] <- '+'
-               |'+' -> buffer.re_mantissa.[0] <- '-'
-               |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
+               if String.length buffer.re_mantissa > 0 then
+                  match buffer.re_mantissa.[0] with
+                  |'-' -> buffer.re_mantissa.[0] <- '+'
+                  |'+' -> buffer.re_mantissa.[0] <- '-'
+                  |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
+               else
+                  ()
          end;
          draw_update_entry iface
       |ComplexEntry | ComplexMatrixEntry ->
@@ -598,8 +601,8 @@ let handle_minus (iface : interface_state_t) =
                if iface.is_entering_imag then
                   buffer.im_mantissa
                else
-                  buffer.re_mantissa and
-            exponent = 
+                  buffer.re_mantissa
+            and exponent = 
                if iface.is_entering_imag then
                   buffer.im_exponent
                else
