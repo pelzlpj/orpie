@@ -25,27 +25,34 @@ open Big_int;;
 
 
 class rpc_calc =
-   object
-      val stack = new rpc_stack
+   object(self)
+      val mutable stack = new rpc_stack
+      val mutable backup_stack = new rpc_stack
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
 
+      method backup () =
+         backup_stack <- stack#backup ()
+
+      method undo () =
+         stack <- backup_stack
+
       method add () =
-         Add.add stack
+         Add.add stack self#backup
 
       method sub () =
-         Sub.sub stack
+         Sub.sub stack self#backup
 
       method mult () =
-         Mult.mult stack
+         Mult.mult stack self#backup
 
       method div () =
-         Div.div stack
+         Div.div stack self#backup
 
       method inv () =
-         Inv.inv stack
+         Inv.inv stack self#backup
 
       method pow () =
-         Pow.pow stack
+         Pow.pow stack self#backup
 
       method get_modes () =
          modes
@@ -58,129 +65,155 @@ class rpc_calc =
        * unaltered. *)
       method dup () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            stack#push gen_el;
-            stack#push gen_el
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               (stack#push gen_el;
+               stack#push gen_el)
+            end
          else
             raise (Invalid_argument "empty stack")
 
       method neg () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               stack#push (RpcInt (minus_big_int el))
-            |RpcFloat el ->
-               stack#push (RpcFloat (0.0 -. el))
-            |RpcComplex el ->
-               stack#push (RpcComplex (Complex.neg el))
-            |RpcFloatMatrix el ->
-               let copy = Gsl_matrix.copy el in
-               (Gsl_matrix.scale copy (-1.0);
-               stack#push (RpcFloatMatrix copy))
-            |RpcComplexMatrix el ->
-               let copy = Gsl_matrix_complex.copy el in
-               (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
-               stack#push (RpcComplexMatrix copy))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcInt (minus_big_int el))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (0.0 -. el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.neg el))
+               |RpcFloatMatrix el ->
+                  let copy = Gsl_matrix.copy el in
+                  (Gsl_matrix.scale copy (-1.0);
+                  stack#push (RpcFloatMatrix copy))
+               |RpcComplexMatrix el ->
+                  let copy = Gsl_matrix_complex.copy el in
+                  (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
+                  stack#push (RpcComplexMatrix copy))
+            end
          else
             raise (Invalid_argument "empty stack")
 
       method sqrt () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcFloat el ->
-               stack#push (RpcFloat (sqrt el))
-            |RpcComplex el ->
-               stack#push (RpcComplex (Complex.sqrt el))
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloat el ->
+                  stack#push (RpcFloat (sqrt el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.sqrt el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
          else
             raise (Invalid_argument "empty stack")
 
       method abs () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               stack#push (RpcInt (abs_big_int el))
-            |RpcFloat el ->
-               stack#push (RpcFloat (abs_float el))
-            |RpcComplex el ->
-               stack#push (RpcFloat (Complex.norm el))
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcInt (abs_big_int el))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (abs_float el))
+               |RpcComplex el ->
+                  stack#push (RpcFloat (Complex.norm el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
          else
             raise (Invalid_argument "empty stack")
 
       method arg () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcComplex el ->
-               stack#push (RpcFloat (Complex.arg el))
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcComplex el ->
+                  stack#push (RpcFloat (Complex.arg el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
          else
             raise (Invalid_argument "empty stack")
 
 
       method exp () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               stack#push (RpcFloat (exp (float_of_big_int el)))
-            |RpcFloat el ->
-               stack#push (RpcFloat (exp el))
-            |RpcComplex el ->
-               stack#push (RpcComplex (Complex.exp el))
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (exp (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (exp el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.exp el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
          else
             raise (Invalid_argument "empty stack")
 
 
       method ln () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               stack#push (RpcFloat (log (float_of_big_int el)))
-            |RpcFloat el ->
-               stack#push (RpcFloat (log el))
-            |RpcComplex el ->
-               stack#push (RpcComplex (Complex.log el))
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (log (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (log el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.log el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
          else
             raise (Invalid_argument "empty stack")
 
 
       method conj () =
          if stack#length > 0 then
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               stack#push (RpcInt el)
-            |RpcFloat el ->
-               stack#push (RpcFloat el)
-            |RpcComplex el ->
-               stack#push (RpcComplex (Complex.conj el))
-            |RpcFloatMatrix el ->
-               stack#push (RpcFloatMatrix el)
-            |RpcComplexMatrix el ->
-               (* element-by-element conjugation *)
-               let rows, cols = Gsl_matrix_complex.dims el and
-               arr = Gsl_matrix_complex.to_array el in
-               let conj_arr = Array.map Complex.conj arr in
-               let conj_mat = Gsl_matrix_complex.of_array conj_arr rows cols in
-               stack#push (RpcComplexMatrix conj_mat)
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcInt el)
+               |RpcFloat el ->
+                  stack#push (RpcFloat el)
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.conj el))
+               |RpcFloatMatrix el ->
+                  stack#push (RpcFloatMatrix el)
+               |RpcComplexMatrix el ->
+                  (* element-by-element conjugation *)
+                  let rows, cols = Gsl_matrix_complex.dims el and
+                  arr = Gsl_matrix_complex.to_array el in
+                  let conj_arr = Array.map Complex.conj arr in
+                  let conj_mat = Gsl_matrix_complex.of_array conj_arr rows cols in
+                  stack#push (RpcComplexMatrix conj_mat)
+            end
+         else
+            raise (Invalid_argument "empty stack")
 
 
       method get_display_line line_num =
@@ -188,27 +221,42 @@ class rpc_calc =
 
       method drop () = 
          if stack#length > 0 then
-            let dummy = stack#pop () in 
-            ()
+            begin
+               self#backup ();
+               let dummy = stack#pop () in 
+               ()
+            end
          else
             raise (Invalid_argument "empty stack")
 
       method swap () =
          if stack#length > 1 then
-            let gen_el1 = stack#pop () in
-            let gen_el2 = stack#pop () in
-            stack#push gen_el1;
-            stack#push gen_el2
+            begin
+               self#backup ();
+               let gen_el1 = stack#pop () in
+               let gen_el2 = stack#pop () in
+               stack#push gen_el1;
+               stack#push gen_el2
+            end
          else
             raise (Invalid_argument "insufficient arguments for swap")
 
       method clear () =
+         self#backup ();
          for i = 1 to stack#length do
             let dummy = stack#pop () in ()
          done
 
       method push (v : rpc_data) =
+         self#backup ();
          stack#push v
+
+      method echo el_num =
+         if el_num <= stack#length then
+            let el = stack#peek el_num in
+            stack#push el
+         else
+            raise (Invalid_argument "cannot echo nonexistant element")
 
       method enter_int i =
          stack#push (RpcInt i)

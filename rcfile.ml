@@ -214,6 +214,8 @@ let parse_line line_stream =
                            register_binding key (Command Swap)
                         |"command_dup" ->
                            register_binding key (Command Dup)
+                        |"command_undo" ->
+                           register_binding key (Command Undo)
                         |"command_begin_browsing" ->
                            register_binding key (Command BeginBrowse)
                         |"browse_end_browsing" ->
@@ -226,6 +228,8 @@ let parse_line line_stream =
                            register_binding key (Browse PrevLine)
                         |"browse_next_line" ->
                            register_binding key (Browse NextLine)
+                        |"browse_echo" ->
+                           register_binding key (Browse Echo)
                         |_ ->
                            config_failwith ("Unknown command name \"" ^ command ^ "\"")
                   end

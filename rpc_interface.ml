@@ -120,6 +120,7 @@ object(self)
                                                
 
    method run () =
+      calc#backup ();
       Rcfile.process_rcfile ();
       wclear scr.stack_win;
       wclear scr.entry_win;
@@ -153,6 +154,25 @@ object(self)
    (* display the stack, where the bottom line of the display
     * corresponds to stack level 'stack_bottom_row' *)
    method draw_stack () =
+      let print_numbered_line l_num =
+         let num_len = 
+            String.length (string_of_int (pred (stack_bottom_row +
+            scr.sw_lines)))
+         in
+         if num_len <= 2 then
+            (sprintf "%2d:   %s" l_num)
+         else if num_len = 3 then
+            (sprintf "%3d:  %s" l_num)
+         else if num_len = 4 then
+            (sprintf "%4d: %s" l_num)
+         else
+            (* if the line number is really huge, truncate to least
+             * significant digits *)
+            let l_num_str = string_of_int l_num in
+            let str_len = String.length l_num_str in
+            let trunc_num = Str.string_after l_num_str (str_len - 4) in
+            (sprintf "%s: %s" trunc_num)
+      in
       for line = stack_bottom_row to pred (stack_bottom_row + scr.sw_lines) do
          let s = calc#get_display_line line in
          let len = String.length s in
@@ -176,16 +196,15 @@ object(self)
                         else
                            String.sub s (len - scr.sw_cols + 7) (scr.sw_cols - 7)
                      in
-                     sprintf "%2d:   %s" line sub_s
+                     print_numbered_line line sub_s
                   else
                      let sub_s = String.sub s 0 (scr.sw_cols - 10) in
-                     sprintf "%2d:   %s..." line sub_s
+                     print_numbered_line line (sub_s ^ "...")
                in
                assert (waddstr scr.stack_win line_string)
             else
                let spacer = String.make (scr.sw_cols - 7 - len) ' ' in
-               let line_num = sprintf "%2d:   " line in
-               let line_string = line_num ^ spacer ^ s in
+               let line_string = print_numbered_line line (spacer ^ s) in 
                assert (waddstr scr.stack_win line_string)
          end;
          begin
@@ -633,9 +652,10 @@ object(self)
                                  self#handle_command_call calc#swap
                               |Dup ->
                                  self#handle_command_call calc#dup
+                              |Undo ->
+                                 self#handle_command_call calc#undo
                               |BeginBrowse ->
-                                 (interface_mode <- BrowsingMode;
-                                 self#draw_stack ())
+                                 self#handle_begin_browse ()
                            end
                         |_ ->
                            failwith "Non-Command operation found in Command Hashtbl"
@@ -659,6 +679,8 @@ object(self)
                         self#handle_prev_line ()
                      |NextLine ->
                         self#handle_next_line ()
+                     |Echo ->
+                        self#handle_browse_echo ()
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"
@@ -1055,6 +1077,15 @@ object(self)
          raise Not_handled
 
 
+   (* begin stack browsing *)
+   method private handle_begin_browse () =
+      if calc#get_stack_size () > 0 then
+         (interface_mode <- BrowsingMode;
+         self#draw_stack ())
+      else
+         ()
+
+
    (* handle exit of browsing mode *)
    method private handle_end_browse () =
       horiz_scroll <- 0;
@@ -1111,6 +1142,13 @@ object(self)
       else
          ()
 
+
+   (* handle echoing stack selection (browsing mode) *)
+   method private handle_browse_echo () =
+      calc#echo stack_selection;
+      self#handle_prev_line ();
+      self#draw_stack ()
+      
 
    (* handle a call to a function (which first pushes the item in the
     * entry buffer)  *)

@@ -57,6 +57,12 @@ class rpc_stack =
 
       method length = len
 
+      method backup () =
+         let b_stack = Array.copy stack and
+         b_len = len in
+         {< len = b_len; stack = b_stack >}
+
+
       method push v =
          (* allocate a new stack if necessary *)
          begin
@@ -70,6 +76,7 @@ class rpc_stack =
             (stack.(len) <- v;
             len <- len + 1)
          end
+
 
       method pop () =
          (* compact stack memory by size_inc whenever we have 2 * size_inc
@@ -89,6 +96,17 @@ class rpc_stack =
                raise (Stack_error "cannot pop empty stack")
          end
 
+
+      (* return a particular stack element without removing it from the stack *)
+      (* element 1 points to the top of the stack *)
+      method peek el_num =
+         if el_num <= len then
+            let actual_el_num = len - el_num in
+            stack.(actual_el_num)
+         else
+            let s = Printf.sprintf "cannot access nonexistant stack element %d"
+            el_num in
+            raise (Stack_error s)
 
 
       (* generate a string to represent a particular stack element.
