@@ -386,6 +386,8 @@ let handle_exit_int (iface : interface_state_t) =
    iface.entry_type <- FloatEntry;
    iface.help_mode <- Standard;
    iface.has_entry <- false;
+   iface.is_entering_base <- false;
+   iface.int_base_string <- "";
    draw_help iface;
    draw_update_entry iface
 
