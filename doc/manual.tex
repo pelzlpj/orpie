@@ -1,0 +1,102 @@
+% Orpie documentation
+\documentclass[11pt,notitlepage]{article}
+\usepackage{times}
+\usepackage{fullpage}
+
+% End preamble
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+\title{Orpie User Manual}
+\author{Paul J. Pelzl}
+\date{March 4, 2004}
+\maketitle
+
+\begin{center}
+{\em ``Because the equals key is for the weak.''}
+\end{center}
+
+
+\section*{Introduction}
+Orpie is a console-based RPN desktop calculator.  The interface is similar to
+that of modern Hewlett-Packard${}^{TM}$ calculators, but has been optimized for
+efficiency on a PC keyboard.  The design is also influenced to some degree by 
+the Mutt email client\footnote{http://www.mutt.org} and the Vim
+editor\footnote{http://vim.sf.net}.
+
+Orpie does not have graphing capability, nor does it offer much in the way of a
+programming interface; other applications such as GNU
+Octave\footnote{http://www.octave.org} can already do this well.  Orpie focuses
+specifically on helping you to crunch numbers quickly.
+
+Orpie is written in Objective Caml (Ocaml)\footnote{http://caml.inria.fr/}, a
+high-performance functional programming language.
+
+\section*{Installation}
+This section describes how to install Orpie by compiling from source.
+
+Before installing Orpie, you should have installed the GNU Scientific Library
+(GSL)\footnote{http://sources.redhat.com/gsl/} version 1.4 or greater.  You will
+also need a curses library (e.g.
+ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), which is
+almost certainly already installed on your system.  Finally, Ocaml 3.06 or
+higher is required to compile the sources.  You will need the Nums library that
+is distributed with Ocaml; at least on Debian, Nums is available as separate
+packages {\tt libnums-ocaml} and {\tt libnums-ocaml-dev}.
+
+I will assume you have received this program in the form of a source tarball, 
+e.g. ``{\tt orpie-x.x.tar.gz}''.  You have undoubtedly extracted this archive 
+already (e.g. using ``{\tt tar xvzf orpie-x.x.tar.gz}'').  Enter the root of 
+the Orpie installation directory, e.g. ``{\tt cd orpie-x.x}''.  You can compile
+the sources with the following sequence:
+\begin{verbatim}
+$ ./configure
+$ make
+\end{verbatim}
+Finally, run ``{\tt make install}'' (as root) to install the executables.
+``{\tt configure}'' accepts a number of parameters that you can learn about with
+``{\tt ./configure --help}''.  Perhaps the most common of these is the {\tt
+--prefix} option, which lets you install to a non-standard
+directory\footnote{The default installation directory is {\tt /usr/local}.}.  
+
+
+\section*{Quick Start}
+
+\section*{Advanced Configuration}
+
+
+\section*{Licensing}
+Orpie has been made available under the GNU General Public License (GPL), 
+version 2.  You should have received a copy of the GPL along with this 
+program, in the file ``COPYING''.
+
+
+\section*{Credits}
+Orpie includes portions of the
+ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} bindings supplied by
+Olivier Andrieu, as well as the curses bindings from the Ocaml Text Mode
+Kit\footnote{http://www.nongnu.org/ocaml-tmk/} written by Nicolas George.  I
+would like to thank these authors for helping to make Orpie possible.
+
+
+\section*{Contact info}
+Orpie author: Paul Pelzl {\tt <pelzlpj@eecs.umich.edu>} \\
+Orpie website: {\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
+
+
+\noindent
+Feel free to contact me if you have bugs, feature requests, patches, etc.  I 
+would also welcome volunteers interested in packaging Orpie for various platforms.
+
+Orpie is developed with the aid of the excellent GNU Arch
+RCS\footnote{http://www.gnu.org/software/gnu-arch/}.  Interested 
+developers are advised to track Orpie development via my public repository: \\
+\hspace*{2cm}{\tt pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
+\hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004} .  
+
+Do you feel compelled to compensate me for writing Orpie?  As a {\em poor, 
+starving} graduate student, I will gratefully accept donations.  Please see \\
+{\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie/donate.html} for more information.
+\end{document}
+
+
+% arch-tag: DO_NOT_CHANGE_db7ed8b2-8ea4-4e32-b0f6-50482487cb00 
