@@ -9,7 +9,7 @@
 \begin{document}
 \title{Orpie v1.0 User Manual}
 \author{Paul J. Pelzl}
-\date{March 4, 2004}
+\date{March 27, 2004}
 \maketitle
 
 \begin{center}
@@ -21,29 +21,51 @@
 Orpie is a console-based RPN desktop calculator.  The interface is similar to
 that of modern Hewlett-Packard${}^{TM}$ calculators, but has been optimized for
 efficiency on a PC keyboard.  The design is also influenced to some degree by 
-the Mutt email client\footnote{http://www.mutt.org} and the Vim
-editor\footnote{http://vim.sf.net}.
+the 
+%BEGIN LATEX
+Mutt email client\footnote{http://www.mutt.org} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.mutt.org">Mutt email client</a> \end{rawhtml}
+and the 
+%BEGIN LATEX
+Vim editor\footnote{http://vim.sf.net}.
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://vim.sf.net">Vim editor</a>. \end{rawhtml} 
 
 Orpie does not have graphing capability, nor does it offer much in the way of a
-programming interface; other applications such as GNU
-Octave\footnote{http://www.octave.org} are already very effective for such
-tasks.  Orpie focuses specifically on helping you to crunch numbers quickly.
+programming interface; other applications such as 
+%BEGIN LATEX
+GNU Octave\footnote{http://www.octave.org} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.octave.org">GNU Octave</a>. \end{rawhtml} 
+are already very effective for such tasks.  Orpie focuses specifically on
+helping you to crunch numbers quickly.
 
-Orpie is written in Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/}, a
-high-performance functional programming language with a whole lot of nice
+Orpie is written in 
+%BEGIN LATEX
+Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/},
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://caml.inria.fr">Objective Caml</a> (aka Ocaml), \end{rawhtml} 
+a high-performance functional programming language with a whole lot of nice
 features.  I highly recommend it.
 
 \section{Installation}
 This section describes how to install Orpie by compiling from source.
 
-Before installing Orpie, you should have installed the GNU Scientific Library
-(GSL)\footnote{http://sources.redhat.com/gsl/} version 1.4 or greater.  You will
-also need a curses library (e.g.
-ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), which is
-almost certainly already installed on your system.  Finally, Ocaml 3.06 or
-higher is required to compile the sources.  You will need the Nums library that
-is distributed with Ocaml; at least on Debian, Nums is available as separate
-packages {\tt libnums-ocaml} and {\tt libnums-ocaml-dev}.
+Before installing Orpie, you should have installed the 
+%BEGIN LATEX
+GNU Scientific Library (GSL)\footnote{http://sources.redhat.com/gsl/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL) \end{rawhtml} 
+version 1.4 or greater.  You will also need a curses library (e.g.
+%BEGIN LATEX
+ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
+which is almost certainly already installed on your system.  Finally, Ocaml
+3.06 or higher is required to compile the sources.  You will need the Nums
+library that is distributed with Ocaml; at least on Debian, Nums is available
+as separate packages {\tt libnums-ocaml} and {\tt libnums-ocaml-dev}.
 
 I will assume you have received this program in the form of a source tarball, 
 e.g. ``{\tt orpie-x.x.tar.gz}''.  You have undoubtedly extracted this archive 
@@ -285,7 +307,10 @@ a number of basic calculator commands have been bound to single keypresses:
       {\tt p} & toggle complex display mode between rectangular and polar \\
       {\tt b} & cycle base display mode between binary, octal, decimal, hex \\
       {\tt v} & view last stack element in a fullscreen editor \\
+%BEGIN LATEX
       {\tt P} & enter $\pi$ on the stack \\
+%END LATEX
+%HEVEA {\tt P} & enter 3.1415\dots on the stack \\
       {\tt C-L} & refresh the display \\
       {\tt <up>} & begin stack browsing mode \\
       {\tt Q} & quit Orpie \\
@@ -584,7 +609,10 @@ they do not take an argument.  Many calculator interface settings are implemente
    \item {\tt command\_dup} \\
       Duplicate the last stack element.
    \item {\tt command\_enter\_pi} \\
-      Enter 3.1415\dots on the stack.
+%BEGIN LATEX
+      Enter $\pi$ on the stack.
+%END LATEX
+%HEVEA Enter 3.1415\dots on the stack.
    \item {\tt command\_hex} \\
       Set the base of integer constant representation to 16 (hexadecimal).
    \item {\tt command\_oct} \\
@@ -694,13 +722,20 @@ with this program, in the file ``COPYING''.
 
 \section{Credits}
 Orpie includes portions of the
-ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} bindings supplied by
-Olivier Andrieu, as well as the curses bindings from the Ocaml Text Mode
-Kit\footnote{http://www.nongnu.org/ocaml-tmk/} written by Nicolas George.  I
-would like to thank these authors for helping to make Orpie possible.
+%BEGIN LATEX
+ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://oandrieu.nerim.net/ocaml/gsl/">ocamlgsl</a> \end{rawhtml}
+bindings supplied by Olivier Andrieu, as well as the curses bindings from the
+%BEGIN LATEX
+Ocaml Text Mode Kit\footnote{http://www.nongnu.org/ocaml-tmk/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.nongnu.org/ocaml-tmk/">Ocaml Text Mode Kit</a> \end{rawhtml}
+written by Nicolas George.  I would like to thank these authors for helping to
+make Orpie possible.
 
 
-\section{Frequently Asked Questions}
+\section{(Not So) Frequently Asked Questions}
 \begin{enumerate}
    \item {\bf Whatever happened to {\tt rpc}?}
 
@@ -753,15 +788,25 @@ Orpie website: {\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
 Feel free to contact me if you have bugs, feature requests, patches, etc.  I 
 would also welcome volunteers interested in packaging Orpie for various platforms.
 
-Orpie is developed with the aid of the excellent GNU Arch
-RCS\footnote{http://www.gnu.org/software/gnu-arch/}.  Interested 
-developers are advised to track Orpie development via my public archive: \\
+Orpie is developed with the aid of the excellent 
+%BEGIN LATEX
+GNU Arch RCS\footnote{http://www.gnu.org/software/gnu-arch/}.
+%END LATEX  
+%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/gnu-arch/">GNU Arch RCS</a>. \end{rawhtml}
+Interested developers are advised to track Orpie development via my public
+archive: \\
 \hspace*{2cm}{\tt pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
 \hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004} .  
 
 Do you feel compelled to compensate me for writing Orpie?  As a {\em poor, 
-starving} graduate student, I will gratefully accept donations.  Please see \\
+starving} graduate student, I will gratefully accept 
+%BEGIN LATEX
+donations.  Please see \\
 {\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie/donate.html} for more information.
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.eecs.umich.edu/~pelzlpj/orpie/donate.html">donations</a>. \end{rawhtml}
+
+
 \end{document}
 
 
