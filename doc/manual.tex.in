@@ -1,0 +1,1188 @@
+% Orpie documentation
+%
+% Notes:
+% This document is designed to be processed with the 'latex2man' perl
+% script.  This script has a preprocessor, which is the source of the
+% IF LATEX ... ELSE ... END IF comments.
+% "latex2man -CLATEX -L" will output pure tex source, which can be
+% handled either via latex or hevea.
+% Hevea has its own preprocessor, which is the source of the BEGIN LATEX
+% and HEVEA comments.
+
+\documentclass[11pt,notitlepage]{article}
+%@% IF LATEX %@%
+\usepackage{times}
+\usepackage{amsmath}
+\usepackage{fullpage}
+%@% ELSE %@%
+\usepackage{latex2man}
+\setVersion{1.0}
+%@% END-IF %@%
+
+% End preamble
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+%@% IF LATEX %@%
+\title{Orpie v1.0 User Manual}
+\author{Paul J. Pelzl}
+\date{March 27, 2004}
+\maketitle
+
+\begin{center}
+\emph{``Because the equals key is for the weak.''}
+\end{center}
+
+
+\section{Introduction}
+Orpie is a console-based RPN (reverse polish notation) desktop
+calculator.  The interface is similar to that of modern
+Hewlett-Packard${}^{TM}$ calculators, but has been optimized for efficiency on
+a PC keyboard.  The design is also influenced to some degree by the 
+%BEGIN LATEX
+Mutt email client\footnote{http://www.mutt.org} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.mutt.org">Mutt email client</a> \end{rawhtml}
+and the 
+%BEGIN LATEX
+Vim editor\footnote{http://vim.sf.net}.
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://vim.sf.net">Vim editor</a>. \end{rawhtml} 
+
+Orpie does not have graphing capability, nor does it offer much in the way of a
+programming interface; other applications such as 
+%BEGIN LATEX
+GNU Octave\footnote{http://www.octave.org} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.octave.org">GNU Octave</a>. \end{rawhtml} 
+are already very effective for such tasks.  Orpie focuses specifically on
+helping you to crunch numbers quickly.
+
+Orpie is written in 
+%BEGIN LATEX
+Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/},
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://caml.inria.fr">Objective Caml</a> (aka Ocaml), \end{rawhtml} 
+a high-performance functional programming language with a whole lot of nice
+features.  I highly recommend it.
+
+\section{Installation}
+This section describes how to install Orpie by compiling from source.
+
+Before installing Orpie, you should have installed the 
+%BEGIN LATEX
+GNU Scientific Library (GSL)\footnote{http://sources.redhat.com/gsl/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL) \end{rawhtml} 
+version 1.4 or greater.  You will also need a curses library (e.g.
+%BEGIN LATEX
+ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
+which is almost certainly already installed on your system.  Finally, Ocaml
+3.06 or higher is required to compile the sources.  You will need the Nums
+library that is distributed with Ocaml; at least on Debian, Nums is available
+as separate packages \texttt{libnums-ocaml} and \texttt{libnums-ocaml-dev}.
+
+I will assume you have received this program in the form of a source tarball, 
+e.g. ``\texttt{orpie-x.x.tar.gz}''.  You have undoubtedly extracted this archive 
+already (e.g. using ``\texttt{tar xvzf orpie-x.x.tar.gz}'').  Enter the root of 
+the Orpie installation directory, e.g. ``\texttt{cd orpie-x.x}''.  You can compile
+the sources with the following sequence:
+\begin{verbatim}
+$ ./configure
+$ make
+\end{verbatim}
+Finally, run ``\texttt{make install}'' (as root) to install the executables.
+``\texttt{configure}'' accepts a number of parameters that you can learn about with
+``\texttt{./configure --help}''.  Perhaps the most common of these is the {\tt
+--prefix} option, which lets you install to a non-standard
+directory\footnote{The default installation prefix is \texttt{/usr/local}.}.  
+%@% ELSE %@%
+   %@% IF ORPIERC %@%
+\begin{Name}{5}{orpierc}{Paul J. Pelzl}{configuration file for the Orpie calculator}{orpierc manpage}
+   \texttt{orpierc} is the configuration textfile for the \Cmd{orpie}{1} console calculator.
+\end{Name}
+   %@% ELSE %@%
+\begin{Name}{1}{orpie}{Paul J. Pelzl}{a console-based RPN calculator}{Orpie 1.0 Manpage}
+   \Prog{orpie} is a console-based RPN calculator with an interactive visual stack.
+\end{Name}
+
+\section{Synopsis}
+\Prog{orpie}
+   %@% END-IF %@%
+%@% END-IF %@%
+
+%@% IF !ORPIERC %@%
+\section{Quick Start}
+%@% IF !LATEX %@%
+CAUTION: while this manpage should be suitable as a quick reference, it may
+be subject to miscellaneous shortcomings in typesetting.  The definitive 
+documentation is the user manual provided with Orpie in PDF format.
+
+%@% END-IF %@%
+This section describes how to use Orpie in its default configuration.  After
+familiarizing yourself with the basic operations as outlined in this section,
+you may wish to consult 
+%@% IF LATEX %@%
+Section \ref{advanced} 
+%@% ELSE %@%
+the \Cmd{orpierc}{5} manpage
+%@% END-IF %@%
+to see how Orpie can be configured to better fit your needs.
+
+\subsection{Overview}
+%@% IF LATEX %@%
+You can start the calculator by executing \texttt{orpie}.
+%@% END-IF %@%
+The interface has two
+panels.  The left panel combines status information with context-sensitive help;
+the right panel represents the calculator's stack.  (Note that the left panel
+will be hidden if Orpie is run in a terminal with less than 80 columns.)
+
+In general, you perform calculations by first entering data on to the stack,
+then executing functions that operate on the stack data.  As an example, you can
+hit \texttt{1<enter>2<enter>+} in order to add 1 and 2.
+
+%@% IF LATEX %@%
+\subsection{Entering Data}
+\subsubsection{Entering Real Numbers}
+%@% ELSE %@%
+\subsection{Entering Real Numbers}
+%@% END-IF %@%
+To enter a real number, just type the desired digits and hit enter.  The space
+bar will begin entry of a scientific notation exponent.  The '\texttt{n}' key is used
+for negation.  Here are some examples:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+      \texttt{1.23<enter>} & \texttt{1.23} \\
+      \texttt{1.23<space>23n<enter>} & \texttt{1.23e-23} \\
+      \texttt{1.23n<space>23<enter>} & \texttt{-1.23e23} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+
+%@% IF LATEX %@%
+\subsubsection{Entering Complex Numbers}
+%@% ELSE %@%
+\subsection{Entering Complex Numbers}
+%@% END-IF %@%
+Orpie can represent complex numbers using either cartesian (rectangular) or
+polar coordinates.  See 
+%@% IF LATEX %@%
+Section \ref{rectpolar} 
+%@% ELSE %@%
+PERFORMING BASIC COMMAND OPERATIONS
+%@% END-IF %@%
+to see how to change the complex number display mode.
+
+A complex number is entered by first pressing '\texttt{(}', then entering the real
+part, then pressing '\texttt{,}' followed by the imaginary part.  Alternatively, you
+can press '\texttt{(}' followed by the magnitude, then '\texttt{<}' followed by the
+phase angle.  The angle will be interpreted in degrees or radians, depending on
+the current setting of the angle mode 
+%@% IF LATEX %@%
+(see Section \ref{anglemode}).
+%@% ELSE %@%
+(see PERFORMING BASIC COMMAND OPERATIONS).
+%@% END-IF %@%
+Examples:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+      \texttt{(1.23, 4.56<enter>} & \texttt{(1.23, 4.56)} \\
+      \texttt{(0.7072<45<enter>} & \texttt{(0.500065915655126, 0.50006591...} \\
+      \texttt{(1.23n,4.56<space>10<enter>} & \texttt{(-1.23, 45600000000)} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\subsubsection{Entering Matrices}
+%@% ELSE %@%
+\subsection{Entering Matrices}
+%@% END-IF %@%
+You can enter matrices by pressing '\texttt{[}'.  The elements of the matrix may then be
+entered as described in the previous sections, and should be separated using
+'\texttt{,}'.  To start a new row of the matrix, press '\texttt{[}' again.  On the
+stack, each row of the matrix is enclosed in a set of brackets; for example, the
+matrix
+%@% IF LATEX %@%
+%BEGIN LATEX
+\begin{displaymath}
+   \left[
+   \begin{matrix}
+      1 & 2 \\
+      3 & 4
+   \end{matrix}
+   \right]
+\end{displaymath}
+%END LATEX
+%HEVEA \begin{center}\begin{tabular}{|cc|}1 & 2 \\ 3 & 4 \end{tabular}\end{center}
+%@% ELSE %@%
+\begin{Table}{2}
+   1 & 2 \\
+   3 & 4
+\end{Table}
+%@% END-IF %@%
+would appear on the stack as \texttt{[[1, 2][3, 4]]}.
+
+Examples of matrix entry:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+      \texttt{[1,2[3,4<enter>} & \texttt{[[1, 2][3, 4]]} \\
+      \texttt{[1.2<space>10,0[3n,5n<enter>} & \texttt{[[ 12000000000, 0 ][ -3, -5 ]]} \\
+      \texttt{[(1,2,3,4[5,6,7,8<enter>} & \texttt{[[ (1, 2), (3, 4) ][ (5, 6), (...} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\subsubsection{Entering Integer Constants}
+%@% ELSE %@%
+\subsection{Entering Integer Constants}
+%@% END-IF %@%
+An exact integer may be entered by pressing '\texttt{\#}' followed by the desired
+digits.  The base of the integer will be assumed to be the same as the current
+calculator base mode (see 
+%@% IF LATEX %@%
+Section \ref{basemode} 
+%@% ELSE %@%
+PERFORMING BASIC COMMAND OPERATIONS
+%@% END-IF %@%
+to see how to set this mode).
+Alternatively, the desired base may be specified by pressing space and appending
+one of \{\texttt{b, o, d, h}\}, to represent binary, octal, decimal, or hexadecimal,
+respectively.  On the stack, the representation of the integer will be changed
+to match the current base mode.  Examples:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+      \texttt{\#123456<enter>} & \texttt{\# 123456 d} \\
+      \texttt{\#ffff<space>h<enter>} & \texttt{\# 65535 d} \\
+      \texttt{\#10101n<space>b<enter>} & \texttt{\# -21 d} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+Note that integer constants may have unlimited length, and the basic arithmetic
+operations (addition, subtraction, multiplication, division) will be performed
+using exact arithmetic when both arguments are integers.
+
+\subsection{Performing Basic Function Operations}
+%@% IF LATEX %@%
+\label{functionops}
+%@% END-IF %@%
+Once some data has been entered on the stack, you can apply operations to that
+data.  For example, '\texttt{+}' will add the last two elements on the stack.  By
+default, the following keys have been bound to such operations:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keys & Operations \\
+      \hline
+      \texttt{+} & add last two stack elements \\
+      \texttt{-} & subtract element 1 from element 2 \\
+      \texttt{*} & multiply last two stack elements \\
+      \texttt{/} & divide element 2 by element 1 \\
+      %@% IF LATEX %@%
+      \texttt{\^{}} & raise element 2 to the power of element 1 \\
+      %@% ELSE %@%
+      \texttt{\Circum} & raise element 2 to the power of element 1 \\
+      %@% END-IF %@%
+      \texttt{n} & negate last element \\
+      \texttt{i} & invert last element \\
+      \texttt{s} & square root function \\
+      \texttt{a} & absolute value function \\
+      \texttt{e} & exponential function \\
+      \texttt{l} & natural logarithm function \\
+      \texttt{c} & complex conjugate function \\
+      \texttt{!} & factorial function  \\
+      \texttt{\%} & element 2 mod element 1 \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+As a shortcut, function operators will automatically enter any data that you
+were in the process of entering.  So instead of the sequence 
+\texttt{2<enter>2<enter>+}, you could type simply \texttt{2<enter>2+} and the second number
+would be entered before the addition operation is applied.
+
+
+\subsection{Performing Extended Function Operations}
+%@% IF LATEX %@%
+\label{extendedfunctions}
+%@% END-IF %@%
+One could bind nearly all calculator operations to specific keypresses, but this
+would rapidly get confusing since the PC keyboard is not labeled as nicely as a
+calculator keyboard is.  For this reason, Orpie includes an 
+\emph{extended command} syntax.
+
+To activate an extended command, press '\texttt{'}' (quote key), followed by the
+first few letters/digits of the command, then hit enter.  Orpie offers an
+autocompletion feature for extended commands, so you only need to type enough of
+the command to identify it uniquely.  The matching extended commands will appear
+in the left panel of the display, to assist you in finding the appropriate
+command.
+
+To avoid interface conflicts, extended commands may be entered only when the
+entry buffer (the bottom line of the screen) is empty.
+
+The following functions are available as extended commands:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Extended Commands & Functions \\
+      \hline
+      \texttt{inv} & inverse function \\
+      \texttt{pow} & raise element 2 to the power of element 1 \\
+      \texttt{sq}  & square last element \\
+      \texttt{sqrt} & square root function \\
+      \texttt{abs} & absolute value function \\
+      \texttt{exp} & exponential function \\
+      \texttt{ln} & natural logarithm function \\
+      %@% IF LATEX %@%
+      \texttt{10\^{}} & base 10 exponential function \\
+      %@% ELSE %@%
+      \texttt{10\Circum} & base 10 exponential function \\
+      %@% END-IF %@%
+      \texttt{log10} & base 10 logarithm function \\
+      \texttt{conj} & complex conjugate function \\
+      \texttt{sin} & sine function \\
+      \texttt{cos} & cosine function \\
+      \texttt{tan} & tangent function \\
+      \texttt{sinh} & hyperbolic sine function \\
+      \texttt{cosh} & hyperbolic cosine function \\
+      \texttt{tanh} & hyperbolic tangent function \\
+      \texttt{asin} & arcsine function \\
+      \texttt{acos} & arccosine function \\
+      \texttt{atan} & arctangent function \\
+      \texttt{asinh} & inverse hyperbolic sine function \\
+      \texttt{acosh} & inverse hyperbolic cosine function \\
+      \texttt{atanh} & inverse hyperbolic tangent function \\
+      \texttt{re} & real part of complex number \\
+      \texttt{im} & imaginary part of complex number \\
+      \texttt{gamma} & Euler gamma function \\
+      \texttt{lngamma} & natural log of Euler gamma function \\
+      \texttt{erf} & error function \\
+      \texttt{erfc} & complementary error function \\
+      \texttt{fact} & factorial function \\
+      \texttt{trans} & matrix transpose \\
+      \texttt{mod} & element 2 mod element 1 \\
+      \texttt{floor} & floor function \\
+      \texttt{ceil} & ceiling function \\
+      \texttt{toint} & convert a real number to an integer type \\
+      \texttt{toreal} & convert an integer type to a real number \\
+      \texttt{add} & add last two elements \\
+      \texttt{sub} & subtract element 1 from element 2 \\
+      \texttt{mult} & multiply last two elements \\
+      \texttt{div} & divide element 2 by element 1 \\
+      \texttt{neg} & negate last element \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+\subsection{Performing Basic Command Operations}
+%@% IF LATEX %@%
+\label{rectpolar}
+\label{anglemode}
+\label{basemode}
+%@% END-IF %@%
+In addition to the function operations listed in 
+%@% IF LATEX %@%
+Section \ref{functionops},
+%@% ELSE %@%
+the section PERFORMING BASIC FUNCTION OPS,
+%@% END-IF %@%
+a number of basic calculator commands have been bound to single keypresses:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keys & Operations \\
+      \hline
+      %@% IF LATEX %@%
+      \texttt{$\backslash$} & drop last element \\
+      %@% ELSE %@%
+      \texttt{\Bs} & drop last element \\
+      %@% END-IF %@%
+      \texttt{|} & clear all stack elements \\
+      \texttt{<pagedown>} & swap last two elements \\
+      \texttt{<enter>} & duplicate last element (when entry buffer is empty) \\
+      \texttt{u} & undo last operation \\
+      \texttt{r} & toggle angle mode between degrees and radians \\
+      \texttt{p} & toggle complex display mode between rectangular and polar \\
+      \texttt{b} & cycle base display mode between binary, octal, decimal, hex \\
+      \texttt{v} & view last stack element in a fullscreen editor \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      \texttt{P} & enter $\pi$ on the stack \\
+%END LATEX
+%HEVEA \texttt{P} & enter 3.1415\dots on the stack \\
+%@% ELSE %@%
+      \texttt{P} & enter 3.14159265 on the stack \\
+%@% END-IF %@%
+      \texttt{C-L} & refresh the display \\
+      \texttt{<up>} & begin stack browsing mode \\
+      \texttt{Q} & quit Orpie \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+\subsection{Performing Extended Command Operations}
+In addition to the function operations listed in 
+%@% IF LATEX %@%
+Section \ref{extendedfunctions}, 
+%@% ELSE %@%
+the section PERFORMING EXTENDED FUNCTION OPERATIONS,
+%@% END-IF %@%
+there are a large number of calculator commands that
+have been implemented using the extended command syntax:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Extended Commands & Calculator Operation \\
+      \hline
+      \texttt{drop} & drop last element \\
+      \texttt{clear} & clear all stack elements \\
+      \texttt{swap} & swap last two elements \\
+      \texttt{dup} & duplicate last element \\
+      \texttt{undo} & undo last operation \\
+      \texttt{rad} & set angle mode to radians \\
+      \texttt{deg} & set angle mode to degrees \\
+      \texttt{rect} & set complex display mode to rectangular \\
+      \texttt{polar} & set complex display mode to polar \\
+      \texttt{bin} & set base display mode to binary \\
+      \texttt{oct} & set base display mode to octal \\
+      \texttt{dec} & set base display mode to decimal \\
+      \texttt{hex} & set base display mode to hexidecimal \\
+      \texttt{view} & view last stack element in a fullscreen editor \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      \texttt{pi} & enter $\pi$ on the stack \\
+%END LATEX
+%HEVEA \texttt{pi} & enter 3.1415\dots on the stack \\
+%@% ELSE %@%
+      \texttt{pi} & enter 3.14159265 on the stack \\
+%@% END-IF %@%
+      \texttt{refresh} & refresh the display \\
+      \texttt{about} & display a nifty ``About Orpie'' screen \\
+      \texttt{quit} & quit Orpie \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+\subsection{Browsing the Stack}
+Orpie offers a \emph{stack browsing mode} to assist in viewing and manipulating
+stack data.  Press \texttt{<up>} to enter stack browsing mode; this should
+highlight the last stack element.  You can use the up and down arrow keys to
+select different stack elements.  The following keys are useful in stack
+browsing mode:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keys & Operations \\
+      \hline
+      \texttt{q} & quit stack browsing mode \\
+      \texttt{<left>} & scroll selected entry to the left \\
+      \texttt{<right>} & scroll selected entry to the right \\
+      \texttt{r} & cyclically ``roll'' stack elements downward, below the selected element (inclusive) \\
+      \texttt{R} & cyclically ``roll'' stack elements upward, below the selected element (inclusive) \\
+      \texttt{v} & view the currently selected element in a fullscreen editor \\
+      \texttt{<enter>} & duplicate the currently selected element \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+The left and right scrolling option may prove useful for viewing very lengthy
+stack entries, such as large matrices.
+%@% END-IF %@%
+% (!ORPIERC)
+
+%@% IF LATEX || ORPIERC %@%
+%@% IF LATEX %@%
+\section{Advanced Configuration}
+\label{advanced}
+%@% ELSE %@%
+\section{Introduction}
+CAUTION: while this manpage should be suitable as a quick reference, it may
+be subject to miscellaneous shortcomings in typesetting.  The definitive 
+documentation is the user manual provided with Orpie in PDF format.
+
+%@% END-IF %@%
+Orpie reads a run-configuration textfile (generally \texttt{/etc/orpierc} or
+\texttt{/usr/local/etc/orpierc}) to determine key and command bindings.  You can
+create a personalized configuration file in \texttt{\$HOME/.orpierc}, and select
+bindings that match your usage patterns.  The recommended procedure is to copy
+the \texttt{orpierc} file provided with Orpie, and edit it to your needs.
+
+%@% IF LATEX %@%
+\subsection{\texttt{orpierc} Syntax}
+%@% ELSE %@%
+\section{\texttt{orpierc} Syntax}
+%@% END-IF %@%
+You may notice that the  \texttt{orpierc} syntax is similar to the syntax used in
+the configuration file for the Mutt email client (muttrc).
+
+Within the \texttt{orpierc} file, strings should be enclosed in double quotes (\texttt{"}).
+A double quote character inside a string may be represented by 
+%@% IF LATEX %@%
+\texttt{$\backslash$"} .
+%@% ELSE %@%
+\Bs " .
+%@% END-IF %@%
+The backslash character must be represented by doubling it 
+%@% IF LATEX %@%
+(\texttt{$\backslash\backslash$}).
+%@% ELSE %@%
+(\Bs\Bs).
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\subsubsection{Setting Variables}
+\label{setvar}
+Syntax: \texttt{set \emph{variable}=\emph{value\_string}} \\ \\
+%@% ELSE %@%
+\subsection{Setting Variables}
+Syntax: set \emph{variable}=\emph{value\_string} \\ \\
+%@% END-IF %@%
+Several configuration variables can be set using this syntax; see 
+%@% IF LATEX %@%
+Section \ref{variables}
+%@% ELSE %@%
+the CONFIGURATION VARIABLES description
+%@% END-IF %@%
+to see a list.  The variables are unquoted, but the values should be quoted strings.
+
+%@% IF LATEX %@%
+\subsubsection{Creating Key Bindings}
+\label{bindings}
+%@% ELSE %@%
+\subsection{Creating Key Bindings}
+%@% END-IF %@%
+Syntax: \texttt{bind \emph{key\_identifier operation}} \\ \\
+This command will bind a keypress to execute a calculator operation.  
+The various operations, which should not be enclosed in quotes,
+may be found in 
+%@% IF LATEX %@%
+Section \ref{operationslist}. 
+%@% ELSE %@%
+the section on CALCULATOR OPERATIONS.
+%@% END-IF %@%
+Key identifiers may be specified by strings that represent a single keypress,
+for example \texttt{"m"} (quotes included).  The key may be prefixed with 
+%@% IF LATEX %@%
+\texttt{"$\backslash\backslash$C"} or \texttt{"$\backslash\backslash$M"} 
+%@% ELSE %@%
+"\Bs\Bs C" or "\Bs\Bs M"
+%@% END-IF %@%
+to represent Control or Meta (Alt) modifiers, respectively; note that the
+backslash must be doubled.  A number of special keys lack single-character
+representations, so the following strings may be used to represent them:
+\begin{itemize}
+   \item \texttt{"<esc>"}
+   \item \texttt{"<tab>"}
+   \item \texttt{"<enter>"}
+   \item \texttt{"<return>"}
+   \item \texttt{"<insert>"}
+   \item \texttt{"<home>"}
+   \item \texttt{"<end>"}
+   \item \texttt{"<pageup>"}
+   \item \texttt{"<pagedown>"}
+   \item \texttt{"<space>"}
+   \item \texttt{"<left>"}
+   \item \texttt{"<right>"}
+   \item \texttt{"<up>"}
+   \item \texttt{"<down>"}
+   \item \texttt{"<f1>"} to \texttt{"<f12>"}
+\end{itemize}
+Due to differences between various terminal emulators, this key identifier syntax may
+not be adequate to describe every keypress.  As a workaround, Orpie will also accept key
+identifiers in octal notation.  As an example, you could use 
+%@% IF LATEX %@%
+\texttt{$\backslash$024} 
+%@% ELSE %@%
+\Bs 024
+%@% END-IF %@%
+(do \emph{not} enclose it in quotes) to represent Ctrl-T.
+
+Orpie includes a secondary executable, \texttt{orpie-curses-keys}, that prints out
+the key identifiers associated with keypresses.  You may find it useful when customizing
+\texttt{orpierc}.
+
+%@% IF LATEX %@%
+\subsubsection{Creating Extended Command Abbreviations}
+\label{abbreviations}
+%@% ELSE %@%
+\subsection{Creating Extended Command Abbreviations}
+%@% END-IF %@%
+Syntax: \texttt{abbrev \emph{command\_abbreviation operation}} \\ \\
+You can use this syntax to set the extended command abbreviations used within
+Orpie to represent the various operations.  A list of available operations may
+be found in 
+%@% IF LATEX %@%
+Section \ref{operationslist}.
+%@% ELSE %@%
+the CALCULATOR OPERATIONS section.
+%@% END-IF %@%
+The command abbreviations should be quoted strings, for example \texttt{"sin"}
+or \texttt{"log"}.
+
+Orpie performs autocompletion on these command abbreviations, allowing you to type
+usually just a few letters in order to select the desired command.  The order of the
+autocompletion matches will be the same as the order in which the abbreviations are
+registered by the rcfile--so you may wish to place the more commonly used command
+abbreviations earlier in the list.
+
+%@% IF LATEX %@%
+\subsection{Configuration Variables}
+\label{variables}
+The following configuration variables may be set as described in Section \ref{setvar}:
+%@% ELSE %@%
+\section{Configuration Variables}
+The following configuration variables may be set as described in the SETTING VARIABLES
+section.
+%@% END-IF %@%
+\begin{itemize}
+   \item \texttt{datafile} \\
+      This variable should be set to the full path of the Orpie datafile, which is used
+      to save the calculator state.  A tilde prefix will be expanded to the home
+      directory.  The default path is \\
+      %@% IF LATEX %@%
+      \texttt{"\~{}/.orpie/calc\_state"}.
+      %@% ELSE %@%
+      "\Bs\Tilde /.orpie/calc\_state".
+      %@% END-IF %@%
+   \item \texttt{buffer} \\
+      This variable should be set to the full path of a buffer file that Orpie uses
+      to pass fullscreen viewing data to the editor of your choice.  The default
+      %@% IF LATEX %@%
+      is \texttt{"\~{}/.orpie/fullscreen"}.
+      %@% ELSE %@%
+      is "\Bs\Tilde /.orpie/fullscreen".
+      %@% END-IF %@%
+   \item \texttt{editor} \\
+      This variable may be set to the fullscreen editor of your choice.  The default
+      value is \texttt{"vi"}.  It is recommended that you choose an editor that offers
+      horizontal scrolling in place of word wrapping, so that the columns of large 
+      matrices can be properly aligned.  (The Vim editor could be used in this fashion
+      by setting \texttt{editor} to \texttt{"vim -c 'set nowrap'"}.)
+\end{itemize}
+
+%@% IF LATEX %@%
+\subsection{Calculator Operations}
+\label{operationslist}
+%@% ELSE %@%
+\section{Calculator Operations}
+%@% END-IF %@%
+Every calculator operation can be made available to the interface using the syntax
+described in 
+%@% IF LATEX %@%
+Sections \ref{bindings} and \ref{abbreviations}.  
+%@% ELSE %@%
+the sections on CREATING KEY BINDINGS and CREATING EXTENDED COMMAND ABBREVIATIONS.
+%@% END-IF %@%
+The following is a list of every available operation.
+
+%@% IF LATEX %@%
+\subsubsection{Functions}
+\label{functions}
+%@% ELSE %@%
+\subsection{Functions}
+%@% END-IF %@%
+The following operations are functions--that is, they will consume at least one
+argument from the stack.  Orpie will generally abort the computation and
+provide an informative error message if a function cannot be successfully applied (for
+example, if you try to compute the transpose of something that is not a matrix).
+
+For the integer constant data type, basic arithmetic operations will yield an exact
+integer constant result.  Division of two integer constants will yield the quotient of
+the division.  The more complicated functions will generally promote the integer constant
+to a real number, and as such the arithmetic will no longer be exact.
+\begin{itemize}
+   \item \texttt{function\_10\_x} \\
+      Raise 10 to the power of the last stack element (inverse of function\_log10).
+   \item \texttt{function\_abs} \\
+      Compute the absolute value of the last stack element.
+   \item \texttt{function\_acos} \\
+      Compute the inverse cosine of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item \texttt{function\_acosh} \\
+      Compute the inverse hyperbolic cosine of the last stack element.
+   \item \texttt{function\_add} \\
+      Add last two stack elements.
+   \item \texttt{function\_arg} \\
+      Compute the argument (phase angle of complex number) of the last stack
+      element.  The value will be provided in either degrees or radians,
+      depending on the current angle mode of the calculator.
+   \item \texttt{function\_asin} \\
+      Compute the inverse sine of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item \texttt{function\_asinh} \\
+      Compute the inverse hyperbolic sine of the last stack element.
+   \item \texttt{function\_atan} \\
+      Compute the inverse tangent of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item \texttt{function\_atanh} \\
+      Compute the inverse hyperbolic tangent of the last stack element.
+   \item \texttt{function\_ceiling} \\
+      Compute the ceiling of the last stack element.
+   \item \texttt{function\_cos} \\
+      Compute the cosine of the last stack element.  If the argument is real,
+      it will be assumed to be either degrees or radians, depending on the
+      angle mode of the calculator.
+   \item \texttt{function\_cosh} \\
+      Compute the hyperbolic cosine of the last stack element.
+   \item \texttt{function\_conj} \\
+      Compute the complex conjugate of the last stack element.
+   \item \texttt{function\_div} \\
+      Divide element 2 by element 1.
+   \item \texttt{function\_erf} \\
+      Compute the error function of the last stack element.
+   \item \texttt{function\_erfc} \\
+      Compute the complementary error function of the last stack element.
+   \item \texttt{function\_exp} \\
+      Evaluate the exponential function of the last stack element.
+   \item \texttt{function\_factorial} \\
+      Compute the factorial of the last stack element.  Note: this is not
+      exact, even for the integer constant data type.  It is computed using
+      an approximation to the gamma function, and therefore is subject to rounding 
+      errors.
+   \item \texttt{function\_floor} \\
+      Compute the floor of the last stack element.
+   \item \texttt{function\_gamma} \\
+      Compute the Euler gamma function of the last stack element.
+   \item \texttt{function\_im} \\
+      Compute the imaginary part of the last stack element.
+   \item \texttt{function\_inv} \\
+      Compute the multiplicative inverse of the last stack element.
+   \item \texttt{function\_ln} \\
+      Compute the natural logarithm of the last stack element.
+   \item \texttt{function\_lngamma} \\
+      Compute the natural logarithm of the Euler gamma function of the last
+      stack element.
+   \item \texttt{function\_log10} \\
+      Compute the base-10 logarithm of the last stack element.
+   \item \texttt{function\_mod} \\
+      Compute element 2 mod element 1.  This operation can be applied only
+      to integer type data.
+   \item \texttt{function\_mult} \\
+      Multiply last two stack elements.
+   \item \texttt{function\_neg} \\
+      Negate last stack element.
+   \item \texttt{function\_pow} \\
+      Raise element 2 to the power of element 1.
+   \item \texttt{function\_re} \\
+      Compute the real part of the last stack element.
+   \item \texttt{function\_sin} \\
+      Compute the sine of the last stack element.  If the argument is real, it
+      will be assumed to be either degrees or radians, depending on the angle
+      mode of the calculator.
+   \item \texttt{function\_sinh} \\
+      Compute the hyperbolic sine of the last stack element.
+   \item \texttt{function\_sq} \\
+      Square the last stack element.
+   \item \texttt{function\_sqrt} \\
+      Compute the square root of the last stack element.
+   \item \texttt{function\_sub} \\
+      Subtract element 1 from element 2.
+   \item \texttt{function\_tan} \\
+      Compute the tangent of the last stack element.  If the argument is real,
+      it will be assumed to be either degrees or radians, depending on the
+      angle mode of the calculator.
+   \item \texttt{function\_tanh} \\
+      Compute the hyperbolic tangent of the last stack element.
+   \item \texttt{function\_to\_int} \\
+      Convert a real number to an integer type.
+   \item \texttt{function\_to\_real} \\
+      Convert an integer type to a real number.
+   \item \texttt{function\_transpose} \\
+      Compute the matrix transpose of the last stack element.
+\end{itemize}
+
+
+%@% IF LATEX %@%
+\subsubsection{Commands}
+\label{commands}
+%@% ELSE %@%
+\subsection{Commands}
+%@% END-IF %@%
+The following operations are referred to as commands; they differ from functions because
+they do not take an argument.  Many calculator interface settings are implemented as commands.
+\begin{itemize}
+   \item \texttt{command\_about} \\
+      Display a nifty ``about Orpie'' credits screen.
+   \item \texttt{command\_begin\_browsing} \\
+      Enter stack browsing mode.
+   \item \texttt{command\_begin\_extended} \\
+      Begin entry of an extended command abbreviation.
+   \item \texttt{command\_bin} \\
+      Set the base of integer constant representation to 2 (binary).
+   \item \texttt{command\_clear} \\
+      Clear all elements from the stack.
+   \item \texttt{command\_cycle\_base} \\
+      Cycle the base of integer constant representation between 2, 8,
+      10, and 16 (bin, oct, dec, and hex).
+   \item \texttt{command\_dec} \\
+      Set the base of integer constant representation to 10 (decimal).
+   \item \texttt{command\_deg} \\
+      Set the angle mode to degrees.
+   \item \texttt{command\_drop} \\
+      Drop the last element off the stack.
+   \item \texttt{command\_dup} \\
+      Duplicate the last stack element.
+   \item \texttt{command\_enter\_pi} \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      Enter $\pi$ on the stack.
+%END LATEX
+%HEVEA Enter 3.1415\dots on the stack.
+%@% ELSE %@%
+      Enter 3.1415\Dots on the stack.
+%@% END-IF %@%
+   \item \texttt{command\_hex} \\
+      Set the base of integer constant representation to 16 (hexadecimal).
+   \item \texttt{command\_oct} \\
+      Set the base of integer constant representation to 8 (octal).
+   \item \texttt{command\_polar} \\
+      Set the complex display mode to polar.
+   \item \texttt{command\_rad} \\
+      Set the angle mode to radians.
+   \item \texttt{command\_rect} \\
+      Set the complex display mode to rectangular (cartesian).
+   \item \texttt{command\_refresh} \\
+      Refresh the display.
+   \item \texttt{command\_swap} \\
+      Swap stack elements 1 and 2.
+   \item \texttt{command\_quit} \\
+      Quit Orpie.
+   \item \texttt{command\_toggle\_angle\_mode} \\
+      Toggle the angle mode between degrees and radians.
+   \item \texttt{command\_toggle\_complex\_mode} \\
+      Toggle the complex display mode between rectangular and polar.
+   \item \texttt{command\_undo} \\
+      Undo the last calculator operation.
+   \item \texttt{command\_view} \\
+      View the last stack element in an external fullscreen editor.
+\end{itemize}
+
+
+%@% IF LATEX %@%
+\subsubsection{Edit Operations}
+\label{edits}
+%@% ELSE %@%
+\subsection{Edit Operations}
+%@% END-IF %@%
+The following operations are related to editing during data entry.  These
+commands cannot be made available as extended commands, since extended
+commands are not accessible while entering data.  These operations should
+be made available as single keypresses using the \texttt{bind} keyword.
+\begin{itemize}
+   \item \texttt{edit\_angle} \\
+      Begin entering the phase angle of a complex number.  (Orpie will
+      assume the angle is in either degrees or radians, depending on
+      the current angle mode.)
+   \item \texttt{edit\_backspace} \\
+      Delete the last character entered.
+   \item \texttt{edit\_begin\_integer} \\
+      Begin entering an integer constant.
+   \item \texttt{edit\_complex} \\
+      Begin entering a complex number.
+   \item \texttt{edit\_enter} \\
+      Enter the data that is currently being edited.
+   \item \texttt{edit\_matrix} \\
+      Begin entering a matrix, or begin entering the next
+      row of a matrix.
+   \item \texttt{edit\_minus} \\
+      Enter a minus sign in input.
+   \item \texttt{edit\_scientific\_notation\_base} \\
+      Begin entering the scientific notation exponent of a real number,
+      or the base of an integer constant.
+   \item \texttt{edit\_separator} \\
+      Begin editing the next element of a complex number or
+      matrix.  (This will insert a comma between elements.)
+\end{itemize}
+
+
+%@% IF LATEX %@%
+\subsubsection{Browsing Operations}
+\label{browse}
+%@% ELSE %@%
+\subsection{Browsing Operations}
+%@% END-IF %@%
+The following list of operations is available only in stack browsing mode.
+As extended commands are unavailable while browsing the stack, these operations
+should be bound to single keypresses using the \texttt{bind} keyword.
+\begin{itemize}
+   \item \texttt{browse\_echo} \\
+      Echo the currently selected element to stack level 1.
+   \item \texttt{browse\_end} \\
+      Exit stack browsing mode.
+   \item \texttt{browse\_drop} \\
+      Drop the currently selected stack element.
+   \item \texttt{browse\_dropn} \\
+      Drop all stack elements below the current selection (inclusive).
+   \item \texttt{browse\_keep} \\
+      Drop all stack elements \emph{except} the current selection.  (This is
+      complementary to \texttt{browse\_drop}.
+   \item \texttt{browse\_keepn} \\
+      Drop all stack elements above the current selection (non-inclusive).  (This
+      is complementary to \texttt{browse\_dropn}.
+   \item \texttt{browse\_next\_line} \\
+      Move the selection cursor down one line.
+   \item \texttt{browse\_prev\_line} \\
+      Move the selection cursor up one line.
+   \item \texttt{browse\_rolldown} \\
+      Cyclically ``roll'' stack elements downward, below the 
+      selected element (inclusive)
+   \item \texttt{browse\_rollup} \\
+      Cyclically ``roll'' stack elements upward, below the selected
+      element (inclusive) 
+   \item \texttt{browse\_scroll\_left} \\
+      Scroll the selected element to the left (for viewing very large
+      entries such as matrices)
+   \item \texttt{browse\_scroll\_right} \\
+      Scroll the selected element to the right
+   \item \texttt{browse\_view} \\
+      View the currently selected stack element in a fullscreen editor
+\end{itemize}
+%@% END-IF %@%
+
+
+%@% IF !ORPIERC %@%
+\section{Licensing}
+Orpie is Free Software; it has been made available under version 2 of the GNU
+General Public License (GPL).  You should have received a copy of the GPL along
+with this program, in the file ``COPYING''.
+
+
+\section{Credits}
+Orpie includes portions of the
+%@% IF LATEX %@%
+%BEGIN LATEX
+ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://oandrieu.nerim.net/ocaml/gsl/">ocamlgsl</a> \end{rawhtml}
+%@% ELSE %@%
+ocamlgsl [1]
+%@% END-IF %@%
+bindings supplied by Olivier Andrieu, as well as the curses bindings from the
+%@% IF LATEX %@%
+%BEGIN LATEX
+Ocaml Text Mode Kit\footnote{http://www.nongnu.org/ocaml-tmk/} 
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.nongnu.org/ocaml-tmk/">Ocaml Text Mode Kit</a> \end{rawhtml}
+%@% ELSE %@%
+Ocaml Text Mode Kit [2]
+%@% END-IF %@%
+written by Nicolas George.  I would like to thank these authors for helping to
+make Orpie possible.
+
+
+%@% IF LATEX %@%
+\section{(Not So) Frequently Asked Questions}
+\begin{enumerate}
+   \item {\bf Whatever happened to \texttt{rpc}?}
+
+      rpc, of course, would be the predecessor to Orpie.  It was written
+      in C++.
+
+      Over the years I have grown increasingly disenchanted with C++, and
+      as a result I lost interest in maintaining rpc.  When I settled on Ocaml
+      as a replacement language, I began working on Orpie as a way to improve
+      my Ocaml abilities.
+
+   \item {\bf What's wrong with C++?  And what's this Ocaml thing?}
+
+      \texttt{<rant>} \\
+      C++ has had so many misfeatures bolted on that no one can possibly hold
+      the entire syntax in his head at one time.  In addition to being
+      prohibitively vast, the syntax is also horribly ugly,
+      especially when dealing with templates.  The ability to use pointers
+      presents many opportunities to shoot yourself in the foot.
+      Garbage collection and exceptions exist as afterthoughts.  In short, there
+      are few compelling reasons to consider C++ for any project that does not require
+      low-level hardware access. \\
+      \texttt{</rant>} 
+     
+      I found Ocaml after searching for a Better Language that offers good
+      performance.  Ocaml is a functional programming language with a pretty
+      syntax, clean design, and all sorts of nice features that one really
+      should expect from a modern programming language.  It supports
+      functional, imperative, and object-oriented programming paradigms,
+      so it is well-suited to a broad class of programming tasks.
+      The type-checking compiler is exceedingly strict, and I find that this
+      improves my overall productivity by catching a lot of bugs prior to
+      runtime.  Ocaml also interfaces with C quite easily, and there are
+      bindings available for many commonly used libraries.
+
+   \item {\bf Does Orpie include any enhancements over the old \texttt{rpc}?}
+
+      The biggest usability enhancement would be the rcfile for keybindings.
+      The context-sensitive help panel is also new.  Integer data may be
+      entered and manipulated with arbitrary precision (thanks to the Nums 
+      library that ships with Ocaml).  The error messages provided by
+      Orpie are, on average, more informative than those provided by rpc;
+      this is a direct consequence of Ocaml's excellent exception handling
+      support.
+
+      I also believe that Orpie has fewer bugs in the input handler/parser,
+      but this remains to be seen.
+\end{enumerate}
+%@% END-IF %@%
+
+\section{Contact info}
+Orpie author: Paul Pelzl \texttt{<pelzlpj@eecs.umich.edu>} \\
+%@% IF LATEX %@%
+Orpie website: \texttt{http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
+%@% ELSE %@%
+Orpie website: \URL{http://www.eecs.umich.edu/\Tilde pelzlpj/orpie} \\
+%@% END-IF %@%
+
+\noindent
+Feel free to contact me if you have bugs, feature requests, patches, etc.  I 
+would also welcome volunteers interested in packaging Orpie for various platforms.
+
+Orpie is developed with the aid of the excellent 
+%@% IF LATEX %@%
+%BEGIN LATEX
+GNU Arch RCS\footnote{http://www.gnu.org/software/gnu-arch/}.
+%END LATEX  
+%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/gnu-arch/">GNU Arch RCS</a>. \end{rawhtml}
+%@% ELSE %@%
+GNU Arch RCS [3].
+%@% END-IF %@%
+Interested developers are advised to track Orpie development via my public
+archive: \\
+%@% IF LATEX %@%
+\hspace*{2cm}\texttt{pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
+\hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004}   
+%@% ELSE %@%
+pelzlpj@eecs.umich.edu--2004 http://www-personal.engin.umich.edu/\Tilde pelzlpj/tla/2004 
+%@% END-IF %@%
+
+Do you feel compelled to compensate me for writing Orpie?  As a \emph{poor, starving} 
+graduate student, I will gratefully accept 
+%BEGIN LATEX
+donations.  Please see \\
+%@% IF LATEX %@%
+\texttt{http://www.eecs.umich.edu/\~{}pelzlpj/orpie/donate.html} for more information.
+%END LATEX
+%HEVEA \begin{rawhtml} <a href="http://www.eecs.umich.edu/~pelzlpj/orpie/donate.html">donations</a>. \end{rawhtml}
+%@% ELSE %@%
+\URL{http://www.eecs.umich.edu/\Tilde pelzlpj/orpie/donate.html} for more information.
+%@% END-IF %@%
+
+
+%@% IF !LATEX && !ORPIERC %@%
+\section{References}
+\begin{Table}{2}
+   [1] & \URL{http://oandrieu.nerim.net/ocaml/gsl/} \\
+   [2] & \URL{http://www.nongnu.org/ocaml-tmk/} 
+   [3] & \URL{http://www.gnu.org/software/gnu-arch/}.
+\end{Table}
+
+\section{See Also}
+\Cmd{orpierc}{5}
+%@% END-IF %@%
+
+%@% END-IF %@%
+% !ORPIERC
+
+%@% IF !LATEX %@%
+   %@% IF ORPIERC %@%
+\section{See Also}
+\Cmd{orpie}{1}
+   %@% END-IF %@%
+\LatexManEnd
+%@% END-IF %@%
+
+\end{document}
+
+
+% arch-tag: DO_NOT_CHANGE_db7ed8b2-8ea4-4e32-b0f6-50482487cb00 
