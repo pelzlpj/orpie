@@ -290,6 +290,10 @@ let draw_entry (iface : interface_state_t) =
    |IntEditMode ->
       draw_entry_string data_string 0
    |AbbrevEditMode ->
+      let first_abbrev_match =
+         if iface.matched_abbrev_list = [] then ""
+         else List.hd iface.matched_abbrev_list
+      in
       let highlight_len = String.length iface.abbrev_entry_buffer in
       if highlight_len = 0 then
          begin match iface.abbrev_or_const with
@@ -300,17 +304,16 @@ let draw_entry (iface : interface_state_t) =
          begin match iface.abbrev_or_const with
          |IsAbbrev ->
             let is_function =
-               match (Rcfile.translate_abbrev iface.matched_abbrev_entry) with
+               match (Rcfile.translate_abbrev first_abbrev_match) with
                |Function ff -> true
                |_ -> false
             in
             if is_function then
-               draw_entry_string (iface.matched_abbrev_entry ^ 
-               "( )") highlight_len
+               draw_entry_string (first_abbrev_match ^ "( )") highlight_len
             else
-               draw_entry_string iface.matched_abbrev_entry highlight_len
+               draw_entry_string first_abbrev_match highlight_len
          |IsConst ->
-            draw_entry_string iface.matched_abbrev_entry highlight_len
+            draw_entry_string first_abbrev_match highlight_len
          end
    |BrowsingMode ->
       ()
@@ -573,7 +576,7 @@ let draw_help_abbrev iface win mvwaddstr_safe try_find =
          else
             ()
       in
-      draw_matches 6 iface.matched_abbrev_entry_list;
+      draw_matches 6 iface.matched_abbrev_list;
       assert (wnoutrefresh win)
    end 
 

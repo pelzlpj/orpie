@@ -82,8 +82,7 @@ type interface_state_t =
    mutable int_base_string             : string;                        (* one-character representation of the base *)
    mutable is_entering_exponent        : bool;                          (* is the user entering a scientific notation exponent *)
    mutable abbrev_entry_buffer         : string;                        (* stores characters entered in abbrev entry mode *)
-   mutable matched_abbrev_entry        : string;                        (* stores the command-completed abbrev entry *)
-   mutable matched_abbrev_entry_list   : string list;                   (* stores the list of all possible command completions *)
+   mutable matched_abbrev_list         : string list;                   (* stores the list of all possible command completions *)
    gen_buffer                          : complex_entry_element_t array; (* storage for floating-point (array)-based types *)
    mutable abbrev_or_const             : abbrev_const_t;                (* in AbbrevEntryMode, are we entering an abbrev or a constant? *)
    mutable variable_entry_buffer       : string;                        (* stores characters entered in variable entry mode *)
@@ -122,8 +121,7 @@ let make (c : rpc_calc) (std : screen_t) =
       int_base_string = "";
       is_entering_exponent = false;
       abbrev_entry_buffer = "";
-      matched_abbrev_entry = "";
-      matched_abbrev_entry_list = [];
+      matched_abbrev_list = [];
       abbrev_or_const = IsAbbrev;
       variable_entry_buffer = "";
       variable_entry_buffer_back = "";

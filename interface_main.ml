@@ -1603,7 +1603,6 @@ let handle_exit_abbrev (iface : interface_state_t) =
    if iface.interface_mode = AbbrevEditMode then begin
       iface.interface_mode <- StandardEditMode;
       iface.abbrev_entry_buffer <- "";
-      iface.matched_abbrev_entry <- "";
       draw_help iface;
       draw_update_entry iface
    end else
@@ -1611,8 +1610,7 @@ let handle_exit_abbrev (iface : interface_state_t) =
 
 
 (* search through a list of commands and find all that match
- * iface.abbrev_entry_buffer.  As a side effect, set matched_abbrev_entry
- * to the head of this list.
+ * iface.abbrev_entry_buffer.
  * The list is built up in reverse order using Str.search_backward,
  * so the head of the list is actually the first match. *)
 let match_abbrev_buffer (iface : interface_state_t) buf =
@@ -1631,37 +1629,27 @@ let match_abbrev_buffer (iface : interface_state_t) buf =
          |IsConst ->
             List.fold_left find_matches [] Const.constant_symbols
       in
-      if List.length match_list = 0 then begin
-         iface.matched_abbrev_entry <- "";
-         raise Not_found
-      end else begin
-         iface.matched_abbrev_entry <- List.hd match_list;
-         match_list
-      end
-   else begin
-      iface.matched_abbrev_entry <- "";
+      if List.length match_list = 0 then raise Not_found
+      else match_list 
+   else 
       raise Not_found
-   end
 
 
 (* backspace during abbrev entry *)
 let handle_abbrev_backspace (iface : interface_state_t) =
    let len = String.length iface.abbrev_entry_buffer in
-   if len > 0 then
-      (iface.abbrev_entry_buffer <- Str.string_before iface.abbrev_entry_buffer 
+   if len > 0 then begin
+      iface.abbrev_entry_buffer <- Str.string_before iface.abbrev_entry_buffer 
       (pred len);
-      (try 
-         iface.matched_abbrev_entry_list <- 
-            match_abbrev_buffer iface iface.abbrev_entry_buffer
+      begin try 
+         iface.matched_abbrev_list <- 
+         match_abbrev_buffer iface iface.abbrev_entry_buffer
       with 
-         Not_found -> ());
-      (if len = 1 then
-         iface.matched_abbrev_entry <- ""
-      else
-         ());
+         Not_found -> ()
+      end;
       draw_help iface;
-      draw_update_entry iface)
-   else
+      draw_update_entry iface
+   end else
       ()
 
 
@@ -1672,7 +1660,7 @@ let handle_abbrev_character (iface : interface_state_t) key =
    (* search through the list of commands for the first one that matches
     * iface.abbrev_entry_buffer *)
    try
-      iface.matched_abbrev_entry_list <- match_abbrev_buffer iface test_buffer;
+      iface.matched_abbrev_list <- match_abbrev_buffer iface test_buffer;
       iface.abbrev_entry_buffer <- test_buffer;
       draw_help iface;
       draw_update_entry iface
@@ -1685,12 +1673,15 @@ let handle_enter_abbrev (iface : interface_state_t) =
    if iface.interface_mode = AbbrevEditMode then begin
       iface.interface_mode <- StandardEditMode;
       begin try
-         iface.matched_abbrev_entry_list <- 
+         iface.matched_abbrev_list <- 
             match_abbrev_buffer iface iface.abbrev_entry_buffer;
+         let first_abbrev_match = 
+            if iface.matched_abbrev_list = [] then ""
+            else List.hd iface.matched_abbrev_list
+         in
          begin match iface.abbrev_or_const with
          |IsAbbrev ->
-            let operation = Rcfile.translate_abbrev
-            iface.matched_abbrev_entry in
+            let operation = Rcfile.translate_abbrev first_abbrev_match in
             begin match operation with
             |Function ff -> 
                process_function iface ff
@@ -1705,14 +1696,13 @@ let handle_enter_abbrev (iface : interface_state_t) =
                register_autobinding operation
             end
          |IsConst ->
-            let con = Const.translate_symbol iface.matched_abbrev_entry in
+            let con = Const.translate_symbol first_abbrev_match in
             iface.calc#enter_const con;
          end
       with
          Not_found -> ()
       end;
       iface.abbrev_entry_buffer <- "";
-      iface.matched_abbrev_entry <- "";
       draw_help iface;
       draw_stack iface;
       draw_update_entry iface
