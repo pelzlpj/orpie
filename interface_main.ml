@@ -1257,7 +1257,7 @@ let handle_interr_function_call (iface : interface_state_t) calc_function =
          push_entry iface
       else
          ();
-      draw_message iface "Working...";
+      draw_message iface "Working... (press a key to abort)";
       assert (doupdate ());
       assert (nodelay iface.scr.entry_win true);
       while not (calc_function ()) do
