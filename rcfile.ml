@@ -106,32 +106,48 @@ let key_of_operation (op : operation_t) =
 
 
 (* abbreviations used in abbreviation entry mode *)
-let abbrev_commands = ref "";;
+let abbrev_commands = ref [];;
 let abbrev_command_table = Hashtbl.create 50;;
 let command_abbrev_table = Hashtbl.create 50;;
 
 (* Register an abbreviation for an operation
  * This updates the string used in regexp matching, and
- * updates the hashtable used to find the corresponding operation. *)
+ * updates the hashtable used to find the corresponding operation. 
+ * Note: this list is generated in reverse order, so that
+ * the list of matches can be generated rapidly in the opposite
+ * order. *)
 let register_abbrev abbr op =
    (* Dummyproofing: if an abbreviation is a prefix of another
     * abbreviation, then it *must* lie earlier in the search order.
     * If not, it becomes impossible to execute the prefix command. *)
-   let regex = Str.regexp ("^" ^ abbr ^ ".*$") in
-   (try
-      let match_pos = Str.search_forward regex !abbrev_commands 0 in
-      let before = Str.string_before !abbrev_commands match_pos
-      and after  = Str.string_after !abbrev_commands match_pos in
-      abbrev_commands := before ^ abbr ^ "\n" ^ after
-   with Not_found ->
-      abbrev_commands := !abbrev_commands ^ abbr ^ "\n");
+   let regex = Str.regexp_string abbr in
+   let check_match (prev_result : bool) el =
+      if prev_result then
+         true
+      else
+         Str.string_match regex el 0
+   in
+   if List.fold_left check_match false !abbrev_commands then
+      (* if abbr is a prefix of some element, then it must
+       * go at the end of the list *)
+      abbrev_commands := !abbrev_commands @ [abbr]
+   else
+      (* if it has no prefix, then prepend it *)
+      abbrev_commands := abbr :: !abbrev_commands;
    Hashtbl.add abbrev_command_table abbr op;
    Hashtbl.add command_abbrev_table op abbr;;
    
+
 (* remove an abbreviation for a command. *)
 let unregister_abbrev abbr =
-   let regex = Str.regexp ("^" ^ abbr ^ "$") in
-   abbrev_commands := Str.replace_first regex "" !abbrev_commands;
+   let remove_matching out_list el =
+      if el = abbr then out_list
+      else el :: out_list
+   in
+   let sublist = 
+      List.fold_left remove_matching [] !abbrev_commands 
+   in
+   abbrev_commands := List.rev sublist;
    try
       let op = Hashtbl.find abbrev_command_table abbr in
       Hashtbl.remove abbrev_command_table abbr;
@@ -143,7 +159,6 @@ let translate_abbrev abb =
    Hashtbl.find abbrev_command_table abb;;
 let abbrev_of_operation op =
    Hashtbl.find command_abbrev_table op;;
-
 
 
 

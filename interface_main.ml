@@ -1625,52 +1625,31 @@ let handle_exit_abbrev (iface : interface_state_t) =
  * so the head of the list is actually the first match. *)
 let match_abbrev_buffer (iface : interface_state_t) buf =
    if String.length buf > 0 then
-      (let regex_str = "^" ^ (Str.quote buf) ^ ".*$" in
-      let regex = Str.regexp regex_str in
-      let rec find_matching_strings starting_pos matches_list =
-         try
-            begin match iface.abbrev_or_const with
-            |IsAbbrev ->
-               let next_pos = 
-                  Str.search_backward regex !Rcfile.abbrev_commands starting_pos
-               in
-               let m = Str.matched_string !Rcfile.abbrev_commands in
-               if next_pos >= 1 then
-                  find_matching_strings (pred next_pos) (m :: matches_list)
-               else
-                  (m :: matches_list)
-            |IsConst ->
-               let next_pos = 
-                  Str.search_backward regex Const.constant_symbols starting_pos
-               in
-               let m = Str.matched_string Const.constant_symbols in
-               if next_pos >= 1 then
-                  find_matching_strings (pred next_pos) (m :: matches_list)
-               else
-                  (m :: matches_list)
-            end
-         with
-            Not_found ->
-               begin
-                  match matches_list with
-                  |[] -> raise Not_found
-                  |_ -> matches_list
-               end
+      let regex = Str.regexp_string buf in
+      let find_matches prev_matches el =
+         if Str.string_match regex el 0 then
+            el :: prev_matches
+         else
+            prev_matches
       in
-      iface.matched_abbrev_entry <- "";
-      let m_list =
-         begin match iface.abbrev_or_const with
+      let match_list =
+         match iface.abbrev_or_const with
          |IsAbbrev ->
-            find_matching_strings (pred (String.length !Rcfile.abbrev_commands)) [];
+            List.fold_left find_matches [] !Rcfile.abbrev_commands
          |IsConst ->
-            find_matching_strings (pred (String.length Const.constant_symbols)) [];
-         end
+            List.fold_left find_matches [] Const.constant_symbols
       in
-      iface.matched_abbrev_entry <- List.hd m_list;
-      m_list)
-   else
-      (iface.matched_abbrev_entry <- "";
-      raise Not_found)
+      if List.length match_list = 0 then begin
+         iface.matched_abbrev_entry <- "";
+         raise Not_found
+      end else begin
+         iface.matched_abbrev_entry <- List.hd match_list;
+         match_list
+      end
+   else begin
+      iface.matched_abbrev_entry <- "";
+      raise Not_found
+   end
 
 
 (* backspace during abbrev entry *)

@@ -56,8 +56,11 @@ let translate_symbol sym =
    else raise (Invalid_argument ("unknown constant \"" ^ sym ^ "\""))
 
 
-let constant_symbols = "NA\nk\nVm\nR\nstdT\nstdP\nsigma\nc\ne\neps0\n" ^
-"u0\ng\nG\nh\nhbar\nme\nmp\nalpha\nphi\nF\nRinf\na0\nuB\nuN\nlam0\nf0\nlamc\nc3\n"
+(* Note: list is reversed so that matching elements can be computed
+ * in the correct order efficiently *)
+let constant_symbols = List.rev ["NA"; "k"; "Vm"; "R"; "stdT"; "stdP"; 
+"sigma"; "c"; "e"; "eps0"; "u0"; "g"; "G"; "h"; "hbar"; "me"; "mp"; "alpha"; 
+"phi"; "F"; "Rinf"; "a0"; "uB"; "uN"; "lam0"; "f0"; "lamc"; "c3"]
 
 
 
