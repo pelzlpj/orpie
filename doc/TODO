@@ -1,11 +1,11 @@
-rpc2 to-do list
+Orpie To-Do List
 --------------------------------------------------------------------------------
 Definitely before release:
 
    * make sure all the rpc 0.98 functions are in rpc2 (gamma, pi, ...)
 
 * create a parser that can read data structures entered into an ascii file,
-  so I can use $EDITOR to enter big matrices (for example)
+  so one can use $EDITOR to enter big matrices (for example)
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but
   "\"" -> extended entry of *any* command/operation (sin, cos, rad, rect, etc.)
@@ -14,9 +14,8 @@ Definitely before release:
   in context.  e.g. sin() doesn't work on matrices, so it is not included in
   the extended entry completion list when the toplevel element is a matrix.
 
-* try to clean up the rcfile syntax a bit, maybe by introducing modes
-
-* implement rcfile macros
+* implement rcfile macros; e.g. base 2 logarithm could be implemented as
+  macro "L" "'ln<enter>2<enter>'ln<enter>/"
 
 
 
