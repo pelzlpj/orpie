@@ -971,6 +971,9 @@ class rpc_calc =
       method delete i = 
          stack#delete i
 
+      method deleteN i =
+         stack#deleteN i
+
       method enter_int i =
          stack#push (RpcInt i)
 

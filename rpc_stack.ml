@@ -166,6 +166,14 @@ class rpc_stack =
             raise (Stack_error "insufficient stack elements")
 
 
+      (* delete all elements below level N *)
+      method deleteN num =
+         if num <= len then
+            len <- len - num
+         else
+            raise (Stack_error "insufficient stack elements")
+
+
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =

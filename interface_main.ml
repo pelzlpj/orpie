@@ -886,7 +886,18 @@ let handle_browse_drop1 (iface : interface_state_t) =
    else
       draw_update_stack iface
 
+
+(* drop all elements below selected element (inclusive) *)
+let handle_browse_dropn (iface : interface_state_t) =
+   iface.calc#deleteN iface.stack_selection;
+   iface.stack_selection <- 1;
+   iface.stack_bottom_row <- 1;
+   if iface.calc#get_stack_size () < 1 then
+      handle_end_browse iface
+   else
+      draw_update_stack iface
    
+
 (* view the last stack element in fullscreen *)
 let handle_view (iface : interface_state_t) =
    try
@@ -1492,6 +1503,8 @@ let do_main_loop (iface : interface_state_t) =
                         handle_browse_view iface
                      |Drop1 ->
                         handle_browse_drop1 iface
+                     |DropN ->
+                        handle_browse_dropn iface
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"

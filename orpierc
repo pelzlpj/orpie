@@ -68,6 +68,7 @@ bind "R" browse_rollup
 bind "v" browse_view
 bind "<return>" browse_echo
 bind "d" browse_drop
+bind "D" browse_dropn
 
 # keys for extended mode operations
 bind "'" extended_exit
