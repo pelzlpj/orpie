@@ -1,6 +1,6 @@
-(* Hard-code the installation prefix.  Example: if prefix = "/usr/local", then
- * the global rcfile will be stored in "/usr/local/etc/orpierc". *)
-let prefix = "@prefix@";;
+(* Hard-code the installation prefix and sysconfdir. *)
+let prefix     = "@prefix@";;
+let sysconfdir = "@sysconfdir@";;
 
 
 (* arch-tag: DO_NOT_CHANGE_b0af51b9-3cf0-479c-a33a-f9221e29ed48 *)

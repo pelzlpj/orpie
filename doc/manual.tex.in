@@ -102,7 +102,9 @@ Finally, run ``\texttt{make install}'' (as root) to install the executables.
 ``\texttt{configure}'' accepts a number of parameters that you can learn about with
 ``\texttt{./configure --help}''.  Perhaps the most common of these is the {\tt
 --prefix} option, which lets you install to a non-standard
-directory\footnote{The default installation prefix is \texttt{/usr/local}.}.  
+directory\footnote{The default installation prefix is \texttt{/usr/local}.  The \texttt{orpierc} file
+will be placed in \texttt{\$(prefix)/etc} by default; use the \texttt{--sysconfdir} option to 
+choose a different location.}.  
 %@% ELSE %@%
    %@% IF ORPIERC %@%
 \begin{Name}{5}{orpierc}{Paul J. Pelzl}{configuration file for the Orpie calculator}{orpierc manpage}

@@ -818,18 +818,20 @@ let open_rcfile rcfile_op =
          let homedir = Sys.getenv "HOME" in
          homedir ^ "/.orpierc"
       in
-      let prefix_rcfile = 
-         if Install.prefix = "/usr" || Install.prefix = "/usr/" then
-            "/etc/orpierc"
-         else
-            Install.prefix ^ "/etc/orpierc" 
+      let rcfile_fullpath = 
+         (* expand out any occurrences of ${prefix} that autoconf
+          * decides to insert *)
+         let prefix_regex = Str.regexp "\\${prefix}" in
+         let expanded_sysconfdir = Str.global_replace prefix_regex 
+         Install.prefix Install.sysconfdir in
+         Utility.join_path expanded_sysconfdir "orpierc"
       in
       begin try (open_in home_rcfile, home_rcfile)
       with Sys_error error_str ->
-         begin try (open_in prefix_rcfile, prefix_rcfile)
+         begin try (open_in rcfile_fullpath, rcfile_fullpath)
          with Sys_error error_str -> failwith 
             ("Could not open configuration file \"" ^ home_rcfile ^ "\" or \"" ^ 
-            prefix_rcfile ^ "\" .")
+            rcfile_fullpath ^ "\" .")
          end
       end
    |Some file ->

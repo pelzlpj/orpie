@@ -15,13 +15,12 @@
 # See the GNU Library General Public License version 2 for more details
 # (enclosed in the file LGPL).
 
-# where to install the binaries
-prefix=@prefix@
-exec_prefix=@exec_prefix@
-BINDIR=$(DESTDIR)/@bindir@
-
-# where to install the man page
-MANDIR=$(DESTDIR)/@mandir@
+# where to install the binaries, rcfiles, manpages, etc.
+prefix      = @prefix@
+exec_prefix = @exec_prefix@
+sysconfdir  = @sysconfdir@
+BINDIR      = $(DESTDIR)/@bindir@
+MANDIR      = $(DESTDIR)/@mandir@
 
 # other variables set by ./configure
 OCAMLC       = @OCAMLC@
@@ -148,13 +147,8 @@ version.ml: Makefile
 
 install-indep: 
 	mkdir -p $(BINDIR)
-	if test "$(prefix)" = "/usr"; then \
-		mkdir -p $(DESTDIR)/etc; \
-  	install -m 644 orpierc $(DESTDIR)/etc; \
-	else \
-		mkdir -p $(DESTDIR)/$(prefix)/etc; \
-		install -m 644 orpierc $(DESTDIR)/$(prefix)/etc; \
-	fi
+	mkdir -p $(DESTDIR)/$(sysconfdir)
+	install -m 644 orpierc $(DESTDIR)/$(sysconfdir)
 	install -m 644 -D doc/orpie.1 $(MANDIR)/man1/orpie.1
 	install -m 644 -D doc/orpie-curses-keys.1 $(MANDIR)/man1/orpie-curses-keys.1
 	install -m 644 -D doc/orpierc.5 $(MANDIR)/man5/orpierc.5
@@ -178,10 +172,7 @@ install-static: install-indep
 uninstall:
 	rm -f $(BINDIR)/$(NAME)$(EXE)
 	rm -f $(BINDIR)/$(NAME2)$(EXE)
-	if test "$(prefix)" = "/usr"; then\
-	rm -f /etc/orpierc; \
-	else rm -f $(DESTDIR)/$(prefix)/etc/orpierc; \
-	fi
+	rm -f $(DESTDIR)/$(sysconfdir)/orpierc
 	rm -f $(MANDIR)/man1/orpie.1
 	rm -f $(MANDIR)/man1/orpie-curses-keys.1
 	rm -f $(MANDIR)/man5/orpierc.5

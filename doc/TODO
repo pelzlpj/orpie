@@ -1,8 +1,6 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* support --sysconfdir configure option
-
 * add additional test cases for the rpc_calc object.  I could really use
   help with this; it's not difficult, just time-consuming.  Have a look
   at calc_test.ml if you're interested in lending a hand.  (Please grab
