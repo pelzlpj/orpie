@@ -48,14 +48,8 @@ let table_key_varedit  = Hashtbl.create 20;;
 let table_varedit_key  = Hashtbl.create 20;;
 
 
-(* Default datafile for loading and saving state *)
-let datafile = ref "~/.orpie/calc_state";;
-(* Default file for checking what version created the stack datafile *)
-let versionfile = ref "~/.orpie/version";;
-(* Default datafile for a fullscreen viewing buffer *)
-let fullscreenfile = ref "~/.orpie/fullscreen";;
-(* Default textfile for editing input *)
-let fullscreen_input = ref "~/.orpie/input"
+(* Default directory for orpie data *)
+let datadir = ref "~/.orpie"
 (* Default editor for fullscreen viewing *)
 let editor = ref "vi";;
 (* Whether or not to hide the help panel *)
@@ -450,59 +444,18 @@ let parse_line line_stream =
       end
    | [< 'Kwd "set" >] ->
       begin match line_stream with parser
-      | [< 'Ident "datafile" >] ->
+      | [< 'Ident "datadir" >] ->
          begin match line_stream with parser
          | [< 'Ident "=" >] ->
             begin match line_stream with parser
-            | [< 'String file >] ->
-               ( (* Printf.fprintf stderr "using datafile \"%s\"\n" file; *)
-               datafile := file)
+            | [< 'String dir >] ->
+               datadir := dir
             | [< >] ->
-               config_failwith ("Expected a datafile string after " ^
-               "\"set datafile = \"")
+               config_failwith ("Expected a directory string after " ^
+               "\"set datadir = \"")
             end
          | [< >] ->
-            config_failwith ("Expected \"=\" after \"set datafile\"")
-         end
-      | [< 'Ident "versionfile" >] ->
-         begin match line_stream with parser
-         | [< 'Ident "=" >] ->
-            begin match line_stream with parser
-            | [< 'String file >] ->
-               versionfile := file
-            | [< >] ->
-               config_failwith ("Expected a versionfile string after " ^
-               "\"set versionfile = \"")
-            end
-         | [< >] ->
-            config_failwith ("Expected \"=\" after \"set versionfile\"")
-         end
-      | [< 'Ident "buffer" >] ->
-         begin match line_stream with parser
-         | [< 'Ident "=" >] ->
-            begin match line_stream with parser
-            | [< 'String file >] ->
-               ( (* Printf.fprintf stderr "using bufferfile \"%s\"\n" file; *)
-               fullscreenfile := file)
-            | [< >] ->
-               config_failwith ("Expected a buffer file string after " ^
-               "\"set buffer = \"")
-            end
-         | [< >] ->
-            config_failwith ("Expected \"=\" after \"set buffer\"")
-         end
-      | [< 'Ident "input_buffer" >] ->
-         begin match line_stream with parser
-         | [< 'Ident "=" >] ->
-            begin match line_stream with parser
-            | [< 'String file >] ->
-               fullscreen_input := file
-            | [< >] ->
-               config_failwith ("Expected an input filename string after " ^
-               "\"set input_buffer = \"")
-            end
-         | [< >] ->
-            config_failwith ("Expected \"=\" after \"set buffer \"")
+            config_failwith ("Expected \"=\" after \"set datadir\"")
          end
       | [< 'Ident "editor" >] ->
          begin match line_stream with parser

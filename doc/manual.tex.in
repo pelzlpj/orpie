@@ -422,7 +422,7 @@ default, the following keys have been bound to such operations:
       \texttt{c} & complex conjugate function \\
       \texttt{!} & factorial function  \\
       \texttt{\%} & element 2 mod element 1 \\
-      \texttt{S} & store element 2 into (variable) element 1 \\
+      \texttt{S} & store element 2 in (variable) element 1 \\
       \texttt{;} & evaluate variable to obtain contents \\
       \hline
 %@% IF LATEX %@%
@@ -515,7 +515,7 @@ The following functions are available as extended commands:
       \texttt{mult} & multiply last two elements \\
       \texttt{div} & divide element 2 by element 1 \\
       \texttt{neg} & negate last element \\
-      \texttt{store} & store element 2 into (variable) element 1 \\
+      \texttt{store} & store element 2 in (variable) element 1 \\
       \texttt{eval} & evaluate variable to obtain contents \\
       \texttt{purge} & delete a variable \\
       \hline
@@ -848,38 +848,14 @@ The following configuration variables may be set as described in the SETTING
 CONFIGURATION VARIABLES section.
 %@% END-IF %@%
 \begin{itemize}
-   \item \texttt{datafile} \\
-      This variable should be set to the full path of the Orpie datafile, which is used
-      to save the calculator state.  A tilde prefix will be expanded to the home
-      directory.  The default path is \\
+   \item \texttt{datadir} \\
+      This variable should be set to the full path of the Orpie data directory, 
+      which will contain the calculator state save file, temporary buffers, etc.
+      The default directory is
       %@% IF LATEX %@%
-      \texttt{"\~{}/.orpie/calc\_state"}.
+      \texttt{"\~{}/.orpie/"}.
       %@% ELSE %@%
-      "\Bs\Tilde /.orpie/calc\_state".
-      %@% END-IF %@%
-   \item \texttt{versionfile} \\
-      This variable should be set to the full path of a file which is used to
-      save the calculator version.  The default path is \\
-      %@% IF LATEX %@%
-      \texttt{"\~{}/.orpie/version"}.
-      %@% ELSE %@%
-      "\Bs\Tilde /.orpie/version".
-      %@% END-IF %@%
-   \item \texttt{buffer} \\
-      This variable should be set to the full path of a buffer file that Orpie uses
-      to pass fullscreen viewing data to the editor of your choice.  The default
-      %@% IF LATEX %@%
-      is \texttt{"\~{}/.orpie/fullscreen"}.
-      %@% ELSE %@%
-      is "\Bs\Tilde /.orpie/fullscreen".
-      %@% END-IF %@%
-   \item \texttt{input\_buffer} \\
-      This variable should be set to the full path of a buffer file that Orpie uses
-      to read input created by the external editor of your choice.  The default
-      %@% IF LATEX %@%
-      is \texttt{"\~{}/.orpie/input"}.
-      %@% ELSE %@%
-      is "\Bs\Tilde /.orpie/input".
+      "\Bs\Tilde /.orpie/".
       %@% END-IF %@%
    \item \texttt{editor} \\
       This variable may be set to the fullscreen editor of your choice.  The default
@@ -1023,7 +999,7 @@ to a real number, and as such the arithmetic will no longer be exact.
    \item \texttt{function\_sqrt} \\
       Compute the square root of the last stack element.
    \item \texttt{function\_store} \\
-      Store element 2 in variable element 1.
+      Store element 2 in (variable) element 1.
    \item \texttt{function\_sub} \\
       Subtract element 1 from element 2.
    \item \texttt{function\_tan} \\
@@ -1234,7 +1210,7 @@ should be bound to single keypresses using the \texttt{bind} keyword.
 
 %@% IF LATEX %@%
 \subsubsection{Integer Entry Operations}
-\label{browse}
+\label{integeroperations}
 %@% ELSE %@%
 \subsection{Integer Entry Operations}
 %@% END-IF %@%

@@ -3,7 +3,10 @@ Orpie ChangeLog
 
 v1.2
 
-   2004-06-15        Fixed crash due to displaying 'about' screen in
+   2004-06-15        Replaced 'datafile', 'buffer', and 'input_buffer'
+                     orpierc variables with the 'datadir' variable.
+                     
+                     Fixed crash due to displaying 'about' screen in
                      a very small terminal window.
 
    2004-06-14        Implemented user-defined variables and

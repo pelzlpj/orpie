@@ -1,8 +1,6 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* document the user-defined variable usage
-
 * support parallel make (maybe use a hand-edited dependency tree to get around
   the ocamldep issues)
 

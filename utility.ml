@@ -75,6 +75,19 @@ let wordwrap_nspace s cols num_spaces =
 (* wordwrap with single space *)
 let wordwrap s cols = wordwrap_nspace s cols 1
 
+(* append a file to a directory, with the proper number
+ * of slashes *)
+let join_path dirname filename =
+   let dir_last   = dirname.[String.length dirname - 1]
+   and file_first = filename.[0] in
+   if dir_last = '/' && file_first = '/' then
+      dirname ^ (Str.string_after filename 1)
+   else if dir_last != '/' && file_first != '/' then
+      dirname ^ "/" ^ filename
+   else
+      dirname ^ filename
+
+
 (* If the filename starts with "~", substitute $HOME *)
 let expand_file filename =
    if Str.string_before filename 2 = "~/" then

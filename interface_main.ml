@@ -1022,11 +1022,12 @@ let handle_browse_echo (iface : interface_state_t) =
 let handle_browse_view (iface : interface_state_t) =
    try
       let fs_string = iface.calc#get_fullscreen_display iface.stack_selection in
-      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreenfile) in
+      let fs_file = Utility.join_path !(Rcfile.datadir) "fullscreen" in
+      let buf = Utility.open_or_create_out_ascii fs_file in
       output_string buf fs_string;
       close_out buf;
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreenfile))
+         Unix.system (!(Rcfile.editor) ^ " " ^ fs_file)
       in ();
       draw_help iface;
       draw_stack iface;
@@ -1086,15 +1087,16 @@ let handle_browse_keepn (iface : interface_state_t) =
  * bumped up to the selected stack level. *)
 let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
    try
+      let input_file = Utility.join_path !(Rcfile.datadir) "input" in
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreen_input))
+         Unix.system (!(Rcfile.editor) ^ " " ^ input_file)
       in ();
       (* wake up curses again, and check for resize *)
       assert (refresh ());
       let rows, cols = get_size () in
       resize_subwins iface.scr;
       handle_refresh iface;
-      let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
+      let edited_buf = Utility.expand_open_in_ascii input_file in
       let lexbuf = Lexing.from_channel edited_buf in
       let data = 
          (* need to call completely different parsers when using degrees
@@ -1152,7 +1154,8 @@ let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
 let handle_browse_edit (iface : interface_state_t) =
    try
       let fs_string = iface.calc#get_fullscreen_display iface.stack_selection in
-      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreen_input) in
+      let input_file = Utility.join_path !(Rcfile.datadir) "input" in
+      let buf = Utility.open_or_create_out_ascii input_file in
       output_string buf fs_string;
       close_out buf;
       edit_parse_input_textfile iface true
@@ -1169,11 +1172,12 @@ let handle_browse_edit (iface : interface_state_t) =
 let handle_view (iface : interface_state_t) =
    try
       let fs_string = iface.calc#get_fullscreen_display 1 in
-      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreenfile) in
+      let fs_file = Utility.join_path !(Rcfile.datadir) "fullscreen" in
+      let buf = Utility.open_or_create_out_ascii fs_file in
       output_string buf fs_string;
       close_out buf;
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreenfile))
+         Unix.system (!(Rcfile.editor) ^ " " ^ fs_file)
       in ();
       draw_help iface;
       draw_stack iface;
