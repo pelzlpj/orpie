@@ -320,7 +320,6 @@ let operation_of_string command_str =
    |"function_purge"                -> (Function Purge)
    |"function_gcd"                  -> (Function Gcd)
    |"function_lcm"                  -> (Function Lcm)
-   |"function_factorial_exact"      -> (Function FactInt)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

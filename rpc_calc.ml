@@ -1025,41 +1025,66 @@ class rpc_calc =
 
 
 
-      (* factorial (calls gamma function) *)
+      (* factorial 
+       * calls gamma function for float arguments, and jumps
+       * to an interruptible exact implementation for integer
+       * arguments.
+       * This function is designed to be called multiple times
+       * until it returns true.  If computation is aborted, the interface
+       * should call abort_computation() to clean up. *)
       method fact () =
-         if stack#length > 0 then begin
-            self#backup ();
-            self#evaln 1;
-            let gen_el = stack#pop () in
-            match gen_el with
-            |RpcInt el ->
-               begin try
-                  stack#push (RpcFloat (Gsl_sf.gamma ((float_of_big_int el) +.
-                  1.0)))
-               with
-                  Gsl_error.Gsl_exn (err, errstr) ->
-                     (stack#push gen_el;
-                     raise (Invalid_argument errstr))
+         match interr_args with
+         |Fact_args (num, acc, el) ->
+            if eq_big_int num zero_big_int then begin
+               stack#push (RpcInt acc);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let next_num = pred_big_int num
+               and next_acc = mult_big_int acc num in
+               interr_args <- Fact_args (next_num, next_acc, el);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               begin match gen_el with
+               |RpcInt el ->
+                  if sign_big_int el >= 0 then begin
+                     interr_args <- Fact_args (el, unit_big_int, gen_el);
+                     false
+                  end else begin
+                     stack#push gen_el;
+                     raise (Invalid_argument "integer factorial requires non-negative argument")
+                  end
+               |RpcFloat el ->
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.gamma (el +. 1.0)));
+                     true
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
+               |RpcVariable s ->
+                  stack#push gen_el;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
                end
-            |RpcFloat el ->
-               begin try
-                  stack#push (RpcFloat (Gsl_sf.gamma (el +. 1.0)))
-               with
-                  Gsl_error.Gsl_exn (err, errstr) ->
-                     (stack#push gen_el;
-                     raise (Invalid_argument errstr))
-               end
-            |RpcVariable s ->
-               stack#push gen_el;
-               let err_msg = 
-                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
-               in
-               raise (Invalid_argument err_msg)
-            |_ ->
-               (stack#push gen_el;
-               raise (Invalid_argument "invalid argument"))
-         end else
-            raise (Invalid_argument "empty stack")
+            end else
+               raise (Invalid_argument "empty stack")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
+
 
 
       (* matrix transpose *)
@@ -1343,6 +1368,7 @@ class rpc_calc =
          eval_elements raw_elements
 
 
+
       method eval () =
          if stack#length > 0 then begin
             (* the extra push and pop is necessary to be able to back up the
@@ -1397,51 +1423,6 @@ class rpc_calc =
                raise (Invalid_argument "only variables can be purged")
          end else
             raise (Invalid_argument "empty stack")
-
-
-      (* exact integer factorial
-       * This is an interruptible computation, and should be
-       * called multiple times until it returns true.
-       * If computation is aborted, the interface should call
-       * abort_computation() to clean up. *)
-      method fact_int () =
-         match interr_args with
-         |Fact_args (num, acc, el) ->
-            if eq_big_int num zero_big_int then begin
-               stack#push (RpcInt acc);
-               interr_args <- NoArgs;
-               true
-            end else begin
-               let next_num = pred_big_int num
-               and next_acc = mult_big_int acc num in
-               interr_args <- Fact_args (next_num, next_acc, el);
-               false
-            end
-         |NoArgs ->
-            if stack#length > 0 then begin
-               self#backup ();
-               self#evaln 1;
-               let gen_el = stack#pop () in
-               begin match gen_el with
-               |RpcInt n ->
-                  if sign_big_int n >= 0 then begin
-                     interr_args <- Fact_args (n, unit_big_int, gen_el);
-                     false
-                  end else begin
-                     stack#push gen_el;
-                     raise (Invalid_argument "exact factorial requires non-negative argument")
-                  end
-               |_ ->
-                  stack#push gen_el;
-                  raise (Invalid_argument "exact factorial requires integer argument")
-               end
-            end else
-               raise (Invalid_argument "empty stack")
-         |_ ->
-            (* shouldn't hit this point if interface is well-behaved *)
-            self#abort_computation ();
-            false
-
 
 
 

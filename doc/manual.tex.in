@@ -502,8 +502,7 @@ The following functions are available as extended commands:
       \texttt{lngamma} & natural log of Euler gamma function \\
       \texttt{erf} & error function \\
       \texttt{erfc} & complementary error function \\
-      \texttt{fact} & factorial function (fast approximation) \\
-      \texttt{factint} & factorial function (slow exact integer value) \\
+      \texttt{fact} & factorial function \\
       \texttt{gcd} & greatest common divisor function \\
       \texttt{lcm} & least common multiple function \\
 %@% IF LATEX %@%
@@ -965,14 +964,11 @@ to a real number, and as such the arithmetic will no longer be exact.
    \item \texttt{function\_exp} \\
       Evaluate the exponential function of the last stack element.
    \item \texttt{function\_factorial} \\
-      Compute the factorial of the last stack element.  Note: this is not
-      exact, even for the integer constant data type.  It is computed using
-      a fast approximation to the gamma function, and therefore is subject to rounding 
-      errors.
-   \item \texttt{function\_factorial\_exact} \\
-      Compute the factorial of the last stack element.  This function requires
-      an integer constant input and returns an integer result.  It is
-      potentially a slow operation.
+      Compute the factorial of the last stack element.  For a real argument,
+      this is computed using a fast approximation to the gamma function,
+      and therefore the result may be subject to rounding errors (or overflow).  For an 
+      integer constant argument, the factorial is computed using exact arithmetic; 
+      this has the potential to be a slow operation.
    \item \texttt{function\_floor} \\
       Compute the floor of the last stack element.
    \item \texttt{function\_gamma} \\

@@ -1353,7 +1353,7 @@ let process_function (iface : interface_state_t) ff =
    |Erfc ->
       handle_function_call iface iface.calc#erfc
    |Fact ->
-      handle_function_call iface iface.calc#fact
+      handle_interr_function_call iface iface.calc#fact
    |Transpose ->
       handle_function_call iface iface.calc#transpose
    |Mod ->
@@ -1378,9 +1378,6 @@ let process_function (iface : interface_state_t) ff =
       handle_interr_function_call iface iface.calc#gcd
    |Lcm ->
       handle_interr_function_call iface iface.calc#lcm
-   |FactInt ->
-      handle_interr_function_call iface iface.calc#fact_int
-
    end
 
 
