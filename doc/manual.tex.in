@@ -721,15 +721,21 @@ documentation is the user manual provided with Orpie in PDF format.
 Orpie reads a run-configuration textfile (generally \texttt{/etc/orpierc} or
 \texttt{/usr/local/etc/orpierc}) to determine key and command bindings.  You can
 create a personalized configuration file in \texttt{\$HOME/.orpierc}, and select
-bindings that match your usage patterns.  The recommended procedure is to copy
-the \texttt{orpierc} file provided with Orpie, and edit it to your needs.
+bindings that match your usage patterns.  The recommended procedure is to ``include''
+the \texttt{orpierc} file provided with Orpie 
+%@% IF LATEX %@%
+(see Section \ref{include}), 
+%@% ELSE %@%
+(see INCLUDING OTHER RCFILES),
+%@% END-IF %@%
+and add or removing settings as desired.
 
 %@% IF LATEX %@%
 \subsection{\texttt{orpierc} Syntax}
 %@% ELSE %@%
 \section{\texttt{orpierc} Syntax}
 %@% END-IF %@%
-You may notice that the  \texttt{orpierc} syntax is similar to the syntax used in
+You may notice that the \texttt{orpierc} syntax is similar to the syntax used in
 the configuration file for the Mutt email client (muttrc).
 
 Within the \texttt{orpierc} file, strings should be enclosed in double quotes (\texttt{"}).
@@ -745,6 +751,19 @@ The backslash character must be represented by doubling it
 %@% ELSE %@%
 (\Bs\Bs).
 %@% END-IF %@%
+
+%@% IF LATEX %@%
+\subsubsection{Including Other Rcfiles}
+\label{include}
+Syntax: \texttt{include \emph{filename\_string}} \\ \\
+%@% ELSE %@%
+\subsection{Including Other Rcfiles}
+Syntax: include \emph{filename\_string} \\ \\
+%@% END-IF %@%
+This syntax can be used to include one run-configuration file within another.
+This command could be used to load the default \texttt{orpierc} file (probably
+found in \texttt{/etc/orpierc}) within your personalized rcfile,
+\texttt{\~{}/.orpierc}.
 
 %@% IF LATEX %@%
 \subsubsection{Setting Configuration Variables}
