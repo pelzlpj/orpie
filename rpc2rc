@@ -35,15 +35,21 @@ bind "<pagedown>" command_swap
 bind "<return>" command_dup
 bind "u" command_undo
 bind "<up>" command_begin_browsing
+bind "'" command_begin_extended
 
 # keys for "browse" operations, which are active during
 # stack browsing mode
-bind "q" browse_end_browsing
+bind "q" browse_end
 bind "<left>" browse_scroll_left
 bind "<right>" browse_scroll_right
 bind "<up>" browse_prev_line
 bind "<down>" browse_next_line
 bind "<return>" browse_echo
+
+# keys for extended mode operations
+bind "'" extended_exit
+bind "<return>" extended_enter
+bind "<backspace>" extended_backspace
 
 
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  

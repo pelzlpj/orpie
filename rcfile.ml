@@ -16,6 +16,9 @@ let table_command_key  = Hashtbl.create 20;;
 let table_key_edit     = Hashtbl.create 20;;
 let table_key_browse   = Hashtbl.create 20;;
 let table_browse_key   = Hashtbl.create 20;;
+let table_extended_key = Hashtbl.create 20;;
+let table_key_extended = Hashtbl.create 20;;
+
 
 
 let function_of_key key =
@@ -32,6 +35,10 @@ let browse_of_key key =
    Hashtbl.find table_key_browse key;;
 let key_of_browse browse_op =
    Hashtbl.find table_browse_key browse_op;;
+let extended_of_key key =
+   Hashtbl.find table_key_extended key;;
+let key_of_extended ex_op =
+   Hashtbl.find table_extended_key ex_op;;
 
 
 
@@ -54,6 +61,9 @@ let register_binding key_string op =
          |Browse b ->
             (Hashtbl.add table_key_browse k op;
             Hashtbl.add table_browse_key op k_string)
+         |Extend e ->
+            (Hashtbl.add table_key_extended k op;
+            Hashtbl.add table_extended_key op k_string)
       end
    (* given a string that represents a character, find the associated
     * curses chtype *)
@@ -218,7 +228,9 @@ let parse_line line_stream =
                            register_binding key (Command Undo)
                         |"command_begin_browsing" ->
                            register_binding key (Command BeginBrowse)
-                        |"browse_end_browsing" ->
+                        |"command_begin_extended" ->
+                           register_binding key (Command BeginExtended)
+                        |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->
                            register_binding key (Browse ScrollLeft)
@@ -230,6 +242,12 @@ let parse_line line_stream =
                            register_binding key (Browse NextLine)
                         |"browse_echo" ->
                            register_binding key (Browse Echo)
+                        |"extended_exit" ->
+                           register_binding key (Extend ExitExtended)
+                        |"extended_enter" ->
+                           register_binding key (Extend EnterExtended)
+                        |"extended_backspace" ->
+                           register_binding key (Extend ExtBackspace)
                         |_ ->
                            config_failwith ("Unknown command name \"" ^ command ^ "\"")
                   end

@@ -41,50 +41,15 @@ type rpc_interface_help_mode = | Standard | Extended;;
 type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry 
                                | FloatMatrixEntry | ComplexMatrixEntry;;
 
-type rpc_interface_mode = | StandardMode | BrowsingMode;;
+type rpc_interface_mode = | StandardEntryMode | ExtendedEntryMode | BrowsingMode;;
 
 type complex_entry_element = 
    {mutable re_mantissa : string; mutable re_exponent : string; mutable re_has_dot : bool; 
     mutable im_mantissa : string; mutable im_exponent : string; mutable im_has_dot : bool};;
 
-
-type rpc_bindings = {
-   begin_int           : int;
-   begin_complex       : int;
-   begin_matrix        : int;
-   separator           : int;
-   backspace           : int;
-   enter               : int;
-   scientific_notation : int;
-   neg                 : int;
-   add                 : int;
-   sub                 : int;
-   mult                : int;
-   div                 : int;
-   drop                : int;
-   swap                : int;
-   clear               : int
-};;
-
-
-let bindings = {
-   begin_int           = int_of_char '#';
-   begin_complex       = int_of_char '(';
-   begin_matrix        = int_of_char '[';
-   separator           = int_of_char ',';
-   backspace           = Key.backspace;
-   enter               = 10;   (* standard enter key *)
-   scientific_notation = int_of_char ' ';
-   neg                 = int_of_char 'n';
-   add                 = int_of_char '+';
-   sub                 = int_of_char '-';
-   mult                = int_of_char '*';
-   div                 = int_of_char '/';
-   drop                = int_of_char '\\';
-   swap                = Key.ppage;
-   clear               = int_of_char '|'
-};;
-
+let extended_commands =
+   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\n" ^
+    "drop\nclear\nswap\ndup\nundo");;
 
 let max_matrix_size = 1000;;
 
@@ -95,7 +60,7 @@ object(self)
    val mutable scr = std                      (* curses screen with two or three subwindows *)
    val mutable stack_bottom_row = 1           (* controls what portion of the stack is viewable *)
    val mutable stack_selection = 1            (* in stack browsing mode, this item is selected *)
-   val mutable interface_mode = StandardMode  (* standard mode or stack browsing mode *)
+   val mutable interface_mode = StandardEntryMode  (* standard mode or stack browsing mode *)
    val mutable horiz_scroll = 0
    val mutable help_mode = Extended           (* controls the mode of context-sensitive help *)
 
@@ -106,6 +71,7 @@ object(self)
    val mutable is_entering_base = false       (* whether or not the user is entering a base *)
    val mutable int_base_string = ""           (* one-character representation of the base *)
    val mutable is_entering_exponent = false   (* whether or not the user is entering a scientific notation exponent *)
+   val mutable extended_entry_buffer = ""     (* stores characters entered in extended entry mode *)
 
    (* Holds a list of complex_entry_elements used for float, complex, and matrix
       types.  Each element has string storage (and other bits) that can hold the
@@ -565,7 +531,7 @@ object(self)
       while true do
          let key = getch () in
          match interface_mode with
-         |StandardMode ->
+         |StandardEntryMode ->
             begin
             (* editing operations take priority *)
             try 
@@ -656,11 +622,35 @@ object(self)
                                  self#handle_command_call calc#undo
                               |BeginBrowse ->
                                  self#handle_begin_browse ()
+                              |BeginExtended ->
+                                 self#handle_begin_extended ()
                            end
                         |_ ->
                            failwith "Non-Command operation found in Command Hashtbl"
                      with Not_found ->
                         self#handle_digit key
+            end
+         |ExtendedEntryMode ->
+            begin
+            (* check to see whether the user is either exiting extended mode or
+             * is applying the extended command *)
+            try
+               let extended_op = Rcfile.extended_of_key key in
+               match extended_op with
+               |Extend ee ->
+                  begin
+                     match ee with
+                     |ExitExtended ->
+                        self#handle_exit_extended ()
+                     |EnterExtended ->
+                        self#handle_enter_extended ()
+                     |ExtBackspace ->
+                        self#handle_extended_backspace ()
+                  end
+               |_ ->
+                  failwith "Non-Extended command found in Extended Hashtbl"
+            with Not_found ->
+               self#handle_extended_character key
             end
          |BrowsingMode ->
             try
@@ -687,8 +677,6 @@ object(self)
             with Not_found | Not_handled ->
                ()
       done
-
-
 
 
    (* handle an 'enter' keypress *)
@@ -1091,7 +1079,7 @@ object(self)
       horiz_scroll <- 0;
       stack_selection <- 1;
       stack_bottom_row <- 1;
-      interface_mode <- StandardMode;
+      interface_mode <- StandardEntryMode;
       self#draw_stack ()
       
 
@@ -1148,6 +1136,62 @@ object(self)
       calc#echo stack_selection;
       self#handle_prev_line ();
       self#draw_stack ()
+      
+
+   (* begin extended entry *)
+   method private handle_begin_extended () =
+      if interface_mode != ExtendedEntryMode then
+         (interface_mode <- ExtendedEntryMode;
+         help_mode <- Extended)
+         (* do other cleanup stuff *)
+      else
+         ()
+
+
+   (* exit extended entry *)
+   method private handle_exit_extended () =
+      if interface_mode = ExtendedEntryMode then
+         (interface_mode <- StandardEntryMode;
+         help_mode <- Standard)
+      else
+         ()
+
+
+   (* enter an extended entry *)
+   method private handle_enter_extended () =
+      (* FIXME: obviously this needs stuff added *)
+      if interface_mode = ExtendedEntryMode then
+         (interface_mode <- StandardEntryMode;
+         help_mode <- Standard)
+      else
+         ()
+
+
+   (* backspace during extended entry *)
+   method private handle_extended_backspace () =
+      let len = String.length extended_entry_buffer in
+      if len > 0 then
+         extended_entry_buffer <- Str.string_before extended_entry_buffer (pred
+         len)
+      else
+         ()
+
+
+   (* handle entry of an arbitrary character in extended mode *)
+   method private handle_extended_character key =
+      let ch = char_of_int key in
+      let test_buffer = extended_entry_buffer ^ (String.make 1 ch) in
+      (* search through the list of commands for the first one that matches
+       * extended_entry_buffer *)
+      let regex_str = "^" ^ test_buffer ^ ".*$" in
+      let regex = Str.regexp regex_str in
+      try
+         let dummy = Str.search_forward regex extended_commands 0 in
+         let matched_command = Str.matched_string extended_commands in
+         self#draw_error ("caught extended command: " ^ matched_command);
+         extended_entry_buffer <- test_buffer
+      with
+         Not_found -> let err = beep () in ()
       
 
    (* handle a call to a function (which first pushes the item in the
