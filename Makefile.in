@@ -66,13 +66,16 @@ CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma
 CMXA = $(CMA:.cma=.cmxa)
 
-CURSES_BOBJS = curses/ml_curses.o curses.cmo
-CURSES_OOBJS = curses/ml_curses.o curses.cmx
+CURSES_CMO = curses/curses.cmo
+CURSES_CMX = curses/curses.cmx
+CURSES_COBJS = curses/ml_curses.o
+CURSES_BOBJS = $(CURSES_CMO) $(CURSES_COBJS)
+CURSES_OOBJS = $(CURSES_CMX) $(CURSES_COBJS)
 
-GSL_CMO = gsl_error.cmo gsl_blas.cmo gsl_complex.cmo gsl_matrix.cmo gsl_matrix_complex.cmo \
-		gsl_vector.cmo gsl_vector_complex.cmo gsl_vector_flat.cmo gsl_matrix_flat.cmo \
-		gsl_vector_complex_flat.cmo gsl_matrix_complex_flat.cmo gsl_vectmat.cmo \
-		gsl_permut.cmo gsl_linalg.cmo gsl_fun.cmo
+GSL_CMO = gsl/gsl_error.cmo gsl/gsl_blas.cmo gsl/gsl_complex.cmo gsl/gsl_matrix.cmo gsl/gsl_matrix_complex.cmo \
+		gsl/gsl_vector.cmo gsl/gsl_vector_complex.cmo gsl/gsl_vector_flat.cmo gsl/gsl_matrix_flat.cmo \
+		gsl/gsl_vector_complex_flat.cmo gsl/gsl_matrix_complex_flat.cmo gsl/gsl_vectmat.cmo \
+		gsl/gsl_permut.cmo gsl/gsl_linalg.cmo gsl/gsl_fun.cmo
 GSL_CMX = $(GSL_CMO:.cmo=.cmx)
 GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o \
 		 gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_vector_double.o gsl/mlgsl_permut.o \
@@ -93,25 +96,25 @@ byte: $(NAME).byte $(NAME2).byte
 opt: $(NAME).opt $(NAME2).opt
 static: $(NAME).static-opt $(NAME2).static-opt
 
-$(NAME).byte: subdirs_byte $(CMO)
+$(NAME).byte: $(CURSES_BOBJS) $(GSL_BOBJS) $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
 
-$(NAME2).byte: subdirs_byte utility.cmo curses-keys.cmo
+$(NAME2).byte: $(CURSES_BOBJS) utility.cmo curses-keys.cmo
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.cmo curses-keys.cmo
 
-$(NAME).opt: subdirs_opt $(CMX)
+$(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
 
-$(NAME2).opt: subdirs_opt utility.cmx curses-keys.cmx
+$(NAME2).opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
 # static build seems to require mashing all the C objects into a library
-$(NAME).static-opt: subdirs_opt $(CMX) my-static-libs
+$(NAME).static-opt: $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
 	curses.cmx $(GSL_CMX) $(CMX)
 	strip $(NAME).static-opt
 
-$(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx my-static-libs
+$(NAME2).static-opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
 	utility.cmx curses-keys.cmx
 	strip $(NAME2).static-opt
@@ -120,25 +123,7 @@ my-static-libs:
 	ar cr libmycurses.a curses/*.o
 	ar cr libmygsl.a gsl/*.o
 
-#$(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx
-#	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
-# curses and gsl bindings
-#####################################
-
-SUBDIRS = curses gsl
-
-.PHONY: subdirs_byte subdirs_opt $(SUBDIRS)
-
-subdirs_byte: 
-	for dir in $(SUBDIRS); do \
-	export BUILD_TYPE=byte && $(MAKE) -C $$dir; \
-	done
-
-subdirs_opt: $(SUBDIRS)
-	for dir in $(SUBDIRS); do \
-	export BUILD_TYPE=opt && $(MAKE) -C $$dir; \
-	done
 
 VERSION=1.2.0
 
@@ -190,27 +175,59 @@ uninstall:
 # generic rules
 ###############
 
-.SUFFIXES: .mli .ml .cmi .cmo .cmx .mll .mly
+.SUFFIXES:
 
-.mli.cmi:
+# GSL and curses targets should be created by
+# calling their respective Makefiles
+gsl/%.cmi : gsl/%.mli
+	cd gsl && $(MAKE) $*.cmi
+
+gsl/%.cmo : gsl/%.ml
+	cd gsl && $(MAKE) $*.cmo
+
+gsl/%.o : gsl/%.ml
+	cd gsl && $(MAKE) $*.o
+
+gsl/%.cmx : gsl/%.ml
+	cd gsl && $(MAKE) $*.cmx
+
+gsl/%.o : gsl/%.c
+	cd gsl && $(MAKE) $*.o
+
+curses/%.cmi : curses/%.mli
+	cd curses && $(MAKE) $*.cmi
+
+curses/%.cmo : curses/%.ml
+	cd curses && $(MAKE) $*.cmo
+
+curses/%.o : curses/%.ml
+	cd curses && $(MAKE) $*.o
+
+curses/%.cmx : curses/%.ml
+	cd curses && $(MAKE) $*.cmx
+
+curses/%.o : curses/%.c
+	cd curses && $(MAKE) $*.o
+
+%.cmi : %.mli
 	$(OCAMLC) -c $(BFLAGS) $<
 
-.ml.cmo:
+%.cmo : %.ml
 	$(OCAMLC) -c $(BFLAGS) $<
 
-.ml.o:
+%.o : %.ml
 	$(OCAMLOPT) -c $(OFLAGS) $<
 
-.ml.cmx:
+%.cmx : %.ml
 	$(OCAMLOPT) -c $(OFLAGS) $<
 
-.mll.ml:
+%.ml : %.mll
 	$(OCAMLLEX) $<
 
-.mly.ml:
+%.ml : %.mly
 	$(OCAMLYACC) -v $<
 
-.mly.mli:
+%.mli : %.mly
 	$(OCAMLYACC) -v $<
 
 # Emacs tags
@@ -258,6 +275,14 @@ dist-clean distclean:: clean
 
 # depend
 ########
+
+depend::
+	$(MAKE) txtin_lexer.ml
+	$(MAKE) txtin_parser.ml
+	$(OCAMLDEP) $(OFLAGS) *.ml *.mli > depend
+	$(OCAMLDEP) -pp cpp -I ./curses curses/*.ml curses/*.mli >> depend
+	$(OCAMLDEP) -I ./gsl gsl/*.ml gsl/*.mli >> depend
+
 
 include depend
 

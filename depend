@@ -1,45 +1,160 @@
-add.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-add.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-curses-keys.cmo: subdirs_byte utility.cmo 
-curses-keys.cmx: subdirs_opt utility.cmx 
-div.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-div.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-interface.cmo: subdirs_byte operations.cmo rpc_calc.cmo 
-interface.cmx: subdirs_opt operations.cmx rpc_calc.cmx 
-interface_draw.cmo: subdirs_byte interface.cmo operations.cmo rcfile.cmo rpc_calc.cmo \
-    rpc_stack.cmo utility.cmo 
-interface_draw.cmx: subdirs_opt interface.cmx operations.cmx rcfile.cmx rpc_calc.cmx \
-    rpc_stack.cmx utility.cmx 
-interface_main.cmo: subdirs_byte big_int_str.cmo interface.cmo interface_draw.cmo \
-    operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo utility.cmo 
-interface_main.cmx: subdirs_opt big_int_str.cmx interface.cmx interface_draw.cmx \
-    operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx utility.cmx 
-inv.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-inv.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-main.cmo: subdirs_byte interface.cmo interface_main.cmo rcfile.cmo rpc_calc.cmo 
-main.cmx: subdirs_opt interface.cmx interface_main.cmx rcfile.cmx rpc_calc.cmx 
-mult.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-mult.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-pow.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-pow.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-rcfile.cmo: subdirs_byte install.cmo operations.cmo 
-rcfile.cmx: subdirs_opt install.cmx operations.cmx 
-rpc_calc.cmo: subdirs_byte add.cmo div.cmo gsl_assist.cmo inv.cmo mult.cmo pow.cmo \
-    rpc_stack.cmo solvelin.cmo sub.cmo 
-rpc_calc.cmx: subdirs_opt add.cmx div.cmx gsl_assist.cmx inv.cmx mult.cmx pow.cmx \
-    rpc_stack.cmx solvelin.cmx sub.cmx 
-rpc_stack.cmo: subdirs_byte big_int_str.cmo rcfile.cmo utility.cmo 
-rpc_stack.cmx: subdirs_opt big_int_str.cmx rcfile.cmx utility.cmx 
-solvelin.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-solvelin.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-sub.cmo: subdirs_byte gsl_assist.cmo rpc_stack.cmo 
-sub.cmx: subdirs_opt gsl_assist.cmx rpc_stack.cmx 
-txtin_lexer.cmo: subdirs_byte txtin_parser.cmi 
-txtin_lexer.cmx: subdirs_opt txtin_parser.cmx 
-txtin_parser.cmo: subdirs_byte big_int_str.cmo rpc_stack.cmo utility.cmo txtin_parser.cmi 
-txtin_parser.cmx: subdirs_opt big_int_str.cmx rpc_stack.cmx utility.cmx txtin_parser.cmi 
-txtin_parser.cmi: subdirs_byte rpc_stack.cmo 
-gsl_assist.cmo: subdirs_byte
-gsl_assist.cmx: subdirs_opt
-utility.cmo: subdirs_byte
-utility.cmx: subdirs_opt
+add.cmo: gsl_assist.cmo ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
+    rpc_stack.cmo 
+add.cmx: gsl_assist.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
+    rpc_stack.cmx 
+curses-keys.cmo: ./curses/curses.cmi utility.cmo 
+curses-keys.cmx: ./curses/curses.cmx utility.cmx 
+div.cmo: gsl_assist.cmo ./gsl/gsl_blas.cmi ./gsl/gsl_error.cmi \
+    ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
+    ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi rpc_stack.cmo 
+div.cmx: gsl_assist.cmx ./gsl/gsl_blas.cmx ./gsl/gsl_error.cmx \
+    ./gsl/gsl_linalg.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
+    ./gsl/gsl_permut.cmx ./gsl/gsl_vectmat.cmx rpc_stack.cmx 
+gsl_assist.cmo: ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi \
+    ./gsl/gsl_vector_complex.cmi ./gsl/gsl_vector_complex_flat.cmi 
+gsl_assist.cmx: ./gsl/gsl_linalg.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_permut.cmx ./gsl/gsl_vectmat.cmx \
+    ./gsl/gsl_vector_complex.cmx ./gsl/gsl_vector_complex_flat.cmx 
+interface.cmo: ./curses/curses.cmi operations.cmo rpc_calc.cmo 
+interface.cmx: ./curses/curses.cmx operations.cmx rpc_calc.cmx 
+interface_draw.cmo: ./curses/curses.cmi interface.cmo operations.cmo \
+    rcfile.cmo rpc_calc.cmo rpc_stack.cmo utility.cmo 
+interface_draw.cmx: ./curses/curses.cmx interface.cmx operations.cmx \
+    rcfile.cmx rpc_calc.cmx rpc_stack.cmx utility.cmx 
+interface_main.cmo: big_int_str.cmo ./curses/curses.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi interface.cmo interface_draw.cmo \
+    operations.cmo rcfile.cmo rpc_calc.cmo rpc_stack.cmo txtin_lexer.cmo \
+    txtin_parser.cmi utility.cmo 
+interface_main.cmx: big_int_str.cmx ./curses/curses.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx interface.cmx interface_draw.cmx \
+    operations.cmx rcfile.cmx rpc_calc.cmx rpc_stack.cmx txtin_lexer.cmx \
+    txtin_parser.cmx utility.cmx 
+inv.cmo: gsl_assist.cmo ./gsl/gsl_error.cmi ./gsl/gsl_linalg.cmi \
+    ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_permut.cmi \
+    ./gsl/gsl_vectmat.cmi ./gsl/gsl_vector.cmi rpc_stack.cmo 
+inv.cmx: gsl_assist.cmx ./gsl/gsl_error.cmx ./gsl/gsl_linalg.cmx \
+    ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_permut.cmx \
+    ./gsl/gsl_vectmat.cmx ./gsl/gsl_vector.cmx rpc_stack.cmx 
+main.cmo: ./curses/curses.cmi ./gsl/gsl_error.cmi interface.cmo \
+    interface_main.cmo rcfile.cmo rpc_calc.cmo 
+main.cmx: ./curses/curses.cmx ./gsl/gsl_error.cmx interface.cmx \
+    interface_main.cmx rcfile.cmx rpc_calc.cmx 
+mult.cmo: gsl_assist.cmo ./gsl/gsl_blas.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo 
+mult.cmx: gsl_assist.cmx ./gsl/gsl_blas.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx 
+pow.cmo: gsl_assist.cmo rpc_stack.cmo 
+pow.cmx: gsl_assist.cmx rpc_stack.cmx 
+rcfile.cmo: ./curses/curses.cmi install.cmo operations.cmo 
+rcfile.cmx: ./curses/curses.cmx install.cmx operations.cmx 
+rpc_calc.cmo: add.cmo div.cmo gsl_assist.cmo ./gsl/gsl_blas.cmi \
+    ./gsl/gsl_complex.cmi ./gsl/gsl_error.cmi ./gsl/gsl_math.cmi \
+    ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_sf.cmo \
+    inv.cmo mult.cmo pow.cmo rpc_stack.cmo solvelin.cmo sub.cmo 
+rpc_calc.cmx: add.cmx div.cmx gsl_assist.cmx ./gsl/gsl_blas.cmx \
+    ./gsl/gsl_complex.cmx ./gsl/gsl_error.cmx ./gsl/gsl_math.cmx \
+    ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_sf.cmx \
+    inv.cmx mult.cmx pow.cmx rpc_stack.cmx solvelin.cmx sub.cmx 
+rpc_stack.cmo: big_int_str.cmo ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi rcfile.cmo utility.cmo 
+rpc_stack.cmx: big_int_str.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx rcfile.cmx utility.cmx 
+solvelin.cmo: gsl_assist.cmo ./gsl/gsl_linalg.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_vector_complex.cmi rpc_stack.cmo 
+solvelin.cmx: gsl_assist.cmx ./gsl/gsl_linalg.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_vector_complex.cmx rpc_stack.cmx 
+sub.cmo: gsl_assist.cmo ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
+    rpc_stack.cmo 
+sub.cmx: gsl_assist.cmx ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
+    rpc_stack.cmx 
+txtin_lexer.cmo: txtin_parser.cmi 
+txtin_lexer.cmx: txtin_parser.cmx 
+txtin_parser.cmo: big_int_str.cmo ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi rpc_stack.cmo utility.cmo txtin_parser.cmi 
+txtin_parser.cmx: big_int_str.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx rpc_stack.cmx utility.cmx txtin_parser.cmi 
+utility.cmo: ./curses/curses.cmi 
+utility.cmx: ./curses/curses.cmx 
+txtin_parser.cmi: rpc_stack.cmo 
+curses/curses.cmo: curses/curses.cmi 
+curses/curses.cmx: curses/curses.cmi 
+curses/test.cmo: ./curses/curses.cmi 
+curses/test.cmx: ./curses/curses.cmx 
+gsl/gsl_blas.cmo: ./gsl/gsl_complex.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_vector.cmi \
+    ./gsl/gsl_vector_complex.cmi gsl/gsl_blas.cmi 
+gsl/gsl_blas.cmx: ./gsl/gsl_complex.cmx ./gsl/gsl_matrix.cmx \
+    ./gsl/gsl_matrix_complex.cmx ./gsl/gsl_vector.cmx \
+    ./gsl/gsl_vector_complex.cmx gsl/gsl_blas.cmi 
+gsl/gsl_complex.cmo: gsl/gsl_complex.cmi 
+gsl/gsl_complex.cmx: gsl/gsl_complex.cmi 
+gsl/gsl_error.cmo: gsl/gsl_error.cmi 
+gsl/gsl_error.cmx: gsl/gsl_error.cmi 
+gsl/gsl_fun.cmo: ./gsl/gsl_matrix.cmi ./gsl/gsl_vector.cmi gsl/gsl_fun.cmi 
+gsl/gsl_fun.cmx: ./gsl/gsl_matrix.cmx ./gsl/gsl_vector.cmx gsl/gsl_fun.cmi 
+gsl/gsl_linalg.cmo: ./gsl/gsl_complex.cmi ./gsl/gsl_fun.cmi \
+    ./gsl/gsl_matrix.cmi ./gsl/gsl_permut.cmi ./gsl/gsl_vectmat.cmi \
+    ./gsl/gsl_vector_flat.cmi gsl/gsl_linalg.cmi 
+gsl/gsl_linalg.cmx: ./gsl/gsl_complex.cmx ./gsl/gsl_fun.cmx \
+    ./gsl/gsl_matrix.cmx ./gsl/gsl_permut.cmx ./gsl/gsl_vectmat.cmx \
+    ./gsl/gsl_vector_flat.cmx gsl/gsl_linalg.cmi 
+gsl/gsl_math.cmo: gsl/gsl_math.cmi 
+gsl/gsl_math.cmx: gsl/gsl_math.cmi 
+gsl/gsl_matrix.cmo: gsl/gsl_matrix.cmi 
+gsl/gsl_matrix.cmx: gsl/gsl_matrix.cmi 
+gsl/gsl_matrix_complex.cmo: ./gsl/gsl_complex.cmi gsl/gsl_matrix_complex.cmi 
+gsl/gsl_matrix_complex.cmx: ./gsl/gsl_complex.cmx gsl/gsl_matrix_complex.cmi 
+gsl/gsl_matrix_complex_flat.cmo: ./gsl/gsl_complex.cmi \
+    ./gsl/gsl_vector_complex_flat.cmi gsl/gsl_matrix_complex_flat.cmi 
+gsl/gsl_matrix_complex_flat.cmx: ./gsl/gsl_complex.cmx \
+    ./gsl/gsl_vector_complex_flat.cmx gsl/gsl_matrix_complex_flat.cmi 
+gsl/gsl_matrix_flat.cmo: ./gsl/gsl_vector_flat.cmi gsl/gsl_matrix_flat.cmi 
+gsl/gsl_matrix_flat.cmx: ./gsl/gsl_vector_flat.cmx gsl/gsl_matrix_flat.cmi 
+gsl/gsl_permut.cmo: ./gsl/gsl_complex.cmi ./gsl/gsl_error.cmi \
+    gsl/gsl_permut.cmi 
+gsl/gsl_permut.cmx: ./gsl/gsl_complex.cmx ./gsl/gsl_error.cmx \
+    gsl/gsl_permut.cmi 
+gsl/gsl_sf.cmo: ./gsl/gsl_fun.cmi 
+gsl/gsl_sf.cmx: ./gsl/gsl_fun.cmx 
+gsl/gsl_vectmat.cmo: ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_complex.cmi \
+    ./gsl/gsl_matrix_complex_flat.cmi ./gsl/gsl_matrix_flat.cmi \
+    ./gsl/gsl_vector.cmi ./gsl/gsl_vector_complex.cmi \
+    ./gsl/gsl_vector_complex_flat.cmi ./gsl/gsl_vector_flat.cmi \
+    gsl/gsl_vectmat.cmi 
+gsl/gsl_vectmat.cmx: ./gsl/gsl_matrix.cmx ./gsl/gsl_matrix_complex.cmx \
+    ./gsl/gsl_matrix_complex_flat.cmx ./gsl/gsl_matrix_flat.cmx \
+    ./gsl/gsl_vector.cmx ./gsl/gsl_vector_complex.cmx \
+    ./gsl/gsl_vector_complex_flat.cmx ./gsl/gsl_vector_flat.cmx \
+    gsl/gsl_vectmat.cmi 
+gsl/gsl_vector.cmo: gsl/gsl_vector.cmi 
+gsl/gsl_vector.cmx: gsl/gsl_vector.cmi 
+gsl/gsl_vector_complex.cmo: ./gsl/gsl_complex.cmi gsl/gsl_vector_complex.cmi 
+gsl/gsl_vector_complex.cmx: ./gsl/gsl_complex.cmx gsl/gsl_vector_complex.cmi 
+gsl/gsl_vector_complex_flat.cmo: ./gsl/gsl_complex.cmi \
+    ./gsl/gsl_vector_flat.cmi gsl/gsl_vector_complex_flat.cmi 
+gsl/gsl_vector_complex_flat.cmx: ./gsl/gsl_complex.cmx \
+    ./gsl/gsl_vector_flat.cmx gsl/gsl_vector_complex_flat.cmi 
+gsl/gsl_vector_flat.cmo: gsl/gsl_vector_flat.cmi 
+gsl/gsl_vector_flat.cmx: gsl/gsl_vector_flat.cmi 
+gsl/gsl_blas.cmi: ./gsl/gsl_complex.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_vector.cmi \
+    ./gsl/gsl_vector_complex.cmi 
+gsl/gsl_fun.cmi: ./gsl/gsl_matrix.cmi ./gsl/gsl_vector.cmi 
+gsl/gsl_linalg.cmi: ./gsl/gsl_complex.cmi ./gsl/gsl_fun.cmi \
+    ./gsl/gsl_matrix.cmi ./gsl/gsl_matrix_flat.cmi ./gsl/gsl_permut.cmi \
+    ./gsl/gsl_vectmat.cmi ./gsl/gsl_vector.cmi ./gsl/gsl_vector_flat.cmi 
+gsl/gsl_matrix.cmi: ./gsl/gsl_vector.cmi 
+gsl/gsl_matrix_complex.cmi: ./gsl/gsl_complex.cmi \
+    ./gsl/gsl_vector_complex.cmi 
+gsl/gsl_matrix_complex_flat.cmi: ./gsl/gsl_complex.cmi \
+    ./gsl/gsl_vector_complex_flat.cmi 
+gsl/gsl_matrix_flat.cmi: ./gsl/gsl_vector_flat.cmi 
+gsl/gsl_vectmat.cmi: ./gsl/gsl_complex.cmi ./gsl/gsl_matrix.cmi \
+    ./gsl/gsl_matrix_complex.cmi ./gsl/gsl_matrix_complex_flat.cmi \
+    ./gsl/gsl_matrix_flat.cmi ./gsl/gsl_vector.cmi \
+    ./gsl/gsl_vector_complex.cmi ./gsl/gsl_vector_complex_flat.cmi \
+    ./gsl/gsl_vector_flat.cmi 
+gsl/gsl_vector_complex.cmi: ./gsl/gsl_complex.cmi 
+gsl/gsl_vector_complex_flat.cmi: ./gsl/gsl_complex.cmi \
+    ./gsl/gsl_vector_flat.cmi 
