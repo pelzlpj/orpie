@@ -177,27 +177,29 @@ static void winch_handler(int n)
 value mlcurses_getch(void)
 {
    CAMLparam0();
-   value ch;
+   int ch;
 
    enter_blocking_section();
-   ch = Val_int(getch());
+   ch = getch();
    leave_blocking_section();
 
-   CAMLreturn(ch);
+   CAMLreturn(Val_int(ch));
 }
 
 
 value mlcurses_wgetch(value win)
 {
    CAMLparam1(win);
-   value ch;
+   int ch;
+   WINDOW* w;
 
    caml__dummy_win = caml__dummy_win;
+   w = (WINDOW *) win;
 
    enter_blocking_section();
-   ch = Val_int(wgetch((WINDOW *) win));
+   ch = wgetch(w);
    leave_blocking_section();
 
-   CAMLreturn(ch);
+   CAMLreturn(Val_int(ch));
 }
 
