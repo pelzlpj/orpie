@@ -46,86 +46,92 @@ let register_binding key_string op =
          |Edit e ->
             Hashtbl.add table_key_edit k op
       end
-   in
-   match key_string with
-   |"<esc>" ->
-      make_entries 27 "<esc>"
-   |"<tab>" ->
-      make_entries 9 "<tab>"
-   |"<enter>" ->
-      make_entries Key.enter "<enter>"
-   |"<return>" ->
-      make_entries 10 "<return>"
-   |"<insert>" ->
-      make_entries Key.ic "<insert>"
-   |"<delete>" ->
-      make_entries Key.dc "<delete>"
-   |"<home>" ->
-      make_entries Key.home "<home>"
-   |"<end>" ->
-      make_entries Key.end_ "<end>"
-   |"<pageup>" ->
-      make_entries Key.ppage "<pageup>"
-   |"<pagedown>" ->
-      make_entries Key.npage "<pagedown>"
-   |"<space>" ->
-      make_entries 32 "<space>"
-   |"<backspace>" ->
-      make_entries Key.backspace "<backspace>"
-   |"<left>" ->
-      make_entries Key.left "<left>"
-   |"<right>" ->
-      make_entries Key.right "<right>"
-   |"<up>" ->
-      make_entries Key.up "<up>"
-   |"<down>" ->
-      make_entries Key.down "<down>"
-   |"<f1>" ->
-      make_entries (Key.f 1) "<f1>"
-   |"<f2>" ->
-      make_entries (Key.f 2) "<f2>"
-   |"<f3>" ->
-      make_entries (Key.f 3) "<f3>"
-   |"<f4>" ->
-      make_entries (Key.f 4) "<f4>"
-   |"<f5>" ->
-      make_entries (Key.f 5) "<f5>"
-   |"<f6>" ->
-      make_entries (Key.f 6) "<f6>"
-   |"<f7>" ->
-      make_entries (Key.f 7) "<f7>"
-   |"<f8>" ->
-      make_entries (Key.f 8) "<f8>"
-   |"<f9>" ->
-      make_entries (Key.f 9) "<f9>"
-   |"<f10>" ->
-      make_entries (Key.f 10) "<f10>"
-   |"<f11>" ->
-      make_entries (Key.f 11) "<f11>"
-   |"<f12>" ->
-      make_entries (Key.f 12) "<f12>"
-   |_ ->
-      if String.length key_string = 1 then
-         make_entries (int_of_char key_string.[0]) key_string
-      else if String.length key_string > 2 then
-         if key_string.[0] = '\\' && key_string.[1] = 'C' then
-            if String.length key_string = 3 then
-               let uc_key_string = String.uppercase key_string in
-               let control_chtype = ((int_of_char uc_key_string.[2]) - 64) and
-               control_str = "^" ^ (String.make 1 uc_key_string.[2]) in
-               make_entries control_chtype control_str
-            else
-               config_failwith ("Illegal control key \"" ^ key_string ^ "\"")
-         else if key_string.[0] = '0' && key_string.[1] = 'o' then
-            (* FIXME: to get the display string, one could do something like
-             * let str = unctrl (ungetch key; getch ()), along with a little
-             * post-processing ala curses-keys.ml *)
-            let substr = String.sub key_string 2 ((String.length key_string) - 2) in
-            make_entries (int_of_string key_string) ("\\" ^ substr)
+   (* given a string that represents a character, find the associated
+    * curses chtype *)
+   and decode_alias str =
+      match str with
+      |"<esc>" -> 27
+      |"<tab>" -> 9
+      |"<enter>" -> Key.enter
+      |"<return>" -> 10
+      |"<insert>" -> Key.ic
+      |"<delete>" -> Key.dc
+      |"<home>" -> Key.home
+      |"<end>" -> Key.end_
+      |"<pageup>" -> Key.ppage
+      |"<pagedown>" -> Key.npage
+      |"<space>" -> 32
+      |"<backspace>" -> Key.backspace
+      |"<left>" -> Key.left
+      |"<right>" -> Key.right
+      |"<up>" -> Key.up
+      |"<down>" -> Key.down
+      |"<f1>" -> (Key.f 1)
+      |"<f2>" -> (Key.f 2)
+      |"<f3>" -> (Key.f 3)
+      |"<f4>" -> (Key.f 4)
+      |"<f5>" -> (Key.f 5)
+      |"<f6>" -> (Key.f 6)
+      |"<f7>" -> (Key.f 7)
+      |"<f8>" -> (Key.f 8)
+      |"<f9>" -> (Key.f 9)
+      |"<f10>" -> (Key.f 10)
+      |"<f11>" -> (Key.f 11)
+      |"<f12>" -> (Key.f 12)
+      |_ -> 
+         if String.length key_string = 1 then
+            int_of_char str.[0]
          else
-            config_failwith ("Unrecognized key string \"" ^ key_string ^ "\"")
+            config_failwith ("Unrecognized key \"" ^ str ^ "\"")
+   in
+   (* This regexp is used to extract the ctrl and meta characters from a string
+    * representing a keypress.
+    * It matches \\M\\C or \\C\\M or \\C or \\M (or no such characters) followed
+    * by an arbitrary string. *)
+   (* Note: is there a way to use raw strings here?  Getting tired of those
+    * backslashes...*)
+   let cm_re = Str.regexp
+   "^\\(\\(\\\\M\\\\C\\|\\\\C\\\\M\\)\\|\\(\\\\M\\)\\|\\(\\\\C\\)\\)?\\(.+\\)"
+   in
+   if Str.string_match cm_re key_string 0 then
+      let has_meta_ctrl =
+         try let _ = Str.matched_group 2 key_string in true
+         with Not_found -> false
+      and has_meta =
+         try let _  = Str.matched_group 3 key_string in true
+         with Not_found -> false
+      and has_ctrl =
+         try let _ = Str.matched_group 4 key_string in true
+         with Not_found -> false
+      and main_key = Str.matched_group 5 key_string in
+      if has_meta_ctrl then
+         if String.length main_key = 1 then
+            let uc_main_key = String.uppercase main_key in
+            let mc_chtype = ((int_of_char uc_main_key.[0]) + 64) in
+            let mc_str = "M-C-" ^ uc_main_key in
+            make_entries mc_chtype mc_str
+         else
+            config_failwith ("Cannot apply \\\\M\\\\C to key \"" ^ main_key ^ "\";\n" ^
+                       "octal notation might let you accomplish this.")
+      else if has_meta then
+         if String.length main_key = 1 then
+            let m_chtype = ((int_of_char main_key.[0]) + 128) in
+            let m_str = "M-" ^ main_key in
+            make_entries m_chtype m_str
+         else
+            config_failwith ("Cannot apply \\\\M to key \"" ^ main_key ^ "\";\n" ^
+                       "octal notation might let you accomplish this.")
+      else if has_ctrl then
+         if String.length main_key = 1 then
+            let uc_main_key = String.uppercase main_key in
+            let c_chtype = ((int_of_char uc_main_key.[0]) - 64) in
+            let c_str = "C-" ^ uc_main_key in
+            make_entries c_chtype c_str
+         else
+            config_failwith ("Cannot apply \\\\C to key \"" ^ main_key ^ "\";\n" ^
+                       "octal notation might let you accomplish this.")
       else
-         config_failwith ("Unrecognized key string \"" ^ key_string ^ "\"");;
+         make_entries (decode_alias main_key) main_key
 
 
 

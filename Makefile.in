@@ -73,13 +73,13 @@ $(NAME).byte: $(CURSES_BOBJS) $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(CMO)
 
 $(NAME2).byte: $(CURSES_BOBJS) curses-keys.ml
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) curses-keys.ml
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses-keys.ml
 
 $(NAME).opt: $(CURSES_OOBJS) $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(CMX)
 
 $(NAME2).opt: $(CURSES_OOBJS) curses-keys.ml
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) curses-keys.ml
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA)  curses-keys.ml
 
 $(CURSES_BOBJS):
 	cd curses && $(MAKE) byte

@@ -11,7 +11,7 @@ begin
    assert (refresh ())
 end;
 let string_of_chtype ch =
-   let str = unctrl ch in
+   let str = keyname ch in
    match str with
    |"KEY_LEFT" -> "<left>"
    |"KEY_RIGHT" -> "<right>"
@@ -43,7 +43,7 @@ let string_of_chtype ch =
    |"^[" -> "<esc>"
    |_ ->  
       if String.length str > 1 && str.[0] = '^' then
-         "\\\\C" ^ (String.sub str 1 ((String.length str) - 1))
+         "\\\\C" ^ (Str.string_after str 1)
       else
          str
 in
