@@ -3,7 +3,9 @@ Orpie ChangeLog
 
 v1.4
 
-   2004-08-30        Started work on a testing framework for the
+   2004-08-30        Version 1.4.0 release.
+   
+                     Started work on a testing framework for the
                      rpc_calc object.  (I'd really appreciate help
                      writing test cases--see calc_test.ml .)
    
