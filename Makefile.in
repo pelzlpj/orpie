@@ -140,11 +140,9 @@ version.ml: Makefile
 
 install-indep: 
 	mkdir -p $(BINDIR)
-	mkdir -p $(MANDIR)/man1
-	cp -f $(NAME).1 $(MANDIR)/man1
 	if test "$(prefix)" = "/usr"; then \
    install -m 644 orpierc /etc; \
-	else install -m 644 orpierc $(prefix)/etc ;
+	else install -m 644 orpierc $(prefix)/etc; \
 	fi
 
 install: install-indep
@@ -159,50 +157,13 @@ install-opt: install-indep
 	cp -f $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
 	cp -f $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
 
-# documentation
-###############
-
-DOCFILES=manual.ps manual.html
-
-doc: $(DOCFILES)
-
-# export
-########
-
-EXPORTDIR=$(NAME)-$(VERSION)
-TAR=$(EXPORTDIR).tar
-
-FTP = $$HOME/ftp/$(NAME)
-WWW = $$HOME/WWW/$(NAME)
-
-FILES = *.ml* $(NAME).1 manual.tex	     \
-	Makefile.in configure configure.in   \
-	.depend README INSTALL COPYING GPL CHANGES
-
-export: source binary export-doc
-	cp README COPYING GPL CHANGES $(FTP)
-
-source: 
-	mkdir -p export/$(EXPORTDIR)
-	cp $(FILES) export/$(EXPORTDIR)
-	cd export ; tar cf $(TAR) $(EXPORTDIR) ; gzip -f --best $(TAR)
-	cp export/$(TAR).gz $(FTP)
-
-export-doc: $(DOCFILES)
-	gzip -c manual.ps > $(FTP)/manual.ps.gz
-	cp manual.html $(WWW)
-
-BINARY = $(EXPORTDIR)-$(OSTYPE)
-BINARYTAR=$(BINARY).tar
-
-BINARYFILES = README INSTALL COPYING GPL $(NAME).1
-
-binary: $(NAME).$(OCAMLBEST) $(DOCFILES)
-	mkdir -p export/$(BINARY)
-	cp $(BINARYFILES) $(DOCFILES) export/$(BINARY)
-	cp $(NAME).$(OCAMLBEST) export/$(BINARY)/$(NAME)
-	(cd export; tar czf $(BINARY).tar.gz $(BINARY))
-	cp export/$(BINARY).tar.gz $(FTP)
+uninstall:
+	rm -f $(BINDIR)/$(NAME)$(EXE)
+	rm -f $(BINDIR)/$(NAME2)$(EXE)
+	if test "$(prefix)" = "/usr"; then\
+	rm -f /etc/orpierc; \
+	else rm -f $(prefix)/etc/orpierc; \
+	fi
 
 
 # generic rules
