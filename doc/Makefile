@@ -15,7 +15,8 @@ manual.pdf: manual.ps
 	ps2pdf13 manual.ps
 
 manual.html: manual.tex
-	hevea manual.tex
+	hevea -fix manual.tex
+	hevea -fix manual.tex
 
 manual.tex.stripped: manual.tex.in
 	python remove-tt.py manual.tex.in manual.tex.stripped
@@ -30,10 +31,10 @@ orpie-curses-keys.1: orpie-curses-keys.tex
 	latex2man -M orpie-curses-keys.tex orpie-curses-keys.1
 
 post-build-cleanup: manual.pdf manual.html orpie.1 orpierc.5 orpie-curses-keys.1
-	rm -f *.aux *.log *.dvi *.ps *.stripped manual.tex
+	rm -f *.aux *.log *.toc *.haux *.htoc *.dvi *.ps *.stripped manual.tex
 
 clean:
-	rm -f manual.tex *.aux *.log *.dvi *.ps *.pdf *.html *.stripped orpie.1 orpierc.5 orpie-curses-keys.1
+	rm -f manual.tex *.aux *.log *.toc *.haux *.htoc *.dvi *.ps *.pdf *.html *.stripped orpie.1 orpierc.5 orpie-curses-keys.1
 
 
 # arch-tag: DO_NOT_CHANGE_a5d62ea3-3a73-4de2-a2b3-a70bb310823f 

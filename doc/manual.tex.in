@@ -34,6 +34,11 @@
 \emph{``Because the equals key is for the weak.''}
 \end{center}
 
+%@% IF LATEX %@%
+\tableofcontents
+\clearpage
+%@% ELSE %@%
+%@% END-IF %@%
 
 \section{Introduction}
 Orpie is a console-based RPN (reverse polish notation) desktop
@@ -969,7 +974,6 @@ ill-defined under many operations.
 %@% END-IF %@%
 
 
-
 %@% IF LATEX %@%
 \begin{center}
    \begin{tabular}[t]{|r|l|}
@@ -1081,6 +1085,31 @@ ill-defined under many operations.
 %@% ELSE %@%
 \end{Table}
 %@% END-IF %@%
+
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Luminance Unit \\
+      \hline
+      \texttt{cd} & candela \\
+      \texttt{lm} & lumen \\
+      \texttt{lx} & lux \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+Note: Although the lumen is defined by
+\texttt{1\_lm = 1\_cd * sr}, Orpie drops the steridian because it is
+a dimensionless unit and therefore is of questionable use to a calculator.
+
 
 %@% END-IF %@%
 % (!ORPIERC)
