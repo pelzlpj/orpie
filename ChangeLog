@@ -1,6 +1,14 @@
 Orpie ChangeLog
 ------------------------------------------------------------------------
 
+v1.5
+
+   2004-09-03        Implemented entry of most fundamental physical 
+                     constants.
+
+   2004-08-31        Fixed incorrect error message regarding deprecated
+                     extended_enter command.
+
 v1.4
 
    2004-08-30        Version 1.4.0 release.
