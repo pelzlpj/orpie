@@ -180,8 +180,10 @@ class rpc_calc =
          stack#push (RpcComplexMatrix cm)
 
       method print_stack =
-         let print_el el = Printf.printf "%s\n" el in
-         List.iter print_el stack#get_display_lines
+         let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in
+         for i = stack#length downto 1 do
+            print_el i (stack#get_display_line i ())
+         done
 
    end;;
 
