@@ -10,8 +10,6 @@ Definitely before release:
 
    * fix the 'install' and 'uninstall' Makefile targets
 
-   * arg function should be sensitive to angle mode
-
    * inversion of integer constant should not remove the last stack entry
 
 * create a parser that can read data structures entered into an ascii file,

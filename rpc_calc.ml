@@ -228,7 +228,12 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcComplex el ->
-                  stack#push (RpcFloat (Gsl_complex.arg el))
+                  begin match modes.angle with
+                  |Rad ->
+                     stack#push (RpcFloat (Gsl_complex.arg el))
+                  |Deg ->
+                     stack#push (RpcFloat (180.0 /. pi *. (Gsl_complex.arg el)))
+                  end
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
