@@ -1932,6 +1932,228 @@ let handle_units_character (iface : interface_state_t) key =
 (****************************************************************)
 (* MAIN LOOP                                                    *)
 (****************************************************************)
+
+(* handle a keypress in standard entry mode *)
+let handle_keypress_standard key (iface : interface_state_t) =
+   (* check whether this keypress is a macro *)
+   begin try
+      let ch_list = Rcfile.macro_of_key key in
+      let rec push_macro chars =
+         match chars with
+         | [] -> ()
+         | head :: tail ->
+            let _ = ungetch head in 
+            push_macro tail
+      in
+      push_macro ch_list
+   with Not_found ->
+   (* if it's not a macro, go ahead and process it *)
+      begin try
+      (* editing operations take priority *)
+         let edit_op = Rcfile.edit_of_key key in
+         match edit_op with
+         |Edit ee ->
+            begin match ee with
+            |Digit ->
+               handle_digit iface key
+            |Enter ->
+               handle_enter iface
+            |Backspace ->
+               handle_backspace iface
+            |Minus ->
+               handle_minus iface
+            |BeginInteger ->
+               handle_begin_int iface
+            |BeginComplex ->
+               handle_begin_complex iface
+            |BeginMatrix ->
+               handle_begin_matrix iface
+            |Separator ->
+               handle_separator iface
+            |Angle ->
+               handle_angle iface
+            |SciNotBase ->
+               handle_scientific_notation iface
+            |BeginUnits ->
+               handle_begin_units iface
+            end
+         |_ ->
+            failwith "Non-Edit operation found in Edit Hashtbl"
+      with Not_found | Not_handled ->
+         (* next we try to match on functions *)
+         try 
+            let function_op = Rcfile.function_of_key key in
+            match function_op with
+            |Function ff ->
+               process_function iface ff
+            |_ ->
+               failwith "Non-Function operation found in Function Hashtbl"
+         with Not_found ->
+            if iface.has_entry then
+               (* finally we try entry of digits *)
+               handle_digit iface key
+            else
+               (* commands are only suitable when there is no entry *)
+               try 
+                  let command_op = Rcfile.command_of_key key in
+                  match command_op with
+                  |Command cc ->
+                     process_command iface cc
+                  |_ ->
+                     failwith "Non-Command operation found in Command Hashtbl"
+               with Not_found ->
+                  handle_digit iface key
+      end
+   end
+
+
+(* handle a keypress in integer editing mode *)
+let handle_keypress_intedit key (iface : interface_state_t) =
+   begin try 
+      let edit_op = Rcfile.edit_of_key key in
+      match edit_op with
+      |Edit ee ->
+         begin match ee with
+         |Digit ->
+            handle_digit iface key
+         |Enter ->
+            handle_enter iface
+         |Backspace ->
+            handle_backspace iface
+         |Minus ->
+            handle_minus iface
+         |SciNotBase ->
+            handle_scientific_notation iface
+         |_ -> raise Not_handled
+         end
+      |_ ->
+         failwith "Non-Edit operation found in Edit Hashtbl"
+   with Not_found | Not_handled ->
+      try
+         let intedit_op = Rcfile.intedit_of_key key in
+         match intedit_op with
+         |IntEdit ie ->
+            begin match ie with
+            |ExitIntEdit ->
+               handle_exit_int iface
+            end
+         |_ ->
+            failwith "Non-IntEdit operation found in IntEdit Hashtbl"
+      with Not_found | Not_handled ->
+         handle_digit iface key
+   end
+
+
+(* handle a keypress in units entry mode *)
+let handle_keypress_unitedit key (iface : interface_state_t) =
+   begin try
+      let edit_op = Rcfile.edit_of_key key in
+      match edit_op with
+      |Edit ee ->
+         begin match ee with
+         |Enter ->
+            handle_enter iface
+         |Backspace ->
+            handle_units_backspace iface
+         |_ -> 
+            handle_units_character iface key
+         end
+      |_ ->
+         failwith "Non-Edit operation found in Edit Hashtbl"
+   with Not_found | Not_handled ->
+      handle_units_character iface key
+   end
+
+
+(* handle a keypress in abbrev entry mode *)
+let handle_keypress_abbrev key (iface : interface_state_t) =
+   begin try
+      let abbrev_op = Rcfile.abbrev_of_key key in
+      match abbrev_op with
+      |Abbrev ee ->
+         begin
+            match ee with
+            |ExitAbbrev ->
+               handle_exit_abbrev iface
+            |EnterAbbrev ->
+               handle_enter_abbrev iface
+            |AbbrevBackspace ->
+               handle_abbrev_backspace iface
+         end
+      |_ ->
+         failwith "Non-Abbrev command found in Abbrev Hashtbl"
+   with Not_found ->
+      handle_abbrev_character iface key
+   end
+
+
+(* handle a keypress in variable editing mode *)
+let handle_keypress_varedit key (iface : interface_state_t) =
+   begin try
+      let varedit_op = Rcfile.varedit_of_key key in
+      match varedit_op with
+      |VarEdit vv ->
+         begin match vv with
+         |ExitVarEdit ->
+            handle_exit_variable iface
+         |EnterVarEdit ->
+            handle_enter_variable iface
+         |VarEditBackspace ->
+            handle_variable_backspace iface
+         |CompleteVarEdit ->
+            handle_complete_variable iface
+         end
+      |_ ->
+         failwith "Non-Variable command found in VarEdit Hashtbl"
+   with Not_found ->
+      handle_variable_character iface key
+   end
+
+
+(* handle a keypress in stack browsing mode *)
+let handle_keypress_browse key (iface : interface_state_t) =
+   try
+      let browse_op = Rcfile.browse_of_key key in
+      match browse_op with
+      |Browse bb ->
+         begin
+            match bb with
+            |EndBrowse ->
+               handle_end_browse iface
+            |ScrollLeft ->
+               handle_scroll_left iface
+            |ScrollRight ->
+               handle_scroll_right iface
+            |RollDown ->
+               handle_rolldown iface
+            |RollUp ->
+               handle_rollup iface
+            |PrevLine ->
+               handle_prev_line iface
+            |NextLine ->
+               handle_next_line iface
+            |Echo ->
+               handle_browse_echo iface
+            |ViewEntry ->
+               handle_browse_view iface
+            |Drop1 ->
+               handle_browse_drop1 iface
+            |DropN ->
+               handle_browse_dropn iface
+            |Keep ->
+               handle_browse_keep iface
+            |KeepN ->
+               handle_browse_keepn iface
+            |EditEntry ->
+               handle_browse_edit iface
+         end
+      |_ ->
+         failwith "Non-Browsing operation found in Browse Hashtbl"
+   with Not_found | Not_handled ->
+      ()
+
+
+
 let do_main_loop (iface : interface_state_t) =
    while iface.run_calc do
       iface.calc#launch_fill_in_thread ();
@@ -1941,212 +2163,12 @@ let do_main_loop (iface : interface_state_t) =
          handle_resize iface
       else
          match iface.interface_mode with
-         |StandardEntryMode ->
-            (* check whether this keypress is a macro *)
-            begin try
-               let ch_list = Rcfile.macro_of_key key in
-               let rec push_macro chars =
-                  match chars with
-                  | [] -> ()
-                  | head :: tail ->
-                     let _ = ungetch head in 
-                     push_macro tail
-               in
-               push_macro ch_list
-            with Not_found ->
-            (* if it's not a macro, go ahead and process it *)
-            begin try
-            (* editing operations take priority *)
-               let edit_op = Rcfile.edit_of_key key in
-               match edit_op with
-               |Edit ee ->
-                  begin match ee with
-                  |Digit ->
-                     handle_digit iface key
-                  |Enter ->
-                     handle_enter iface
-                  |Backspace ->
-                     handle_backspace iface
-                  |Minus ->
-                     handle_minus iface
-                  |BeginInteger ->
-                     handle_begin_int iface
-                  |BeginComplex ->
-                     handle_begin_complex iface
-                  |BeginMatrix ->
-                     handle_begin_matrix iface
-                  |Separator ->
-                     handle_separator iface
-                  |Angle ->
-                     handle_angle iface
-                  |SciNotBase ->
-                     handle_scientific_notation iface
-                  |BeginUnits ->
-                     handle_begin_units iface
-                  end
-               |_ ->
-                  failwith "Non-Edit operation found in Edit Hashtbl"
-            with Not_found | Not_handled ->
-               (* next we try to match on functions *)
-               try 
-                  let function_op = Rcfile.function_of_key key in
-                  match function_op with
-                  |Function ff ->
-                     process_function iface ff
-                  |_ ->
-                     failwith "Non-Function operation found in Function Hashtbl"
-               with Not_found ->
-                  if iface.has_entry then
-                     (* finally we try entry of digits *)
-                     handle_digit iface key
-                  else
-                     (* commands are only suitable when there is no entry *)
-                     try 
-                        let command_op = Rcfile.command_of_key key in
-                        match command_op with
-                        |Command cc ->
-                           process_command iface cc
-                        |_ ->
-                           failwith "Non-Command operation found in Command Hashtbl"
-                     with Not_found ->
-                        handle_digit iface key
-            end
-            end
-         |IntEditMode ->
-            begin 
-               try 
-                  let edit_op = Rcfile.edit_of_key key in
-                  match edit_op with
-                  |Edit ee ->
-                     begin match ee with
-                     |Digit ->
-                        handle_digit iface key
-                     |Enter ->
-                        handle_enter iface
-                     |Backspace ->
-                        handle_backspace iface
-                     |Minus ->
-                        handle_minus iface
-                     |SciNotBase ->
-                        handle_scientific_notation iface
-                     |_ -> raise Not_handled
-                     end
-                  |_ ->
-                     failwith "Non-Edit operation found in Edit Hashtbl"
-               with Not_found | Not_handled ->
-                  try
-                     let intedit_op = Rcfile.intedit_of_key key in
-                     match intedit_op with
-                     |IntEdit ie ->
-                        begin match ie with
-                        |ExitIntEdit ->
-                           handle_exit_int iface
-                        end
-                     |_ ->
-                        failwith "Non-IntEdit operation found in IntEdit Hashtbl"
-                  with Not_found | Not_handled ->
-                     handle_digit iface key
-            end
-         |UnitEditMode ->
-            begin try
-               let edit_op = Rcfile.edit_of_key key in
-               match edit_op with
-               |Edit ee ->
-                  begin match ee with
-                  |Enter ->
-                     handle_enter iface
-                  |Backspace ->
-                     handle_units_backspace iface
-                  |_ -> 
-                     handle_units_character iface key
-                  end
-               |_ ->
-                  failwith "Non-Edit operation found in Edit Hashtbl"
-            with Not_found | Not_handled ->
-               handle_units_character iface key
-            end
-         |AbbrevEntryMode ->
-            begin
-            (* check to see whether the user is either exiting abbrev mode or
-             * is applying the abbrev command *)
-            try
-               let abbrev_op = Rcfile.abbrev_of_key key in
-               match abbrev_op with
-               |Abbrev ee ->
-                  begin
-                     match ee with
-                     |ExitAbbrev ->
-                        handle_exit_abbrev iface
-                     |EnterAbbrev ->
-                        handle_enter_abbrev iface
-                     |AbbrevBackspace ->
-                        handle_abbrev_backspace iface
-                  end
-               |_ ->
-                  failwith "Non-Abbrev command found in Abbrev Hashtbl"
-            with Not_found ->
-               handle_abbrev_character iface key
-            end
-         |VarEditMode ->
-            begin try
-               let varedit_op = Rcfile.varedit_of_key key in
-               match varedit_op with
-               |VarEdit vv ->
-                  begin match vv with
-                  |ExitVarEdit ->
-                     handle_exit_variable iface
-                  |EnterVarEdit ->
-                     handle_enter_variable iface
-                  |VarEditBackspace ->
-                     handle_variable_backspace iface
-                  |CompleteVarEdit ->
-                     handle_complete_variable iface
-                  end
-               |_ ->
-                  failwith "Non-Variable command found in VarEdit Hashtbl"
-            with Not_found ->
-               handle_variable_character iface key
-            end
-         |BrowsingMode ->
-            try
-               let browse_op = Rcfile.browse_of_key key in
-               match browse_op with
-               |Browse bb ->
-                  begin
-                     match bb with
-                     |EndBrowse ->
-                        handle_end_browse iface
-                     |ScrollLeft ->
-                        handle_scroll_left iface
-                     |ScrollRight ->
-                        handle_scroll_right iface
-                     |RollDown ->
-                        handle_rolldown iface
-                     |RollUp ->
-                        handle_rollup iface
-                     |PrevLine ->
-                        handle_prev_line iface
-                     |NextLine ->
-                        handle_next_line iface
-                     |Echo ->
-                        handle_browse_echo iface
-                     |ViewEntry ->
-                        handle_browse_view iface
-                     |Drop1 ->
-                        handle_browse_drop1 iface
-                     |DropN ->
-                        handle_browse_dropn iface
-                     |Keep ->
-                        handle_browse_keep iface
-                     |KeepN ->
-                        handle_browse_keepn iface
-                     |EditEntry ->
-                        handle_browse_edit iface
-                  end
-               |_ ->
-                  failwith "Non-Browsing operation found in Browse Hashtbl"
-            with Not_found | Not_handled ->
-               ()
+         |StandardEntryMode -> handle_keypress_standard key iface
+         |IntEditMode       -> handle_keypress_intedit key iface
+         |UnitEditMode      -> handle_keypress_unitedit key iface
+         |AbbrevEntryMode   -> handle_keypress_abbrev key iface
+         |VarEditMode       -> handle_keypress_varedit key iface
+         |BrowsingMode      -> handle_keypress_browse key iface
    done
 
 

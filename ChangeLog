@@ -3,6 +3,11 @@ Orpie ChangeLog
 
 v1.5
 
+   2004-09-07        Support --sysconfdir configure option.  (Anyone
+                     packaging for the filesystem hierarchy standard
+                     will now need to use something like "./configure
+                     --prefix=/usr --sysconfdir=/etc".)
+
    2004-09-03        Implemented entry of most fundamental physical 
                      constants.
 
