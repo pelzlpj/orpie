@@ -49,6 +49,7 @@ type rpc_bindings = {
    begin_complex       : int;
    begin_matrix        : int;
    separator           : int;
+   backspace           : int;
    enter               : int;
    scientific_notation : int;
    neg                 : int;
@@ -67,6 +68,7 @@ let bindings = {
    begin_complex       = int_of_char '(';
    begin_matrix        = int_of_char '[';
    separator           = int_of_char ',';
+   backspace           = Key.backspace;
    enter               = 10;   (* standard enter key *)
    scientific_notation = int_of_char ' ';
    neg                 = int_of_char 'n';
@@ -106,7 +108,8 @@ object(self)
       im_mantissa = ""; im_exponent = ""; im_has_dot = false}
    val mutable current_buffer = 0
    val mutable is_entering_imag = false
-   val mutable matrix_cols = max_matrix_size
+   val mutable matrix_cols = 1
+   val mutable has_multiple_rows = false
                                                
 
    method run () =
@@ -149,8 +152,8 @@ object(self)
          wclrtoeol scr.stack_win;
          if len > scr.sw_cols - 7 then
             (* need to truncate the string *)
-            let sub_s = String.sub s 0 (scr.sw_cols - 11) in 
-            let line_string = sprintf "%2d:   %s ..." line sub_s in
+            let sub_s = String.sub s 0 (scr.sw_cols - 10) in 
+            let line_string = sprintf "%2d:   %s..." line sub_s in
             assert (waddstr scr.stack_win line_string)
          else
             let spacer = String.make (scr.sw_cols - 7 - len) ' ' in
@@ -193,8 +196,10 @@ object(self)
          in
          if (is_current && is_entering_exponent) || String.length exponent > 0 then
             mantissa ^ " x10^" ^ sign_space ^ exponent
-         else
+         else if is_current || String.length mantissa > 0 then
             mantissa
+         else 
+            "0"
       in
       match entry_type with
       |IntEntry ->
@@ -222,17 +227,16 @@ object(self)
             let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
             draw_entry_string ("(" ^ re_str ^ ")")
       |FloatMatrixEntry ->
+         (* FIXME: "[1[2" -> [[1, 2]] for some reason *)
          let ss = ref "[[" in
-         let matrix_rows = succ (current_buffer / matrix_cols) in
          begin
             for el = 0 to pred current_buffer do
-               (if (el mod matrix_cols) = 0 && el > 0 then
-                  ss := !ss ^ "]["
-               else
-                  ());
                let temp_re = get_float_str false gen_buffer.(el).re_mantissa
                gen_buffer.(el).re_exponent in
-               ss := !ss ^ temp_re ^ ", "
+               (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
+                  ss := !ss ^ temp_re ^ "]["
+               else
+                  ss := !ss ^ temp_re ^ ", ")
             done;
             let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
             gen_buffer.(current_buffer).re_exponent in
@@ -241,17 +245,15 @@ object(self)
          end
       |ComplexMatrixEntry ->
          let ss = ref "[[" in
-         let matrix_rows = succ (current_buffer / matrix_cols) in
          for el = 0 to pred current_buffer do
-            (if (el mod matrix_cols) = 0 && el > 0 then
-               ss := !ss ^ "]["
-            else
-               ());
             let temp_re = get_float_str false gen_buffer.(el).re_mantissa
             gen_buffer.(el).re_exponent and
             temp_im = get_float_str false gen_buffer.(el).im_mantissa
             gen_buffer.(el).im_exponent in
-            ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), "
+            (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
+               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]["
+            else
+               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), ")
          done;
          (if is_entering_imag then
             let temp_re = get_float_str false gen_buffer.(current_buffer).re_mantissa
@@ -369,6 +371,19 @@ object(self)
 
    (* parse the entry buffers to obtain an rpc object *)
    method private get_entry_from_buffer () =
+      (* get a float from strings representing the mantissa and exponent *)
+      let get_float_el mantissa exponent =
+         if String.length mantissa > 0 then
+            if String.length exponent > 0 then
+               if exponent = "-" || exponent = "+" then
+                  float_of_string mantissa
+               else
+                  float_of_string (mantissa ^ "e" ^ exponent)
+            else
+               float_of_string mantissa
+         else
+            0.0
+      in
       match entry_type with
       |IntEntry ->
          let base_mode = 
@@ -398,45 +413,65 @@ object(self)
          begin
             let buffer = gen_buffer.(0) in
             try
-               if is_entering_exponent && String.length buffer.re_exponent > 0 then
-                  let ff = float_of_string (buffer.re_mantissa ^ "e" ^
-                  buffer.re_exponent) in
-                  RpcFloat ff
-               else
-                  let ff = float_of_string buffer.re_mantissa in
-                  RpcFloat ff
+               let ff = get_float_el buffer.re_mantissa buffer.re_exponent in
+               RpcFloat ff
             with Failure "float_of_string" ->
-               raise (Invalid_argument "improperly formatted floating point data")
+               raise (Invalid_argument "improperly formatted floating-point data")
          end
       |ComplexEntry ->
          begin
             let buffer = gen_buffer.(0) in
             try
-               let real_part =
-                  if String.length buffer.re_mantissa > 0 then
-                     if String.length buffer.re_exponent > 0 then
-                        float_of_string (buffer.re_mantissa ^ "e" ^
-                        buffer.re_exponent)
-                     else
-                        float_of_string buffer.re_mantissa
-                  else 0.0
-               and imag_part =
-                  if String.length buffer.im_mantissa > 0 then
-                     if String.length buffer.im_exponent > 0 then
-                        float_of_string (buffer.im_mantissa ^ "e" ^
-                        buffer.im_exponent)
-                     else
-                        float_of_string buffer.im_mantissa
-                  else
-                     0.0
-               in
+               let real_part = get_float_el buffer.re_mantissa
+               buffer.re_exponent and
+               imag_part = get_float_el buffer.im_mantissa
+               buffer.im_exponent in
                RpcComplex {re = real_part; im = imag_part}
             with Failure "float_of_string" ->
-               raise (Invalid_argument "improperly formatted floating point data")
+               raise (Invalid_argument "improperly formatted complex floating-point data")
          end
-      |_ ->
-         (* handle entry of other data types *)
-         failwith "entry of unhandled data type"
+      |FloatMatrixEntry ->
+         begin
+            let matrix_rows = 
+               if has_multiple_rows then
+                  succ (current_buffer / matrix_cols)
+               else
+                  1
+            in
+            let temp_arr = Array.make (matrix_rows * matrix_cols) 0.0 in
+            try
+               for i = 0 to current_buffer do
+                  temp_arr.(i) <- (get_float_el gen_buffer.(i).re_mantissa
+                     gen_buffer.(i).re_exponent)
+               done;
+               RpcFloatMatrix (Gsl_matrix.of_array temp_arr matrix_rows matrix_cols)
+            with Failure "float_of_string" ->
+               raise (Invalid_argument "improperly formatted floating-point matrix data")
+         end
+      |ComplexMatrixEntry ->
+         begin
+            let matrix_rows = 
+               if has_multiple_rows then
+                  succ (current_buffer / matrix_cols)
+               else
+                  1
+            in
+            let temp_arr = Array.make (matrix_rows * matrix_cols) 
+            {re = 0.0; im = 0.0} in
+            try
+               for i = 0 to current_buffer do
+                  let re_part = get_float_el gen_buffer.(i).re_mantissa
+                  gen_buffer.(i).re_exponent and
+                  im_part = get_float_el gen_buffer.(i).im_mantissa
+                  gen_buffer.(i).im_exponent in
+                  temp_arr.(i) <- {re = re_part; im = im_part}
+               done;
+               RpcComplexMatrix (Gsl_matrix_complex.of_array temp_arr matrix_rows matrix_cols)
+            with Failure "float_of_string" ->
+               raise (Invalid_argument "improperly formatted complex
+               floating-point matrix data")
+         end
+
 
 
    (* parse the entry buffers to obtain an rpc object, then stack#push it *)
@@ -457,7 +492,8 @@ object(self)
          done;
          current_buffer <- 0;
          is_entering_imag <- false;
-         matrix_cols <- max_matrix_size;
+         matrix_cols <- 1;
+         has_multiple_rows <- false;
          self#draw_entry ()
       in
       begin
@@ -480,353 +516,620 @@ object(self)
          if is_extended_entry then
             (* do something here *)
             ()
-         else
-            begin
-(*               Printf.fprintf stdout "key = %d\n" key;
-               flush stdout; *)
-               if key = bindings.enter then
-                  try
-                     (if has_entry then
-                        self#push_entry ()
-                     else
-                        calc#dup ());
-                     self#draw_stack ()
-                  with Invalid_argument error_msg ->
-                     self#draw_error error_msg
-               else if key = bindings.begin_int then
-                  if entry_type = FloatEntry then
-                     (entry_type <- IntEntry;
-                     int_entry_buffer <- "";
-                     self#draw_entry ())
-                  else
-                     () 
-               else if key = bindings.begin_complex then
-                  (has_entry <- true;
-                  match entry_type with
-                  |FloatEntry ->
-                     (entry_type <- ComplexEntry;
-                     self#draw_entry ())
-                  |FloatMatrixEntry ->
-                     (entry_type <- ComplexMatrixEntry;
-                     self#draw_entry ())
-                  |_ ->
-                     ())
-               else if key = bindings.begin_matrix then
-                  (has_entry <- true;
-                  match entry_type with
-                  |FloatEntry ->
-                     (entry_type <- FloatMatrixEntry;
-                     self#draw_entry ())
-                  |ComplexEntry ->
-                     (entry_type <- ComplexMatrixEntry;
-                     self#draw_entry ())
-                  (* FIXME: |FloatMatrixEntry -> (next row) *)
-                  |_ ->
-                     ())
-               else if key = bindings.separator then
-                  match entry_type with
-                  |ComplexEntry ->
-                     if not is_entering_imag then
-                        (is_entering_imag <- true;
-                        is_entering_exponent <- false;
-                        self#draw_entry ())
-                     else
-                        ()
-                  |FloatMatrixEntry ->
-                     if current_buffer < pred max_matrix_size then
-                        (current_buffer <- succ current_buffer;
-                        is_entering_exponent <- false;
-                        (*FIXME: any other items to reset here?*)
-                        self#draw_entry ())
-                     else
-                        ()
-                  |ComplexMatrixEntry ->
-                     if is_entering_imag then
-                        if current_buffer < pred max_matrix_size then
-                           (current_buffer <- succ current_buffer;
-                           is_entering_exponent <- false;
-                           is_entering_imag <- false;
-                           (*FIXME: any other items to reset here?*)
-                           self#draw_entry ())
-                        else
-                           ()
-                     else
-                        (is_entering_imag <- true;
-                        is_entering_exponent <- false;
-                        self#draw_entry ())
-                  |_ ->
-                     ()
-               else if key = bindings.scientific_notation then
-                  match entry_type with 
-                  |IntEntry ->
-                     if String.length int_entry_buffer > 0 then
-                        (is_entering_base <- true;
-                        self#draw_entry ())
-                     else
-                        ()
-                  |FloatEntry | FloatMatrixEntry ->
-                     if String.length gen_buffer.(current_buffer).re_mantissa > 0 then
-                        (is_entering_exponent <- true;
-                        self#draw_entry ())
-                     else
-                        ()
-                  |ComplexEntry | ComplexMatrixEntry ->
-                     if is_entering_imag then
-                        if String.length gen_buffer.(current_buffer).im_mantissa > 0 then
-                           (is_entering_exponent <- true;
-                           self#draw_entry ())
-                        else
-                           ()
-                     else
-                        if String.length gen_buffer.(0).re_mantissa > 0 then
-                           (is_entering_exponent <- true;
-                           self#draw_entry ())
-                        else
-                           ()
-               else if key = bindings.neg then
-                  if has_entry then
-                     match entry_type with
-                     |IntEntry ->
-                        (begin
-                           match int_entry_buffer.[0] with
-                           |'-' -> int_entry_buffer.[0] <- '+'
-                           |'+' -> int_entry_buffer.[0] <- '-'
-                           |_ -> int_entry_buffer <- "-" ^ int_entry_buffer
-                        end;
-                        self#draw_entry ())
-                     |FloatEntry | FloatMatrixEntry ->
-                        begin
-                           let buffer = gen_buffer.(current_buffer) in
-                           if is_entering_exponent then
-                              if String.length buffer.re_exponent > 0 then
-                                 match buffer.re_exponent.[0] with
-                                 |'-' -> buffer.re_exponent.[0] <- '+'
-                                 |'+' -> buffer.re_exponent.[0] <- '-'
-                                 |_ -> buffer.re_exponent <- "-" ^ buffer.re_exponent
-                              else
-                                 ()
-                           else
-                              match buffer.re_mantissa.[0] with
-                              |'-' -> buffer.re_mantissa.[0] <- '+'
-                              |'+' -> buffer.re_mantissa.[0] <- '-'
-                              |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
-                        end;
-                        self#draw_entry ()
-                     |ComplexEntry | ComplexMatrixEntry ->
-                        begin
-                           let buffer = gen_buffer.(current_buffer) in
-                           let mantissa = 
-                              if is_entering_imag then
-                                 buffer.im_mantissa
-                              else
-                                 buffer.re_mantissa and
-                           exponent = 
-                              if is_entering_imag then
-                                 buffer.im_exponent
-                              else
-                                 buffer.re_exponent
-                           in
-                           if is_entering_exponent then
-                              if String.length exponent > 0 then
-                                 match exponent.[0] with
-                                 |'-' -> exponent.[0] <- '+'
-                                 |'+' -> exponent.[0] <- '-'
-                                 |_ -> 
-                                    if is_entering_imag then
-                                       buffer.im_exponent <- "-" ^ buffer.im_exponent
-                                    else
-                                       buffer.re_exponent <- "-" ^ buffer.re_exponent
-                              else
-                                 ()
-                           else
-                              if String.length mantissa > 0 then
-                                 match mantissa.[0] with
-                                 |'-' -> mantissa.[0] <- '+'
-                                 |'+' -> mantissa.[0] <- '-'
-                                 |_ -> 
-                                    if is_entering_imag then
-                                       buffer.im_mantissa <- "-" ^ buffer.im_mantissa
-                                    else
-                                       buffer.re_mantissa <- "-" ^ buffer.re_mantissa
-                              else
-                                 ()
-                        end;
-                        self#draw_entry ()
-                  else
-                     try calc#neg (); self#draw_stack ()
-                     with Invalid_argument error_msg ->
-                        self#draw_error error_msg
-               else if key = bindings.add then
-                  try 
-                     (if has_entry then
-                        self#push_entry ()
-                     else
-                        ());
-                     calc#add (); 
-                     self#draw_stack ()
-                  with 
-                     Invalid_argument error_msg ->
-                        self#draw_error error_msg
-               else if key = bindings.sub then
-                  try 
-                     (if has_entry then
-                        self#push_entry ()
-                     else
-                        ());
-                     calc#sub (); 
-                     self#draw_stack ()
-                  with 
-                     Invalid_argument error_msg ->
-                        self#draw_error error_msg
-               else if key = bindings.mult then
-                  try 
-                     (if has_entry then
-                        self#push_entry ()
-                     else
-                        ());
-                     calc#mult (); 
-                     self#draw_stack ()
-                  with 
-                     Invalid_argument error_msg ->
-                        self#draw_error error_msg
-               else if key = bindings.div then
-                  try 
-                     (if has_entry then
-                        self#push_entry ()
-                     else
-                        ());
-                     calc#div (); 
-                     self#draw_stack ()
-                  with 
-                     Invalid_argument error_msg ->
-                        self#draw_error error_msg
-               else if key = bindings.drop then
-                  try calc#drop (); self#draw_stack ()
-                  with Invalid_argument error_msg ->
-                     self#draw_error error_msg
-               else if key = bindings.swap then
-                  try calc#swap (); self#draw_stack ()
-                  with Invalid_argument error_msg ->
-                     self#draw_error error_msg
-               else if key = bindings.clear then
-                  try calc#clear (); self#draw_stack ()
-                  with Invalid_argument error_msg ->
-                     self#draw_error error_msg
-               else (* handle entry of digits *)
-                  let process_float_digit buffer is_imag =
-                     let exponent_buffer =
-                        if is_imag then buffer.im_exponent
-                        else buffer.re_exponent
-                     and mantissa_buffer =
-                        if is_imag then buffer.im_mantissa
-                        else buffer.re_mantissa
-                     and has_dot =
-                        if is_imag then buffer.im_has_dot
-                        else buffer.re_has_dot
-                     in
-                     begin
-                        if is_entering_exponent then
-                           let explen =
-                              (if String.length exponent_buffer > 0 then
-                                 match exponent_buffer.[0] with
-                                 |'-' | '+'-> 4
-                                 |_ -> 3
-                              else
-                                 3)
-                           in
-                           if String.length exponent_buffer < explen then
-                              let digits = "0123456789" in
-                              try
-                                 let c = char_of_int key in
-                                 if String.contains digits c then
-                                    (* need this hack to be able to perform
-                                     * the mutable field assignment... *)
-                                    (if is_imag then
-                                       buffer.im_exponent <- exponent_buffer ^
-                                       (String.make 1 c)
-                                    else
-                                       buffer.re_exponent <- exponent_buffer ^
-                                       (String.make 1 c);
-                                    self#draw_entry ())
-                                 else
-                                    ()
-                              with Invalid_argument "char_of_int" ->
-                                 ()
-                           else
-                              ()
-                        else if String.length mantissa_buffer < 17 then
-                           let digits =
-                              if has_dot then "0123456789"
-                              else "0123456789."
-                           in
-                           try
-                              let c = char_of_int key in
-                              if String.contains digits c then
-                                 begin
-                                    (if is_imag then
-                                       (buffer.im_mantissa <- mantissa_buffer ^
-                                       (String.make 1 c);
-                                       if c = '.' then buffer.im_has_dot <- true
-                                       else ())
-                                    else
-                                       (buffer.re_mantissa <- mantissa_buffer ^
-                                       (String.make 1 c);
-                                       if c = '.' then buffer.re_has_dot <- true
-                                       else ()));
-                                    has_entry <- true;
-                                    self#draw_entry ()
-                                 end
-                              else
-                                 ()
-                           with Invalid_argument "char_of_int" ->
-                              ()
-                        else
-                           ()
-                     end
-                  in
-                  match entry_type with
-                  |IntEntry ->
-                     begin
-                        if is_entering_base then
-                           let base_chars = "bodh" in
-                           try
-                              let c = char_of_int key in
-                              if String.contains base_chars c then
-                                 (int_base_string <- String.make 1 c;
-                                 self#draw_entry ())
-                              else
-                                 ()
-                           with Invalid_argument "char_of_int" ->
-                              ()
-                        else
-                           let digits = "0123456789abcdefABCDEF" in
-                           try
-                              let c = char_of_int key in
-                              if String.contains digits c then
-                                 (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
-                                 has_entry <- true;
-                                 self#draw_entry ())
-                              else
-                                 ()
-                           with Invalid_argument "char_of_int" ->
-                              ()
-                     end (* IntEntry *)
-                  |FloatEntry | FloatMatrixEntry ->
-                     let buffer = gen_buffer.(current_buffer) in
-                     process_float_digit buffer false
-                  |ComplexEntry | ComplexMatrixEntry ->
-                     begin
-                        let buffer = gen_buffer.(current_buffer) in
-                        if is_entering_imag then
-                           process_float_digit buffer true
-                        else
-                           process_float_digit buffer false
-                     end
-            end
+         else if key = bindings.enter then
+            self#handle_enter ()
+         else if key = bindings.begin_int then
+            self#handle_begin_int ()
+         else if key = bindings.begin_complex then
+            self#handle_begin_complex ()
+         else if key = bindings.begin_matrix then
+            self#handle_begin_matrix ()
+         else if key = bindings.separator then
+            self#handle_separator ()
+         else if key = bindings.backspace then
+            self#handle_backspace ()
+         else if key = bindings.scientific_notation then
+            self#handle_scientific_notation ()
+         else if key = bindings.neg then
+            self#handle_neg ()
+         else if key = bindings.add then
+            self#handle_add ()
+         else if key = bindings.sub then
+            self#handle_sub ()
+         else if key = bindings.mult then
+            self#handle_mult ()
+         else if key = bindings.div then
+            self#handle_div ()
+         else if key = bindings.drop then
+            self#handle_drop ()
+         else if key = bindings.swap then
+            self#handle_swap ()
+         else if key = bindings.clear then
+            self#handle_clear ()
+         else (* handle entry of digits *)
+            self#handle_digit key
       done
 
 
-end;;
+
+
+   (* handle an 'enter' keypress *)
+   method private handle_enter () =
+      try
+         (if has_entry then
+            self#push_entry ()
+         else
+            calc#dup ());
+         self#draw_stack ()
+      with Invalid_argument error_msg ->
+         self#draw_error error_msg
+
+
+   (* handle a 'begin_int' keypress *)
+   method private handle_begin_int () =
+      if entry_type = FloatEntry then
+         (entry_type <- IntEntry;
+         int_entry_buffer <- "";
+         self#draw_entry ())
+      else
+         () 
+
+
+   (* handle a 'begin_complex' keypress *)
+   method private handle_begin_complex () =
+      has_entry <- true;
+      match entry_type with
+      |FloatEntry ->
+         (entry_type <- ComplexEntry;
+         self#draw_entry ())
+      |FloatMatrixEntry ->
+         (entry_type <- ComplexMatrixEntry;
+         self#draw_entry ())
+      |_ ->
+         ()
+
+
+   (* handle a 'begin_matrix' keypress *)
+   method private handle_begin_matrix () =
+      has_entry <- true;
+      match entry_type with
+      |FloatEntry ->
+         (entry_type <- FloatMatrixEntry;
+         self#draw_entry ())
+      |ComplexEntry ->
+         (entry_type <- ComplexMatrixEntry;
+         self#draw_entry ())
+      |FloatMatrixEntry ->
+         if not has_multiple_rows then
+            (has_multiple_rows <- true;
+            current_buffer <- succ current_buffer;
+            matrix_cols <- current_buffer;
+            is_entering_exponent <- false;
+            self#draw_entry ())
+         else if (succ current_buffer) mod matrix_cols = 0 then
+            (current_buffer <- succ current_buffer;
+            is_entering_exponent <- false;
+            (*FIXME: any other items to reset here?*)
+            self#draw_entry ())
+         else
+            ()
+      |ComplexMatrixEntry ->
+         if not has_multiple_rows then
+            (has_multiple_rows <- true;
+            current_buffer <- succ current_buffer;
+            matrix_cols <- current_buffer;
+            is_entering_exponent <- false;
+            is_entering_imag <- false;
+            self#draw_entry ())
+         else if (succ current_buffer) mod matrix_cols = 0 then
+            (current_buffer <- succ current_buffer;
+            is_entering_exponent <- false;
+            is_entering_imag <- false;
+            (*FIXME: any other items to reset here?*)
+            self#draw_entry ())
+         else
+            ()
+      |_ ->
+         ()
+      
+
+   (* handle a 'separator' keypress *)
+   method private handle_separator () =
+      match entry_type with
+      |ComplexEntry ->
+         if not is_entering_imag then
+            (is_entering_imag <- true;
+            is_entering_exponent <- false;
+            self#draw_entry ())
+         else
+            ()
+      |FloatMatrixEntry ->
+         if current_buffer < pred max_matrix_size then
+            (current_buffer <- succ current_buffer;
+            is_entering_exponent <- false;
+            (if not has_multiple_rows then
+               matrix_cols <- succ current_buffer
+            else
+               ());
+            (*FIXME: any other items to reset here?*)
+            self#draw_entry ())
+         else
+            ()
+      |ComplexMatrixEntry ->
+         if is_entering_imag then
+            if current_buffer < pred max_matrix_size then
+               (current_buffer <- succ current_buffer;
+               is_entering_exponent <- false;
+               is_entering_imag <- false;
+               (if not has_multiple_rows then
+                  matrix_cols <- succ current_buffer
+               else
+                  ());
+               (*FIXME: any other items to reset here?*)
+               self#draw_entry ())
+            else
+               ()
+         else
+            (is_entering_imag <- true;
+            is_entering_exponent <- false;
+            self#draw_entry ())
+      |_ ->
+         ()
+
+
+   (* handle a 'backspace' keypress *)
+   method private handle_backspace () =
+      let buffer = gen_buffer.(current_buffer) in
+      match entry_type with
+      |IntEntry ->
+         (if is_entering_base then
+            (is_entering_base <- false;
+            int_base_string <- "")
+         else if String.length int_entry_buffer > 0 then
+            (let len = String.length int_entry_buffer in
+            int_entry_buffer <- String.sub int_entry_buffer 0 (len - 1))
+         else
+            (entry_type <- FloatEntry;
+            has_entry <- false));
+         self#draw_entry ()
+      |FloatEntry ->
+         if is_entering_exponent then
+            if String.length buffer.re_exponent > 0 then
+               (let len = String.length buffer.re_exponent in
+               buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
+               self#draw_entry ())
+            else
+               (is_entering_exponent <- false;
+               self#draw_entry ())
+         else if String.length buffer.re_mantissa > 0 then
+               (let len = String.length buffer.re_mantissa in
+               buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
+               self#draw_entry ())
+         else
+            has_entry <- false
+      |ComplexEntry ->
+         if is_entering_imag then
+            if is_entering_exponent then
+               if String.length buffer.im_exponent > 0 then
+                  (let len = String.length buffer.im_exponent in
+                  buffer.im_exponent <- String.sub buffer.im_exponent 0 (len - 1);
+                  self#draw_entry ())
+               else
+                  (is_entering_exponent <- false;
+                  self#draw_entry ())
+            else if String.length buffer.im_mantissa > 0 then
+                  (let len = String.length buffer.im_mantissa in
+                  buffer.im_mantissa <- String.sub buffer.im_mantissa 0 (len - 1);
+                  self#draw_entry ())
+            else
+               begin
+                  is_entering_imag <- false;
+                  (if String.length buffer.re_exponent > 0 then
+                     is_entering_exponent <- true
+                  else
+                     ());
+                  self#draw_entry ()
+               end
+         (* not entering imag *)
+         else if is_entering_exponent then
+            if String.length buffer.re_exponent > 0 then
+               (let len = String.length buffer.re_exponent in
+               buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
+               self#draw_entry ())
+            else
+               (is_entering_exponent <- false;
+               self#draw_entry ())
+         else if String.length buffer.re_mantissa > 0 then
+               (let len = String.length buffer.re_mantissa in
+               buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
+               self#draw_entry ())
+         else
+            (entry_type <- FloatEntry;
+            has_entry <- false;
+            self#draw_entry ())
+      |FloatMatrixEntry ->
+         if is_entering_exponent then
+            if String.length buffer.re_exponent > 0 then
+               (let len = String.length buffer.re_exponent in
+               buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
+               self#draw_entry ())
+            else
+               (is_entering_exponent <- false;
+               self#draw_entry ())
+         else if String.length buffer.re_mantissa > 0 then
+               (let len = String.length buffer.re_mantissa in
+               buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
+               self#draw_entry ())
+         else if current_buffer > 0 then
+            begin
+               current_buffer <- pred current_buffer;
+               (if String.length gen_buffer.(current_buffer).re_exponent > 0 then
+                  is_entering_exponent <- true
+               else
+                  ());
+               (if succ current_buffer <= matrix_cols then
+                  (matrix_cols <- succ current_buffer;
+                  has_multiple_rows <- false)
+               else
+                  ());
+               self#draw_entry ()
+            end
+         else
+            (entry_type <- FloatEntry;
+            has_entry <- false;
+            self#draw_entry ())
+      |ComplexMatrixEntry ->
+         if is_entering_imag then
+            if is_entering_exponent then
+               if String.length buffer.im_exponent > 0 then
+                  (let len = String.length buffer.im_exponent in
+                  buffer.im_exponent <- String.sub buffer.im_exponent 0 (len - 1);
+                  self#draw_entry ())
+               else
+                  (is_entering_exponent <- false;
+                  self#draw_entry ())
+            else if String.length buffer.im_mantissa > 0 then
+                  (let len = String.length buffer.im_mantissa in
+                  buffer.im_mantissa <- String.sub buffer.im_mantissa 0 (len - 1);
+                  self#draw_entry ())
+            else
+               begin
+                  is_entering_imag <- false;
+                  (if String.length buffer.re_exponent > 0 then
+                     is_entering_exponent <- true
+                  else
+                     () );
+                  self#draw_entry ()
+               end
+         (* not entering imag *)
+         else if is_entering_exponent then
+            if String.length buffer.re_exponent > 0 then
+               (let len = String.length buffer.re_exponent in
+               buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
+               self#draw_entry ())
+            else
+               (is_entering_exponent <- false;
+               self#draw_entry ())
+         else if String.length buffer.re_mantissa > 0 then
+               (let len = String.length buffer.re_mantissa in
+               buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
+               self#draw_entry ())
+         else if current_buffer > 0 then
+            begin
+               current_buffer <- pred current_buffer;
+               is_entering_imag <- true;
+               (if String.length gen_buffer.(current_buffer).im_exponent > 0 then
+                  is_entering_exponent <- true
+               else
+                  ());
+               (if succ current_buffer <= matrix_cols then
+                  (matrix_cols <- succ current_buffer;
+                  has_multiple_rows <- false)
+               else
+                  ());
+               self#draw_entry ();
+            end
+         else
+            entry_type <- FloatEntry;
+            has_entry <- false;
+            self#draw_entry ()
+
+
+   (* handle a 'scientific_notation' (or base change) keypress *)
+   method private handle_scientific_notation () =
+      match entry_type with 
+      |IntEntry ->
+         if String.length int_entry_buffer > 0 then
+            (is_entering_base <- true;
+            self#draw_entry ())
+         else
+            ()
+      |FloatEntry | FloatMatrixEntry ->
+         if String.length gen_buffer.(current_buffer).re_mantissa > 0 then
+            (is_entering_exponent <- true;
+            self#draw_entry ())
+         else
+            ()
+      |ComplexEntry | ComplexMatrixEntry ->
+         if is_entering_imag then
+            if String.length gen_buffer.(current_buffer).im_mantissa > 0 then
+               (is_entering_exponent <- true;
+               self#draw_entry ())
+            else
+               ()
+         else
+            if String.length gen_buffer.(0).re_mantissa > 0 then
+               (is_entering_exponent <- true;
+               self#draw_entry ())
+            else
+               ()
+
+
+   (* handle a 'neg' keypress *)
+   method private handle_neg () =
+      if has_entry then
+         match entry_type with
+         |IntEntry ->
+            (begin
+               match int_entry_buffer.[0] with
+               |'-' -> int_entry_buffer.[0] <- '+'
+               |'+' -> int_entry_buffer.[0] <- '-'
+               |_ -> int_entry_buffer <- "-" ^ int_entry_buffer
+            end;
+            self#draw_entry ())
+         |FloatEntry | FloatMatrixEntry ->
+            begin
+               let buffer = gen_buffer.(current_buffer) in
+               if is_entering_exponent then
+                  if String.length buffer.re_exponent > 0 then
+                     match buffer.re_exponent.[0] with
+                     |'-' -> buffer.re_exponent.[0] <- '+'
+                     |'+' -> buffer.re_exponent.[0] <- '-'
+                     |_ -> buffer.re_exponent <- "-" ^ buffer.re_exponent
+                  else
+                     ()
+               else
+                  match buffer.re_mantissa.[0] with
+                  |'-' -> buffer.re_mantissa.[0] <- '+'
+                  |'+' -> buffer.re_mantissa.[0] <- '-'
+                  |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
+            end;
+            self#draw_entry ()
+         |ComplexEntry | ComplexMatrixEntry ->
+            begin
+               let buffer = gen_buffer.(current_buffer) in
+               let mantissa = 
+                  if is_entering_imag then
+                     buffer.im_mantissa
+                  else
+                     buffer.re_mantissa and
+               exponent = 
+                  if is_entering_imag then
+                     buffer.im_exponent
+                  else
+                     buffer.re_exponent
+               in
+               if is_entering_exponent then
+                  if String.length exponent > 0 then
+                     match exponent.[0] with
+                     |'-' -> exponent.[0] <- '+'
+                     |'+' -> exponent.[0] <- '-'
+                     |_ -> 
+                        if is_entering_imag then
+                           buffer.im_exponent <- "-" ^ buffer.im_exponent
+                        else
+                           buffer.re_exponent <- "-" ^ buffer.re_exponent
+                  else
+                     ()
+               else
+                  if String.length mantissa > 0 then
+                     match mantissa.[0] with
+                     |'-' -> mantissa.[0] <- '+'
+                     |'+' -> mantissa.[0] <- '-'
+                     |_ -> 
+                        if is_entering_imag then
+                           buffer.im_mantissa <- "-" ^ buffer.im_mantissa
+                        else
+                           buffer.re_mantissa <- "-" ^ buffer.re_mantissa
+                  else
+                     ()
+            end;
+            self#draw_entry ()
+      else
+         try calc#neg (); self#draw_stack ()
+         with Invalid_argument error_msg ->
+            self#draw_error error_msg
+
+
+   (* handle an 'add' keypress *)
+   method private handle_add () =
+      try 
+         (if has_entry then
+            self#push_entry ()
+         else
+            ());
+         calc#add (); 
+         self#draw_stack ()
+      with 
+         Invalid_argument error_msg ->
+            self#draw_error error_msg
+
+
+   (* handle a 'sub' keypress *)
+   method private handle_sub () =
+      try 
+         (if has_entry then
+            self#push_entry ()
+         else
+            ());
+         calc#sub (); 
+         self#draw_stack ()
+      with 
+         Invalid_argument error_msg ->
+            self#draw_error error_msg
+
+
+   (* handle a 'mult' keypress *)
+   method private handle_mult () =
+      try 
+         (if has_entry then
+            self#push_entry ()
+         else
+            ());
+         calc#mult (); 
+         self#draw_stack ()
+      with 
+         Invalid_argument error_msg ->
+            self#draw_error error_msg
+
+
+   (* handle a 'div' keypress *)
+   method private handle_div () =
+      try 
+         (if has_entry then
+            self#push_entry ()
+         else
+            ());
+         calc#div (); 
+         self#draw_stack ()
+      with 
+         Invalid_argument error_msg ->
+            self#draw_error error_msg
+
+
+   (* handle a 'drop' keypress *)
+   method private handle_drop () =
+      try calc#drop (); self#draw_stack ()
+      with Invalid_argument error_msg ->
+         self#draw_error error_msg
+
+         
+   (* handle a 'swap' keypress *)
+   method private handle_swap () =
+      try calc#swap (); self#draw_stack ()
+      with Invalid_argument error_msg ->
+         self#draw_error error_msg
+
+
+   (* handle a 'clear' keypress *)
+   method private handle_clear () =
+      try calc#clear (); self#draw_stack ()
+      with Invalid_argument error_msg ->
+         self#draw_error error_msg
+
+
+   (* handle entry of a digit *)
+   method private handle_digit key =
+      let process_float_digit buffer is_imag =
+         let exponent_buffer =
+            if is_imag then buffer.im_exponent
+            else buffer.re_exponent
+         and mantissa_buffer =
+            if is_imag then buffer.im_mantissa
+            else buffer.re_mantissa
+         and has_dot =
+            if is_imag then buffer.im_has_dot
+            else buffer.re_has_dot
+         in
+         begin
+            if is_entering_exponent then
+               let explen =
+                  (if String.length exponent_buffer > 0 then
+                     match exponent_buffer.[0] with
+                     |'-' | '+'-> 4
+                     |_ -> 3
+                  else
+                     3)
+               in
+               if String.length exponent_buffer < explen then
+                  let digits = "0123456789" in
+                  try
+                     let c = char_of_int key in
+                     if String.contains digits c then
+                        (* need this hack to be able to perform
+                         * the mutable field assignment... *)
+                        (if is_imag then
+                           buffer.im_exponent <- exponent_buffer ^
+                           (String.make 1 c)
+                        else
+                           buffer.re_exponent <- exponent_buffer ^
+                           (String.make 1 c);
+                        self#draw_entry ())
+                     else
+                        ()
+                  with Invalid_argument "char_of_int" ->
+                     ()
+               else
+                  ()
+            else if String.length mantissa_buffer < 17 then
+               let digits =
+                  if has_dot then "0123456789"
+                  else "0123456789."
+               in
+               try
+                  let c = char_of_int key in
+                  if String.contains digits c then
+                     begin
+                        (if is_imag then
+                           (buffer.im_mantissa <- mantissa_buffer ^
+                           (String.make 1 c);
+                           if c = '.' then buffer.im_has_dot <- true
+                           else ())
+                        else
+                           (buffer.re_mantissa <- mantissa_buffer ^
+                           (String.make 1 c);
+                           if c = '.' then buffer.re_has_dot <- true
+                           else ()));
+                        has_entry <- true;
+                        self#draw_entry ()
+                     end
+                  else
+                     ()
+               with Invalid_argument "char_of_int" ->
+                  ()
+            else
+               ()
+         end
+      in
+      match entry_type with
+      |IntEntry ->
+         begin
+            if is_entering_base then
+               let base_chars = "bodh" in
+               try
+                  let c = char_of_int key in
+                  if String.contains base_chars c then
+                     (int_base_string <- String.make 1 c;
+                     self#draw_entry ())
+                  else
+                     ()
+               with Invalid_argument "char_of_int" ->
+                  ()
+            else
+               let digits = "0123456789abcdefABCDEF" in
+               try
+                  let c = char_of_int key in
+                  if String.contains digits c then
+                     (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
+                     has_entry <- true;
+                     self#draw_entry ())
+                  else
+                     ()
+               with Invalid_argument "char_of_int" ->
+                  ()
+         end
+      |FloatEntry | FloatMatrixEntry ->
+         let buffer = gen_buffer.(current_buffer) in
+         process_float_digit buffer false
+      |ComplexEntry | ComplexMatrixEntry ->
+         let buffer = gen_buffer.(current_buffer) in
+         if is_entering_imag then
+            process_float_digit buffer true
+         else
+            process_float_digit buffer false
+
+
+end;;  (* class rpc_interface *)
 
 
 
