@@ -1222,14 +1222,45 @@ let handle_quit (iface : interface_state_t) =
 (* HANDLERS FOR STANDARD CALCULATOR FUNCTIONS AND COMMANDS             *)
 (***********************************************************************)
 
+
+(* register an autobinding.
+ * The autobindings are stored both in an array for quick ordered
+ * access, and in the standard keybinding hashtables. *)
+let register_autobinding (iface : interface_state_t) (ff : function_operation)=
+   (* find oldest autobinding *)
+   let oldest     = ref 0 in
+   let oldest_age = ref (-1) in
+   for i = 0 to pred (Array.length !Rcfile.autobind_keys) do
+      let (key, bound_f, age) = !Rcfile.autobind_keys.(i) in
+      if age > !oldest_age then begin
+         oldest     := i;
+         oldest_age := age
+      end else
+         ();
+      (* make all autobindings "older" *)
+      !Rcfile.autobind_keys.(i) <- (key, bound_f, (succ age))
+   done;
+   if Array.length !Rcfile.autobind_keys > 0 then begin
+      let (key, bound_f, age) = !Rcfile.autobind_keys.(!oldest) in
+      begin match bound_f with
+      |None         -> ()
+      |Some func_op -> Rcfile.remove_binding key (Function func_op)
+      end;
+      Rcfile.register_binding key (Function ff);
+      !Rcfile.autobind_keys.(!oldest) <- (key, Some ff, 0) 
+   end else
+      ()
+
+
+
 (* handle a call to a function (which first pushes the item in the
  * entry buffer)  *)
 let handle_function_call (iface : interface_state_t) calc_function =
    try 
-      (if iface.has_entry then
+      if iface.has_entry then
          push_entry iface
       else
-         ());
+         ();
       calc_function ();
       draw_update_stack iface
    with 
@@ -1283,6 +1314,12 @@ let handle_interr_function_call (iface : interface_state_t) calc_function =
 
 
 let process_function (iface : interface_state_t) ff =
+   (* check whether ff should be autobound *)
+   begin try
+      let _ = Rcfile.key_of_function (Function ff) in ()
+   with Not_found ->
+      register_autobinding iface ff
+   end;
    begin match ff with
    |Add ->
       handle_function_call iface iface.calc#add

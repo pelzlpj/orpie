@@ -56,6 +56,9 @@ let editor = ref "vi";;
 let hide_help = ref false;;
 (* Whether or not to conserve memory in favor of faster display *)
 let conserve_memory = ref false;;
+(* Autobinding keys *)
+let autobind_keys_list : (string * function_operation option * int) list ref = ref [];;
+let autobind_keys = ref (Array.of_list [("", None, 0)]);;
 
 
 let function_of_key key =
@@ -257,6 +260,39 @@ let register_binding key_string op =
 
 
 
+(* Remove a key binding. *)
+let remove_binding key_string op =
+   let remove_entries k k_string =
+      match op with
+      |Function _ ->
+         Hashtbl.remove table_key_function k;
+         Hashtbl.remove table_function_key op
+      |Command _ ->
+         Hashtbl.remove table_key_command k;
+         Hashtbl.remove table_command_key op
+      |Edit _ ->
+         Hashtbl.remove table_key_edit k;
+         Hashtbl.remove table_edit_key op
+      |Browse _ ->
+         Hashtbl.remove table_key_browse k;
+         Hashtbl.remove table_browse_key op
+      |Extend _ ->
+         Hashtbl.remove table_key_extended k;
+         Hashtbl.remove table_extended_key op
+      |IntEdit _ ->
+         Hashtbl.remove table_key_intedit k;
+         Hashtbl.remove table_intedit_key op
+      |VarEdit _ ->
+         Hashtbl.remove table_key_varedit k;
+         Hashtbl.remove table_varedit_key op
+   in
+   (* given a string that represents a character, find the associated
+    * curses chtype *)
+   let k, string_rep = decode_single_key_string key_string in
+   remove_entries k string_rep
+
+
+
 (* Register a macro.  This parses the macro string and divides it into multiple
  * whitespace-separated keypresses, then stores the list of keypresses in the
  * appropriate hashtable. *)
@@ -436,6 +472,26 @@ let parse_line line_stream =
       | [< >] ->
          config_failwith "Expected a key string after keyword \"bind\""
       end
+   | [< 'Kwd "autobind" >] ->
+      begin match line_stream with parser
+      | [< 'String k >] -> 
+         autobind_keys_list := (k, None, 1) :: !autobind_keys_list
+      | [< 'Ident "\\" >] ->
+         begin match line_stream with parser
+         | [< 'Int octal_int >] ->
+            begin
+               try
+                  let octal_digits = "0o" ^ (string_of_int octal_int) in
+                  autobind_keys_list := (octal_digits, None, 1) :: !autobind_keys_list
+               with 
+                  (Failure "int_of_string") -> config_failwith "Expected octal digits after \"\\\""
+            end
+         | [< >]  ->
+            config_failwith "Expected octal digits after \"\\\""
+         end
+      | [< >] ->
+         config_failwith "Expected a key string after keyword \"bind\""
+      end
    | [< 'Kwd "macro" >] ->
       begin match line_stream with parser
       | [< 'String key >] ->
@@ -535,6 +591,27 @@ let parse_line line_stream =
       config_failwith "Expected a keyword at start of line";;
 
 
+(* obtain a valid autobinding array, eliminating duplicate keys *)
+let generate_autobind_array () =
+   let candidates = Array.of_list (List.rev !autobind_keys_list) in
+   let temp_arr = Array.make (Array.length candidates) ("", None, 0) in
+   let pointer = ref 0 in
+   for i = 0 to pred (Array.length candidates) do
+      let (c_ss, c_bound_f, c_age) = candidates.(i) in
+      let matched = ref false in
+      for j = 0 to !pointer do
+         let (t_ss, t_bound_f, t_age) = temp_arr.(j) in
+         if c_ss = t_ss then matched := true else ()
+      done;
+      if not !matched then begin
+         temp_arr.(!pointer) <- candidates.(i);
+         pointer := succ !pointer
+      end else
+         ()
+   done;
+   autobind_keys := Array.sub temp_arr 0 !pointer
+
+
 
 (* try opening the rc file, first looking at $HOME/.orpierc, 
  * then looking at $PREFIX/etc/orpierc *)
@@ -561,7 +638,7 @@ let open_rcfile () =
 
 let process_rcfile () =
    let line_lexer line = 
-      make_lexer ["bind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
+      make_lexer ["bind"; "autobind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
    let config_stream, rcfile_filename = open_rcfile () in
@@ -589,9 +666,11 @@ let process_rcfile () =
                   !line_num rcfile_filename)
 
       done
-   with
-      End_of_file ->
-         close_in config_stream
+   with End_of_file ->
+      begin
+         close_in config_stream;
+         generate_autobind_array ()
+      end
 
 
 

@@ -93,6 +93,16 @@ bind "<return>" variable_enter
 bind "<backspace>" variable_backspace
 bind "<tab>" variable_complete
 
+# autobound keys
+autobind "<f5>"
+autobind "<f6>"
+autobind "<f7>"
+autobind "<f8>"
+autobind "<f9>"
+autobind "<f10>"
+autobind "<f11>"
+autobind "<f12>"
+
 # extended command abbreviations
 # these should be given in the desired order of matching precedence
 abbrev "inv"     function_inv
@@ -190,14 +200,6 @@ macro "<f1>" "@ r 0 1 <return>"
 macro "<f2>" "@ r 0 2 <return>"
 macro "<f3>" "@ r 0 3 <return>"
 macro "<f4>" "@ r 0 4 <return>"
-macro "<f5>" "@ r 0 5 <return>"
-macro "<f6>" "@ r 0 6 <return>"
-macro "<f7>" "@ r 0 7 <return>"
-macro "<f8>" "@ r 0 8 <return>"
-macro "<f9>" "@ r 0 9 <return>"
-macro "<f10>" "@ r 1 0 <return>"
-macro "<f11>" "@ r 1 1 <return>"
-macro "<f12>" "@ r 1 2 <return>"
 
 
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  
