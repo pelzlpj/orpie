@@ -15,9 +15,11 @@ Potential improvements for rpc2:
    * arbitrary precision rationals (is this useful?)
 
    * separate threads for GUI and calc, so computations
-     can be interrupted
+     can be interrupted (useful?)
 
    * slightly improved UI
+
+   * better error messages
 
 ------------------------------------------------------------------------
 

@@ -36,16 +36,21 @@ type rpc_interface_screen = {stdscr:window; lines:int; cols:int;
    entry_win:window; ew_lines:int; ew_cols:int};;
 
 type rpc_interface_help_mode = | Standard | Extended;;
+type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry 
+                               | FloatMatrixEntry | ComplexMatrixEntry;;
+
 
 
 class rpc_interface (c : rpc_calc) (std : rpc_interface_screen) =
 object(self)
    val version = "0.10"
    val calc = c
-   val mutable scr = std
-   val mutable stack_bottom_row = 1
-   val mutable help_top_row = 1
-   val mutable help_mode = Extended
+   val mutable scr = std                      (* curses screen with two or three subwindows *)
+   val mutable stack_bottom_row = 1           (* controls what portion of the stack is viewable *)
+   val mutable help_mode = Extended           (* controls the mode of context-sensitive help *)
+   val mutable is_extended_entry = false      (* is the current entry "extended" or not? *)
+   val mutable entry_type = FloatEntry        (* the current type of data being entered *)
+   val mutable int_entry_buffer = ""          (* holds characters entered for int data type *)
 
 
    method run () =
@@ -66,8 +71,8 @@ object(self)
          {re=0.2; im=4.0}; {re=(-3.0); im=10.0}; {re=(-14.0); im=0.0} |] 2 2);
       self#draw_stack ();
       self#draw_help ();
-      let k = getch () in
-         Printf.printf "%d\n" k
+      self#draw_entry ();
+      self#do_main_loop ()
         
 
    (* display the stack, where the bottom line of the display
@@ -88,6 +93,30 @@ object(self)
             assert (mvwaddstr scr.stack_win (scr.sw_lines - line) 0 line_string)
       done;
       assert (wrefresh scr.stack_win)
+
+
+
+   (* display the entry area *)
+   method draw_entry () =
+      assert(mvwaddstr scr.entry_win 0 0 (String.make scr.ew_cols '-'));
+      let draw_entry_string str =
+         let len_str = String.length str in
+         begin
+            if len_str > scr.ew_cols - 1 then
+               let trunc_str = String.sub str (len_str - scr.ew_cols + 5) (scr.ew_cols - 5) in
+               assert (mvwaddstr scr.entry_win 1 0 ("... " ^ trunc_str))
+            else
+               assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str - 1) str)
+         end;
+         assert (wrefresh scr.entry_win)
+      in
+      match entry_type with
+      |IntEntry ->
+         let s = "# " ^ int_entry_buffer in
+         draw_entry_string s
+      |_ ->
+         ();
+
 
 
    (* display the help window *)
@@ -162,9 +191,39 @@ object(self)
                assert (mvwaddstr win 17 1 "Miscellaneous:");
                assert (mvwaddstr win 18 2 "pi   undo  view");
                assert (mvwaddstr win 20 1 "<Backspace> : exit extended entry");
-         end;
+               assert (wrefresh win)
+         end
       |None ->
          ()
+
+
+   (* accept and process input *)
+   method do_main_loop () =
+      while true do
+         let key = getch () in
+         if is_extended_entry then
+            (* do something here *)
+            ()
+         else (
+            match char_of_int key with
+            |'#' ->
+               Printf.fprintf stdout "key = %d\n" key;
+               flush stdout;
+               if entry_type = FloatEntry then
+                  (entry_type <- IntEntry;
+                  int_entry_buffer <- "";
+                  self#draw_entry ())
+               else
+                  ()
+            |c ->
+               let digits = "0123456789abcdefABCDEF" in
+               if String.contains digits c then
+                  (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
+                  self#draw_entry ())
+               else
+                  ()
+         )
+      done
 
 
 end;;
