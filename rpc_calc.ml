@@ -49,6 +49,18 @@ class rpc_calc =
       method mode_polar () =
          modes <- {angle = modes.angle; base = modes.base; complex = Polar}
 
+      method mode_bin () =
+         modes <- {angle = modes.angle; base = Bin; complex = modes.complex}
+
+      method mode_oct () =
+         modes <- {angle = modes.angle; base = Oct; complex = modes.complex}
+
+      method mode_dec () =
+         modes <- {angle = modes.angle; base = Dec; complex = modes.complex}
+
+      method mode_hex () =
+         modes <- {angle = modes.angle; base = Hex; complex = modes.complex}
+
       method add () =
          Add.add stack self#backup
 

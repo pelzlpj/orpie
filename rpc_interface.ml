@@ -50,7 +50,8 @@ type complex_entry_element =
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
-    "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n");;
+    "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n" ^
+    "bin\noct\ndec\nhex");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -91,6 +92,10 @@ Hashtbl.add command_abbrev_table "rad" (Command SetRadians);;
 Hashtbl.add command_abbrev_table "deg" (Command SetDegrees);;
 Hashtbl.add command_abbrev_table "rect" (Command SetRect);;
 Hashtbl.add command_abbrev_table "polar" (Command SetPolar);;
+Hashtbl.add command_abbrev_table "bin" (Command SetBin);;
+Hashtbl.add command_abbrev_table "oct" (Command SetOct);;
+Hashtbl.add command_abbrev_table "dec" (Command SetDec);;
+Hashtbl.add command_abbrev_table "hex" (Command SetHex);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -699,6 +704,22 @@ object(self)
             self#draw_stack ()
          |SetPolar ->
             self#handle_command_call calc#mode_polar;
+            self#draw_help ();
+            self#draw_stack ()
+         |SetBin ->
+            self#handle_command_call calc#mode_bin;
+            self#draw_help ();
+            self#draw_stack ()
+         |SetOct ->
+            self#handle_command_call calc#mode_oct;
+            self#draw_help ();
+            self#draw_stack ()
+         |SetDec ->
+            self#handle_command_call calc#mode_dec;
+            self#draw_help ();
+            self#draw_stack ()
+         |SetHex ->
+            self#handle_command_call calc#mode_hex;
             self#draw_help ();
             self#draw_stack ()
 

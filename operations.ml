@@ -10,7 +10,8 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Re | Im;;
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit
-                          | SetRadians | SetDegrees | SetRect | SetPolar;;
+                          | SetRadians | SetDegrees | SetRect | SetPolar
+                          | SetBin | SetOct | SetDec | SetHex;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;
