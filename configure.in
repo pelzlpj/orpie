@@ -134,7 +134,6 @@ fi
 LIBS="$gsl_save_libs"
 GSL_LIB="-lgsl -lgslcblas"
 
-
 # substitutions to perform
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
@@ -149,7 +148,7 @@ AC_SUBST(GSL_LIB)
 AC_SUBST(DEFS)
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile curses/Makefile gsl/Makefile)
+AC_OUTPUT(Makefile curses/Makefile gsl/Makefile install.ml)
 chmod a-w Makefile
 chmod a-w curses/Makefile
 chmod a-w gsl/Makefile

@@ -56,8 +56,8 @@ all: $(OCAMLBEST)
 # bytecode and native-code compilation
 ######################################
 
-CMO = big_int_str.cmo utility.cmo rcfile.cmo rpc_stack.cmo add.cmo sub.cmo \
-		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
+CMO = big_int_str.cmo utility.cmo install.cmo rcfile.cmo rpc_stack.cmo add.cmo \
+		sub.cmo mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
 		operations.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma
@@ -126,6 +126,7 @@ install-indep:
 	mkdir -p $(BINDIR)
 	mkdir -p $(MANDIR)/man1
 	cp -f $(NAME).1 $(MANDIR)/man1
+	install -m 644 orpierc $(prefix)/etc
 
 install: install-indep
 	cp -f $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
@@ -239,18 +240,20 @@ configure: configure.in
 # clean
 #######
 
-clean::
+partly-clean::
 	rm -f *.cm[iox] *.o *~
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
+
+clean:: partly-clean
 	cd curses && $(MAKE) clean
 	cd gsl && $(MAKE) clean
 
 dist-clean distclean:: clean
 	cd curses && $(MAKE) distclean
 	cd gsl && $(MAKE) distclean
-	rm -f Makefile config.cache config.log config.status
+	rm -f Makefile config.cache config.log config.status install.ml
 
 # depend
 ########

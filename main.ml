@@ -113,7 +113,7 @@ try
    Interface_main.run iface
 with error ->
    endwin ();
-   Printf.fprintf stderr "Caught error at toplevel: %s\n" (Printexc.to_string error);;
+   Printf.fprintf stderr "Caught error at toplevel:\n%s\n" (Printexc.to_string error);;
 
 
 (* For some reason this call fails if it is moved to rpc_interface... *)

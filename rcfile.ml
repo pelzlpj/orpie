@@ -445,19 +445,30 @@ let parse_line line_stream =
       config_failwith "Expected a keyword at start of line";;
 
 
+(* try opening the rc file, first looking at $HOME/.orpierc, 
+ * then looking at $PREFIX/etc/orpierc *)
+let open_rcfile () =
+   let home_rcfile =
+      let homedir = Unix.getenv "HOME" in
+      homedir ^ "/.orpierc"
+   in
+   let prefix_rcfile = Install.prefix ^ "/etc/orpierc" in
+   try open_in home_rcfile
+   with Sys_error error_str ->
+      begin
+         try open_in prefix_rcfile
+         with Sys_error error_str -> failwith 
+         ("Could not find configuration file \"" ^ home_rcfile ^ "\" or \"" ^ 
+         prefix_rcfile ^ "\" .")
+      end
+
 
 let process_rcfile () =
    let line_lexer line = 
       make_lexer ["bind"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
-   let config_stream = 
-      try
-         open_in "orpierc"
-      with
-         Sys_error error_str -> failwith "Could not find configuration file
-         \"orpierc\"."
-   in
+   let config_stream = open_rcfile () in
    let line_num = ref 0 in
    try
       while true do
