@@ -39,8 +39,8 @@ GSL_LIB    = @GSL_LIB@
 INCLUDES = -I ./curses -I ./gsl
 BFLAGS   = -pp camlp4o -g $(INCLUDES)
 OFLAGS   = -pp camlp4o $(INCLUDES)
-BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB)'
-OLFLAGS  = -cclib '$(CURSES_LIB) $(GSL_LIB)'
+BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
+OLFLAGS  = -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
 DEPFLAGS = -pp camlp4o
 
 # main target
@@ -97,11 +97,11 @@ $(NAME2).opt: subdirs_opt utility.cmx curses-keys.cmx
 
 # static build seems to require mashing all the C objects into a library
 $(NAME).static-opt: subdirs_opt $(CMX) my-static-libs
-	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB)' -o $@ $(CMXA) \
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
 	curses.cmx $(GSL_CMX) $(CMX)
 
 $(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx my-static-libs
-	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB)' -o $@ $(CMXA) curses.cmx \
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
 	utility.cmx curses-keys.cmx
 
 my-static-libs:
