@@ -166,10 +166,8 @@ AC_SUBST(GSL_LIB)
 AC_SUBST(DEFS)
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile curses/Makefile gsl/Makefile install.ml)
+AC_OUTPUT(Makefile install.ml)
 chmod a-w Makefile
-chmod a-w curses/Makefile
-chmod a-w gsl/Makefile
 
 
 
