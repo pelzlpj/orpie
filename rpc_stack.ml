@@ -326,7 +326,7 @@ class rpc_stack =
                      line := !line ^ "]";
                      !line
                   |RpcVariable s ->
-                     "var: " ^ s
+                     "@ " ^ s
                   end
                in
                make_string stack.(index)
@@ -501,6 +501,8 @@ class rpc_stack =
                   done;
                   line := !line ^ "]";
                   !line
+               |RpcVariable s ->
+                  "@" ^ s
                |_ ->
                   (* fall back on single-line display *)
                   self#get_display_string line_num calc_modes

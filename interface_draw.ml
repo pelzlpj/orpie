@@ -275,7 +275,7 @@ let draw_entry (iface : interface_state_t) =
             ss := !ss ^ "(" ^ temp_re ^ ")]]");
          !ss
       |VarEntry ->
-         "var: " ^ iface.variable_entry_buffer
+         "@ " ^ iface.variable_entry_buffer
    in
    begin match iface.interface_mode with
    |StandardEntryMode ->

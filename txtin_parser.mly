@@ -147,12 +147,16 @@ let decode_matrix mat_rows =
     * in this array. *)
    decode_float_complex_matrix mat
 
+(* convert a floating point string to an RpcFloat *)
+let decode_variable v_str =
+   Rpc_stack.RpcVariable v_str
 %}
 
 
 /* declarations */
 %token <string> INTEGER
 %token <string> FLOAT
+%token <string> VARIABLE
 %token BEGINCOMPLEX
 %token ENDCOMPLEX
 %token SEPARATOR
@@ -201,85 +205,8 @@ data_rad:
    INTEGER 
       { decode_integer $1 }
 
-   | FLOAT
-      { decode_float $1 } 
-
-   | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
-      { decode_complex_rect $2 $4 }
-
-   | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
-      { decode_complex_polar_rad $2 $4 }
-
-   | BEGINMATRIX matrix_rows_rad ENDMATRIX
-      { decode_matrix $2 }
-;
-
-
-matrix_rows_rad:
-   matrix_rows_rad BEGINMATRIX matrix_row_elements_rad ENDMATRIX
-      {$3 :: $1}
-   | /* empty */
-      {[]}
-;
-
-
-matrix_row_elements_rad:
-   matrix_row_elements_rad SEPARATOR FLOAT
-      { (F (float_of_string $3)) :: $1 }
-   | matrix_row_elements_rad SEPARATOR BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
-      { 
-         let f1 = float_of_string $4
-         and f2 = float_of_string $6 in
-         (C {Complex.re = f1; Complex.im = f2}) :: $1
-      }
-   | matrix_row_elements_rad SEPARATOR BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
-      { 
-         let r  = float_of_string $4
-         and th = float_of_string $6 in
-         (C (rect_of_polar_rad r th)) :: $1
-      }
-   | FLOAT
-      { (F (float_of_string $1)) :: [] }
-   | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
-      {
-         let f1 = float_of_string $2
-         and f2 = float_of_string $4 in
-         (C {Complex.re = f1; Complex.im = f2}) :: []
-      }
-   | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
-      {
-         let r  = float_of_string $2
-         and th = float_of_string $4 in
-         (C (rect_of_polar_rad r th)) :: []
-      }
-;
-
-
-
-
-decode_data_rad:
-   datalist_rad EOF 
-      { List.rev $1 }
-;
-
-
-datalist_rad:
-   datalist_rad datagroup_rad
-      { $2 :: $1 }
-   |  /* empty */
-      { [] }
-;
-
-
-datagroup_rad:
-   data_rad
-      { $1 }
-;
-
-
-data_rad:
-   INTEGER 
-      { decode_integer $1 }
+   | VARIABLE
+      { decode_variable $1}
 
    | FLOAT
       { decode_float $1 } 
@@ -362,6 +289,9 @@ datagroup_deg:
 data_deg:
    INTEGER 
       { decode_integer $1 }
+
+   | VARIABLE
+      { decode_variable $1}
 
    | FLOAT
       { decode_float $1 } 

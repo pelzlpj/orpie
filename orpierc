@@ -54,7 +54,7 @@ bind "<return>" command_dup
 bind "u" command_undo
 bind "<up>" command_begin_browsing
 bind "'" command_begin_extended
-bind "\"" command_begin_variable
+bind "@" command_begin_variable
 bind "r" command_toggle_angle_mode
 bind "p" command_toggle_complex_mode
 bind "b" command_cycle_base
@@ -88,7 +88,7 @@ bind "<return>" extended_enter
 bind "<backspace>" extended_backspace
 
 # keys for variable edit mode operations
-bind "\"" variable_cancel
+bind "@" variable_cancel
 bind "<return>" variable_enter
 bind "<backspace>" variable_backspace
 

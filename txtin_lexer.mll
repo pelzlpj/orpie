@@ -30,11 +30,12 @@
 }
 
 (* space, tab, CR, linefeed, vertical tab *)
-let whitespace = [' ' '\010' '\013' '\009' '\012']
-let digit      = ['0'-'9']
-let hex_digit  = ['0'-'9' 'a'-'f' 'A'-'F']
-let base_ident = ['b' 'o' 'd' 'h']
-let sign       = ['-' '+']
+let whitespace    = [' ' '\010' '\013' '\009' '\012']
+let digit         = ['0'-'9']
+let hex_digit     = ['0'-'9' 'a'-'f' 'A'-'F']
+let base_ident    = ['b' 'o' 'd' 'h']
+let sign          = ['-' '+']
+let variable_char = ['a'-'z' 'A'-'Z' '0'-'9' '-' '_']
 
 rule token =
    parse whitespace+ {token lexbuf}
@@ -42,6 +43,11 @@ rule token =
       let s = Lexing.lexeme lexbuf in
       let int_str = String.sub s 1 (String.length s - 1) in
       INTEGER int_str}
+
+   | '@' variable_char+ {
+      let s = Lexing.lexeme lexbuf in
+      let var_str = String.sub s 1 (String.length s - 1) in
+      VARIABLE var_str}
 
    | ((sign? digit+ ('.' digit*)?) | (sign? digit* '.' digit+)) ('e' sign? digit+)? {
       FLOAT (Lexing.lexeme lexbuf)}
