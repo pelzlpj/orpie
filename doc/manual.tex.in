@@ -16,7 +16,7 @@
 \usepackage{fullpage}
 %@% ELSE %@%
 \usepackage{latex2man}
-\setVersion{1.1}
+\setVersion{1.3}
 %@% END-IF %@%
 
 % End preamble
@@ -24,9 +24,9 @@
 
 \begin{document}
 %@% IF LATEX %@%
-\title{Orpie v1.2 User Manual}
+\title{Orpie v1.3 User Manual}
 \author{Paul J. Pelzl}
-\date{June 15, 2004}
+\date{July 18, 2004}
 \maketitle
 
 \begin{center}
@@ -80,7 +80,7 @@ ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}),
 %END LATEX
 %HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
 which is almost certainly already installed on your system.  Finally, Ocaml
-3.06 or higher is required to compile the sources.  You will need the Nums
+3.07 or higher is required to compile the sources.  You will need the Nums
 library that is distributed with Ocaml; at least on Debian, Nums is available
 as separate packages \texttt{libnums-ocaml} and \texttt{libnums-ocaml-dev}.
 
