@@ -28,10 +28,10 @@ exception Not_handled;;
 
 (* help_win is provided as an option, because it may be dropped if
  * the screen width is too small *)
-type screen_t = {stdscr:window; lines:int; cols:int;
-   help_win:window option; hw_lines:int; hw_cols:int;
-   stack_win:window; sw_lines:int; sw_cols:int; 
-   entry_win:window; ew_lines:int; ew_cols:int};;
+type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
+   mutable help_win:window option; mutable hw_lines:int; mutable hw_cols:int;
+   mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
+   mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
 
 type help_mode_t = | Standard | Extended;;
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 

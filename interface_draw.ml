@@ -103,7 +103,7 @@ let draw_stack (iface : interface_state_t) =
       end
    done;
    assert (wnoutrefresh iface.scr.stack_win);
-   assert (move (iface.scr.lines - 1) (iface.scr.ew_cols - 1))
+   assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
 
 let draw_update_stack iface =
@@ -264,7 +264,7 @@ let draw_entry (iface : interface_state_t) =
    |BrowsingMode ->
       ()
    end;
-   assert (move (iface.scr.lines - 1) (iface.scr.ew_cols - 1)) 
+   assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
 
 let draw_update_entry iface =
@@ -483,8 +483,9 @@ let draw_help (iface : interface_state_t) =
       end
    |None ->
       ()
-   end;
-   assert (move (iface.scr.lines - 1) (iface.scr.ew_cols - 1))
+   end; 
+   assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
+
 
 
 (* write an error message to the stack window *)
@@ -506,7 +507,7 @@ let draw_error (iface : interface_state_t) msg =
    let s = String.make iface.scr.sw_cols '-' in
    assert (mvwaddstr iface.scr.stack_win (List.length trunc_error_lines) 0 s);
    assert (wnoutrefresh iface.scr.stack_win);
-   assert (move (iface.scr.lines - 1) (iface.scr.ew_cols - 1))
+   assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 
 
 

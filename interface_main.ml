@@ -31,6 +31,8 @@ open Interface;;
 open Interface_draw;;
 
 
+
+
 (*******************************************************************)
 (* OBTAINING AN OBJECT FROM THE ENTRY BUFFER                       *)
 (*******************************************************************)
@@ -863,7 +865,12 @@ let handle_view (iface : interface_state_t) =
          
 (* refresh the screen *)
 let handle_refresh (iface : interface_state_t) =
-   erase ();
+(*   begin match iface.scr.help_win with
+   |None -> ()
+   |Some win -> werase win
+   end;
+   werase iface.scr.stack_win;
+   werase iface.scr.entry_win; *)
    draw_help iface;
    draw_stack iface;
    draw_update_entry iface
@@ -873,6 +880,8 @@ let handle_refresh (iface : interface_state_t) =
 let handle_about (iface : interface_state_t) =
    draw_about iface;
    let a = getch () in ();
+   erase ();
+   assert (refresh ());
    handle_refresh iface
 
 
@@ -1167,122 +1176,230 @@ let handle_enter_extended (iface : interface_state_t) =
 
 
 
+
+(*******************************************************************)
+(* RESIZE HANDLER                                                  *)
+(*******************************************************************)
+
+
+(* create the (new) windows corresponding to the different areas of the screen *)
+let create_windows screen =
+   let height, width = get_size () in
+   if height >= 24 then 
+      if width >= 80 then
+         (* full two-pane window provided *)
+         let left_win   = Some (newwin (height - 2) 40 0 0) and
+         right_win  = newwin (height - 2) 40 0 40 and
+         bottom_win = newwin 2 80 (height - 2) 0 in
+         {stdscr = screen; lines = height; cols = width; 
+         help_win = left_win; hw_lines = (height - 2); hw_cols = 40;
+         stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
+         entry_win = bottom_win; ew_lines = 2; ew_cols = 80}
+      else if width >= 40 then
+         (* only the stack window is provided *)
+         let right_win = newwin (height - 2) 40 0 0 and
+         bottom_win = newwin 2 width (height - 2) 0 in
+         {stdscr = screen; lines = height; cols = width; 
+         help_win = None; hw_lines = 0; hw_cols = 0;
+         stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
+         entry_win = bottom_win; ew_lines = 2; ew_cols = 40}
+      else
+         (endwin ();
+         failwith "Orpie requires at least a 40 column window.")
+   else
+      (endwin (); 
+      failwith "Orpie requires at least a 24 line window.");;
+
+
+(* resize the various windows to fit the new terminal size *)
+let resize_subwins scr =
+   let height, width = get_size () in
+   if height >= 24 then 
+      if width >= 80 then
+         (* full two-pane window provided *)
+         begin
+            scr.lines <- height;
+            scr.cols <- width;
+            begin match scr.help_win with
+            |None ->
+               scr.help_win <- Some (newwin (height - 2) 40 0 0)
+            |Some win ->
+               assert (wresize win (height - 2) 40);
+            end;
+            scr.hw_lines <- height - 2;
+            scr.hw_cols <- 40;
+            assert (wresize scr.stack_win (height - 2) 40);
+            assert (mvwin scr.stack_win 0 40);
+            scr.sw_lines <- height - 2;
+            scr.sw_cols <- 40;
+            assert (wresize scr.entry_win 2 80);
+            assert (mvwin scr.entry_win (height - 2) 0);
+            scr.ew_lines <- 2;
+            scr.ew_cols <- 80
+         end
+      else if width >= 40 then
+         (* only the stack window is provided *)
+         begin
+            scr.lines <- height;
+            scr.cols <- width;
+            begin match scr.help_win with
+            |None ->
+               ()
+            |Some win ->
+               assert (delwin win);
+               scr.help_win <- None;
+            end;
+            scr.hw_lines <- 0;
+            scr.hw_cols <- 0;
+            assert (wresize scr.stack_win (height - 2) 40);
+            assert (mvwin scr.stack_win 0 0);
+            scr.sw_lines <- height - 2;
+            scr.sw_cols <- 40;
+            assert (wresize scr.entry_win 2 40);
+            assert (mvwin scr.entry_win (height - 2) 0);
+            scr.ew_lines <- 2;
+            scr.ew_cols <- 40
+         end
+      else
+         (endwin ();
+         failwith "Orpie requires at least a 40 column window.")
+   else
+      (endwin (); 
+      failwith "Orpie requires at least a 24 line window.");;
+
+
+(* handle a terminal resize *)
+let handle_resize (iface : interface_state_t) =
+   (* reset ncurses *)
+   endwin ();
+   assert (refresh ());
+   let rows, cols = get_size () in
+   resize_subwins iface.scr;
+   handle_refresh iface;;
+
+
+
+
 (****************************************************************)
 (* MAIN LOOP                                                    *)
 (****************************************************************)
 let do_main_loop (iface : interface_state_t) =
    while iface.run_calc do
-      let key = getch () in
-      match iface.interface_mode with
-      |StandardEntryMode ->
-         begin
-         (* editing operations take priority *)
-         try 
-            let edit_op = Rcfile.edit_of_key key in
-            match edit_op with
-            |Edit ee ->
-               begin
-                  match ee with
-                  |Digit ->
-                     handle_digit iface key
-                  |Enter ->
-                     handle_enter iface
-                  |Backspace ->
-                     handle_backspace iface
-                  |Minus ->
-                     handle_minus iface
-                  |BeginInteger ->
-                     handle_begin_int iface
-                  |BeginComplex ->
-                     handle_begin_complex iface
-                  |BeginMatrix ->
-                     handle_begin_matrix iface
-                  |Separator ->
-                     handle_separator iface
-                  |Angle ->
-                     handle_angle iface
-                  |SciNotBase ->
-                     handle_scientific_notation iface
-               end
-            |_ ->
-               failwith "Non-Edit operation found in Edit Hashtbl"
-         with Not_found | Not_handled ->
-            (* next we try to match on functions *)
+      let key = wgetch iface.scr.entry_win in
+      (* using the ncurses SIGWINCH handler to catch window resize events *)
+      if key = Key.resize then
+         handle_resize iface
+      else
+         match iface.interface_mode with
+         |StandardEntryMode ->
+            begin
+            (* editing operations take priority *)
             try 
-               let function_op = Rcfile.function_of_key key in
-               match function_op with
-               |Function ff ->
-                  process_function iface ff
+               let edit_op = Rcfile.edit_of_key key in
+               match edit_op with
+               |Edit ee ->
+                  begin
+                     match ee with
+                     |Digit ->
+                        handle_digit iface key
+                     |Enter ->
+                        handle_enter iface
+                     |Backspace ->
+                        handle_backspace iface
+                     |Minus ->
+                        handle_minus iface
+                     |BeginInteger ->
+                        handle_begin_int iface
+                     |BeginComplex ->
+                        handle_begin_complex iface
+                     |BeginMatrix ->
+                        handle_begin_matrix iface
+                     |Separator ->
+                        handle_separator iface
+                     |Angle ->
+                        handle_angle iface
+                     |SciNotBase ->
+                        handle_scientific_notation iface
+                  end
                |_ ->
-                  failwith "Non-Function operation found in Function Hashtbl"
-            with Not_found ->
-               if iface.has_entry then
-                  (* finally we try entry of digits *)
-                  handle_digit iface key
-               else
-                  (* commands are only suitable when there is no entry *)
-                  try 
-                     let command_op = Rcfile.command_of_key key in
-                     match command_op with
-                     |Command cc ->
-                        process_command iface cc
-                     |_ ->
-                        failwith "Non-Command operation found in Command Hashtbl"
-                  with Not_found ->
+                  failwith "Non-Edit operation found in Edit Hashtbl"
+            with Not_found | Not_handled ->
+               (* next we try to match on functions *)
+               try 
+                  let function_op = Rcfile.function_of_key key in
+                  match function_op with
+                  |Function ff ->
+                     process_function iface ff
+                  |_ ->
+                     failwith "Non-Function operation found in Function Hashtbl"
+               with Not_found ->
+                  if iface.has_entry then
+                     (* finally we try entry of digits *)
                      handle_digit iface key
-         end
-      |ExtendedEntryMode ->
-         begin
-         (* check to see whether the user is either exiting extended mode or
-          * is applying the extended command *)
-         try
-            let extended_op = Rcfile.extended_of_key key in
-            match extended_op with
-            |Extend ee ->
-               begin
-                  match ee with
-                  |ExitExtended ->
-                     handle_exit_extended iface
-                  |EnterExtended ->
-                     handle_enter_extended iface
-                  |ExtBackspace ->
-                     handle_extended_backspace iface
-               end
-            |_ ->
-               failwith "Non-Extended command found in Extended Hashtbl"
-         with Not_found ->
-            handle_extended_character iface key
-         end
-      |BrowsingMode ->
-         try
-            let browse_op = Rcfile.browse_of_key key in
-            match browse_op with
-            |Browse bb ->
-               begin
-                  match bb with
-                  |EndBrowse ->
-                     handle_end_browse iface
-                  |ScrollLeft ->
-                     handle_scroll_left iface
-                  |ScrollRight ->
-                     handle_scroll_right iface
-                  |RollDown ->
-                     handle_rolldown iface
-                  |RollUp ->
-                     handle_rollup iface
-                  |PrevLine ->
-                     handle_prev_line iface
-                  |NextLine ->
-                     handle_next_line iface
-                  |Echo ->
-                     handle_browse_echo iface
-                  |ViewEntry ->
-                     handle_browse_view iface
-               end
-            |_ ->
-               failwith "Non-Browsing operation found in Browse Hashtbl"
-         with Not_found | Not_handled ->
-            ()
+                  else
+                     (* commands are only suitable when there is no entry *)
+                     try 
+                        let command_op = Rcfile.command_of_key key in
+                        match command_op with
+                        |Command cc ->
+                           process_command iface cc
+                        |_ ->
+                           failwith "Non-Command operation found in Command Hashtbl"
+                     with Not_found ->
+                        handle_digit iface key
+            end
+         |ExtendedEntryMode ->
+            begin
+            (* check to see whether the user is either exiting extended mode or
+             * is applying the extended command *)
+            try
+               let extended_op = Rcfile.extended_of_key key in
+               match extended_op with
+               |Extend ee ->
+                  begin
+                     match ee with
+                     |ExitExtended ->
+                        handle_exit_extended iface
+                     |EnterExtended ->
+                        handle_enter_extended iface
+                     |ExtBackspace ->
+                        handle_extended_backspace iface
+                  end
+               |_ ->
+                  failwith "Non-Extended command found in Extended Hashtbl"
+            with Not_found ->
+               handle_extended_character iface key
+            end
+         |BrowsingMode ->
+            try
+               let browse_op = Rcfile.browse_of_key key in
+               match browse_op with
+               |Browse bb ->
+                  begin
+                     match bb with
+                     |EndBrowse ->
+                        handle_end_browse iface
+                     |ScrollLeft ->
+                        handle_scroll_left iface
+                     |ScrollRight ->
+                        handle_scroll_right iface
+                     |RollDown ->
+                        handle_rolldown iface
+                     |RollUp ->
+                        handle_rollup iface
+                     |PrevLine ->
+                        handle_prev_line iface
+                     |NextLine ->
+                        handle_next_line iface
+                     |Echo ->
+                        handle_browse_echo iface
+                     |ViewEntry ->
+                        handle_browse_view iface
+                  end
+               |_ ->
+                  failwith "Non-Browsing operation found in Browse Hashtbl"
+            with Not_found | Not_handled ->
+               ()
    done
 
 
@@ -1290,6 +1407,7 @@ let do_main_loop (iface : interface_state_t) =
 let run (iface : interface_state_t) =
    iface.calc#backup ();
    Rcfile.process_rcfile ();
+   assert (keypad iface.scr.entry_win true);
 
    (* initialize buffers for matrix entry *)
    for i = 1 to pred max_matrix_size do
@@ -1313,6 +1431,16 @@ let run (iface : interface_state_t) =
       end;
       do_main_loop iface
         
+
+
+
+
+
+
+
+
+
+
 
 
 (* arch-tag: DO_NOT_CHANGE_b4519dd2-7e94-4cbf-931a-bb5f97445cbf *)
