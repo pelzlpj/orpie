@@ -336,6 +336,22 @@ class rpc_stack =
                (* this is the actual index into the array *)
                let index = len - line_num in
                match stack.(index) with
+               |RpcInt el -> 
+                  begin
+                     match calc_modes.base with
+                     |Bin ->
+                        let s = string_of_big_int_base el 2 in
+                        "#" ^ s ^ "_b"
+                     |Oct ->
+                        let s = string_of_big_int_base el 8 in
+                        "#" ^ s ^ "_o"
+                     |Hex ->
+                        let s = string_of_big_int_base el 16 in
+                        "#" ^ s ^ "_h"
+                     |Dec ->
+                        let s = string_of_big_int el in
+                        "#" ^ s ^ "_d"
+                  end
                |RpcFloatMatrix el ->
                   (* looks like [[ a11, a12 ]
                    *             [ a21, a22 ]] 

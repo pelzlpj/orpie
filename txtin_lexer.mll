@@ -43,7 +43,9 @@ rule token =
       let int_str = String.sub s 1 (String.length s - 1) in
       INTEGER int_str}
 
-   | ((sign? digit+ ('.' digit*)?) | (sign? digit* ('.' digit+)?)) ('e' sign? digit+)? {
+   | ((sign? digit+ ('.' digit*)?) | (sign? digit* '.' digit+)) ('e' sign? digit+)? {
+      Printf.fprintf stderr "float string: '%s'\n" (Lexing.lexeme lexbuf);
+      flush stderr;
       FLOAT (Lexing.lexeme lexbuf)}
 
    | '(' 

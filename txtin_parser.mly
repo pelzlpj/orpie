@@ -39,7 +39,7 @@ let decode_float_complex_matrix mat =
    let flt_array = Array.make_matrix num_rows num_cols 0.0
    and cpx_array = Array.make_matrix num_rows num_cols Complex.zero in
    let has_complex = ref false in
-   Printf.fprintf stdout "matrix:\n";
+   Printf.fprintf stderr "matrix:\n";
    for i = 0 to pred num_rows do
       if Array.length mat.(i) != num_cols then
          raise (Utility.Txtin_error "inconsistent number of columns in input matrix")
@@ -48,19 +48,19 @@ let decode_float_complex_matrix mat =
             for j = 0 to pred num_cols do
                begin match mat.(i).(j) with
                |F el ->
-                  Printf.fprintf stdout "F: %8.5g " el;
-                  flush stdout;
+                  Printf.fprintf stderr "F: %8.5g " el;
+                  flush stderr;
                   flt_array.(i).(j) <- el;
                   cpx_array.(i).(j) <- {Complex.re = el; Complex.im = 0.0}
                |C el -> 
-                  Printf.fprintf stdout "C: (%8.5g, %8.5g) " el.Complex.re
+                  Printf.fprintf stderr "C: (%8.5g, %8.5g) " el.Complex.re
                   el.Complex.im;
-                  flush stdout;
+                  flush stderr;
                   has_complex := true;
                   cpx_array.(i).(j) <- el
                end
             done;
-            Printf.fprintf stdout "\n"
+            Printf.fprintf stderr "\n"
          end
    done;
    if !has_complex then
@@ -116,8 +116,8 @@ tokengroup:
 
 token:
    INTEGER 
-      { Printf.fprintf stdout "integer: %s\n" $1;
-        flush stdout;
+      { Printf.fprintf stderr "integer: %s\n" $1;
+        flush stderr;
         let int_str = $1 in
         let str_len = String.length int_str in
         let digits  = Str.string_before int_str (str_len - 2) in
@@ -138,25 +138,35 @@ token:
         Rpc_stack.RpcInt int_val}
 
    | FLOAT
-      { Printf.fprintf stdout "float: %g\n" (float_of_string $1);
-        flush stdout;
+      { Printf.fprintf stderr "FLOAT float string: '%s'\n" $1;
+        flush stderr;
+        Printf.fprintf stderr "float: %g\n" (float_of_string $1);
+        flush stderr;
         Rpc_stack.RpcFloat (float_of_string $1)} 
 
    | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
       {
+         Printf.fprintf stderr "COMPLEX1 float string: '%s'\n" $2;
+         flush stderr;
+         Printf.fprintf stderr "COMPLEX2 float string: '%s'\n" $4;
+         flush stderr;
          let f1 = float_of_string $2
          and f2 = float_of_string $4 in
-         Printf.fprintf stdout "complex: (%g, %g)\n" f1 f2;
-         flush stdout;
+         Printf.fprintf stderr "complex: (%g, %g)\n" f1 f2;
+         flush stderr;
          Rpc_stack.RpcComplex {Complex.re = f1; Complex.im = f2}
       }
 
    | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
       {
+         Printf.fprintf stderr "COMPLEX1 float string: '%s'\n" $2;
+         flush stderr;
+         Printf.fprintf stderr "COMPLEX2 float string: '%s'\n" $4;
+         flush stderr;
          let mag = float_of_string $2
          and ang = float_of_string $4 in
-         Printf.fprintf stdout "complex: (%g <%g)\n" mag ang;
-         flush stdout;
+         Printf.fprintf stderr "complex: (%g <%g)\n" mag ang;
+         flush stderr;
          Rpc_stack.RpcComplex (rect_of_polar mag ang)
       }
 
@@ -166,8 +176,8 @@ token:
           * is a list of elements; create a 2d array 
           * from these lists, and generate the appropriate
           * orpie_data from the 2d array. *)
-         Printf.fprintf stdout "matched matrix toplevel\n";
-         flush stdout;
+         Printf.fprintf stderr "matched matrix toplevel\n";
+         flush stderr;
          let num_rows = List.length $2 in
          let num_cols = List.length (List.hd $2) in
          let mat = Array.make_matrix num_rows num_cols (F 0.0) in

@@ -48,7 +48,8 @@ type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase
 type browse_operation   = | EndBrowse
                           | ScrollLeft | ScrollRight | RollDown | RollUp
                           | PrevLine | NextLine | Echo | ViewEntry
-                          | Drop1 | DropN | Keep | KeepN;;
+                          | Drop1 | DropN | Keep | KeepN
+                          | EditEntry;;
 
 type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 

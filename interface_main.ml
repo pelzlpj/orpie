@@ -918,6 +918,63 @@ let handle_browse_keepn (iface : interface_state_t) =
    draw_update_stack iface
 
 
+let handle_browse_edit (iface : interface_state_t) =
+   try
+      let fs_string = iface.calc#get_fullscreen_display iface.stack_selection in
+      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreen_input) in
+      output_string buf fs_string;
+      close_out buf;
+      let _ = 
+         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreen_input))
+      in ();
+      let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
+      let lexbuf = Lexing.from_channel edited_buf in
+      let data = Txtin_parser.data_list Txtin_lexer.token lexbuf in
+      let rec push_data d =
+         begin match d with
+         |[] -> 
+            ()
+         |hd :: tl -> 
+            iface.calc#delete iface.stack_selection;
+            iface.calc#push hd;
+            iface.calc#rolldown iface.stack_selection;
+            push_data tl
+         end
+      in
+      push_data data;
+      close_in edited_buf;
+      draw_help iface;
+      draw_stack iface;
+      draw_update_entry iface
+   with
+      |Sys_error ss -> 
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+      |Parsing.Parse_error ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface "syntax error in input";
+         draw_update_entry iface)
+      |Utility.Txtin_error ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+      |Big_int_str.Big_int_string_failure ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+      |Failure ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface "syntax error in input";
+         draw_update_entry iface)
+
+
+
 (* view the last stack element in fullscreen *)
 let handle_view (iface : interface_state_t) =
    try
@@ -989,6 +1046,17 @@ let handle_edit_input (iface : interface_state_t) =
          draw_stack iface;
          draw_error iface ss;
          draw_update_entry iface)
+      |Big_int_str.Big_int_string_failure ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+      |Failure ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface "syntax error in input";
+         draw_update_entry iface)
+
 
 
 
@@ -1598,6 +1666,8 @@ let do_main_loop (iface : interface_state_t) =
                         handle_browse_keep iface
                      |KeepN ->
                         handle_browse_keepn iface
+                     |EditEntry ->
+                        handle_browse_edit iface
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"

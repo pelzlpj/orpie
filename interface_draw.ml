@@ -451,15 +451,17 @@ let draw_help (iface : interface_state_t) =
          try_find Rcfile.key_of_command (Command Dup));
          mvwaddstr_safe win 13 2 ("view        : " ^
          try_find Rcfile.key_of_browse (Browse ViewEntry));
-         mvwaddstr_safe win 14 2 ("drop        : " ^
+         mvwaddstr_safe win 14 2 ("edit        : " ^
+         try_find Rcfile.key_of_browse (Browse EditEntry));
+         mvwaddstr_safe win 15 2 ("drop        : " ^
          try_find Rcfile.key_of_browse (Browse Drop1));
-         mvwaddstr_safe win 15 2 ("dropn       : " ^
+         mvwaddstr_safe win 16 2 ("dropn       : " ^
          try_find Rcfile.key_of_browse (Browse DropN));
-         mvwaddstr_safe win 16 2 ("keep        : " ^
+         mvwaddstr_safe win 17 2 ("keep        : " ^
          try_find Rcfile.key_of_browse (Browse Keep));
-         mvwaddstr_safe win 17 2 ("keepn       : " ^
+         mvwaddstr_safe win 18 2 ("keepn       : " ^
          try_find Rcfile.key_of_browse (Browse KeepN));
-         mvwaddstr_safe win 19 1 ("exit browsing mode: " ^
+         mvwaddstr_safe win 20 1 ("exit browsing mode: " ^
          try_find Rcfile.key_of_browse (Browse EndBrowse));
          assert (wnoutrefresh win)
       |_ ->
