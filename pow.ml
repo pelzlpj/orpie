@@ -35,12 +35,18 @@ let pow (stack : rpc_stack) (evaln : int -> unit) =
             stack#push (RpcInt 
                (power_big_int_positive_big_int el1 el2))
          else
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "invalid argument"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "integer power function requires nonnegative power"))
       |RpcFloat el2 ->
          let f_el1 = float_of_big_int el1 in
-         stack#push (RpcFloat (f_el1 ** el2))
+         (* if power is nonnegative or if power is integer *)
+         if f_el1 >= 0.0 || el2 = float_of_int (int_of_float el2) then
+            stack#push (RpcFloat (f_el1 ** el2))
+         else
+            let c_el1 = cmpx_of_float f_el1 in
+            let c_el2 = cmpx_of_float el2 in
+            stack#push (RpcComplex (Complex.pow c_el1 c_el2))
       |RpcComplex el2 ->
          let c_el1 = cmpx_of_int el1 in
          stack#push (RpcComplex (Complex.pow c_el1 el2))
@@ -54,7 +60,12 @@ let pow (stack : rpc_stack) (evaln : int -> unit) =
       |RpcInt el2 ->
          stack#push (RpcFloat (el1 ** (float_of_big_int el2)))
       |RpcFloat el2 ->
-         stack#push (RpcFloat (el1 ** el2))
+         if el1 >= 0.0 || el2 = float_of_int (int_of_float el2) then
+            stack#push (RpcFloat (el1 ** el2))
+         else
+            let c_el1 = cmpx_of_float el1 in
+            let c_el2 = cmpx_of_float el2 in
+            stack#push (RpcComplex (Complex.pow c_el1 c_el2))
       |RpcComplex el2 ->
          stack#push (RpcComplex (Complex.pow (cmpx_of_float el1) el2))
       |_ ->

@@ -3,6 +3,10 @@ Orpie ChangeLog
 
 v1.4
 
+   2004-08-27        Raising a negative real number to a noninteger
+                     power now produces a complex value rather than
+                     real-valued 'nan'
+
    2004-08-23        Deprecated "extended_" operation identifiers in
                      favor of somewhat more clear "abbrev_" 
                      identifiers.
