@@ -1443,8 +1443,6 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#maximum
    |Utpn ->
       handle_function_call iface iface.calc#upper_tail_prob_normal
-   |Rand ->
-      handle_function_call iface iface.calc#rand
    end
 
 
@@ -1521,6 +1519,8 @@ let process_command (iface : interface_state_t) cc =
       handle_refresh iface
    |EnterPi ->
       handle_command_call iface iface.calc#enter_pi
+   |Rand ->
+      handle_command_call iface iface.calc#rand
    |EditInput ->
       handle_edit_input iface
    |CycleHelp ->

@@ -160,7 +160,6 @@ abbrev "stdevbias" function_stdev_biased
 abbrev "min"     function_minimum
 abbrev "max"     function_maximum
 abbrev "utpn"    function_utpn
-abbrev "rand"    function_rand
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap
@@ -178,6 +177,7 @@ abbrev "hex"     command_hex
 abbrev "view"    command_view
 abbrev "refresh" command_refresh
 abbrev "pi"      command_enter_pi
+abbrev "rand"    command_rand
 abbrev "edit"    command_edit_input
 abbrev "add"     function_add
 abbrev "sub"     function_sub

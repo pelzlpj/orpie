@@ -35,14 +35,14 @@ type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
                             | Store | Purge | Gcd | Lcm | Binom | Perm
                             | Total | Mean | Sumsq | Var |VarBias
                             | Stdev | StdevBias | Min | Max 
-                            | Utpn | Rand;;
+                            | Utpn;;
 
 type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
                             | BeginBrowse | BeginExtended | BeginVar | Quit
                             | SetRadians | SetDegrees | SetRect | SetPolar
                             | SetBin | SetOct | SetDec | SetHex
                             | ToggleAngleMode | ToggleComplexMode | CycleBase
-                            | View | About | Refresh | EnterPi 
+                            | View | About | Refresh | EnterPi | Rand
                             | EditInput | CycleHelp;;
 
 type edit_operation_t     = | Digit | Enter | Backspace | Minus | SciNotBase 

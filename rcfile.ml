@@ -372,7 +372,6 @@ let operation_of_string command_str =
    |"function_minimum"              -> (Function Min)
    |"function_maximum"              -> (Function Max)
    |"function_utpn"                 -> (Function Utpn)
-   |"function_rand"                 -> (Function Rand)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)
@@ -406,6 +405,7 @@ let operation_of_string command_str =
    |"command_refresh"               -> (Command Refresh)
    |"command_about"                 -> (Command About)
    |"command_enter_pi"              -> (Command EnterPi)
+   |"command_rand"                  -> (Command Rand)
    |"command_edit_input"            -> (Command EditInput)
    |"command_cycle_help"            -> (Command CycleHelp)
    |"browse_end"                    -> (Browse EndBrowse)
@@ -430,6 +430,8 @@ let operation_of_string command_str =
    |"variable_enter"                -> (VarEdit EnterVarEdit)
    |"variable_backspace"            -> (VarEdit VarEditBackspace)
    |"variable_complete"             -> (VarEdit CompleteVarEdit)
+   |"function_rand"                 -> config_failwith 
+                                       "operation \"function_rand\" is deprecated; please replace with \"command_rand\"."
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
    end
 
