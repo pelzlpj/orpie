@@ -1,6 +1,8 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* support --sysconfdir configure option
+
 * add additional test cases for the rpc_calc object.  I could really use
   help with this; it's not difficult, just time-consuming.  Have a look
   at calc_test.ml if you're interested in lending a hand.  (Please grab
@@ -9,9 +11,13 @@ Orpie To-Do List (roughly in order of priority)
 
 * add additional units
 
+* add physical constants
+
 * add additional statistical functions (multivariate, distributions, ...)
 
 * add finance functions
+
+* i18n
 
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
