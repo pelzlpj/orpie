@@ -1,6 +1,13 @@
 Orpie ChangeLog
 ------------------------------------------------------------------------
 
+v1.2
+
+   2004-04-22        Orpie no longer generates an error message if
+                     it is run without a preexisting calculator
+                     state file.
+
+
 v1.1
 
    2004-04-17        Version 1.1.1 release.  Added Chris Petersen's

@@ -75,6 +75,9 @@ class rpc_stack =
       (* FIXME: if the datafile is corrupted, this can segfault... *)
       method load_state () =
          try
+            (* check whether the state file exists *)
+            Unix.access (Utility.expand_file !(Rcfile.datafile)) [Unix.F_OK];
+            (* if it does exist, try loading it *)
             let load_file = Utility.expand_open_in_bin !(Rcfile.datafile) in
             let data_modes, data_stack, data_len = 
                (Marshal.from_channel load_file : calculator_modes * (orpie_data
@@ -85,7 +88,14 @@ class rpc_stack =
             len <- data_len;
             data_modes)
          with
+            (* this gets raised if the file does not exist; in that case do *
+             * nothing, as it should be created later. *)
+            |Unix.Unix_error (err_num, err_str1, err_str2) ->
+               {angle = Rad; base = Dec; complex = Rect}
+            (* this gets raised if, for example, we don't have read permission
+             * on the state data file *)
             |Sys_error ss -> raise (Invalid_argument "can't open calculator state data file")
+            (* this shouldn't happen unless the data file gets corrupted. *)
             |Failure ff -> raise (Invalid_argument "can't deserialize calculator data from file")
 
             

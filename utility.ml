@@ -75,27 +75,29 @@ let wordwrap_nspace s cols num_spaces =
 (* wordwrap with single space *)
 let wordwrap s cols = wordwrap_nspace s cols 1
 
+(* If the filename starts with "~", substitute $HOME *)
+let expand_file filename =
+   if Str.string_before filename 2 = "~/" then
+      let homedir = Unix.getenv "HOME" in
+      homedir ^ Str.string_after filename 1
+   else
+      filename
+
+
 (* Do whatever is necessary to open up a file for writing.  If it already exists,
  * open it as-is.  If it does not exist, make sure that all prefix directories
  * do exist, then open a new file. *)
 let open_or_create_out_gen is_binary filename =
-   (* If the filename starts with "~", substitute $HOME *)
-   let expand_file =
-      if Str.string_before filename 2 = "~/" then
-         let homedir = Unix.getenv "HOME" in
-         homedir ^ Str.string_after filename 1
-      else
-         filename
-   in
+   let exp_file = expand_file filename in
    (* Test whether the file exists *)
-   if Sys.file_exists expand_file then
+   if Sys.file_exists exp_file then
       if is_binary then
-         open_out_bin expand_file
+         open_out_bin exp_file
       else
-         open_out expand_file
+         open_out exp_file
    else
       (* Check whether all directories exist *)
-      let dir_path = Filename.dirname expand_file in
+      let dir_path = Filename.dirname exp_file in
       let dir_list = Str.split (Str.regexp "/+") dir_path in
       (* if necessary, add the first "/" to the first directory *)
       let slash_dir_list =
@@ -122,9 +124,9 @@ let open_or_create_out_gen is_binary filename =
       in
       make_directories slash_dir_list;
       if is_binary then
-         open_out_bin (Filename.basename expand_file)
+         open_out_bin (Filename.basename exp_file)
       else
-         open_out (Filename.basename expand_file)
+         open_out (Filename.basename exp_file)
 
 
 let open_or_create_out_bin filename =
@@ -138,17 +140,10 @@ let open_or_create_out_ascii filename =
 (* open a filename, with tilde expansion *)
 let expand_open_in_gen is_binary filename =
    (* If the filename starts with "~", substitute $HOME *)
-   let expand_file =
-      if Str.string_before filename 2 = "~/" then
-         let homedir = Unix.getenv "HOME" in
-         homedir ^ Str.string_after filename 1
-      else
-         filename
-   in
    if is_binary then
-      open_in_bin expand_file
+      open_in_bin (expand_file filename)
    else
-      open_in expand_file
+      open_in (expand_file filename)
 
 
 let expand_open_in_bin filename =
