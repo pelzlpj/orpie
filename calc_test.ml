@@ -95,27 +95,28 @@ in
 let mprec = 1e-15 in
 (* unit conversion tolerance *)
 let uprec = 1e-8 in
-(* ad-hoc float matrix norm *)
-let float_mat_norm () =
-   calc#total ();
-   calc#dup ();
-   calc#transpose ();
-   calc#mult ();
-   calc#to_float ()
-in
-(* ad-hoc complex matrix norm *)
-let cpx_mat_norm () =
-   load_data "[[1, 1]]";
-   calc#swap ();
-   calc#mult ();
+(* ad-hoc matrix norm *)
+let mat_norm () =
    calc#dup ();
    calc#transpose ();
    calc#conj ();
    calc#mult ();
-   calc#re ();
-   calc#to_float ()
+   calc#trace ();
+   calc#abs ();
+   calc#sqrt ()
 in
-
+(* get a normlized error metric for a matrix result. *)
+(* Assumes the last two stack elements are result matrix
+ * and expected result matrix. *)
+let mat_error () =
+   calc#dup ();
+   calc#rolldown 3;
+   calc#sub ();
+   mat_norm ();
+   calc#swap ();
+   mat_norm ();
+   calc#div ()
+in
 
 print_endline "testing add()...";
 
@@ -187,31 +188,27 @@ test_result_float_tol 0.0 uprec "add-complex-complex-2";
 
 load_data "[[6, 8][10, 12]] [[1, 2][3, 4]] [[5, 6][7, 8]]";
 calc#add ();
-calc#sub ();
-float_mat_norm ();
+mat_error ();
 test_result_float_tol 0.0 mprec "add-fmat-fmat-1";
 
-load_data "[[55.1676516, 106.3352832][157.5029248, 208.6705664]]_m^2/min
+load_data "[[55.1676416, 106.3352832][157.5029248, 208.6705664]]_m^2/min
 [[1, 2][3, 4]]_yd^2/s [[5, 6][7, 8]]_m^2/min";
 calc#add ();
-calc#sub ();
-float_mat_norm ();
+mat_error ();
 test_result_float_tol 0.0 uprec "add-fmat-fmat-2";
 
 load_data "[[(6, 6), (9, 8)][(12, 10), (15, 12)]]
            [[1, 2][3, 4]] [[(5, 6), (7, 8)][(9, 10), (11, 12)]]";
 calc#add ();
-calc#sub ();
-cpx_mat_norm ();
+mat_error ();
 test_result_float_tol 0.0 mprec "add-fmat-cmat-1";
 
-load_data "[[(55.1676516, 10.0), (106.3352832, 20.0)]
+load_data "[[(55.1676416, 10.0), (106.3352832, 20.0)]
             [(157.5029248, 30.0), (208.6705664, 40.0)]]_m^2/min
            [[1, 2][3, 4]]_yd^2/s
            [[(5, 10.0), (6, 20.0)][(7, 30.0), (8, 40.0)]]_m^2/min";
 calc#add ();
-calc#sub ();
-cpx_mat_norm ();
+mat_error ();
 test_result_float_tol 0.0 uprec "add_fmat_cmat_2";
 
 
