@@ -1222,6 +1222,7 @@ class rpc_calc =
 
 
       method enter_pi () =
+         self#backup ();
          stack#push (RpcFloat pi)
 
       method get_display_line line_num =
@@ -1892,6 +1893,7 @@ class rpc_calc =
 
          (* random float between 0 and 1 *)
          method rand () =
+            self#backup ();           
             stack#push (RpcFloat (Random.float 1.0))
 
 
