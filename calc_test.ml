@@ -151,6 +151,15 @@ let mat_error () =
    mat_norm ();
    calc#div ()
 in
+let cpx_error () =
+   calc#dup ();
+   calc#rolldown 3;
+   calc#sub ();
+   calc#swap ();
+   calc#div ();
+   calc#abs ()
+in
+
 
 (************************************************)
 (* ADDITION                                     *)
@@ -299,8 +308,7 @@ test_result_float_tolnorm 40.0 mprec "sub-int-float-1";
 
 load_data "(20.0, -20.0) #30`d (10.0, 20.0)";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 mprec "sub-int-complex-1";
 
 load_data "30.0 #10`d";
@@ -317,38 +325,32 @@ test_result_float_tolnorm (-20.0000000041) uprec "sub-float-float-2";
 
 load_data "(20.0, -20.0) 30.0 (10.0, 20.0)";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 mprec "sub-float-complex-1";
 
 load_data "(36.6666666667, -20)_yd^2/min 10.0_ft^2/s (30, 20)_yd^2/min";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 uprec "sub-float-complex-2";
 
 load_data "(20.0, 20.0) (30.0, 20.0) #10`d";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 mprec "sub-complex-int-1";
 
 load_data "(20.0, 20.0) (30.0, 20.0) 10.0";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 mprec "sub-complex-float-1";
 
 load_data "(-20.0, -30.0) (10.0, 20.0) (30.0, 50.0)";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 mprec "sub-complex-complex-1";
 
 load_data "(-10.0, -20.0)_m (10.0, 20.0)_in (10.254, 20.508)_m";
 calc#sub ();
-calc#sub ();
-calc#abs ();
+cpx_error ();
 test_result_float_tol 0.0 uprec "sub-complex-complex-2";
 
 load_data "[[-4, -1][2, 6]] [[1, 5][9, 14]] [[5, 6][7, 8]]";
@@ -410,8 +412,88 @@ test_result_float_tol 0.0 uprec "sub-cmat-cmat-2";
 
 calc#clear ();
 (************************************************)
-(* OTHER FUNCTIONS GO HERE :-)                  *)
+(* MULTIPLICATION                               *)
 (************************************************)
+print_endline "testing mult()...";
+
+load_data "#15`d #-5`d";
+calc#mult ();
+test_result_exact "# -75`d" "mult-int-int-1";
+
+load_data "#65`o #9f`h";
+calc#mult ();
+test_result_exact "# 8427`d" "mult-int-int-2";
+
+load_data "#10`d 20";
+calc#mult ();
+test_result_float_tolnorm 200.0 mprec "mult-int-float-1";
+
+load_data "#10`d 20_m^2/s";
+calc#mult ();
+test_result_float_tolnorm 200.0 mprec "mult-int-float-1";
+
+load_data "(200, -300)_ft^3*s #10`d (20, -30)_ft^3*s";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-int-complex-1";
+
+load_data "30 #15`d";
+calc#mult ();
+test_result_float_tolnorm 450.0 mprec "mult-float-int-1";
+
+load_data "30_ft^2 #15`d";
+calc#mult ();
+test_result_float_tolnorm 450.0 mprec "mult-float-int-2";
+
+load_data "20 30";
+calc#mult ();
+test_result_float_tolnorm 600.0 mprec "mult-float-float-1";
+
+load_data "50_m/s 60_kg/hr";
+calc#mult ();
+test_result_float_tolnorm 0.833333333333333 mprec "mult-float-float-2";
+
+load_data "(-800, 160) -20 (40, -8)";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-float-complex-1";
+
+load_data "(-74.322432, 14.8644864)_m^3 -20_m/s (40, -8)_ft^2*s";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "mult-float-complex-2";
+
+load_data "(300, -600) (10, -20) #30`d";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-complex-int-1";
+
+load_data "(300, -600)_m^2 (10, -20)_m^2 #30`d";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-complex-int-2";
+
+load_data "(-300, 450) (-20, 30) 15";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-complex-float-1";
+
+load_data "(-661.386786555, 992.080179832)_lb^3/s (-20, 30)_lb^2 15_kg/s";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "mult-complex-float-2";
+
+load_data "(1100, 200) (10, 20) (30, -40)";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "mult-complex-complex-1";
+
+load_data "(43307.0866143, 7874.0157481)_kg*in^2/s (10, 20)_in/s^2 (30, -40)_kg*m*s";
+calc#mult ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "mult-complex-complex-2";
+
+
 
 
 
