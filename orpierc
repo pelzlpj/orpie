@@ -138,6 +138,15 @@ abbrev "purge"   function_purge
 abbrev "gcd"     function_gcd
 abbrev "lcm"     function_lcm
 abbrev "binom"   function_binomial_coeff
+abbrev "total"   function_total
+abbrev "mean"    function_mean
+abbrev "sumsq"   function_sumsq
+abbrev "var"     function_var_unbiased
+abbrev "varbias" function_var_biased
+abbrev "stdev"   function_stdev_unbiased
+abbrev "stdevbias" function_stdev_biased
+abbrev "min"     function_minimum
+abbrev "max"     function_maximum
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

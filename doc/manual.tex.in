@@ -537,6 +537,15 @@ The following functions are available as extended commands:
       \texttt{store} & store element 2 in (variable) element 1 \\
       \texttt{eval} & evaluate variable to obtain contents \\
       \texttt{purge} & delete a variable \\
+      \texttt{total} & sum the columns of a real matrix \\
+      \texttt{mean} & compute the sample means of the columns of a real matrix \\
+      \texttt{sumsq} & sum the squares of the columns of a real matrix \\
+      \texttt{var} & compute the unbiased sample variances of the columns of a real matrix \\
+      \texttt{varbias} & compute the biased (population) sample variances of the columns of a real matrix \\
+      \texttt{stdev} & compute the unbiased sample standard deviations of the columns of a real matrix \\
+      \texttt{stdevbias} & compute the biased (pop.) sample standard deviations of the columns of a matrix \\
+      \texttt{min} & find the minima of the columns of a real matrix \\
+      \texttt{max} & find the maxima of the columns of a real matrix \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -1008,6 +1017,15 @@ to a real number, and as such the arithmetic will no longer be exact.
       stack element.
    \item \texttt{function\_log10} \\
       Compute the base-10 logarithm of the last stack element.
+   \item \texttt{function\_maximum} \\
+      Find the maximum values of each of the columns of a real NxM matrix,
+      returning a 1xM matrix as a result.
+   \item \texttt{function\_minimum} \\
+      Find the minimum values of each of the columns of a real NxM matrix,
+      returning a 1xM matrix as a result.
+   \item \texttt{function\_mean} \\
+      Compute the sample means of each of the columns of a real NxM matrix,
+      returning a 1xM matrix as a result.
    \item \texttt{function\_mod} \\
       Compute element 2 mod element 1.  This operation can be applied only
       to integer type data.
@@ -1039,10 +1057,21 @@ to a real number, and as such the arithmetic will no longer be exact.
       Square the last stack element.
    \item \texttt{function\_sqrt} \\
       Compute the square root of the last stack element.
+   \item \texttt{function\_stdev\_unbiased} \\
+      Compute the unbiased sample standard deviation of each of the columns of a real NxM
+      matrix, returning a 1xM matrix as a result.  (Compare to HP48's \texttt{sdev}
+      function.)
+   \item \texttt{function\_stdev\_biased} \\
+      Compute the biased (population) sample standard deviation of each of the columns 
+      of a real NxM matrix, returning a 1xM matrix as a result.  (Compare to 
+      HP48's \texttt{psdev} function.)
    \item \texttt{function\_store} \\
       Store element 2 in (variable) element 1.
    \item \texttt{function\_sub} \\
       Subtract element 1 from element 2.
+   \item \texttt{function\_sumsq} \\
+      Sum the squares of each of the columns of a real NxM matrix, returning a
+      1xM matrix as a result.
    \item \texttt{function\_tan} \\
       Compute the tangent of the last stack element.  If the argument is real,
       it will be assumed to be either degrees or radians, depending on the
@@ -1053,8 +1082,20 @@ to a real number, and as such the arithmetic will no longer be exact.
       Convert a real number to an integer type.
    \item \texttt{function\_to\_real} \\
       Convert an integer type to a real number.
+   \item \texttt{function\_total} \\
+      Sum each of the columns of a real NxM matrix, returning a
+      1xM matrix as a result.
    \item \texttt{function\_transpose} \\
       Compute the matrix transpose of the last stack element.
+   \item \texttt{function\_var\_unbiased} \\
+      Compute the unbiased sample variance of each of the columns of a real NxM
+      matrix, returning a 1xM matrix as a result.  (Compare to HP48's \texttt{var}
+      function.)
+   \item \texttt{function\_var\_biased} \\
+      Compute the biased (population) sample variance of each of the columns of a
+      real NxM matrix, returning a 1xM matrix as a result.  (Compare to HP48's
+      \texttt{pvar} function.)
+
 \end{itemize}
 
 

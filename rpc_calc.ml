@@ -1619,7 +1619,233 @@ class rpc_calc =
             self#abort_computation ();
             false
 
-      
+
+         (* single-variable statistics: total *)
+         method total () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  (* multiply on the left by a row of ones *)
+                  let n, m = Gsl_matrix.dims mat in
+                  let ones_arr = Array.make n 1.0 in
+                  let ones = Gsl_matrix.of_array ones_arr 1 n in
+                  let result = Gsl_matrix.create 1 m in
+                  Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 ones mat
+                  0.0 result;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "total can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for total")
+
+
+
+         (* single-variable statistics: sample mean *)
+         method mean () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  (* multiply on the left by a row of ones, divided by n *)
+                  let n, m = Gsl_matrix.dims mat in
+                  let ones_arr = Array.make n (1.0 /. (float_of_int n)) in
+                  let ones = Gsl_matrix.of_array ones_arr 1 n in
+                  let result = Gsl_matrix.create 1 m in
+                  Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 ones mat
+                  0.0 result;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "total can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for total")
+
+
+         (* single-variable statistics: sum of squares *)
+         method sum_squares () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  let n, m = Gsl_matrix.dims mat in
+                  let result = Gsl_matrix.create 1 m in
+                  for col = 0 to pred m do
+                     result.{0, col} <- 0.0;
+                     for row = 0 to pred n do
+                        let squared_el = mat.{row, col} *. mat.{row, col} in
+                        result.{0, col} <- result.{0, col} +. squared_el
+                     done
+                  done;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "sumsq can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for sumsq")
+
+
+         (* single-variable statistics: bias-corrected sample variance *)
+         method variance_unbiased () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  let n, m = Gsl_matrix.dims mat in
+                  if n > 1 then begin
+                     let means = Array.make m 1.0 in
+                     let result = Gsl_matrix.create 1 m in
+                     let float_n   = float_of_int n in
+                     let float_nm1 = float_n -. 1.0 in
+                     for col = 0 to pred m do
+                        means.(col) <- 0.0;
+                        result.{0, col} <- 0.0;
+                        for row = 0 to pred n do
+                           means.(col) <- means.(col) +. (mat.{row, col} /.  float_n);
+                           result.{0, col} <- result.{0, col} +. 
+                           (mat.{row, col} *. mat.{row, col} /. float_nm1);
+                        done;
+                        result.{0, col} <- result.{0, col} -. 
+                        (means.(col) *. means.(col) *. float_n /. float_nm1)
+                     done;
+                     stack#push (RpcFloatMatrix result)
+                  end else begin
+                     stack#push gen_el;
+                     raise (Invalid_argument "insufficient rows to compute unbiased variance")
+                  end
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "var can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for var")
+
+
+
+         (* single-variable statistics: sample variance (biased) *)
+         method variance_biased () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  let n, m = Gsl_matrix.dims mat in
+                  let means = Array.make m 1.0 in
+                  let result = Gsl_matrix.create 1 m in
+                  let float_n = float_of_int n in
+                  for col = 0 to pred m do
+                     means.(col) <- 0.0;
+                     result.{0, col} <- 0.0;
+                     for row = 0 to pred n do
+                        means.(col) <- means.(col) +. (mat.{row, col} /. float_n);
+                        result.{0, col} <- result.{0, col} +. 
+                        (mat.{row, col} *. mat.{row, col} /. float_n);
+                     done;
+                     result.{0, col} <- result.{0, col} -. 
+                     (means.(col) *. means.(col))
+                  done;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "var can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for varbias")
+
+
+         (* single-variable statistics: unbiased sample standard deviation *)
+         method standard_deviation_unbiased () =
+            self#variance_unbiased ();
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloatMatrix mat ->
+               let n, m = Gsl_matrix.dims mat in
+               let result = Gsl_matrix.create 1 m in
+               for col = 0 to pred m do
+                  result.{0, col} <- sqrt mat.{0, col}
+               done;
+               stack#push (RpcFloatMatrix result)
+            |_ -> ()
+               
+
+         (* single-variable statistics: unbiased sample standard deviation *)
+         method standard_deviation_biased () =
+            self#variance_biased ();
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcFloatMatrix mat ->
+               let n, m = Gsl_matrix.dims mat in
+               let result = Gsl_matrix.create 1 m in
+               for col = 0 to pred m do
+                  result.{0, col} <- sqrt mat.{0, col}
+               done;
+               stack#push (RpcFloatMatrix result)
+            |_ -> ()
+
+
+         (* single-variable statistics: minimum of set *)
+         method minimum () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  let n, m = Gsl_matrix.dims mat in
+                  let result = Gsl_matrix.create 1 m in
+                  for col = 0 to pred m do
+                     result.{0, col} <- mat.{0, col};
+                     for row = 1 to pred n do
+                        if mat.{row, col} < result.{0, col} then
+                           result.{0, col} <- mat.{row, col}
+                        else
+                           ()
+                     done
+                  done;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "min can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for min")
+
+
+
+         (* single-variable statistics: maximum of set *)
+         method maximum () =
+            if stack#length > 0 then begin
+               self#backup ();
+               self#evaln 1;
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloatMatrix mat ->
+                  let n, m = Gsl_matrix.dims mat in
+                  let result = Gsl_matrix.create 1 m in
+                  for col = 0 to pred m do
+                     result.{0, col} <- mat.{0, col};
+                     for row = 1 to pred n do
+                        if mat.{row, col} > result.{0, col} then
+                           result.{0, col} <- mat.{row, col}
+                        else
+                           ()
+                     done
+                  done;
+                  stack#push (RpcFloatMatrix result)
+               |_ ->
+                  stack#push gen_el;
+                  raise (Invalid_argument "min can only be applied to real matrices")
+            end else
+               raise (Invalid_argument "insufficient arguments for min")
+
+
 
 
 (*      method print_stack () =

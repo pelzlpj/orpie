@@ -1,9 +1,6 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* test linear-time table lookup algorithm for power-of-two base conversions,
-  and compare to current algorithm
-
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
 

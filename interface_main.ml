@@ -1380,6 +1380,24 @@ let process_function (iface : interface_state_t) ff =
       handle_interr_function_call iface iface.calc#lcm
    |Binom ->
       handle_interr_function_call iface iface.calc#binom
+   |Total ->
+      handle_function_call iface iface.calc#total
+   |Mean ->
+      handle_function_call iface iface.calc#mean
+   |Sumsq ->
+      handle_function_call iface iface.calc#sum_squares
+   |Var ->
+      handle_function_call iface iface.calc#variance_unbiased
+   |VarBias ->
+      handle_function_call iface iface.calc#variance_biased
+   |Stdev ->
+      handle_function_call iface iface.calc#standard_deviation_unbiased
+   |StdevBias ->
+      handle_function_call iface iface.calc#standard_deviation_biased
+   |Min ->
+      handle_function_call iface iface.calc#minimum
+   |Max ->
+      handle_function_call iface iface.calc#maximum
    end
 
 
