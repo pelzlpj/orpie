@@ -200,6 +200,8 @@ let parse_line line_stream =
                            register_binding key (Function Ln)
                         |"function_conj" ->
                            register_binding key (Function Conj)
+                        |"function_sin" ->
+                           register_binding key (Function Sin)
                         |"edit_integer" ->
                            register_binding key (Edit BeginInteger)
                         |"edit_complex" ->

@@ -48,7 +48,7 @@ type complex_entry_element =
     mutable im_mantissa : string; mutable im_exponent : string};;
 
 let extended_commands =
-   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\n" ^
+   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\nsin\n" ^
     "drop\nclear\nswap\ndup\nundo\nquit");;
 
 (* abbreviations used in extended entry mode *)
@@ -66,6 +66,7 @@ Hashtbl.add command_abbrev_table "arg" (Function Arg);;
 Hashtbl.add command_abbrev_table "exp" (Function Exp);;
 Hashtbl.add command_abbrev_table "ln" (Function Ln);;
 Hashtbl.add command_abbrev_table "conj" (Function Conj);;
+Hashtbl.add command_abbrev_table "sin" (Function Sin);;
 Hashtbl.add command_abbrev_table "drop" (Command Drop);;
 Hashtbl.add command_abbrev_table "clear" (Command Clear);;
 Hashtbl.add command_abbrev_table "swap" (Command Swap);;
@@ -167,6 +168,8 @@ object(self)
             (sprintf "%s: %s" trunc_num)
       in
       for line = stack_bottom_row to pred (stack_bottom_row + scr.sw_lines) do
+         fprintf stderr "fetching display line %d\n" line;
+         flush stderr;
          let s = calc#get_display_line line in
          let len = String.length s in
          assert (wmove scr.stack_win 
@@ -614,6 +617,8 @@ object(self)
             self#handle_function_call calc#ln
          |Conj ->
             self#handle_function_call calc#conj
+         |Sin ->
+            self#handle_function_call calc#sin
       end
 
 
@@ -1138,7 +1143,9 @@ object(self)
    (* begin stack browsing *)
    method private handle_begin_browse () =
       if calc#get_stack_size () > 0 then
-         (interface_mode <- BrowsingMode;
+         (fprintf stderr "beginning browse\n";
+         flush stderr;
+         interface_mode <- BrowsingMode;
          self#draw_stack ())
       else
          ()
