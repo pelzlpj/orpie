@@ -177,38 +177,58 @@ uninstall:
 
 .SUFFIXES:
 
-# GSL and curses targets should be created by
-# calling their respective Makefiles
+
+# GSL build rules
+gsl-opt: $(GSL_OOBJS)
+gsl-byte: $(GSL_BOBJS)
+
+GSL_INCLUDES = -I ./gsl
+GSL_BFLAGS = -g $(GSL_INCLUDES)
+GSL_OFLAGS = $(GSL_INCLUDES)
+GSL_CFLAGS = -Wall -fPIC -DPIC
+
 gsl/%.cmi : gsl/%.mli
-	cd gsl && $(MAKE) $*.cmi
+	$(OCAMLC) -c $(GSL_BFLAGS) $<
 
 gsl/%.cmo : gsl/%.ml
-	cd gsl && $(MAKE) $*.cmo
+	$(OCAMLC) -c $(GSL_BFLAGS) $<
 
 gsl/%.o : gsl/%.ml
-	cd gsl && $(MAKE) $*.o
+	$(OCAMLOPT) -c $(GSL_OFLAGS) $<
 
 gsl/%.cmx : gsl/%.ml
-	cd gsl && $(MAKE) $*.cmx
+	$(OCAMLOPT) -c $(GSL_OFLAGS) $<
 
 gsl/%.o : gsl/%.c
-	cd gsl && $(MAKE) $*.o
+	cd gsl && $(OCAMLC) -ccopt "$(GSL_CFLAGS)" -c $*.c
+
+
+# curses build rules
+curses-opt: $(CURSES_OOBJS)
+curses-byte: $(CURSES_BOBJS)
+
+CURSES_INCLUDES =
+CURSES_BFLAGS = -g $(CURSES_INCLUDES)
+CURSES_OFLAGS = $(CURSES_INCLUDES)
+CURSES_CFLAGS = -Wall -fPIC -DPIC
 
 curses/%.cmi : curses/%.mli
-	cd curses && $(MAKE) $*.cmi
+	$(OCAMLC) -pp cpp -c $(CURSES_BFLAGS) $<
 
 curses/%.cmo : curses/%.ml
-	cd curses && $(MAKE) $*.cmo
+	$(OCAMLC) -pp cpp -c $(CURSES_BFLAGS) $<
 
 curses/%.o : curses/%.ml
-	cd curses && $(MAKE) $*.o
+	$(OCAMLOPT) -pp cpp -c $(CURSES_OFLAGS) $<
 
 curses/%.cmx : curses/%.ml
-	cd curses && $(MAKE) $*.cmx
+	$(OCAMLOPT) -pp cpp -c $(CURSES_OFLAGS) $<
 
 curses/%.o : curses/%.c
-	cd curses && $(MAKE) $*.o
+	cd curses && $(OCAMLC) -ccopt "$(CURSES_CFLAGS)" -c $*.c
 
+
+# generic build rules for toplevel directory
 %.cmi : %.mli
 	$(OCAMLC) -c $(BFLAGS) $<
 
@@ -229,6 +249,8 @@ curses/%.o : curses/%.c
 
 %.mli : %.mly
 	$(OCAMLYACC) -v $<
+
+
 
 # Emacs tags
 ############
@@ -259,19 +281,22 @@ configure: configure.in
 #######
 
 partly-clean::
-	rm -f *.cm[iox] *.o *~ txtin*.ml txtin*.mli *.output
+	rm -f *.cm[iox] *.o *.a *~ txtin*.ml txtin*.mli *.output
 	rm -f $(GENERATED) parser.output
 	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt $(NAME).static-opt $(NAME2).static-opt
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 
-clean:: partly-clean
-	cd curses && $(MAKE) clean
-	cd gsl && $(MAKE) clean
+gsl-clean::
+	rm -f gsl/*.cm[iox] gsl/*.o *~
+
+curses-clean::
+	rm -f curses/*.cm[iox] curses/*.o *~
+
+clean:: partly-clean gsl-clean curses-clean
 
 dist-clean distclean:: clean
-	cd curses && $(MAKE) distclean
-	cd gsl && $(MAKE) distclean
 	rm -f Makefile config.cache config.log config.status install.ml
+
 
 # depend
 ########
