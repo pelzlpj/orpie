@@ -492,7 +492,88 @@ calc#mult ();
 cpx_error ();
 test_result_float_tol 0.0 uprec "mult-complex-complex-2";
 
+calc#clear ();
+(************************************************)
+(* DIVISION                                     *)
+(************************************************)
+print_endline "testing div()...";
 
+load_data "#75`d #-5`d";
+calc#div ();
+test_result_exact "# -15`d" "div-int-int-1";
+
+load_data "#20353`o #9f`h";
+calc#div ();
+test_result_exact "# 53`d" "div-int-int-2";
+
+load_data "#10`d 20";
+calc#div ();
+test_result_float_tolnorm 0.5 mprec "div-int-float-1";
+
+load_data "#10`d 20_m^2/s";
+calc#div ();
+test_result_float_tolnorm 0.5 mprec "div-int-float-1";
+
+load_data "(4, 2)_ft^-3*s^-1 #10`d (2, -1)_ft^3*s";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-int-complex-1";
+
+load_data "30 #15`d";
+calc#div ();
+test_result_float_tolnorm 2.0 mprec "div-float-int-1";
+
+load_data "30_ft^2 #15`d";
+calc#div ();
+test_result_float_tolnorm 2.0 mprec "div-float-int-2";
+
+load_data "30 20";
+calc#div ();
+test_result_float_tolnorm 1.5 mprec "div-float-float-1";
+
+load_data "50_m/s 60_kg/hr";
+calc#div ();
+test_result_float_tolnorm 3000.0 mprec "div-float-float-2";
+
+load_data "(-4, -2) -20 (4, -2)";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-float-complex-1";
+
+load_data "(-1.5773268726, -0.315465374521)_ft^-1*s^-2 -20_m/s (40, -8)_ft^2*s";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "div-float-complex-2";
+
+load_data "(1, -2) (30, -60) #30`d";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-complex-int-1";
+
+load_data "(1, -2)_m^2 (30, -60)_m^2 #30`d";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-complex-int-2";
+
+load_data "(-2, 3) (-30, 45) 15";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-complex-float-1";
+
+load_data "(-0.274328050829, 0.411492076245)_kg*s (-20, 30)_lb^2 15_kg/s";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "div-complex-float-2";
+
+load_data "(-0.2, 0.4) (10, 20) (30, -40)";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 mprec "div-complex-complex-1";
+
+load_data "(-0.00508, 0.01016)_kg^-1*s^-3 (10, 20)_in/s^2 (30, -40)_kg*m*s";
+calc#div ();
+cpx_error ();
+test_result_float_tol 0.0 uprec "div-complex-complex-2";
 
 
 
