@@ -235,27 +235,77 @@ let decode_single_key_string key_string =
 
 
 (* Register a key binding.  This adds hash table entries for translation
- * between curses chtypes and commands (in both directions). *)
+ * between curses chtypes and commands (in both directions).
+ * This can also unregister bindings, if the operation is NoFunc, NoComm, etc. *)
 let register_binding_internal k k_string op =
    match op with
+   |Function NoFunc ->
+      begin try
+         let old_op = Hashtbl.find table_key_function k in
+         Hashtbl.remove table_key_function k;
+         Hashtbl.remove table_function_key old_op
+      with Not_found -> ()
+      end
    |Function _ ->
       Hashtbl.add table_key_function k op;
       Hashtbl.add table_function_key op k_string
+   |Command NoComm ->
+      begin try
+         let old_op = Hashtbl.find table_key_command k in
+         Hashtbl.remove table_key_command k;
+         Hashtbl.remove table_command_key old_op
+      with Not_found -> ()
+      end
    |Command _ ->
       Hashtbl.add table_key_command k op;
       Hashtbl.add table_command_key op k_string
+   |Edit NoEdit ->
+      begin try
+         let old_op = Hashtbl.find table_key_edit k in
+         Hashtbl.remove table_key_edit k;
+         Hashtbl.remove table_edit_key old_op
+      with Not_found -> ()
+      end
    |Edit _ ->
       Hashtbl.add table_key_edit k op;
       Hashtbl.add table_edit_key op k_string
+   |Browse NoBrowse ->
+      begin try
+         let old_op = Hashtbl.find table_key_browse k in
+         Hashtbl.remove table_key_browse k;
+         Hashtbl.remove table_browse_key old_op
+      with Not_found -> ()
+      end
    |Browse _ ->
       Hashtbl.add table_key_browse k op;
       Hashtbl.add table_browse_key op k_string
+   |Extend NoExt ->
+      begin try
+         let old_op = Hashtbl.find table_key_extended k in
+         Hashtbl.remove table_key_extended k;
+         Hashtbl.remove table_extended_key old_op
+      with Not_found -> ()
+      end
    |Extend _ ->
       Hashtbl.add table_key_extended k op;
       Hashtbl.add table_extended_key op k_string
+   |IntEdit NoInt ->
+      begin try
+         let old_op = Hashtbl.find table_key_intedit k in
+         Hashtbl.remove table_key_intedit k;
+         Hashtbl.remove table_intedit_key old_op
+      with Not_found -> ()
+      end
    |IntEdit _ ->
       Hashtbl.add table_key_intedit k op;
       Hashtbl.add table_intedit_key op k_string
+   |VarEdit NoVarEdit ->
+      begin try
+         let old_op = Hashtbl.find table_key_varedit k in
+         Hashtbl.remove table_key_varedit k;
+         Hashtbl.remove table_varedit_key old_op
+      with Not_found -> ()
+      end
    |VarEdit _ ->
       Hashtbl.add table_key_varedit k op;
       Hashtbl.add table_varedit_key op k_string
@@ -374,6 +424,7 @@ let operation_of_string command_str =
    |"function_minimum"              -> (Function Min)
    |"function_maximum"              -> (Function Max)
    |"function_utpn"                 -> (Function Utpn)
+   |"function_noop"                 -> (Function NoFunc)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)
@@ -383,6 +434,7 @@ let operation_of_string command_str =
    |"edit_backspace"                -> (Edit Backspace)
    |"edit_enter"                    -> (Edit Enter)
    |"edit_scientific_notation_base" -> (Edit SciNotBase)
+   |"edit_noop"                     -> (Edit NoEdit)
    |"command_drop"                  -> (Command Drop)
    |"command_clear"                 -> (Command Clear)
    |"command_swap"                  -> (Command Swap)
@@ -410,6 +462,7 @@ let operation_of_string command_str =
    |"command_rand"                  -> (Command Rand)
    |"command_edit_input"            -> (Command EditInput)
    |"command_cycle_help"            -> (Command CycleHelp)
+   |"command_noop"                  -> (Command NoComm)
    |"browse_end"                    -> (Browse EndBrowse)
    |"browse_scroll_left"            -> (Browse ScrollLeft)
    |"browse_scroll_right"           -> (Browse ScrollRight)
@@ -424,14 +477,18 @@ let operation_of_string command_str =
    |"browse_keep"                   -> (Browse Keep)
    |"browse_keepn"                  -> (Browse KeepN)
    |"browse_edit"                   -> (Browse EditEntry)
+   |"browse_noop"                   -> (Browse NoBrowse)
    |"extended_exit"                 -> (Extend ExitExtended)
    |"extended_enter"                -> (Extend EnterExtended)
    |"extended_backspace"            -> (Extend ExtBackspace)
+   |"extended_noop"                 -> (Extend NoExt)
    |"integer_cancel"                -> (IntEdit ExitIntEdit)
+   |"integer_noop"                  -> (IntEdit NoInt)
    |"variable_cancel"               -> (VarEdit ExitVarEdit)
    |"variable_enter"                -> (VarEdit EnterVarEdit)
    |"variable_backspace"            -> (VarEdit VarEditBackspace)
    |"variable_complete"             -> (VarEdit CompleteVarEdit)
+   |"variable_noop"                 -> (VarEdit NoVarEdit)
    |"function_rand"                 -> config_failwith 
                                        "operation \"function_rand\" is deprecated; please replace with \"command_rand\"."
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")

@@ -35,7 +35,7 @@ type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
                             | Store | Purge | Gcd | Lcm | Binom | Perm
                             | Total | Mean | Sumsq | Var |VarBias
                             | Stdev | StdevBias | Min | Max 
-                            | Utpn;;
+                            | Utpn | NoFunc;;
 
 type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
                             | BeginBrowse | BeginExtended | BeginVar | Quit
@@ -43,24 +43,24 @@ type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
                             | SetBin | SetOct | SetDec | SetHex
                             | ToggleAngleMode | ToggleComplexMode | CycleBase
                             | View | About | Refresh | EnterPi | Rand
-                            | EditInput | CycleHelp;;
+                            | EditInput | CycleHelp | NoComm;;
 
 type edit_operation_t     = | Digit | Enter | Backspace | Minus | SciNotBase 
                             | BeginInteger | BeginComplex | BeginMatrix
-                            | Separator | Angle;;
+                            | Separator | Angle | NoEdit;;
 
 type browse_operation_t   = | EndBrowse
                             | ScrollLeft | ScrollRight | RollDown | RollUp
                             | PrevLine | NextLine | Echo | ViewEntry
                             | Drop1 | DropN | Keep | KeepN
-                            | EditEntry;;
+                            | EditEntry | NoBrowse;;
 
-type extended_operation_t = | ExitExtended | EnterExtended | ExtBackspace;;
+type extended_operation_t = | ExitExtended | EnterExtended | ExtBackspace | NoExt;;
 
-type integer_edit_operation_t = | ExitIntEdit;;
+type integer_edit_operation_t = | ExitIntEdit | NoInt;;
 
 type var_edit_operation_t = | ExitVarEdit | EnterVarEdit | VarEditBackspace
-                            | CompleteVarEdit;;
+                            | CompleteVarEdit | NoVarEdit;;
 
 type operation_t = | Function of function_operation_t 
                    | Command  of command_operation_t
