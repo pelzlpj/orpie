@@ -631,6 +631,47 @@ Kit\footnote{http://www.nongnu.org/ocaml-tmk/} written by Nicolas George.  I
 would like to thank these authors for helping to make Orpie possible.
 
 
+\section{Frequently Asked Questions}
+\begin{enumerate}
+   \item {\bf Whatever happened to {\tt rpc}?}
+
+      Over the years I have grown increasingly disenchanted with C++, and
+      as a result I lost interest in maintaining rpc.  When I settled on Ocaml
+      as a replacement language, I began working on Orpie as a way to improve
+      my Ocaml abilities.
+
+   \item {\bf What's wrong with C++?  And what's this Ocaml thing?}
+
+      C++ has had so many misfeatures bolted on that no one can possibly hold
+      the entire syntax in his head at one time.  The syntax itself is horrid,
+      especially when dealing with templates.  The ability to use pointers
+      presents many opportunities to shoot yourself in the foot.
+      Garbage collection and exceptions exist as afterthoughts.  In short, I
+      don't think anyone should consider C++ for a project that does not require
+      low-level hardware access.
+     
+      I found Ocaml after searching for a Better Language that offers good
+      performance.  Ocaml is a functional programming language with a pretty
+      syntax, clean design, and all sorts of nice features that one really
+      should expect from a modern programming language.  The type-checking 
+      compiler is exceedingly strict, and I find that this improves my
+      overall productivity by catching a lot of bugs prior to runtime.  Ocaml
+      also interfaces with C quite easily, and there are bindings available
+      for many commonly used libraries.
+
+   \item {\bf Does Orpie include any enhancements over the old {\tt rpc}?}
+
+      The biggest usability enhancement would be the rcfile for keybindings.
+      The context-sensitive help panel is also new.  Integer data may be
+      entered and manipulated with arbitrary precision (thanks to the Nums 
+      library that ships with Ocaml).  The error messages provided by
+      Orpie are, on average, more informative than those provided by rpc;
+      this is a direct consequence of Ocaml's nice exception handling.
+
+      I also believe that Orpie has fewer bugs in the input handler/parser,
+      but this remains to be seen.
+\end{enumerate}
+
 \section{Contact info}
 Orpie author: Paul Pelzl {\tt <pelzlpj@eecs.umich.edu>} \\
 Orpie website: {\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
