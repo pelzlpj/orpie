@@ -315,7 +315,12 @@ let generate_abbrev_help () =
       (get_abbr (Function Erfc))      ^ "  " ^ 
       (get_abbr (Function Transpose)) ^ "  " ^ 
       (get_abbr (Function Re))        ^ "  " ^ 
-      (get_abbr (Function Im))
+      (get_abbr (Function Im))        ^ "  " ^
+      (get_abbr (Function Mod))       ^ "  " ^
+      (get_abbr (Function Floor))     ^ "  " ^
+      (get_abbr (Function Ceiling))   ^ "  " ^
+      (get_abbr (Function ToInt))     ^ "  " ^
+      (get_abbr (Function ToFloat))
    in
    let functions_str_wrap = trunc_list 
    (Utility.wordwrap_nspace functions_str 34 2) 5 in
