@@ -591,14 +591,20 @@ let draw_help (iface : interface_state_t) =
             wattron win WA.bold;
             mvwaddstr_safe win 9 0 "Matched variables:";
             wattroff win WA.bold;
-            let highlight_len = String.length iface.variable_entry_buffer in
-            let rec draw_matches v_pos match_list =
+            let highlight_len = 
+               begin match iface.completion with
+               |None   -> String.length iface.variable_entry_buffer 
+               |Some _ -> 0
+               end
+            in
+            let rec draw_matches v_pos match_list count =
                if v_pos < iface.scr.hw_lines then
                   begin match match_list with
                   |[] ->
                      ()
                   |m :: tail ->
-                     begin
+                     begin match iface.completion with
+                     |None ->
                         (* highlight the first 'highlight_len' characters *)
                         wattron win WA.bold;
                         let len_str = String.length m in
@@ -607,16 +613,24 @@ let draw_help (iface : interface_state_t) =
                         wattroff win WA.bold;
                         mvwaddstr_safe win v_pos (2 + highlight_len)
                            (Str.string_after m (highlight_len));
-                        draw_matches (succ v_pos) tail
-                     end
+                     |Some num ->
+                        (* highlight the entire selected match *)
+                        if count = num then begin
+                           wattron win WA.bold;
+                           mvwaddstr_safe win v_pos 2 m;
+                           wattroff win WA.bold;
+                        end else
+                           mvwaddstr_safe win v_pos 2 m;
+                     end;
+                     draw_matches (succ v_pos) tail (succ count)
                   end
                else
                   ()
             in
-            if List.length iface.matched_variable_entry_list = 0 then
+            if List.length iface.matched_variables = 0 then
                mvwaddstr_safe win 10 2 "(none)"
             else
-               draw_matches 10 iface.matched_variable_entry_list;
+               draw_matches 10 iface.matched_variables 0;
             assert (wnoutrefresh win)
          end 
       end

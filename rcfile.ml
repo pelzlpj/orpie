@@ -379,6 +379,7 @@ let operation_of_string command_str =
    |"variable_cancel"               -> (VarEdit ExitVarEdit)
    |"variable_enter"                -> (VarEdit EnterVarEdit)
    |"variable_backspace"            -> (VarEdit VarEditBackspace)
+   |"variable_complete"             -> (VarEdit CompleteVarEdit)
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
    end
 

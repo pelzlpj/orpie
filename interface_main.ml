@@ -911,8 +911,8 @@ let handle_begin_variable (iface : interface_state_t) =
       let all_variables = 
          Hashtbl.fold add_variable (iface.calc#get_variables ()) []
       in
-      iface.sorted_variable_list <- List.stable_sort String.compare all_variables;
-      iface.matched_variable_entry_list <- iface.sorted_variable_list;
+      iface.sorted_variables <- List.stable_sort String.compare all_variables;
+      iface.matched_variables <- iface.sorted_variables;
       draw_help iface;
       draw_update_entry iface
    end else
@@ -1553,9 +1553,7 @@ let handle_exit_variable (iface : interface_state_t) =
 
 
 (* search through a list of variables and find all that match
- * iface.variable_entry_buffer.
- * The list is built up in reverse order using Str.search_backward,
- * so the head of the list is actually the first match. *)
+ * iface.variable_entry_buffer. *)
 let match_variable_buffer (iface : interface_state_t) buf =
    let buf_regex = Str.regexp (Str.quote buf) in
    let rec match_aux var_lst matches_lst =
@@ -1568,7 +1566,7 @@ let match_variable_buffer (iface : interface_state_t) buf =
          else
             match_aux tail matches_lst
    in
-   match_aux iface.sorted_variable_list []
+   List.rev (match_aux iface.sorted_variables [])
 
 
 
@@ -1576,9 +1574,10 @@ let match_variable_buffer (iface : interface_state_t) buf =
 let handle_variable_backspace (iface : interface_state_t) =
    let len = String.length iface.variable_entry_buffer in
    if len > 0 then begin
+      iface.completion <- None;
       iface.variable_entry_buffer <- Str.string_before iface.variable_entry_buffer 
       (pred len);
-      iface.matched_variable_entry_list <- 
+      iface.matched_variables <- 
          match_variable_buffer iface iface.variable_entry_buffer;
       draw_help iface;
       draw_update_entry iface
@@ -1599,13 +1598,14 @@ let handle_variable_character (iface : interface_state_t) key =
          (* search through the list of variables for the first one that matches
           * iface.variable_entry_buffer *)
          begin try
-            iface.matched_variable_entry_list <- match_variable_buffer iface test_buffer;
+            iface.completion <- None;
+            iface.matched_variables <- match_variable_buffer iface test_buffer;
             iface.variable_entry_buffer <- test_buffer;
             draw_help iface;
             draw_update_entry iface
          with
             Not_found ->
-               iface.matched_variable_entry_list <- [];
+               iface.matched_variables <- [];
                iface.variable_entry_buffer <- test_buffer;
                draw_help iface;
                draw_update_entry iface
@@ -1625,12 +1625,40 @@ let handle_enter_variable (iface : interface_state_t) =
          iface.entry_type <- FloatEntry;
       iface.interface_mode <- StandardEntryMode;
       iface.help_mode <- Standard;
+      iface.completion <- None;
       iface.variable_entry_buffer <- "";
       draw_help iface;
       draw_stack iface;
       draw_update_entry iface
    end else
       ()
+
+
+(* autocomplete a variable *)
+let handle_complete_variable (iface : interface_state_t) =
+   if List.length iface.matched_variables > 0 then begin
+      begin match iface.completion with
+      |None   -> 
+         iface.completion <- Some 0;
+         iface.variable_entry_buffer_back <- iface.variable_entry_buffer;
+         iface.variable_entry_buffer <- 
+            List.nth iface.matched_variables 0
+      |Some i -> 
+         if i < List.length iface.matched_variables - 1 then begin
+            iface.completion <- Some (succ i);
+            iface.variable_entry_buffer <- 
+               List.nth iface.matched_variables (succ i)
+         end else begin
+            iface.completion <- None;
+            iface.variable_entry_buffer <- iface.variable_entry_buffer_back
+         end
+      end;
+      draw_help iface;
+      draw_update_entry iface
+   end else
+      let _ = beep () in ()
+
+
 
 
 (****************************************************************)
@@ -1782,6 +1810,8 @@ let do_main_loop (iface : interface_state_t) =
                      handle_enter_variable iface
                   |VarEditBackspace ->
                      handle_variable_backspace iface
+                  |CompleteVarEdit ->
+                     handle_complete_variable iface
                   end
                |_ ->
                   failwith "Non-Variable command found in VarEdit Hashtbl"

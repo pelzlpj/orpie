@@ -1,6 +1,9 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* fix crash on autocomplete of variable names: it's a problem in draw_help
+  when trying to highlight more letters than exist in a word
+
 * fix display of the 'about' screen when the number of columns is < 80
 
 * document the user-defined variable usage

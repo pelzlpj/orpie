@@ -46,6 +46,7 @@ bind "l" function_ln
 bind "c" function_conj
 bind "!" function_factorial
 bind "%" function_mod
+bind "S" function_store
 
 # keys for "command" operations, which do not take an argument
 bind "\\" command_drop
@@ -93,6 +94,7 @@ bind "<backspace>" extended_backspace
 bind "@" variable_cancel
 bind "<return>" variable_enter
 bind "<backspace>" variable_backspace
+bind "<tab>" variable_complete
 
 # extended command abbreviations
 # these should be given in the desired order of matching precedence

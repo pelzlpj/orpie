@@ -56,7 +56,8 @@ type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 
 type integer_edit_operation = | ExitIntEdit;;
 
-type var_edit_operation  = | ExitVarEdit | EnterVarEdit | VarEditBackspace;;
+type var_edit_operation  = | ExitVarEdit | EnterVarEdit | VarEditBackspace
+                           | CompleteVarEdit;;
 
 type operation = | Function of function_operation 
                  | Command of command_operation

@@ -87,8 +87,10 @@ type interface_state_t =
    mutable matched_extended_entry_list : string list;                   (* stores the list of all possible command completions *)
    gen_buffer                          : complex_entry_element_t array; (* storage for floating-point (array)-based types *)
    mutable variable_entry_buffer       : string;                        (* stores characters entered in variable entry mode *)
-   mutable matched_variable_entry_list : string list;                   (* stores the list of all matching variable completions *)
-   mutable sorted_variable_list        : string list;                   (* stores an alphabetically sorted list of all variables *)
+   mutable variable_entry_buffer_back  : string;                        (* used in variable completion *)
+   mutable matched_variables           : string list;                   (* stores the list of all matching variable completions *)
+   mutable sorted_variables            : string list;                   (* stores an alphabetically sorted list of all variables *)
+   mutable completion                  : int option;                    (* which one of the list elements to complete variables with *)
    mutable curr_buf                    : int;                           (* which element of gen_buffer is being edited *)
    mutable is_entering_imag            : bool;                          (* is the imaginary component being edited *)
    mutable matrix_cols                 : int;                           (* how many cols in the matrix being entered *)
@@ -121,8 +123,10 @@ let make (c : rpc_calc) (std : screen_t) =
       matched_extended_entry = "";
       matched_extended_entry_list = [];
       variable_entry_buffer = "";
-      matched_variable_entry_list = [];
-      sorted_variable_list = [];
+      variable_entry_buffer_back = "";
+      matched_variables = [];
+      sorted_variables = [];
+      completion = None;
       gen_buffer = Array.make max_matrix_size
          {re_mantissa = ""; re_exponent = "";
          im_mantissa = ""; im_exponent = ""; is_polar = false};
