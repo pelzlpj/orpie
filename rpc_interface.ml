@@ -39,6 +39,20 @@ type rpc_interface_help_mode = | Standard | Extended;;
 type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry 
                                | FloatMatrixEntry | ComplexMatrixEntry;;
 
+type rpc_bindings = {
+   begin_int     : int;
+   begin_complex : int;
+   begin_matrix  : int;
+   enter         : int
+};;
+
+
+let bindings = {
+   begin_int     = int_of_char '#';
+   begin_complex = int_of_char '(';
+   begin_matrix  = int_of_char '[';
+   enter         = 10   (* standard enter key *)
+};;
 
 
 class rpc_interface (c : rpc_calc) (std : rpc_interface_screen) =
@@ -81,16 +95,18 @@ object(self)
       for line = stack_bottom_row to pred (stack_bottom_row + scr.sw_lines) do
          let s = calc#get_display_line line in
          let len = String.length s in
+         assert (wmove scr.stack_win (scr.sw_lines - line) 0);
+         wclrtoeol scr.stack_win;
          if len > scr.sw_cols - 7 then
             (* need to truncate the string *)
             let sub_s = String.sub s 0 (scr.sw_cols - 11) in 
             let line_string = sprintf "%2d:   %s ..." line sub_s in
-            assert (mvwaddstr scr.stack_win (scr.sw_lines - line) 0 line_string)
+            assert (waddstr scr.stack_win line_string)
          else
             let spacer = String.make (scr.sw_cols - 7 - len) ' ' in
             let line_num = sprintf "%2d:   " line in
             let line_string = line_num ^ spacer ^ s in
-            assert (mvwaddstr scr.stack_win (scr.sw_lines - line) 0 line_string)
+            assert (waddstr scr.stack_win line_string)
       done;
       assert (wrefresh scr.stack_win)
 
@@ -98,7 +114,9 @@ object(self)
 
    (* display the entry area *)
    method draw_entry () =
-      assert(mvwaddstr scr.entry_win 0 0 (String.make scr.ew_cols '-'));
+      assert (mvwaddstr scr.entry_win 0 0 (String.make scr.ew_cols '-'));
+      assert (wmove scr.entry_win 1 0);
+      wclrtoeol scr.entry_win;
       let draw_entry_string str =
          let len_str = String.length str in
          begin
@@ -115,7 +133,7 @@ object(self)
          let s = "# " ^ int_entry_buffer in
          draw_entry_string s
       |_ ->
-         ();
+         draw_entry_string int_entry_buffer
 
 
 
@@ -197,6 +215,44 @@ object(self)
          ()
 
 
+   (* write an error message to the stack window *)
+   method draw_error msg =
+      (* FIXME: do something better than this *)
+      assert (wmove scr.stack_win 0 0);
+      wclrtoeol scr.stack_win;
+      assert (waddstr scr.stack_win "  Some Error");
+      let s = String.make scr.sw_cols '-' in
+      assert (mvwaddstr scr.stack_win 1 0 s);
+      assert (wrefresh scr.stack_win)
+
+
+
+   (* parse the entry buffers to obtain an rpc object, then stack#push it *)
+   method push_entry () =
+      match entry_type with
+      |IntEntry ->
+         let base_mode = (calc#get_modes ()).base in
+         let base = match base_mode with
+         |Bin -> 2
+         |Oct -> 8
+         |Dec -> 10
+         |Hex -> 16 in
+         begin
+            try
+               let ival = Big_int_str.big_int_of_string_base int_entry_buffer base in
+               calc#enter_int ival;
+               self#draw_stack ();
+            with Big_int_str.Big_int_string_failure error_msg ->
+               self#draw_error error_msg
+         end;
+         entry_type <- FloatEntry;
+         int_entry_buffer <- "";
+         self#draw_entry ()
+      |_ ->
+         ()
+
+
+
    (* accept and process input *)
    method do_main_loop () =
       while true do
@@ -204,26 +260,39 @@ object(self)
          if is_extended_entry then
             (* do something here *)
             ()
-         else (
-            match char_of_int key with
-            |'#' ->
-               Printf.fprintf stdout "key = %d\n" key;
-               flush stdout;
-               if entry_type = FloatEntry then
-                  (entry_type <- IntEntry;
-                  int_entry_buffer <- "";
-                  self#draw_entry ())
+         else
+            begin
+(*               Printf.fprintf stdout "key = %d\n" key;
+               flush stdout; *)
+               if key = bindings.enter then
+                  self#push_entry ()
+               else if key = bindings.begin_int then
+                  if entry_type = FloatEntry then
+                     (entry_type <- IntEntry;
+                     int_entry_buffer <- "";
+                     self#draw_entry ())
+                  else
+                     () 
                else
-                  ()
-            |c ->
-               let digits = "0123456789abcdefABCDEF" in
-               if String.contains digits c then
-                  (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
-                  self#draw_entry ())
-               else
-                  ()
-         )
+                  match entry_type with
+                  |IntEntry ->
+                     (let digits = "0123456789abcdefABCDEF" in
+                     try
+                        let c = char_of_int key in
+                        if String.contains digits c then
+                           (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
+                           self#draw_entry ())
+                        else
+                           ()
+                     with Invalid_argument "char_of_int" ->
+                        ())
+                  |_ ->
+                     (* handle other entry types *)
+                     ()
+            end
       done
+
+
 
 
 end;;
