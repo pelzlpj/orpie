@@ -153,9 +153,12 @@ let string_of_big_int_base (num : big_int) (base : int) =
 * algorithm that requires one long division for every digit output. *)
 (* Note 1: This runs in logarithmic stack space, so we should be able to handle
  * some pretty large big_ints before worrying about blowing the stack. *)
-(* Note 2: a faster method for computing a divisor would make this go a
+(* Note 2: A faster method for computing a divisor could make this go a
  * lot quicker yet; gprof indicates that most of the time is spent in
  * multiplication ==> the power_int_positive_int_base call. *)
+(* Note 3: This routine actually appears to outperform string_of_big_int()
+ * for computing decimal representations.  CPU time decrease looks to be around
+ * a third. *)
 let string_of_big_int_base_gen (num : big_int) (base : int) =
    if base >= 2 && base <= 36 then
       let rec str_of_big_int_aux (ival : big_int) =

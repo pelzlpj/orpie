@@ -262,7 +262,7 @@ class rpc_stack =
                            let s = string_of_big_int_base el 16 in
                            "# " ^ s ^ " h"
                         |Dec ->
-                           let s = string_of_big_int el in
+                           let s = string_of_big_int_base_gen el 10 in
                            "# " ^ s ^ " d"
                      end
                   |RpcFloat el ->
@@ -384,7 +384,7 @@ class rpc_stack =
                         let s = string_of_big_int_base el 16 in
                         "#" ^ s ^ "_h"
                      |Dec ->
-                        let s = string_of_big_int el in
+                        let s = string_of_big_int_base_gen el 10 in
                         "#" ^ s ^ "_d"
                   end
                |RpcFloatMatrix el ->
