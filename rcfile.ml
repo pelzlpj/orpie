@@ -313,6 +313,7 @@ let operation_of_string command_str =
    |"browse_view"                   -> (Browse ViewEntry)
    |"browse_drop"                   -> (Browse Drop1)
    |"browse_dropn"                  -> (Browse DropN)
+   |"browse_keep"                   -> (Browse Keep)
    |"extended_exit"                 -> (Extend ExitExtended)
    |"extended_enter"                -> (Extend EnterExtended)
    |"extended_backspace"            -> (Extend ExtBackspace)

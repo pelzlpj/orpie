@@ -418,7 +418,9 @@ let draw_help (iface : interface_state_t) =
          try_find Rcfile.key_of_browse (Browse Drop1));
          mvwaddstr_safe win 15 2 ("dropn       : " ^
          try_find Rcfile.key_of_browse (Browse DropN));
-         mvwaddstr_safe win 17 1 ("exit browsing mode: " ^
+         mvwaddstr_safe win 16 2 ("keep        : " ^
+         try_find Rcfile.key_of_browse (Browse Keep));
+         mvwaddstr_safe win 18 1 ("exit browsing mode: " ^
          try_find Rcfile.key_of_browse (Browse EndBrowse));
          assert (wnoutrefresh win)
       |_ ->

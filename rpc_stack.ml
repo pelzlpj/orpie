@@ -174,6 +174,15 @@ class rpc_stack =
             raise (Stack_error "insufficient stack elements")
 
 
+      (* keep only a particular stack element *)
+      method keep num =
+         if num <= len then
+            (stack.(0) <- stack.(len - num);
+            len <- 1)
+         else
+            raise (Stack_error "insufficient stack elements")
+
+
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =
