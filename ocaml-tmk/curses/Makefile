@@ -31,7 +31,7 @@ mlcurses.cma: curses.cmo
 	$(OCAMLMKLIB) -o mlcurses -linkall $^
 
 mlcurses.cmxa: curses.cmx
-	$(OCAMLMKLIB) -o mlcurses -linkall $^
+	$(OCAMLMKLIB) -o mlcurses -l$(CURSES) -linkall $^
 
 curses.cmi: curses.mli
 	$(OCAMLC) -c $^
