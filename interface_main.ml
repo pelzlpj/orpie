@@ -365,7 +365,7 @@ let push_entry (iface : interface_state_t) =
 
 (* handle an 'enter' keypress *)
 let handle_enter (iface : interface_state_t) =
-   iface.interface_mode <- StandardEntryMode;
+   iface.interface_mode <- StandardEditMode;
    draw_help iface;
    try
       if iface.has_entry then
@@ -518,7 +518,7 @@ let handle_angle (iface : interface_state_t) =
 
 (* cancel integer entry mode *)
 let handle_exit_int (iface : interface_state_t) =
-   iface.interface_mode <- StandardEntryMode;
+   iface.interface_mode <- StandardEditMode;
    iface.entry_type <- FloatEntry;
    iface.is_entering_base <- false;
    iface.int_base_string <- "";
@@ -900,8 +900,8 @@ let handle_digit (iface : interface_state_t) key =
 
 (* begin abbrev entry *)
 let handle_begin_abbrev (iface : interface_state_t) =
-   if iface.interface_mode <> AbbrevEntryMode then begin
-      iface.interface_mode <- AbbrevEntryMode;
+   if iface.interface_mode <> AbbrevEditMode then begin
+      iface.interface_mode <- AbbrevEditMode;
       iface.abbrev_or_const <- IsAbbrev;
       draw_help iface;
       draw_update_entry iface
@@ -911,8 +911,8 @@ let handle_begin_abbrev (iface : interface_state_t) =
 
 (* begin constant entry *)
 let handle_begin_const (iface : interface_state_t) =
-   if iface.interface_mode <> AbbrevEntryMode then begin
-      iface.interface_mode <- AbbrevEntryMode;
+   if iface.interface_mode <> AbbrevEditMode then begin
+      iface.interface_mode <- AbbrevEditMode;
       iface.abbrev_or_const <- IsConst;
       draw_help iface;
       draw_update_entry iface
@@ -998,7 +998,7 @@ let handle_end_browse (iface : interface_state_t) =
    iface.horiz_scroll <- 0;
    iface.stack_selection <- 1;
    iface.stack_bottom_row <- 1;
-   iface.interface_mode <- StandardEntryMode;
+   iface.interface_mode <- StandardEditMode;
    draw_help iface;
    draw_update_stack iface
    
@@ -1600,8 +1600,8 @@ let process_command (iface : interface_state_t) cc =
 
 (* exit abbrev entry *)
 let handle_exit_abbrev (iface : interface_state_t) =
-   if iface.interface_mode = AbbrevEntryMode then begin
-      iface.interface_mode <- StandardEntryMode;
+   if iface.interface_mode = AbbrevEditMode then begin
+      iface.interface_mode <- StandardEditMode;
       iface.abbrev_entry_buffer <- "";
       iface.matched_abbrev_entry <- "";
       draw_help iface;
@@ -1682,8 +1682,8 @@ let handle_abbrev_character (iface : interface_state_t) key =
 
 (* enter an abbrev entry *)
 let handle_enter_abbrev (iface : interface_state_t) =
-   if iface.interface_mode = AbbrevEntryMode then begin
-      iface.interface_mode <- StandardEntryMode;
+   if iface.interface_mode = AbbrevEditMode then begin
+      iface.interface_mode <- StandardEditMode;
       begin try
          iface.matched_abbrev_entry_list <- 
             match_abbrev_buffer iface iface.abbrev_entry_buffer;
@@ -1727,7 +1727,7 @@ let handle_enter_abbrev (iface : interface_state_t) =
 (* exit variable entry *)
 let handle_exit_variable (iface : interface_state_t) =
    if iface.interface_mode = VarEditMode then begin
-      iface.interface_mode <- StandardEntryMode;
+      iface.interface_mode <- StandardEditMode;
       iface.entry_type <- FloatEntry;
       iface.variable_entry_buffer <- "";
       draw_help iface;
@@ -1803,7 +1803,7 @@ let handle_enter_variable (iface : interface_state_t) =
          push_entry iface
       else
          iface.entry_type <- FloatEntry;
-      iface.interface_mode <- StandardEntryMode;
+      iface.interface_mode <- StandardEditMode;
       iface.completion <- None;
       iface.variable_entry_buffer <- "";
       draw_help iface;
@@ -1846,7 +1846,7 @@ let handle_complete_variable (iface : interface_state_t) =
 (* exit units entry *)
 let handle_exit_units (iface : interface_state_t) =
    if iface.interface_mode = UnitEditMode then begin
-      iface.interface_mode <- StandardEntryMode;
+      iface.interface_mode <- StandardEditMode;
       iface.units_entry_buffer <- "";
       iface.is_entering_units <- false;
       draw_update_entry iface
@@ -1862,7 +1862,7 @@ let handle_units_backspace (iface : interface_state_t) =
       (pred len);
       draw_update_entry iface
    end else begin
-      iface.interface_mode <- StandardEntryMode;
+      iface.interface_mode <- StandardEditMode;
       iface.is_entering_units <- false;
       draw_update_entry iface
    end
@@ -2115,12 +2115,12 @@ let do_main_loop (iface : interface_state_t) =
          handle_resize iface
       else
          match iface.interface_mode with
-         |StandardEntryMode -> handle_keypress_standard key iface
-         |IntEditMode       -> handle_keypress_intedit key iface
-         |UnitEditMode      -> handle_keypress_unitedit key iface
-         |AbbrevEntryMode   -> handle_keypress_abbrev key iface
-         |VarEditMode       -> handle_keypress_varedit key iface
-         |BrowsingMode      -> handle_keypress_browse key iface
+         |StandardEditMode -> handle_keypress_standard key iface
+         |IntEditMode      -> handle_keypress_intedit key iface
+         |AbbrevEditMode   -> handle_keypress_abbrev key iface
+         |VarEditMode      -> handle_keypress_varedit key iface
+         |UnitEditMode     -> handle_keypress_unitedit key iface
+         |BrowsingMode     -> handle_keypress_browse key iface
    done
 
 

@@ -285,11 +285,11 @@ let draw_entry (iface : interface_state_t) =
          "@ " ^ iface.variable_entry_buffer
    in
    begin match iface.interface_mode with
-   |StandardEntryMode ->
+   |StandardEditMode ->
       draw_entry_string data_string 0
    |IntEditMode ->
       draw_entry_string data_string 0
-   |AbbrevEntryMode ->
+   |AbbrevEditMode ->
       let highlight_len = String.length iface.abbrev_entry_buffer in
       if highlight_len = 0 then
          begin match iface.abbrev_or_const with
@@ -722,11 +722,11 @@ let draw_help (iface : interface_state_t) =
          with Not_found -> "(N/A)"
       in
       begin match iface.interface_mode with
-      |StandardEntryMode | UnitEditMode -> 
+      |StandardEditMode | UnitEditMode -> 
          draw_help_standard iface win mvwaddstr_safe try_find
       |IntEditMode ->
          draw_help_intedit iface win mvwaddstr_safe try_find
-      |AbbrevEntryMode ->
+      |AbbrevEditMode ->
          draw_help_abbrev iface win mvwaddstr_safe try_find
       |VarEditMode ->
          draw_help_varedit iface win mvwaddstr_safe try_find

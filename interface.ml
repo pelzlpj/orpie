@@ -35,8 +35,8 @@ type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;
 
-type interface_mode_t = | StandardEntryMode | IntEditMode | AbbrevEntryMode 
-                        | VarEditMode | BrowsingMode | UnitEditMode;;
+type interface_mode_t = | StandardEditMode | IntEditMode | AbbrevEditMode 
+                        | VarEditMode | UnitEditMode | BrowsingMode;;
 
 type abbrev_const_t = IsAbbrev | IsConst;;
 
@@ -112,7 +112,7 @@ let make (c : rpc_calc) (std : screen_t) =
       run_calc = true;
       stack_bottom_row = 1;
       stack_selection = 1;
-      interface_mode = StandardEntryMode;
+      interface_mode = StandardEditMode;
       horiz_scroll = 0;
       help_page = 0;
       has_entry = false;
