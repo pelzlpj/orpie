@@ -42,7 +42,7 @@ done;;
 (* Algorithm: continually divide 'num' by 'base'.  The remainders
  *            are the digits in the string, right-to-left. 
  *            'zero_str' keeps track of the zeros that would be added
- *            to the front of the string; they are only added if there
+ *            to the front of the string; they are only prepended if there
  *            is a nonzero digit. *)
 let string_of_big_int_base (num : big_int) (base : int) =
    if base >= 2 && base <= 36 then
@@ -50,19 +50,21 @@ let string_of_big_int_base (num : big_int) (base : int) =
       (* get_digit recursively adds one more digit on the left end of the string,
        * exiting when the quotient becomes zero. *)
       let rec get_digit quotient zero_str str =
-         let eq_zero = (compare_big_int quotient zero_big_int) in
-         if eq_zero = 0 then
+         let test_zero = (compare_big_int quotient zero_big_int) in
+         match test_zero with
+         |0 ->
             str
-         else if eq_zero = 1 then
+         |1 ->
             let quot, rem = quomod_big_int quotient big_base in
             let irem = int_of_big_int rem in
-            let digit = digits.[irem] in
-            match irem with
+            let digit = digits.[irem] in (
+            match irem with 
             |0 ->
                get_digit quot ((String.make 1 digit) ^ zero_str) str
             |_ ->
                get_digit quot "" ((String.make 1 digit) ^ zero_str ^ str)
-         else
+            )
+         |_ ->
             raise (Big_int_string_failure "negative quotient")
       in
       let s = get_digit (abs_big_int num) "" "" in
