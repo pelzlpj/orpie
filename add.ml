@@ -20,7 +20,7 @@
  *)
 
 open Rpc_stack
-open Utility
+open Gsl_assist
 open Big_int
 
 let add (stack : rpc_stack) (do_backup : unit -> unit) =

@@ -21,7 +21,7 @@
 
 open Rpc_stack
 open Gsl_error
-open Utility
+open Gsl_assist
 
 
 let inv (stack : rpc_stack) (do_backup : unit -> unit) =

@@ -19,6 +19,10 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* utility.ml
+ *
+ * miscellaneous helper functions that don't really fit elsewhere *)
+
 open Curses;;
 
 

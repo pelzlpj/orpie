@@ -56,8 +56,8 @@ all: $(OCAMLBEST)
 # bytecode and native-code compilation
 ######################################
 
-CMO = big_int_str.cmo utility.cmo install.cmo rcfile.cmo rpc_stack.cmo add.cmo \
-		sub.cmo mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
+CMO = big_int_str.cmo gsl_assist.cmo install.cmo rcfile.cmo utility.cmo rpc_stack.cmo \
+		add.cmo sub.cmo mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
 		operations.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma
@@ -85,14 +85,14 @@ opt: $(NAME).opt $(NAME2).opt
 $(NAME).byte: subdirs_byte $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
 
-$(NAME2).byte: subdirs_byte utility.ml curses-keys.ml
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.ml curses-keys.ml
+$(NAME2).byte: subdirs_byte utility.cmo curses-keys.cmo
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.cmo curses-keys.cmo
 
 $(NAME).opt: subdirs_opt $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
 
-$(NAME2).opt: subdirs_opt utility.ml curses-keys.ml
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.ml curses-keys.ml
+$(NAME2).opt: subdirs_opt utility.cmx curses-keys.cmx
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
 
 # curses and gsl bindings
