@@ -1323,8 +1323,16 @@ class rpc_calc =
 
       method eval () =
          if stack#length > 0 then begin
-            self#backup ();
-            self#evaln 1
+            (* the extra push and pop is necessary to be able to back up the
+             * stack *only* when the eval() changes it *)
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcVariable s ->
+               stack#push gen_el;
+               self#backup ();
+               self#evaln 1
+            |_ ->
+               stack#push gen_el
          end else
             raise (Invalid_argument "empty stack")
          
