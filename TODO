@@ -10,6 +10,11 @@ Definitely before release:
 
    * fix the 'install' and 'uninstall' Makefile targets
 
+   * fix the crash on hitting 'neg' on an empty matrix element
+
+   * arg function should be sensitive to angle mode
+
+   * inversion of integer constant should not remove the last stack entry
 
 * create a parser that can read data structures entered into an ascii file,
   so I can use $EDITOR to enter big matrices (for example)

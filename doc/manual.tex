@@ -30,7 +30,8 @@ Octave\footnote{http://www.octave.org} are already very effective for such
 tasks.  Orpie focuses specifically on helping you to crunch numbers quickly.
 
 Orpie is written in Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/}, a
-high-performance functional programming language.
+high-performance functional programming language with a whole lot of nice
+features.  I highly recommend it.
 
 \section{Installation}
 This section describes how to install Orpie by compiling from source.
@@ -348,14 +349,14 @@ You may notice that the  {\tt orpierc} syntax is similar to the syntax used in
 the configuration file for the Mutt email client (muttrc).
 
 \subsubsection{Setting Variables}
-Syntax: {\tt set {\em variable} {\em value\_string}}
-
+\label{setvar}
+Syntax: {\tt set {\em variable} {\em value\_string}} \\ \\
 Several configuration variables can be set using this syntax; see Section \ref{variables}
-to see a list.  The value should be a quoted string.
+to see a list.  The variables are unquoted, but the values should be quoted strings.
 
 \subsubsection{Creating Key Bindings}
-Syntax: {\tt bind {\em key\_identifier operation}}
-
+\label{bindings}
+Syntax: {\tt bind {\em key\_identifier operation}} \\ \\
 This command will bind a keypress to execute a calculator operation.  The various operations
 may be found in Section \ref{operationslist}. Key identifiers may be specified
 by strings that represent a single keypress, for example {\tt "m"} (quotes
@@ -386,8 +387,8 @@ identifiers in octal notation.  As an example, you could use {\tt $\backslash$02
 ({\em without} quotes) to represent Ctrl-T.
 
 \subsubsection{Creating Extended Command Abbreviations}
-Syntax: {\tt abbrev {\em command\_abbreviation operation}}
-
+\label{abbreviations}
+Syntax: {\tt abbrev {\em command\_abbreviation operation}} \\ \\
 You can use this syntax to set the extended command abbreviations used within
 Orpie to represent the various operations.  A list of available operations may be found
 in Section \ref{operationslist}.  The command abbreviations should be quoted strings,
@@ -398,6 +399,137 @@ usually just a few letters in order to select the desired command.  The order of
 autocompletion matches will be the same as the order in which the abbreviations are
 registered by the rcfile--so you may wish to place the more commonly used command
 abbreviations earlier in the list.
+
+\subsection{Configuration Variables}
+\label{variables}
+The following configuration variables may be set as described in Section \ref{setvar}:
+\begin{itemize}
+   \item {\tt datafile} \\
+      This variable should be set to the full path of the Orpie datafile, which is used
+      to save the calculator state.  A tilde prefix will be expanded to the home
+      directory.  The default path is \\
+      {\tt "\~{}/.orpie/calc\_state"}.
+   \item {\tt buffer} \\
+      This variable should be set to the full path of a buffer file that Orpie uses
+      to pass fullscreen viewing data to the editor of your choice.  The default
+      is {\tt "\~{}/.orpie/fullscreen"}.
+   \item {\tt editor} \\
+      This variable may be set to the fullscreen editor of your choice.  The default
+      value is {\tt "vi"}.  It is recommended that you choose an editor that offers
+      horizontal scrolling in place of word wrapping, so that the columns of large 
+      matrices can be properly aligned.  (The Vim editor could be used in this fashion
+      by setting {\tt editor} to {\tt "vim -c 'set nowrap'"}.)
+\end{itemize}
+
+\subsection{Calculator Operations}
+\label{operationslist}
+Every calculator operation can be made available to the interface using the syntax
+described in Sections \ref{bindings} and \ref{abbreviations}.  The following is a
+list of every available operation.
+
+\subsubsection{Functions}
+\label{functions}
+The following operations are functions--that is, they will consume at least one
+argument from the stack.  Orpie will generally abort the computation and
+provide an informative error message if a function cannot be successfully applied (for
+example, if you try to compute the transpose of something that is not a matrix).
+
+For the integer constant data type, basic arithmetic operations will yield an exact
+integer constant result.  Division of two integer constants will yield the quotient of
+the division.  The more complicated functions will generally promote the integer constant
+to a real number, and as such the arithmetic will no longer be exact.
+\begin{itemize}
+   \item {\tt function\_10\_x} \\
+      Raise 10 to the power of the last stack element (inverse of function\_log10).
+   \item {\tt function\_abs} \\
+      Compute the absolute value of the last stack element.
+   \item {\tt function\_acos} \\
+      Compute the inverse cosine of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item {\tt function\_acosh} \\
+      Compute the inverse hyperbolic cosine of the last stack element.
+   \item {\tt function\_add} \\
+      Add last two stack elements.
+   \item {\tt function\_arg} \\
+      Compute the argument (phase angle of complex number) of the last stack
+      element.  The value will be provided in either degrees or radians,
+      depending on the current angle mode of the calculator.
+   \item {\tt function\_asin} \\
+      Compute the inverse sine of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item {\tt function\_asinh} \\
+      Compute the inverse hyperbolic sine of the last stack element.
+   \item {\tt function\_atan} \\
+      Compute the inverse tangent of the last stack element.  For real numbers,
+      The result will be provided either in degrees or radians, depending on
+      the angle mode of the calculator.
+   \item {\tt function\_atanh} \\
+      Compute the inverse hyperbolic tangent of the last stack element.
+   \item {\tt function\_cos} \\
+      Compute the cosine of the last stack element.  If the argument is real,
+      it will be assumed to be either degrees or radians, depending on the
+      angle mode of the calculator.
+   \item {\tt function\_cosh} \\
+      Compute the hyperbolic cosine of the last stack element.
+   \item {\tt function\_conj} \\
+      Compute the complex conjugate of the last stack element.
+   \item {\tt function\_div} \\
+      Divide element 2 by element 1.
+   \item {\tt function\_erf} \\
+      Compute the error function of the last stack element.
+   \item {\tt function\_erfc} \\
+      Compute the complementary error function of the last stack element.
+   \item {\tt function\_exp} \\
+      Evaluate the exponential function of the last stack element.
+   \item {\tt function\_factorial} \\
+      Compute the factorial of the last stack element.  Note: this is not
+      exact, even for the integer constant data type.  It is computed using
+      the gamma function and as such is subject to rounding errors.
+   \item {\tt function\_gamma} \\
+      Compute the Euler gamma function of the last stack element.
+   \item {\tt function\_im} \\
+      Compute the imaginary part of the last stack element.
+   \item {\tt function\_inv} \\
+      Compute the multiplicative inverse of the last stack element.
+   \item {\tt function\_ln} \\
+      Compute the natural logarithm of the last stack element.
+   \item {\tt function\_lngamma} \\
+      Compute the natural logarithm of the Euler gamma function of the last
+      stack element.
+   \item {\tt function\_log10} \\
+      Compute the base-10 logarithm of the last stack element.
+   \item {\tt function\_mult} \\
+      Multiply last two stack elements.
+   \item {\tt function\_neg} \\
+      Negate last stack element.
+   \item {\tt function\_pow} \\
+      Raise element 2 to the power of element 1.
+   \item {\tt function\_re} \\
+      Compute the real part of the last stack element.
+   \item {\tt function\_sin} \\
+      Compute the sine of the last stack element.  If the argument is real, it
+      will be assumed to be either degrees or radians, depending on the angle
+      mode of the calculator.
+   \item {\tt function\_sinh} \\
+      Compute the hyperbolic sine of the last stack element.
+   \item {\tt function\_sq} \\
+      Square the last stack element.
+   \item {\tt function\_sqrt} \\
+      Compute the square root of the last stack element.
+   \item {\tt function\_sub} \\
+      Subtract element 1 from element 2.
+   \item {\tt function\_tan} \\
+      Compute the tangent of the last stack element.  If the argument is real,
+      it will be assumed to be either degrees or radians, depending on the
+      angle mode of the calculator.
+   \item {\tt function\_tanh} \\
+      Compute the hyperbolic tangent of the last stack element.
+   \item {\tt function\_transpose} \\
+      Compute the matrix transpose of the last stack element.
+\end{itemize}
+
 
 \section{Licensing}
 Orpie has been made available under the GNU General Public License (GPL), 
@@ -424,7 +556,7 @@ would also welcome volunteers interested in packaging Orpie for various platform
 
 Orpie is developed with the aid of the excellent GNU Arch
 RCS\footnote{http://www.gnu.org/software/gnu-arch/}.  Interested 
-developers are advised to track Orpie development via my public repository: \\
+developers are advised to track Orpie development via my public archive: \\
 \hspace*{2cm}{\tt pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
 \hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004} .  
 
