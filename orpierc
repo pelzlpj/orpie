@@ -165,6 +165,7 @@ abbrev "utpn"    function_utpn
 abbrev "ustand"  function_standardize_units
 abbrev "uconvert" function_convert_units
 abbrev "uvalue"  function_unit_value
+abbrev "trace"   function_trace
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

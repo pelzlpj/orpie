@@ -3,6 +3,8 @@ Orpie ChangeLog
 
 v1.4
 
+   2004-08-30        Implemented matrix trace.
+
    2004-08-29        Integrated unit handling code.  Real and complex 
                      scalars and matrices can are now dimensioned
                      quantities.  Unit conversion and base

@@ -445,6 +445,7 @@ let operation_of_string command_str =
    |"function_standardize_units"    -> (Function StandardizeUnits)
    |"function_convert_units"        -> (Function ConvertUnits)
    |"function_unit_value"           -> (Function UnitValue)
+   |"function_trace"                -> (Function Trace)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

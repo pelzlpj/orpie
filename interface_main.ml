@@ -1509,6 +1509,8 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#convert_units
    |UnitValue ->
       handle_function_call iface iface.calc#unit_value
+   |Trace ->
+      handle_function_call iface iface.calc#trace
    end
 
 

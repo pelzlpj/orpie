@@ -36,7 +36,7 @@ type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
                             | Total | Mean | Sumsq | Var |VarBias
                             | Stdev | StdevBias | Min | Max 
                             | Utpn | StandardizeUnits | ConvertUnits
-                            | UnitValue;;
+                            | UnitValue | Trace;;
 
 type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
                             | BeginBrowse | BeginAbbrev | BeginVar | Quit

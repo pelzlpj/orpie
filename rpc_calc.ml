@@ -2307,6 +2307,55 @@ class rpc_calc =
             raise_invalid "unit conversion target must be real-valued"
 
 
+      (* trace of a matrix *)
+      method trace () = self#check_args 1 "trace"
+      self#internal_trace
+
+      method private internal_trace () =
+         self#evaln 1;
+         let gen_el = stack#pop () in
+         match gen_el with
+         |RpcFloatMatrixUnit (el, uu) ->
+            let n, m = Gsl_matrix.dims el in
+            if n = m then begin
+               let result = ref 0.0 in
+               for i = 0 to pred n do
+                  result := !result +. el.{i, i}
+               done;
+               let new_el = {
+                  Units.coeff = {
+                     Complex.re = !result;
+                     Complex.im = 0.0
+                  };
+                  Units.factors = uu.Units.factors
+               } in
+               stack#push (RpcFloatUnit new_el)
+            end else begin
+               stack#push gen_el;
+               raise_invalid "argument of trace must be a square matrix"
+            end
+         |RpcComplexMatrixUnit (el, uu) ->
+            let n, m = Gsl_matrix_complex.dims el in
+            if n = m then begin
+               let result = ref Complex.zero in
+               for i = 0 to pred n do
+                  result := Complex.add !result el.{i, i}
+               done;
+               let new_el = {
+                  Units.coeff   = !result;
+                  Units.factors = uu.Units.factors
+               } in
+               stack#push (RpcComplexUnit new_el)
+            end else begin
+               stack#push gen_el;
+               raise_invalid "argument of trace must be a square matrix"
+            end
+         |_ ->
+            stack#push gen_el;
+            raise_invalid "argument of trace must be a square matrix"
+
+
+
 
 (*      method print_stack () =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in
