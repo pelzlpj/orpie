@@ -110,10 +110,10 @@ $(NAME2).byte: $(CURSES_BOBJS) utility.cmo curses-keys.cmo
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.cmo curses-keys.cmo
 
 $(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(CMX) $(OLFLAGS)
 
 $(NAME2).opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx $(OLFLAGS)
 
 # static build seems to require mashing all the C objects into a library
 $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
@@ -132,7 +132,7 @@ my-static-libs:
 
 # calculator testing program
 test.opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX) $(OLFLAGS)
 
 
 VERSION=1.4.0
