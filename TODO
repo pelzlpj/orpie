@@ -7,8 +7,8 @@ Definitely before release:
    * clean up the help panel; ideally, the hotkeys should be displayed
      in the main help window
 
-   * improve the build script (link directly with relevant portions of
-     ocamlgsl-0.3.2, so the user will need only GSL and ncurses)
+   * fix the build script, so it (1) detects libgsl and (2) provides
+     the proper optimization flags to the ocamlgsl compile process
 
 
 * create a parser that can read data structures entered into an ascii file,

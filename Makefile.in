@@ -45,17 +45,11 @@ DEPFLAGS = -pp camlp4o
 # main target
 #############
 
-NAME = orpie
+NAME  = orpie
 NAME2 = orpie-curses-keys
 
 all: $(OCAMLBEST)
 
-SUBDIRS = curses gsl
-
-.PHONY: subdirs $(SUBDIRS)
-
-$(SUBDIRS):
-	$(MAKE) -C $@
 
 
 # bytecode and native-code compilation
@@ -79,7 +73,6 @@ GSL_CMX = $(GSL_CMO:.cmo=.cmx)
 GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o \
 		 gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_vector_double.o gsl/mlgsl_permut.o \
 		 gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o 
-
 GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
 GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
@@ -88,24 +81,42 @@ GENERATED = version.ml
 byte: $(NAME).byte $(NAME2).byte
 opt: $(NAME).opt $(NAME2).opt
 
-$(NAME).byte: $(SUBDIRS) $(CMO)
+$(NAME).byte: subdirs_byte $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
 
-$(NAME2).byte: $(SUBDIRS) curses-keys.ml
+$(NAME2).byte: subdirs_byte curses-keys.ml
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses-keys.ml
 
-$(NAME).opt: $(SUBDIRS) $(CMX)
+$(NAME).opt: subdirs_opt $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
 
-$(NAME2).opt: $(SUBDIRS) curses-keys.ml
+$(NAME2).opt: subdirs_opt curses-keys.ml
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses-keys.ml
 
+
+# curses and gsl bindings
+#####################################
+
+SUBDIRS = curses gsl
+
+.PHONY: subdirs_byte subdirs_opt $(SUBDIRS)
+
+subdirs_byte: 
+	for dir in $(SUBDIRS); do \
+	export BUILD_TYPE=byte && $(MAKE) -C $$dir; \
+	done
+
+subdirs_opt: $(SUBDIRS)
+	for dir in $(SUBDIRS); do \
+	export BUILD_TYPE=opt && $(MAKE) -C $$dir; \
+	done
 
 VERSION=1.0
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
 	echo "let date = \""`date`"\"" >> version.ml
+
 
 # installation
 ##############

@@ -33,7 +33,6 @@ OCAMLBEST= @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
 OCAMLWIN32 = @OCAMLWIN32@
 EXE = @EXE@
-DEFS = @DEFS@
 
 INCLUDES =
 BFLAGS = -g $(INCLUDES)
@@ -43,7 +42,7 @@ CFLAGS = -Wall -fPIC -DPIC
 # main target
 #############
 
-all: byte opt
+all: $(BUILD_TYPE)
 
 # bytecode and native-code compilation
 ######################################
@@ -84,7 +83,7 @@ version.ml: Makefile
 	$(OCAMLOPT) -pp cpp -c $(OFLAGS) $<
 
 .c.o:
-	$(OCAMLC) -ccopt "$(CFLAGS) $(DEFS)" -c $<
+	$(OCAMLC) -ccopt "$(CFLAGS)" -c $<
 
 
 # Emacs tags
