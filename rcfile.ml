@@ -262,6 +262,7 @@ let operation_of_string command_str =
    |"function_lngamma"              -> (Function LnGamma)
    |"function_erf"                  -> (Function Erf)
    |"function_erfc"                 -> (Function Erfc)
+   |"function_factorial"            -> (Function Fact)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

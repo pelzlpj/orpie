@@ -36,6 +36,8 @@ let initialize_screen () =
 let calc = new Rpc_calc.rpc_calc;;
 let iface = Interface.make calc (initialize_screen ());;
 
+(* initialize the error handler *)
+Gsl_error.init ();;
 
 try
    Interface_main.run iface

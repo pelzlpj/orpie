@@ -733,9 +733,21 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_sf.gamma (float_of_big_int el)))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.gamma (float_of_big_int el)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_sf.gamma el))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.gamma el))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -752,9 +764,21 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_sf.lngamma (float_of_big_int el)))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.lngamma (float_of_big_int el)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_sf.lngamma el))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.lngamma el))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -771,9 +795,21 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_sf.erf (float_of_big_int el)))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.erf (float_of_big_int el)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_sf.erf el))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.erf el))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -791,9 +827,21 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (Gsl_sf.erfc (float_of_big_int el)))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.erfc (float_of_big_int el)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |RpcFloat el ->
-                  stack#push (RpcFloat (Gsl_sf.erfc el))
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.erfc el))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -801,6 +849,38 @@ class rpc_calc =
          else
             raise (Invalid_argument "empty stack")
 
+
+
+      (* factorial (calls gamma function) *)
+      method fact () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.gamma ((float_of_big_int el) +.
+                     1.0)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
+               |RpcFloat el ->
+                  begin try
+                     stack#push (RpcFloat (Gsl_sf.gamma (el +. 1.0)))
+                  with
+                     Gsl_error.Gsl_exn (err, errstr) ->
+                        (stack#push gen_el;
+                        raise (Invalid_argument errstr))
+                  end
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
 
 
       method enter_pi () =

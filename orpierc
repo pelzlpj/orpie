@@ -37,6 +37,7 @@ bind "\\Ca" function_arg
 bind "e" function_exp
 bind "l" function_ln
 bind "c" function_conj
+bind "!" function_factorial
 
 # keys for "command" operations, which do not take an argument
 bind "\\" command_drop
@@ -104,6 +105,7 @@ abbrev "gamma"   function_gamma
 abbrev "lngamma" function_lngamma
 abbrev "erf"     function_erf
 abbrev "erfc"    function_erfc
+abbrev "fact"    function_factorial
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap
