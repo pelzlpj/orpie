@@ -586,6 +586,37 @@ they do not take an argument.  Many calculator interface settings are implemente
       View the last stack element in an external fullscreen editor.
 \end{itemize}
 
+
+\subsubsection{Edit Operations}
+\label{edits}
+The following operations are related to editing during data entry:
+\begin{itemize}
+   \item {\tt edit\_angle} \\
+      Begin entering the phase angle of a complex number.  (Orpie will
+      assume the angle is in either degrees or radians, depending on
+      the current angle mode.)
+   \item {\tt edit\_backspace} \\
+      Delete the last character entered.
+   \item {\tt edit\_begin\_integer} \\
+      Begin entering an integer constant.
+   \item {\tt edit\_complex} \\
+      Begin entering a complex number.
+   \item {\tt edit\_enter} \\
+      Enter the data that is currently being edited.
+   \item {\tt edit\_matrix} \\
+      Begin entering a matrix, or begin entering the next
+      row of a matrix.
+   \item {\tt edit\_minus} \\
+      Enter a minus sign in input.
+   \item {\tt edit\_scientific\_notation\_base} \\
+      Begin entering the scientific notation exponent of a real number,
+      or the base of an integer constant.
+   \item {\tt edit\_separator} \\
+      Begin editing the next element of a complex number or
+      matrix.  (This will insert a comma between elements.)
+\end{itemize}
+
+
 \section{Licensing}
 Orpie has been made available under the GNU General Public License (GPL), 
 version 2.  You should have received a copy of the GPL along with this 
