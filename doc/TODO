@@ -1,5 +1,7 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
+* detect singular matrices when performing inversion
+
 * implement rcfile macros; e.g. base 2 logarithm could be implemented as
   macro "L" "'ln<enter>2<enter>'ln<enter>/"
 
