@@ -323,6 +323,7 @@ let operation_of_string command_str =
    |"function_gcd"                  -> (Function Gcd)
    |"function_lcm"                  -> (Function Lcm)
    |"function_binomial_coeff"       -> (Function Binom)
+   |"function_permutation"          -> (Function Perm)
    |"function_total"                -> (Function Total)
    |"function_mean"                 -> (Function Mean)
    |"function_sumsq"                -> (Function Sumsq)

@@ -29,6 +29,8 @@ type interruptable_args_t =
    | Fact_args of big_int * big_int * orpie_data_t
    | Binom_args of big_int * big_int * big_int * 
                    big_int * orpie_data_t * orpie_data_t
+   | Perm_args of big_int * big_int * big_int *
+                  orpie_data_t * orpie_data_t
    | NoArgs;;
 
 let pi = 3.14159265358979323846;;
@@ -114,6 +116,10 @@ class rpc_calc =
             stack#push el;
             interr_args <- NoArgs
          |Binom_args (n, k, num, denom, el1, el2) ->
+            stack#push el1;
+            stack#push el2;
+            interr_args <- NoArgs
+         |Perm_args (n, term, partial, el1, el2) ->
             stack#push el1;
             stack#push el2;
             interr_args <- NoArgs
@@ -1568,10 +1574,95 @@ class rpc_calc =
                |_ ->
                   (stack#push gen_el1;
                   stack#push gen_el2;
-                  raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+                  raise (Invalid_argument "binom can only be applied to real or integer arguments"))
                end
             end else
                raise (Invalid_argument "insufficient arguments for binom")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
+
+
+      (* # of permutations of subsets of a population
+       * For a float argument, this is computed using lngamma in order to avoid
+       * overflow.  For an integer argument, jump to an interruptible
+       * exact arithmetic value. *)
+      method permutations () =
+         match interr_args with
+         |Perm_args (n, term, partial, el1, el2) ->
+            if eq_big_int n term then begin
+               stack#push (RpcInt partial);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let new_partial = mult_big_int n partial in
+               interr_args <- Perm_args ((pred_big_int n), term, new_partial,
+               el1, el2);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 1 then begin
+               self#backup ();
+               self#evaln 2;
+               let gen_el2 = stack#pop () in
+               let gen_el1 = stack#pop () in
+               begin match gen_el1 with
+               |RpcInt el1 ->
+                  begin match gen_el2 with
+                  |RpcInt el2 ->
+                     if sign_big_int el1 >= 0 && sign_big_int el2 >= 0 then
+                        if ge_big_int el1 el2 then
+                           let nmk = sub_big_int el1 el2 in
+                           interr_args <- Perm_args (el1, nmk, unit_big_int,
+                           gen_el1, gen_el2);
+                           false
+                        else
+                           (stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "first argument to perm must be >= second argument"))
+                     else
+                        (stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "integer perm requires nonnegative arguments"))
+                  |_ ->
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "perm requires either two integer or two real arguments"))
+                  end
+               |RpcFloat el1 ->
+                  begin match gen_el2 with
+                  |RpcFloat el2 ->
+                     begin try
+                        let log_perm = (Gsl_sf.lngamma (el1 +. 1.0)) -.
+                        (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                        stack#push (RpcFloat (exp log_perm));
+                        true
+                     with
+                        Gsl_error.Gsl_exn (err, errstr) ->
+                           (stack#push gen_el1;
+                            stack#push gen_el2;
+                           raise (Invalid_argument errstr))
+                     end
+                  |_ ->
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "perm requires either two integer or two real arguments"))
+                  end
+               |RpcVariable s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
+               |_ ->
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "perm can only be applied to real or integer arguments"))
+               end
+            end else
+               raise (Invalid_argument "insufficient arguments for perm")
          |_ ->
             (* shouldn't hit this point if interface is well-behaved *)
             self#abort_computation ();

@@ -1380,6 +1380,8 @@ let process_function (iface : interface_state_t) ff =
       handle_interr_function_call iface iface.calc#lcm
    |Binom ->
       handle_interr_function_call iface iface.calc#binom
+   |Perm ->
+      handle_interr_function_call iface iface.calc#permutations
    |Total ->
       handle_function_call iface iface.calc#total
    |Mean ->

@@ -32,7 +32,7 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Gamma | LnGamma | Erf | Erfc | Fact
                           | Transpose | Mod | Floor | Ceiling
                           | ToInt | ToFloat | SolveLin | Eval
-                          | Store | Purge | Gcd | Lcm | Binom
+                          | Store | Purge | Gcd | Lcm | Binom | Perm
                           | Total | Mean | Sumsq | Var |VarBias
                           | Stdev | StdevBias | Min | Max 
                           | Utpn;;

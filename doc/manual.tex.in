@@ -509,6 +509,7 @@ The following functions are available as extended commands:
       \texttt{gcd} & greatest common divisor function \\
       \texttt{lcm} & least common multiple function \\
       \texttt{binom} & binomial coefficient function \\
+      \texttt{perm} & permutation function \\
 %@% IF LATEX %@%
 %BEGIN LATEX
       \hline
@@ -1034,6 +1035,15 @@ to a real number, and as such the arithmetic will no longer be exact.
       Multiply last two stack elements.
    \item \texttt{function\_neg} \\
       Negate last stack element.
+   \item \texttt{function\_permutation} \\
+      Compute the permutation coefficient determined by the last two stack
+      elements 'n' and 'k': the number of ways of obtaining an ordered subset
+      of k elements from a set of n elements.
+      If these arguments are real, the coefficient is computed
+      using a fast approximation to the log of the gamma function, and therefore
+      the result is subject to rounding errors.  For integer constant arguments,
+      the coefficient is computed using exact arithmetic; this has the potential
+      to be a slow operation.
    \item \texttt{function\_pow} \\
       Raise element 2 to the power of element 1.
    \item \texttt{function\_purge} \\
