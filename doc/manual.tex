@@ -18,10 +18,10 @@
 
 
 \section{Introduction}
-Orpie is a console-based RPN desktop calculator.  The interface is similar to
-that of modern Hewlett-Packard${}^{TM}$ calculators, but has been optimized for
-efficiency on a PC keyboard.  The design is also influenced to some degree by 
-the 
+Orpie is a console-based RPN (reverse polish notation) desktop
+calculator.  The interface is similar to that of modern
+Hewlett-Packard${}^{TM}$ calculators, but has been optimized for efficiency on
+a PC keyboard.  The design is also influenced to some degree by the 
 %BEGIN LATEX
 Mutt email client\footnote{http://www.mutt.org} 
 %END LATEX
@@ -318,7 +318,7 @@ a number of basic calculator commands have been bound to single keypresses:
    \end{tabular}
 \end{center}
 
-\subsection{Performing Extended Function Operations}
+\subsection{Performing Extended Command Operations}
 In addition to the function operations listed in Section
 \ref{extendedfunctions}, there are a large number of calculator commands that
 have been implemented using the extended command syntax:
@@ -386,6 +386,10 @@ the {\tt orpierc} file provided with Orpie, and edit it to your needs.
 You may notice that the  {\tt orpierc} syntax is similar to the syntax used in
 the configuration file for the Mutt email client (muttrc).
 
+Within the {\tt orpierc} file, strings should be enclosed in double quotes ({\tt "}).
+A double quote character inside a string may be represented by {\tt $\backslash$"} .  The
+backslash character must be represented by doubling it ({\tt $\backslash\backslash$}).
+
 \subsubsection{Setting Variables}
 \label{setvar}
 Syntax: {\tt set {\em variable}={\em value\_string}} \\ \\
@@ -395,11 +399,12 @@ to see a list.  The variables are unquoted, but the values should be quoted stri
 \subsubsection{Creating Key Bindings}
 \label{bindings}
 Syntax: {\tt bind {\em key\_identifier operation}} \\ \\
-This command will bind a keypress to execute a calculator operation.  The various operations
+This command will bind a keypress to execute a calculator operation.  
+The various operations, which should not be enclosed in quotes,
 may be found in Section \ref{operationslist}. Key identifiers may be specified
 by strings that represent a single keypress, for example {\tt "m"} (quotes
 included).  The key may be prefixed with {\tt "$\backslash\backslash$C"} or
-{\tt "$\backslash\backslash$M"} to represent Control or Meta modifiers,
+{\tt "$\backslash\backslash$M"} to represent Control or Meta (Alt) modifiers,
 respectively; note that the backslash must be doubled.  A number of special
 keys lack single-character representations, so the following strings may be
 used to represent them:
@@ -739,6 +744,9 @@ make Orpie possible.
 \begin{enumerate}
    \item {\bf Whatever happened to {\tt rpc}?}
 
+      rpc, of course, would be the predecessor to Orpie.  It was written
+      in C++.
+
       Over the years I have grown increasingly disenchanted with C++, and
       as a result I lost interest in maintaining rpc.  When I settled on Ocaml
       as a replacement language, I began working on Orpie as a way to improve
@@ -748,22 +756,25 @@ make Orpie possible.
 
       {\tt <rant>} \\
       C++ has had so many misfeatures bolted on that no one can possibly hold
-      the entire syntax in his head at one time.  The syntax itself is horrid,
+      the entire syntax in his head at one time.  In addition to being
+      prohibitively vast, the syntax is also horribly ugly,
       especially when dealing with templates.  The ability to use pointers
       presents many opportunities to shoot yourself in the foot.
-      Garbage collection and exceptions exist as afterthoughts.  In short, I
-      don't think anyone should consider C++ for a project that does not require
+      Garbage collection and exceptions exist as afterthoughts.  In short, there
+      are few compelling reasons to consider C++ for any project that does not require
       low-level hardware access. \\
       {\tt </rant>} 
      
       I found Ocaml after searching for a Better Language that offers good
       performance.  Ocaml is a functional programming language with a pretty
       syntax, clean design, and all sorts of nice features that one really
-      should expect from a modern programming language.  The type-checking 
-      compiler is exceedingly strict, and I find that this improves my
-      overall productivity by catching a lot of bugs prior to runtime.  Ocaml
-      also interfaces with C quite easily, and there are bindings available
-      for many commonly used libraries.
+      should expect from a modern programming language.  It supports
+      functional, imperative, and object-oriented programming paradigms,
+      so it is well-suited to a broad class of programming tasks.
+      The type-checking compiler is exceedingly strict, and I find that this
+      improves my overall productivity by catching a lot of bugs prior to
+      runtime.  Ocaml also interfaces with C quite easily, and there are
+      bindings available for many commonly used libraries.
 
    \item {\bf Does Orpie include any enhancements over the old {\tt rpc}?}
 
