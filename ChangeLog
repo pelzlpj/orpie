@@ -3,6 +3,11 @@ Orpie ChangeLog
 
 v1.1
 
+   2004-04-17        Version 1.1.1 release.  Added Chris Petersen's
+                     orpie.spec file for building RPMs.
+
+   2004-04-16        Version 1.1 release.
+
    2004-04-14        Added a linear system solver that avoids
                      computation of an inverse matrix.
 
