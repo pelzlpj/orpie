@@ -507,9 +507,15 @@ let handle_exit_int (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
    iface.entry_type <- FloatEntry;
    iface.help_mode <- Standard;
-   iface.has_entry <- false;
    iface.is_entering_base <- false;
    iface.int_base_string <- "";
+   if (String.length iface.gen_buffer.(0).re_mantissa > 0) or
+      (String.length iface.gen_buffer.(0).re_exponent > 0) or
+      (String.length iface.gen_buffer.(0).im_mantissa > 0) or
+      (String.length iface.gen_buffer.(0).im_exponent > 0) then
+      iface.has_entry <- true
+   else
+      iface.has_entry <- false;
    draw_help iface;
    draw_update_entry iface
 
@@ -519,14 +525,14 @@ let handle_backspace (iface : interface_state_t) =
    let buffer = iface.gen_buffer.(iface.curr_buf) in
    begin match iface.entry_type with
    |IntEntry ->
-      (if iface.is_entering_base then
-         (iface.is_entering_base <- false;
-         iface.int_base_string <- "")
-      else if String.length iface.int_entry_buffer > 0 then
-         (let len = String.length iface.int_entry_buffer in
-         iface.int_entry_buffer <- String.sub iface.int_entry_buffer 0 (len - 1))
-      else
-         handle_exit_int iface)
+      if iface.is_entering_base then begin
+         iface.is_entering_base <- false;
+         iface.int_base_string <- ""
+      end else if String.length iface.int_entry_buffer > 0 then begin
+         let len = String.length iface.int_entry_buffer in
+         iface.int_entry_buffer <- String.sub iface.int_entry_buffer 0 (len - 1)
+      end else
+         handle_exit_int iface
    |FloatEntry ->
       if iface.is_entering_exponent then
          if String.length buffer.re_exponent > 0 then
