@@ -1124,7 +1124,7 @@ let handle_exit_extended (iface : interface_state_t) =
  * so the head of the list is actually the first match. *)
 let match_extended_buffer (iface : interface_state_t) buf =
    if String.length buf > 0 then
-      (let regex_str = "^" ^ buf ^ ".*$" in
+      (let regex_str = "^" ^ (Str.quote buf) ^ ".*$" in
       let regex = Str.regexp regex_str in
       let rec find_matching_strings starting_pos matches_list =
          try
