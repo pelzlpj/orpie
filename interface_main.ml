@@ -1378,6 +1378,8 @@ let process_function (iface : interface_state_t) ff =
       handle_interr_function_call iface iface.calc#gcd
    |Lcm ->
       handle_interr_function_call iface iface.calc#lcm
+   |Binom ->
+      handle_interr_function_call iface iface.calc#binom
    end
 
 

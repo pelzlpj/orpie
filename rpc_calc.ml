@@ -27,6 +27,8 @@ type interruptable_args_t =
    | Gcd_args of big_int * big_int * orpie_data * orpie_data
    | Lcm_args of big_int * big_int * big_int * orpie_data * orpie_data
    | Fact_args of big_int * big_int * orpie_data
+   | Binom_args of big_int * big_int * big_int * 
+                   big_int * orpie_data * orpie_data
    | NoArgs;;
 
 let pi = 3.14159265358979323846;;
@@ -110,6 +112,10 @@ class rpc_calc =
             interr_args <- NoArgs
          |Fact_args (num, acc, el) ->
             stack#push el;
+            interr_args <- NoArgs
+         |Binom_args (n, k, num, denom, el1, el2) ->
+            stack#push el1;
+            stack#push el2;
             interr_args <- NoArgs
          |NoArgs ->
             ()
@@ -1525,6 +1531,103 @@ class rpc_calc =
             self#abort_computation ();
             false
 
+
+      (* binomial coefficient
+       * For a float argument, this is computed using lngamma in order to avoid
+       * overflow.  For an integer argument, jump to an interruptible
+       * exact arithmetic value. *)
+      method binom () =
+         match interr_args with
+         |Binom_args (n, k, num, denom, el1, el2) ->
+            if eq_big_int k zero_big_int then begin
+               let result = div_big_int num denom in
+               stack#push (RpcInt result);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let nmk = sub_big_int n k in
+               let new_num = mult_big_int num (succ_big_int nmk) in
+               let new_denom = mult_big_int denom k in
+               interr_args <- Binom_args (n, (pred_big_int k), new_num,
+               new_denom, el1, el2);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 1 then begin
+               self#backup ();
+               self#evaln 2;
+               let gen_el2 = stack#pop () in
+               let gen_el1 = stack#pop () in
+               begin match gen_el1 with
+               |RpcInt el1 ->
+                  begin match gen_el2 with
+                  |RpcInt el2 ->
+                     if sign_big_int el1 >= 0 && sign_big_int el2 >= 0 then
+                        if ge_big_int el1 el2 then
+                           (* save a little computation via a binomial identity *)
+                           let nmk = sub_big_int el1 el2 in
+                           if lt_big_int nmk el2 then begin
+                              interr_args <- Binom_args (el1, nmk, unit_big_int,
+                              unit_big_int, gen_el1, gen_el2);
+                              false
+                           end else begin
+                              interr_args <- Binom_args (el1, el2, unit_big_int,
+                              unit_big_int, gen_el1, gen_el2);
+                              false
+                           end
+                        else
+                           (stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "first argument to binom must be >= second argument"))
+                     else
+                        (stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "integer binom requires nonnegative arguments"))
+                  |_ ->
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "binom requires either two integer or two real arguments"))
+                  end
+               |RpcFloat el1 ->
+                  begin match gen_el2 with
+                  |RpcFloat el2 ->
+                     begin try
+                        let log_coeff = (Gsl_sf.lngamma (el1 +. 1.0)) -.
+                        (Gsl_sf.lngamma (el2 +. 1.0)) -. 
+                        (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                        stack#push (RpcFloat (exp log_coeff));
+                        true
+                     with
+                        Gsl_error.Gsl_exn (err, errstr) ->
+                           (stack#push gen_el1;
+                            stack#push gen_el2;
+                           raise (Invalid_argument errstr))
+                     end
+                  |_ ->
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "binom requires either two integer or two real arguments"))
+                  end
+               |RpcVariable s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
+               |_ ->
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+               end
+            end else
+               raise (Invalid_argument "empty stack")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
+
+      
 
 
 (*      method print_stack () =

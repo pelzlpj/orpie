@@ -505,6 +505,7 @@ The following functions are available as extended commands:
       \texttt{fact} & factorial function \\
       \texttt{gcd} & greatest common divisor function \\
       \texttt{lcm} & least common multiple function \\
+      \texttt{binom} & binomial coefficient function \\
 %@% IF LATEX %@%
 %BEGIN LATEX
       \hline
@@ -943,6 +944,13 @@ to a real number, and as such the arithmetic will no longer be exact.
       the angle mode of the calculator.
    \item \texttt{function\_atanh} \\
       Compute the inverse hyperbolic tangent of the last stack element.
+   \item \texttt{function\_binomial\_coeff} \\
+      Compute the binomial coefficient (``n choose k'') formed by the last two
+      stack elements.  If these arguments are real, the coefficient is computed
+      using a fast approximation to the log of the gamma function, and therefore
+      the result is subject to rounding errors.  For integer constant arguments,
+      the coefficient is computed using exact arithmetic; this has the potential
+      to be a slow operation.
    \item \texttt{function\_ceiling} \\
       Compute the ceiling of the last stack element.
    \item \texttt{function\_cos} \\

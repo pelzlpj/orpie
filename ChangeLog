@@ -3,7 +3,16 @@ Orpie ChangeLog
 
 v1.3
 
-   2004-06-22        Removed dependence on Ocaml Unix module
+   2004-07-04        Added binomial coefficient function.
+
+   2004-07-03        Added LCM function.
+
+   2004-06-27        Implemented a method for handling interruptible
+                     computations.
+
+                     Added exact factorial and GCD functions.
+
+   2004-06-22        Removed dependence on Ocaml Unix module.
 
 
 v1.2
