@@ -1,0 +1,16 @@
+rpc2 to-do list
+--------------------------------------------------------------------------------
+* link the help screen with extended entries (show a command completion list,
+  etc.)
+
+* loading and saving stack
+
+* see if interface can be refactored at all...  rpc_interface.ml is too big
+
+* try to clean up the rcfile syntax a bit, maybe by introducing modes
+
+* implement rcfile macros
+
+
+
+# arch-tag: DO_NOT_CHANGE_6545e902-84e9-4893-9111-d01704eed3f0 
