@@ -664,6 +664,8 @@ class rpc_calc =
          else
             raise (Invalid_argument "empty stack")
 
+      method enter_pi () =
+         stack#push (RpcFloat pi)
 
       method get_display_line line_num =
          stack#get_display_string line_num modes

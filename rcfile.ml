@@ -294,6 +294,8 @@ let parse_line line_stream =
                            register_binding key (Command View)
                         |"command_refresh" ->
                            register_binding key (Command Refresh)
+                        |"command_enter_pi" ->
+                           register_binding key (Command EnterPi)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->

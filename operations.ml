@@ -13,7 +13,7 @@ type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | SetRadians | SetDegrees | SetRect | SetPolar
                           | SetBin | SetOct | SetDec | SetHex
                           | ToggleAngleMode | ToggleComplexMode | CycleBase
-                          | View | About | Refresh;;
+                          | View | About | Refresh | EnterPi;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator | Angle;;

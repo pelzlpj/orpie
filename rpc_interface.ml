@@ -52,7 +52,7 @@ let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
     "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n" ^
-    "bin\noct\ndec\nhex\nview\nabout\nrefresh");;
+    "bin\noct\ndec\nhex\nview\nabout\nrefresh\npi");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -100,6 +100,7 @@ Hashtbl.add command_abbrev_table "hex" (Command SetHex);;
 Hashtbl.add command_abbrev_table "view" (Command View);;
 Hashtbl.add command_abbrev_table "about" (Command About);;
 Hashtbl.add command_abbrev_table "refresh" (Command Refresh);;
+Hashtbl.add command_abbrev_table "pi" (Command EnterPi);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -859,6 +860,8 @@ object(self)
             self#handle_about ()
          |Refresh ->
             self#handle_refresh ()
+         |EnterPi ->
+            self#handle_command_call calc#enter_pi
       end
 
 
