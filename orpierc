@@ -17,11 +17,13 @@ bind "n" edit_minus
 bind "<backspace>" edit_backspace
 bind "<return>" edit_enter
 bind "<space>" edit_scientific_notation_base
+bind "`" edit_scientific_notation_base
 bind "#" edit_begin_integer
 bind "(" edit_complex
 bind "[" edit_matrix
 bind "," edit_separator
 bind "<" edit_angle
+bind "_" edit_begin_units
 
 # keys for "integer edit" operations
 bind "#" integer_cancel
@@ -160,6 +162,9 @@ abbrev "stdevbias" function_stdev_biased
 abbrev "min"     function_minimum
 abbrev "max"     function_maximum
 abbrev "utpn"    function_utpn
+abbrev "ustand"  function_standardize_units
+abbrev "uconvert" function_convert_units
+abbrev "uvalue"  function_unit_value
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

@@ -5,8 +5,6 @@ Orpie To-Do List (roughly in order of priority)
 
 * add finance functions
 
-* unit conversions (maybe)
-
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
 

@@ -205,9 +205,13 @@ let get_entry_from_buffer (iface : interface_state_t) =
          let buffer = iface.gen_buffer.(0) in
          try
             let ff = get_float_el buffer.re_mantissa buffer.re_exponent in
-            RpcFloat ff
-         with Failure "float_of_string" ->
-            raise (Invalid_argument "improperly formatted floating-point data")
+            let fu = Units.unit_of_float_string ff iface.units_entry_buffer in
+            RpcFloatUnit fu
+         with 
+            |Failure "float_of_string" ->
+               raise (Invalid_argument "improperly formatted floating-point data")
+            |Units.Units_error ss ->
+               raise (Invalid_argument ss)
       end
    |ComplexEntry ->
       begin
@@ -219,7 +223,9 @@ let get_entry_from_buffer (iface : interface_state_t) =
                buffer.re_exponent
                and imag_part = get_float_el buffer.im_mantissa
                buffer.im_exponent in
-               RpcComplex {re = real_part; im = imag_part}
+               let cu = Units.unit_of_cpx_string 
+               {re = real_part; im = imag_part} iface.units_entry_buffer in
+               RpcComplexUnit cu
             (* if is_polar==true, then the data in the buffer represents
              * polar data... so convert it to rect notation before storing
              * it as a complex number. *)
@@ -234,10 +240,16 @@ let get_entry_from_buffer (iface : interface_state_t) =
                      (pi /. 180.0 *. (get_float_el buffer.im_mantissa
                      buffer.im_exponent))
                in
-               RpcComplex {re = r *. (cos theta); im = r *. (sin theta)}
+               let cu = Units.unit_of_cpx_string 
+               {re = r *. (cos theta); im = r *. (sin theta)}
+               iface.units_entry_buffer in
+               RpcComplexUnit cu
             end
-         with Failure "float_of_string" ->
-            raise (Invalid_argument "improperly formatted complex floating-point data")
+         with 
+            |Failure "float_of_string" ->
+               raise (Invalid_argument "improperly formatted complex floating-point data")
+            |Units.Units_error ss ->
+               raise (Invalid_argument ss)
       end
    |FloatMatrixEntry ->
       begin
@@ -253,7 +265,9 @@ let get_entry_from_buffer (iface : interface_state_t) =
                temp_arr.(i) <- (get_float_el iface.gen_buffer.(i).re_mantissa
                   iface.gen_buffer.(i).re_exponent)
             done;
-            RpcFloatMatrix (Gsl_matrix.of_array temp_arr matrix_rows iface.matrix_cols)
+            let uu = Units.unit_of_string iface.units_entry_buffer in
+            RpcFloatMatrixUnit (Gsl_matrix.of_array temp_arr matrix_rows
+            iface.matrix_cols, uu)
          with Failure "float_of_string" ->
             raise (Invalid_argument "improperly formatted floating-point matrix data")
       end
@@ -296,13 +310,16 @@ let get_entry_from_buffer (iface : interface_state_t) =
                   im = r *. (sin theta)}
                end
             done;
-            RpcComplexMatrix (Gsl_matrix_complex.of_array temp_arr matrix_rows iface.matrix_cols)
+            let uu = Units.unit_of_string iface.units_entry_buffer in
+            RpcComplexMatrixUnit (Gsl_matrix_complex.of_array temp_arr
+            matrix_rows iface.matrix_cols, uu)
          with Failure "float_of_string" ->
             raise (Invalid_argument "improperly formatted complex
             floating-point matrix data")
       end
    |VarEntry ->
       RpcVariable iface.variable_entry_buffer
+
 
 
 
@@ -327,6 +344,8 @@ let push_entry (iface : interface_state_t) =
       iface.matrix_cols <- 1;
       iface.has_multiple_rows <- false;
       iface.variable_entry_buffer <- "";
+      iface.units_entry_buffer <- "";
+      iface.is_entering_units <- false;
       draw_update_entry iface
    in
    begin
@@ -920,6 +939,40 @@ let handle_begin_variable (iface : interface_state_t) =
       ()
 
 
+(* begin entry of units *)
+let handle_begin_units (iface : interface_state_t) =
+   match iface.entry_type with
+   |FloatEntry ->
+      if iface.gen_buffer.(0).re_mantissa = "" then
+         iface.gen_buffer.(0).re_mantissa <- "1"
+      else
+         ();
+      iface.has_entry         <- true;
+      iface.interface_mode    <- UnitEditMode;
+      iface.is_entering_units <- true;
+      draw_update_entry iface
+   |ComplexEntry ->
+      if iface.gen_buffer.(0).re_mantissa = "" then
+         iface.gen_buffer.(0).re_mantissa <- "0"
+      else
+         ();
+      if iface.gen_buffer.(0).im_mantissa = "" && iface.is_entering_imag then
+         iface.gen_buffer.(0).im_mantissa <- "0"
+      else
+         ();
+      iface.has_entry         <- true;
+      iface.interface_mode    <- UnitEditMode;
+      iface.is_entering_units <- true;
+      draw_update_entry iface
+   |FloatMatrixEntry | ComplexMatrixEntry ->
+      iface.has_entry         <- true;
+      iface.interface_mode    <- UnitEditMode;
+      iface.is_entering_units <- true;
+      draw_update_entry iface
+   (* FIXME: add other matches as units code gets filled out *)
+   |_ -> ()
+
+
 (***********************************************************************)
 (* HANDLERS FOR BROWSING-RELATED KEYSTROKES                            *)
 (***********************************************************************)
@@ -1130,25 +1183,30 @@ let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
       handle_refresh iface
    with
       |Parsing.Parse_error ->
-         (draw_help iface;
+         draw_help iface;
          draw_stack iface;
          draw_error iface "syntax error in input";
-         draw_update_entry iface)
+         draw_update_entry iface
       |Utility.Txtin_error ss ->
-         (draw_help iface;
+         draw_help iface;
          draw_stack iface;
          draw_error iface ss;
-         draw_update_entry iface)
+         draw_update_entry iface
       |Big_int_str.Big_int_string_failure ss ->
-         (draw_help iface;
+         draw_help iface;
          draw_stack iface;
          draw_error iface ss;
-         draw_update_entry iface)
+         draw_update_entry iface
+      |Units.Units_error ss ->
+         draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface
       |Failure ss ->
-         (draw_help iface;
+         draw_help iface;
          draw_stack iface;
          draw_error iface "syntax error in input";
-         draw_update_entry iface)
+         draw_update_entry iface
 
 
 (* edit the selected stack element with an external editor *)
@@ -1443,6 +1501,12 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#maximum
    |Utpn ->
       handle_function_call iface iface.calc#upper_tail_prob_normal
+   |StandardizeUnits ->
+      handle_function_call iface iface.calc#standardize_units
+   |ConvertUnits ->
+      handle_function_call iface iface.calc#convert_units
+   |UnitValue ->
+      handle_function_call iface iface.calc#unit_value
    end
 
 
@@ -1690,7 +1754,7 @@ let match_variable_buffer (iface : interface_state_t) buf =
 
 
 
-(* backspace during abbrev entry *)
+(* backspace during variable entry *)
 let handle_variable_backspace (iface : interface_state_t) =
    let len = String.length iface.variable_entry_buffer in
    if len > 0 then begin
@@ -1705,7 +1769,7 @@ let handle_variable_backspace (iface : interface_state_t) =
       ()
 
 
-(* handle entry of an arbitrary character in abbrev mode *)
+(* handle entry of an arbitrary character in variable entry mode *)
 let handle_variable_character (iface : interface_state_t) key =
    (* variables with long strings simply aren't useful, and
     * it's possible that deleting them could become difficult. *)
@@ -1780,6 +1844,47 @@ let handle_complete_variable (iface : interface_state_t) =
 
 
 
+(****************************************************************)
+(* IMPLEMENTATION OF UNITS ENTRY SYSTEM                         *)
+(****************************************************************)
+
+(* exit units entry *)
+let handle_exit_units (iface : interface_state_t) =
+   if iface.interface_mode = UnitEditMode then begin
+      iface.interface_mode <- StandardEntryMode;
+      iface.units_entry_buffer <- "";
+      iface.is_entering_units <- false;
+      draw_update_entry iface
+   end else
+      ()
+
+
+(* backspace during units entry *)
+let handle_units_backspace (iface : interface_state_t) =
+   let len = String.length iface.units_entry_buffer in
+   if len > 0 then begin
+      iface.units_entry_buffer <- Str.string_before iface.units_entry_buffer 
+      (pred len);
+      draw_update_entry iface
+   end else begin
+      iface.interface_mode <- StandardEntryMode;
+      iface.is_entering_units <- false;
+      draw_update_entry iface
+   end
+
+
+(* handle entry of an arbitrary character in units entry mode *)
+let handle_units_character (iface : interface_state_t) key =
+   let allowable_regex = Str.regexp "[a-zA-Z0-9\\.\\^\\*/-]" in
+   let ch = char_of_int key in
+   let ss = String.make 1 ch in
+   if Str.string_match allowable_regex ss 0 then begin
+      iface.units_entry_buffer <- iface.units_entry_buffer ^ ss;
+      draw_update_entry iface
+   end else
+      let _ = beep () in ()
+
+
 
 (****************************************************************)
 (* MAIN LOOP                                                    *)
@@ -1792,24 +1897,23 @@ let do_main_loop (iface : interface_state_t) =
       if key = Key.resize then
          handle_resize iface
       else
-         (* check whether this keypress is a macro *)
-         try
-            let ch_list = Rcfile.macro_of_key key in
-            let rec push_macro chars =
-               match chars with
-               | [] -> ()
-               | head :: tail ->
-                  let _ = ungetch head in 
-                  push_macro tail
-            in
-            push_macro ch_list
-         with Not_found ->
-         (* if it's not a macro, go ahead and process it *)
          match iface.interface_mode with
          |StandardEntryMode ->
-            begin
+            (* check whether this keypress is a macro *)
+            begin try
+               let ch_list = Rcfile.macro_of_key key in
+               let rec push_macro chars =
+                  match chars with
+                  | [] -> ()
+                  | head :: tail ->
+                     let _ = ungetch head in 
+                     push_macro tail
+               in
+               push_macro ch_list
+            with Not_found ->
+            (* if it's not a macro, go ahead and process it *)
+            begin try
             (* editing operations take priority *)
-            try 
                let edit_op = Rcfile.edit_of_key key in
                match edit_op with
                |Edit ee ->
@@ -1834,6 +1938,8 @@ let do_main_loop (iface : interface_state_t) =
                      handle_angle iface
                   |SciNotBase ->
                      handle_scientific_notation iface
+                  |BeginUnits ->
+                     handle_begin_units iface
                   end
                |_ ->
                   failwith "Non-Edit operation found in Edit Hashtbl"
@@ -1861,6 +1967,7 @@ let do_main_loop (iface : interface_state_t) =
                            failwith "Non-Command operation found in Command Hashtbl"
                      with Not_found ->
                         handle_digit iface key
+            end
             end
          |IntEditMode ->
             begin 
@@ -1896,6 +2003,24 @@ let do_main_loop (iface : interface_state_t) =
                         failwith "Non-IntEdit operation found in IntEdit Hashtbl"
                   with Not_found | Not_handled ->
                      handle_digit iface key
+            end
+         |UnitEditMode ->
+            begin try
+               let edit_op = Rcfile.edit_of_key key in
+               match edit_op with
+               |Edit ee ->
+                  begin match ee with
+                  |Enter ->
+                     handle_enter iface
+                  |Backspace ->
+                     handle_units_backspace iface
+                  |_ -> 
+                     handle_units_character iface key
+                  end
+               |_ ->
+                  failwith "Non-Edit operation found in Edit Hashtbl"
+            with Not_found | Not_handled ->
+               handle_units_character iface key
             end
          |AbbrevEntryMode ->
             begin

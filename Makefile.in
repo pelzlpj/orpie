@@ -38,7 +38,7 @@ EXE          = @EXE@
 CURSES_LIB = @CURSES_LIB@
 GSL_LIB    = @GSL_LIB@
 
-INCLUDES = -I ./curses -I ./gsl
+INCLUDES = -I ./curses -I ./gsl -I ./units
 BFLAGS   = -pp camlp4o -g $(INCLUDES) -thread
 OFLAGS   = -pp camlp4o $(INCLUDES) -thread
 BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
@@ -83,6 +83,9 @@ GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgs
 GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
 GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
+UNITS_CMO = units/units.cmo units/constants.cmo
+UNITS_CMX = $(UNITS_CMO:.cmo=.cmx)
+
 GENERATED = version.ml
 
 # special case: generated parser depends on the .cmi file
@@ -96,22 +99,22 @@ byte: $(NAME).byte $(NAME2).byte
 opt: $(NAME).opt $(NAME2).opt
 static: $(NAME).static-opt $(NAME2).static-opt
 
-$(NAME).byte: $(CURSES_BOBJS) $(GSL_BOBJS) $(CMO)
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
+$(NAME).byte: $(CURSES_BOBJS) $(GSL_BOBJS) $(UNITS_CMO) $(CMO)
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(UNITS_CMO) $(CMO) 
 
 $(NAME2).byte: $(CURSES_BOBJS) utility.cmo curses-keys.cmo
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.cmo curses-keys.cmo
 
-$(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(CMX)
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
+$(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
 
 $(NAME2).opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
 # static build seems to require mashing all the C objects into a library
-$(NAME).static-opt: $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
+$(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
-	curses.cmx $(GSL_CMX) $(CMX)
+	curses.cmx $(GSL_CMX) $(UNITS_CMX) $(CMX)
 	strip $(NAME).static-opt
 
 $(NAME2).static-opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx my-static-libs
@@ -232,6 +235,27 @@ curses/%.o : curses/%.c
 	cd curses && $(OCAMLC) -ccopt "$(CURSES_CFLAGS)" -c $*.c
 
 
+# Units build rules
+gsl-opt: $(UNITS_CMX)
+gsl-byte: $(UNITS_CMO)
+
+UNITS_INCLUDES = -I ./units
+UNITS_BFLAGS = -g $(UNITS_INCLUDES) -thread
+UNITS_OFLAGS = $(UNITS_INCLUDES) -thread
+
+units/%.cmi : units/%.mli
+	$(OCAMLC) -c $(UNITS_BFLAGS) $<
+
+units/%.cmo : units/%.ml
+	$(OCAMLC) -c $(UNITS_BFLAGS) $<
+
+units/%.o : units/%.ml
+	$(OCAMLOPT) -c $(UNITS_OFLAGS) $<
+
+units/%.cmx : units/%.ml
+	$(OCAMLOPT) -c $(UNITS_OFLAGS) $<
+
+
 # generic build rules for toplevel directory
 %.cmi : %.mli
 	$(OCAMLC) -c $(BFLAGS) $<
@@ -273,7 +297,7 @@ tags:
 #########
 
 vtags:
-	otags -vi *.ml
+	otags -vi -o tags *.ml
 
 
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
@@ -303,7 +327,10 @@ gsl-clean::
 curses-clean::
 	rm -f curses/*.cm[iox] curses/*.o *~
 
-clean:: partly-clean gsl-clean curses-clean
+units-clean::
+	rm -f units/*.cm[iox] units/*.o *~
+
+clean:: partly-clean gsl-clean curses-clean units-clean
 
 dist-clean distclean:: clean
 	rm -f Makefile config.cache config.log config.status install.ml

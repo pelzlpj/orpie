@@ -5,9 +5,10 @@
 % script.  This script has a preprocessor, which is the source of the
 % IF LATEX ... ELSE ... END IF comments.
 % "latex2man -CLATEX -L" will output pure tex source, which can be
-% handled either via latex or hevea.
+% handled either via latex or hevea. (Also, latex2man sucks.  If you know 
+% of a better tool that does the same job, I'd love to hear about it.)
 % Hevea has its own preprocessor, which is the source of the BEGIN LATEX
-% and HEVEA comments.
+% and HEVEA comments. (Hevea doesn't suck.)
 
 \documentclass[11pt,notitlepage]{article}
 %@% IF LATEX %@%
@@ -60,9 +61,9 @@ helping you to crunch numbers quickly.
 
 Orpie is written in 
 %BEGIN LATEX
-Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/},
+Objective Caml (aka OCaml)\footnote{http://caml.inria.fr/},
 %END LATEX
-%HEVEA \begin{rawhtml} <a href="http://caml.inria.fr">Objective Caml</a> (aka Ocaml), \end{rawhtml} 
+%HEVEA \begin{rawhtml} <a href="http://caml.inria.fr">Objective Caml</a> (aka OCaml), \end{rawhtml} 
 a high-performance functional programming language with a whole lot of nice
 features.  I highly recommend it.
 
@@ -79,9 +80,9 @@ version 1.4 or greater.  You will also need a curses library (e.g.
 ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), 
 %END LATEX
 %HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
-which is almost certainly already installed on your system.  Finally, Ocaml
+which is almost certainly already installed on your system.  Finally, OCaml
 3.07 or higher is required to compile the sources.  You will need the Nums
-library that is distributed with Ocaml; at least on Debian, Nums is available
+library that is distributed with OCaml; at least on Debian, Nums is available
 as separate packages \texttt{libnums-ocaml} and \texttt{libnums-ocaml-dev}.
 
 I will assume you have received this program in the form of a source tarball, 
@@ -271,6 +272,47 @@ Examples of matrix entry:
 %@% END-IF %@%
 
 %@% IF LATEX %@%
+\subsubsection{Entering Data With Units}
+%@% ELSE %@%
+\subsection{Entering Data With Units}
+%@% END-IF %@%
+Real and complex scalars and matrices can optionally be labeled with units.  After typing
+in the numeric portion of the data, press '\texttt{\_}' followed by a units string.  The format
+of units strings is described in
+%@% IF LATEX %@%
+Section \ref{unitsformat}.
+%@% ELSE %@%
+the UNITS FORMATTING section.
+%@% END-IF %@%
+
+Examples of entering dimensioned data:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Keypresses & Resulting Entry \\
+      \hline
+%@% IF LATEX %@%
+      \texttt{1.234\_N*mm\^{}2/s<enter>} & \texttt{1.234\_N*mm\^{}2*s\^{}-1} \\
+      \texttt{(2.3,5\_s\^{}-4<enter>} & \texttt{(2.3, 5)\_s\^{}-4} \\
+%@% ELSE %@%
+      \texttt{1.234\_N*mm\Circum2/s<enter>} & \texttt{1.234\_N*mm\Circum2*s\Circum-1} \\
+      \texttt{(2.3,5\_s\Circum-4<enter>} & \texttt{(2.3, 5)\_s\Circum-4} \\
+%@% END-IF %@%
+      \texttt{[1,2[3,4\_lbf*in<enter>} & \texttt{[[ 1, 2 ][ 3, 4 ]]\_lbf*in} \\
+      \texttt{\_nm<enter>} & \texttt{1\_nm} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
 \subsubsection{Entering Integer Constants}
 %@% ELSE %@%
 \subsection{Entering Integer Constants}
@@ -297,9 +339,15 @@ to match the current base mode.  Examples:
       \hline 
       Keypresses & Resulting Entry \\
       \hline
-      \texttt{\#123456<enter>} & \texttt{\# 123456 d} \\
-      \texttt{\#ffff<space>h<enter>} & \texttt{\# 65535 d} \\
-      \texttt{\#10101n<space>b<enter>} & \texttt{\# -21 d} \\
+%@% IF LATEX %@% 
+      \texttt{\#123456<enter>} & \texttt{\# 123456\`{}d} \\
+      \texttt{\#ffff<space>h<enter>} & \texttt{\# 65535\`{}d} \\
+      \texttt{\#10101n<space>b<enter>} & \texttt{\# -21\`{}d} \\
+%@% ELSE %@%
+      \texttt{\#123456<enter>} & \texttt{\# 123456`d} \\
+      \texttt{\#ffff<space>h<enter>} & \texttt{\# 65535`d} \\
+      \texttt{\#10101n<space>b<enter>} & \texttt{\# -21`d} \\
+%@% END-IF %@%
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -363,8 +411,13 @@ by the examples below:
       \hline 
       Data Type & Sample Input String \\
       \hline
-      integer constant & \texttt{\#12345678\_d}, where the trailing
+%@% IF LATEX %@%
+      integer constant & \texttt{\#12345678\`{}d}, where the trailing
                          letter is one of the base characters \{b, o, d, h\} \\
+%@% ELSE %@%
+      integer constant & \texttt{\#12345678`d}, where the trailing
+                         letter is one of the base characters \{b, o, d, h\} \\
+%@% END-IF %@%
       real number      & \texttt{-123.45e67} \\
       complex number   & \texttt{(1e10, 2)} or \texttt{(1 <90)} \\
       real matrix      & \texttt{[[1, 2][3.1, 4.5e10]]} \\
@@ -377,6 +430,9 @@ by the examples below:
 %@% ELSE %@%
 \end{Table}
 %@% END-IF %@%
+Real and complex numbers and matrices may have units appended; just add a units
+string such as ``\texttt{\_N*m/s}'' immediately following the numeric portion
+of the expression.
 
 Notice that the complex matrix input parser is quite flexible; real and complex
 matrix elements may be mixed, and cartesian and polar complex formats may be
@@ -548,6 +604,9 @@ The following functions are available as abbreviations:
       \texttt{min} & find the minima of the columns of a real matrix \\
       \texttt{max} & find the maxima of the columns of a real matrix \\
       \texttt{utpn} & compute the upper tail probability of a normal distribution \\
+      \texttt{uconvert} & convert element 2 to an equivalent expression with units matching element 1 \\
+      \texttt{ustand} & convert to equivalent expression using SI standard base units \\
+      \texttt{uvalue} & drop the units of the last element \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -704,6 +763,238 @@ browsing mode:
 The left and right scrolling option may prove useful for viewing very lengthy
 stack entries, such as large matrices.  The edit option provides a convenient
 way to correct data after it has been entered on the stack.
+
+\subsection{Units Formatting}
+A units string is a list of units separated by '\texttt{*}' to indicate multiplication
+and '\texttt{/}' to indicate division.  Units may be raised to real-valued powers
+%@% IF LATEX %@%
+\label{unitsformat}
+using the '\texttt{\^{}}' character.  A contrived example of a valid unit string would be 
+"\texttt{N*nm\^{}2*kg/s/in\^{}-3*GHz\^{}2.34}".
+%@% ELSE %@%
+using the '\texttt{\Circum}' character.  A contrived example of a valid unit string would be 
+"\texttt{N*nm\Circum2*kg/s/in\Circum-3*GHz\Circum2.34}".
+%@% END-IF %@%
+
+Orpie supports the standard SI prefix set, 
+\texttt{\{y, z, a, f, p, n, u, m, c, d, da, h, k, M, G, T, P, E, Z, Y\}}
+(note the use of '\texttt{u}' for micro-).  These prefixes may be applied
+to any of the following exhaustive sets of units:
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Length Unit \\
+      \hline
+      \texttt{m} & meter \\
+      \texttt{ft} & foot \\
+      \texttt{in} & inch \\
+      \texttt{yd} & yard \\
+      \texttt{mi} & mile \\
+      \texttt{pc} & parsec \\
+      \texttt{AU} & astronomical unit \\
+      \texttt{Ang} & angstrom \\
+      \texttt{furlong} & furlong \\
+      \texttt{pt} & PostScript point \\
+      \texttt{pica} & PostScript pica \\
+      \texttt{nmi} & nautical mile \\
+      \texttt{lyr} & lightyear \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Mass Unit \\
+      \hline
+      \texttt{g} & gram \\
+      \texttt{lb} & pound mass \\
+      \texttt{oz} & ounce \\
+      \texttt{slug} & slug \\
+      \texttt{lbt} & Troy pound \\
+      \texttt{ton} & (USA) short ton \\
+      \texttt{tonl} & (UK) long ton \\
+      \texttt{tonm} & metric ton \\
+      \texttt{ct} & carat \\
+      \texttt{gr} & grain \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Time Unit \\
+      \hline
+      \texttt{s} & second \\
+      \texttt{min} & minute \\
+      \texttt{hr} & hour \\
+      \texttt{day} & day \\
+      \texttt{yr} & year \\
+      \texttt{Hz} & Hertz \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Temperature Unit \\
+      \hline
+      \texttt{K} & Kelvin \\
+      \texttt{R} & Rankine \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+Note: No, Celsius and Fahrenheit will not be supported.  Because these
+temperature units do not share a common zero point, their behavior is
+ill-defined under many operations.
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Force Unit \\
+      \hline
+      \texttt{N} & Newton \\
+      \texttt{lbf} & pound force \\
+      \texttt{dyn} & dyne \\
+      \texttt{kip} & kip \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Energy Unit \\
+      \hline
+      \texttt{J} & Joule \\
+      \texttt{erg} & erg \\
+      \texttt{cal} & calorie \\
+      \texttt{BTU} & british thermal unit \\
+      \texttt{eV} & electron volt \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Electrical Unit \\
+      \hline
+      \texttt{A} & Ampere \\
+      \texttt{C} & Coulomb \\
+      \texttt{V} & volt \\
+      \texttt{Ohm} & Ohm \\
+      \texttt{F} & Farad \\
+      \texttt{H} & Henry \\
+      \texttt{T} & Tesla \\
+      \texttt{G} & Gauss \\
+      \texttt{Wb} & Weber \\
+      \texttt{Mx} & Maxwell \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Power Unit \\
+      \hline
+      \texttt{W} & Watt \\
+      \texttt{hp} & horsepower \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Pressure Unit \\
+      \hline
+      \texttt{Pa} & Pascal \\
+      \texttt{atm} & atmosphere \\
+      \texttt{bar} & bar \\
+      \texttt{Ohm} & Ohm \\
+      \texttt{mmHg} & millimeters of mercury \\
+      \texttt{inHg} & inches of mercury \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
 %@% END-IF %@%
 % (!ORPIERC)
 
@@ -1047,6 +1338,10 @@ to a real number, and as such the arithmetic will no longer be exact.
       to be a slow operation.
    \item \texttt{function\_ceiling} \\
       Compute the ceiling of the last stack element.
+   \item \texttt{function\_convert\_units} \\
+      Convert stack element 2 to an equivalent expression in the units of
+      element 1.  Element 1 should be real-valued, and its magnitude will
+      be ignored when computing the conversion.
    \item \texttt{function\_cos} \\
       Compute the cosine of the last stack element.  If the argument is real,
       it will be assumed to be either degrees or radians, depending on the
@@ -1141,6 +1436,9 @@ to a real number, and as such the arithmetic will no longer be exact.
       Square the last stack element.
    \item \texttt{function\_sqrt} \\
       Compute the square root of the last stack element.
+   \item \texttt{function\_standardize\_units} \\
+      Convert the last stack element to an equivalent expression using the SI standard
+      base units (kg, m, s, etc.).
    \item \texttt{function\_stdev\_unbiased} \\
       Compute the unbiased sample standard deviation of each of the columns of a real NxM
       matrix, returning a 1xM matrix as a result.  (Compare to HP48's \texttt{sdev}
@@ -1171,6 +1469,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       1xM matrix as a result.
    \item \texttt{function\_transpose} \\
       Compute the matrix transpose of the last stack element.
+   \item \texttt{function\_unit\_value} \\
+      Drop the units of the last stack element.
    \item \texttt{function\_utpn} \\
       Compute the upper tail probability of a normal distribution. \\
 %@% IF LATEX %@%
@@ -1288,6 +1588,8 @@ be made available as single keypresses using the \texttt{bind} keyword.
       Delete the last character entered.
    \item \texttt{edit\_begin\_integer} \\
       Begin entering an integer constant.
+   \item \texttt{edit\_begin\_units} \\
+      Begin appending units to a numeric expression.
    \item \texttt{edit\_complex} \\
       Begin entering a complex number.
    \item \texttt{edit\_enter} \\
@@ -1426,11 +1728,11 @@ ocamlgsl [1]
 bindings supplied by Olivier Andrieu, as well as the curses bindings from the
 %@% IF LATEX %@%
 %BEGIN LATEX
-Ocaml Text Mode Kit\footnote{http://www.nongnu.org/ocaml-tmk/} 
+OCaml Text Mode Kit\footnote{http://www.nongnu.org/ocaml-tmk/} 
 %END LATEX
-%HEVEA \begin{rawhtml} <a href="http://www.nongnu.org/ocaml-tmk/">Ocaml Text Mode Kit</a> \end{rawhtml}
+%HEVEA \begin{rawhtml} <a href="http://www.nongnu.org/ocaml-tmk/">OCaml Text Mode Kit</a> \end{rawhtml}
 %@% ELSE %@%
-Ocaml Text Mode Kit [2]
+OCaml Text Mode Kit [2]
 %@% END-IF %@%
 written by Nicolas George.  I would like to thank these authors for helping to
 make Orpie possible.
@@ -1445,11 +1747,11 @@ make Orpie possible.
       in C++.
 
       Over the years I have grown increasingly disenchanted with C++, and
-      as a result I lost interest in maintaining rpc.  When I settled on Ocaml
+      as a result I lost interest in maintaining rpc.  When I settled on OCaml
       as a replacement language, I began working on Orpie as a way to improve
-      my Ocaml abilities.
+      my OCaml abilities.
 
-   \item {\bf What's wrong with C++?  And what's this Ocaml thing?}
+   \item {\bf What's wrong with C++?  And what's this OCaml thing?}
 
       \texttt{<rant>} \\
       C++ has had so many misfeatures bolted on that no one can possibly hold
@@ -1461,15 +1763,15 @@ make Orpie possible.
       C++ for any project that does not require low-level hardware access. \\
       \texttt{</rant>} 
      
-      I found Ocaml after searching for a Better Language that offers good
-      performance.  Ocaml is a functional programming language with a pretty
+      I found OCaml after searching for a Better Language that offers good
+      performance.  OCaml is a functional programming language with a pretty
       syntax, clean design, and all sorts of nice features that one really
       should expect from a modern programming language.  It supports
       functional, imperative, and object-oriented programming paradigms,
       so it is well-suited to a broad class of programming tasks.
       The type-checking compiler is exceedingly strict, and I find that this
       improves my overall productivity by catching a lot of bugs prior to
-      runtime.  Ocaml also interfaces with C quite easily, and there are
+      runtime.  OCaml also interfaces with C quite easily, and there are
       bindings available for many commonly used libraries.
 
    \item {\bf Does Orpie include any enhancements over the old \texttt{rpc}?}
@@ -1478,9 +1780,9 @@ make Orpie possible.
       The context-sensitive help panel is new, as is user-defined variable
       support and autobindings.  Integer data may be
       entered and manipulated with arbitrary precision (thanks to the Nums 
-      library that ships with Ocaml).  The error messages provided by
+      library that ships with OCaml).  The error messages provided by
       Orpie are, on average, more informative than those provided by rpc;
-      this is a direct consequence of Ocaml's excellent exception handling
+      this is a direct consequence of OCaml's excellent exception handling
       support.
 
       I also believe that Orpie has fewer bugs in the input handler/parser,
@@ -1500,7 +1802,7 @@ make Orpie possible.
 
       Try deleting the calculator state file (probably \texttt{\~{}/.orpie/calc\_state} ,
       unless you changed the \texttt{data\_dir} configuration variable).  Orpie makes use of 
-      Ocaml's marshalling feature, which is very convenient but doesn't respond well to corrupt
+      OCaml's marshalling feature, which is very convenient but doesn't respond well to corrupt
       data files.
       
 

@@ -36,7 +36,7 @@ type f_or_c = | F of float
 (* decode a matrix of type CF and decide
  * whether it has float elements or complex elements,
  * then create the appropriate orpie_data_t type. *)
-let decode_float_complex_matrix mat =
+let decode_float_complex_matrix mat u_str =
    let num_rows = Array.length mat
    and num_cols = Array.length mat.(0) in
    let flt_array = Array.make_matrix num_rows num_cols 0.0
@@ -60,9 +60,11 @@ let decode_float_complex_matrix mat =
          end
    done;
    if !has_complex then
-      Rpc_stack.RpcComplexMatrix (Gsl_matrix_complex.of_arrays cpx_array)
+      Rpc_stack.RpcComplexMatrixUnit (Gsl_matrix_complex.of_arrays cpx_array,
+      Units.unit_of_string (Str.string_after u_str 1))
    else
-      Rpc_stack.RpcFloatMatrix (Gsl_matrix.of_arrays flt_array)
+      Rpc_stack.RpcFloatMatrixUnit (Gsl_matrix.of_arrays flt_array,
+      Units.unit_of_string (Str.string_after u_str 1))
 
 
 let rect_of_polar_rad r theta = 
@@ -97,40 +99,41 @@ let decode_integer i_str =
    Rpc_stack.RpcInt int_val
 
 
-(* convert a floating point string to an RpcFloat *)
-let decode_float f_str =
-   Rpc_stack.RpcFloat (float_of_string f_str)
+(* convert a floating point string and a unit string to an RpcFloatUnit *)
+let decode_float_units f_str u_str =
+   Rpc_stack.RpcFloatUnit (Units.unit_of_float_string
+   (float_of_string f_str) (Str.string_after u_str 1))
 
-
-(* convert a cartesian complex number string to an RpcComplex *)
-let decode_complex_rect re_str im_str =
+(* convert a cartesian complex number string and a unit string to an 
+ * RpcComplexUnit *)
+let decode_complex_rect_units re_str im_str u_str =
    let f1 = float_of_string re_str
    and f2 = float_of_string im_str in
-   Rpc_stack.RpcComplex {Complex.re = f1; Complex.im = f2}
-
+   Rpc_stack.RpcComplexUnit (Units.unit_of_cpx_string
+   {Complex.re = f1; Complex.im = f2} (Str.string_after u_str 1))
 
 (* convert a polar representation complex number string to an
  * RpcComplex.  The rect_of_polar argument should take care of
  * any necessary degrees/radians conversion. *)
-let decode_complex_polar rect_of_polar mag_str ang_str = 
+let decode_complex_polar_units rect_of_polar mag_str ang_str u_str = 
    let mag = float_of_string mag_str
    and ang = float_of_string ang_str in
-   Rpc_stack.RpcComplex (rect_of_polar mag ang)
+   Rpc_stack.RpcComplexUnit (Units.unit_of_cpx_string
+   (rect_of_polar mag ang) (Str.string_after u_str 1))
 
 
 (* convert a polar representation complex number string to an
  * RpcComplex.  Assumes radian representation of the angle. *)
-let decode_complex_polar_rad mag_str ang_str =
-   decode_complex_polar rect_of_polar_rad mag_str ang_str
+let decode_complex_polar_rad_units mag_str ang_str u_str =
+   decode_complex_polar_units rect_of_polar_rad mag_str ang_str u_str
 
 (* convert a polar representation complex number string to an
  * RpcComplex.  Assumes degree representation of the angle. *)
-let decode_complex_polar_deg mag_str ang_str =
-   decode_complex_polar rect_of_polar_deg mag_str ang_str
+let decode_complex_polar_deg_units mag_str ang_str u_str =
+   decode_complex_polar_units rect_of_polar_deg mag_str ang_str u_str
 
-
-(* convert a matrix to an RpcFloatMatrix or an RpcComplexMatrix. *)
-let decode_matrix mat_rows =
+(* convert a matrix to an RpcFloatMatrixUnit or an RpcComplexMatrix. *)
+let decode_matrix_units mat_rows u_str =
    (* matrix_rows is a list of rows, each of which
     * is a list of elements; create a 2d array 
     * from these lists, and generate the appropriate
@@ -145,9 +148,9 @@ let decode_matrix mat_rows =
    (* create a float array or a complex array, depending
     * on whether or not any complex types are present
     * in this array. *)
-   decode_float_complex_matrix mat
+   decode_float_complex_matrix mat u_str
 
-(* convert a floating point string to an RpcFloat *)
+(* convert a variable string to an RpcVariable *)
 let decode_variable v_str =
    Rpc_stack.RpcVariable v_str
 %}
@@ -157,6 +160,7 @@ let decode_variable v_str =
 %token <string> INTEGER
 %token <string> FLOAT
 %token <string> VARIABLE
+%token <string> UNITS
 %token BEGINCOMPLEX
 %token ENDCOMPLEX
 %token SEPARATOR
@@ -208,17 +212,29 @@ data_rad:
    | VARIABLE
       { decode_variable $1}
 
+   | FLOAT UNITS
+      { decode_float_units $1 $2 }
+
    | FLOAT
-      { decode_float $1 } 
+      { decode_float_units $1 "_" } 
+
+   | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX UNITS
+      { decode_complex_rect_units $2 $4 $6 }
 
    | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
-      { decode_complex_rect $2 $4 }
+      { decode_complex_rect_units $2 $4 "_" }
+
+   | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX UNITS
+      { decode_complex_polar_rad_units $2 $4 $6 }
 
    | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
-      { decode_complex_polar_rad $2 $4 }
+      { decode_complex_polar_rad_units $2 $4 "_" }
+
+   | BEGINMATRIX matrix_rows_rad ENDMATRIX UNITS
+      { decode_matrix_units $2 $4 }
 
    | BEGINMATRIX matrix_rows_rad ENDMATRIX
-      { decode_matrix $2 }
+      { decode_matrix_units $2 "_" }
 ;
 
 
@@ -293,17 +309,29 @@ data_deg:
    | VARIABLE
       { decode_variable $1}
 
+   | FLOAT UNITS
+      { decode_float_units $1 $2 }
+
    | FLOAT
-      { decode_float $1 } 
+      { decode_float_units $1 "_" } 
+
+   | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX UNITS
+      { decode_complex_rect_units $2 $4 $6 }
 
    | BEGINCOMPLEX FLOAT SEPARATOR FLOAT ENDCOMPLEX
-      { decode_complex_rect $2 $4 }
+      { decode_complex_rect_units $2 $4 "_" }
+
+   | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX UNITS
+      { decode_complex_polar_deg_units $2 $4 $6 }
 
    | BEGINCOMPLEX FLOAT ANGLE FLOAT ENDCOMPLEX
-      { decode_complex_polar_deg $2 $4 }
+      { decode_complex_polar_deg_units $2 $4 "_" }
+
+   | BEGINMATRIX matrix_rows_deg ENDMATRIX UNITS
+      { decode_matrix_units $2 $4 }
 
    | BEGINMATRIX matrix_rows_deg ENDMATRIX
-      { decode_matrix $2 }
+      { decode_matrix_units $2 "_" }
 ;
 
 

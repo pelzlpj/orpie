@@ -199,46 +199,57 @@ let draw_entry (iface : interface_state_t) =
       match iface.entry_type with
       |IntEntry ->
          if iface.is_entering_base then
-            "# " ^ iface.int_entry_buffer ^ " " ^ iface.int_base_string
+            "# " ^ iface.int_entry_buffer ^ "`" ^ iface.int_base_string
          else
             "# " ^ iface.int_entry_buffer
       |FloatEntry ->
          let mantissa_str = iface.gen_buffer.(0).re_mantissa
          and exponent_str = iface.gen_buffer.(0).re_exponent in
-         get_float_str true mantissa_str exponent_str
+         let ff = get_float_str true mantissa_str exponent_str in
+         if iface.is_entering_units then
+            ff ^ "_" ^ iface.units_entry_buffer
+         else
+            ff
       |ComplexEntry ->
          let buffer = iface.gen_buffer.(0) in
-         if iface.is_entering_imag then
-            let temp = get_float_str false buffer.re_mantissa buffer.re_exponent in
-            let re_str = 
-               if String.length temp > 0 then temp
-               else "0"
-            in
-            let im_str = get_float_str true buffer.im_mantissa buffer.im_exponent in
-            match buffer.is_polar with
-            |false ->
-               "(" ^ re_str ^ ", " ^ im_str ^ ")"
-            |true ->
-               "(" ^ re_str ^ " <" ^ im_str ^ ")"
+         let cc = 
+            if iface.is_entering_imag then
+               let temp = get_float_str false buffer.re_mantissa buffer.re_exponent in
+               let re_str = 
+                  if String.length temp > 0 then temp
+                  else "0"
+               in
+               let im_str = get_float_str true buffer.im_mantissa buffer.im_exponent in
+               match buffer.is_polar with
+               |false ->
+                  "(" ^ re_str ^ ", " ^ im_str ^ ")"
+               |true ->
+                  "(" ^ re_str ^ " <" ^ im_str ^ ")"
+            else
+               let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
+               "(" ^ re_str ^ ")"
+         in
+         if iface.is_entering_units then
+            cc ^ "_" ^ iface.units_entry_buffer
          else
-            let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
-            "(" ^ re_str ^ ")"
+            cc
       |FloatMatrixEntry ->
          let ss = ref "[[" in
-         begin
-            for el = 0 to pred iface.curr_buf do
-               let temp_re = get_float_str false iface.gen_buffer.(el).re_mantissa
-               iface.gen_buffer.(el).re_exponent in
-               (if iface.has_multiple_rows && ((succ el) mod iface.matrix_cols) = 0 then
-                  ss := !ss ^ temp_re ^ "]["
-               else
-                  ss := !ss ^ temp_re ^ ", ")
-            done;
-            let temp_re = get_float_str true iface.gen_buffer.(iface.curr_buf).re_mantissa
-            iface.gen_buffer.(iface.curr_buf).re_exponent in
-            ss := !ss ^ temp_re ^ "]]";
+         for el = 0 to pred iface.curr_buf do
+            let temp_re = get_float_str false iface.gen_buffer.(el).re_mantissa
+            iface.gen_buffer.(el).re_exponent in
+            if iface.has_multiple_rows && ((succ el) mod iface.matrix_cols) = 0 then
+               ss := !ss ^ temp_re ^ "]["
+            else
+               ss := !ss ^ temp_re ^ ", "
+         done;
+         let temp_re = get_float_str true iface.gen_buffer.(iface.curr_buf).re_mantissa
+         iface.gen_buffer.(iface.curr_buf).re_exponent in
+         ss := !ss ^ temp_re ^ "]]";
+         if iface.is_entering_units then
+            !ss ^ "_" ^ iface.units_entry_buffer
+         else
             !ss
-         end
       |ComplexMatrixEntry ->
          let ss = ref "[[" in
          for el = 0 to pred iface.curr_buf do
@@ -273,7 +284,10 @@ let draw_entry (iface : interface_state_t) =
             let temp_re = get_float_str true iface.gen_buffer.(iface.curr_buf).re_mantissa
             iface.gen_buffer.(iface.curr_buf).re_exponent in
             ss := !ss ^ "(" ^ temp_re ^ ")]]");
-         !ss
+         if iface.is_entering_units then
+            !ss ^ "_" ^ iface.units_entry_buffer
+         else
+            !ss
       |VarEntry ->
          "@ " ^ iface.variable_entry_buffer
    in
@@ -304,6 +318,8 @@ let draw_entry (iface : interface_state_t) =
          draw_entry_string "<enter variable name>" 0
       else
          draw_entry_string data_string 0
+   |UnitEditMode ->
+      draw_entry_string data_string 0
    end;
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 

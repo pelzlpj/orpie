@@ -36,10 +36,11 @@ let hex_digit     = ['0'-'9' 'a'-'f' 'A'-'F']
 let base_ident    = ['b' 'o' 'd' 'h']
 let sign          = ['-' '+']
 let variable_char = ['a'-'z' 'A'-'Z' '0'-'9' '-' '_']
+let units         = ['a'-'z' 'A'-'Z' '0'-'9' '.' '-' '*' '/' '^']
 
 rule token =
    parse whitespace+ {token lexbuf}
-   | '#' sign? hex_digit+ '_' base_ident {
+   | '#' sign? hex_digit+ '`' base_ident {
       let s = Lexing.lexeme lexbuf in
       let int_str = String.sub s 1 (String.length s - 1) in
       INTEGER int_str}
@@ -51,6 +52,9 @@ rule token =
 
    | ((sign? digit+ ('.' digit*)?) | (sign? digit* '.' digit+)) ('e' sign? digit+)? {
       FLOAT (Lexing.lexeme lexbuf)}
+
+   | '_' units* {
+      UNITS (Lexing.lexeme lexbuf)}
 
    | '(' 
       { BEGINCOMPLEX }

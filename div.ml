@@ -33,74 +33,77 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with
       |RpcInt el2 ->
          stack#push (RpcInt (div_big_int el1 el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat ((float_of_big_int el1) /. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_int el1 in
-         stack#push (RpcComplex (Complex.div c_el1 el2))
+      |RpcFloatUnit el2 ->
+         let fu_el1 = funit_of_float (float_of_big_int el1) in
+         stack#push (RpcFloatUnit (Units.div fu_el1 el2))
+      |RpcComplexUnit el2 ->
+         let cu_el1 = cunit_of_cpx (cmpx_of_int el1) in
+         stack#push (RpcComplexUnit (Units.div cu_el1 el2))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for division"))
       )
-   |RpcFloat el1 -> (
+   |RpcFloatUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         stack#push (RpcFloat (el1 /. float_of_big_int el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat (el1 /. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_float el1 in
-         stack#push (RpcComplex (Complex.div c_el1 el2))
+         let fu_el2 = funit_of_float (float_of_big_int el2) in
+         stack#push (RpcFloatUnit (Units.div el1 fu_el2))
+      |RpcFloatUnit el2 ->
+         stack#push (RpcFloatUnit (Units.div el1 el2))
+      |RpcComplexUnit el2 ->
+         stack#push (RpcComplexUnit (Units.div el1 el2))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for division"))
       )
-   |RpcComplex el1 -> (
+   |RpcComplexUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         let c_el2 = cmpx_of_int el2 in
-         stack#push (RpcComplex (Complex.div el1 c_el2))
-      |RpcFloat el2 ->
-         let c_el2 = cmpx_of_float el2 in
-         stack#push (RpcComplex (Complex.div el1 c_el2))
-      |RpcComplex el2 ->
-         stack#push (RpcComplex (Complex.div el1 el2))
+         let cu_el2 = cunit_of_cpx (cmpx_of_int el2) in
+         stack#push (RpcComplexUnit (Units.div el1 cu_el2))
+      |RpcFloatUnit el2 | RpcComplexUnit el2 ->
+         stack#push (RpcComplexUnit (Units.div el1 el2))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for division"))
       )
-   |RpcFloatMatrix el1 -> (
+   |RpcFloatMatrixUnit (el1, u1) -> (
       match gen_el2 with
       |RpcInt el2 ->
+         let uquot = Units.div u1 (funit_of_float 
+         (float_of_big_int el2)) in
          let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result (1.0 /. float_of_big_int el2);
-         stack#push (RpcFloatMatrix result))
-      |RpcFloat el2 ->
+         (Gsl_matrix.scale result uquot.Units.coeff.Complex.re);
+         stack#push (RpcFloatMatrixUnit (result, unorm uquot))
+      |RpcFloatUnit el2 ->
+         let uquot = Units.div u1 el2 in
          let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result (1.0 /. el2);
-         stack#push (RpcFloatMatrix result))
-      |RpcComplex el2 ->
+         (Gsl_matrix.scale result uquot.Units.coeff.Complex.re);
+         stack#push (RpcFloatMatrixUnit (result, unorm uquot))
+      |RpcComplexUnit el2 ->
+         let uquot = Units.div u1 el2 in
          let c_el1 = cmat_of_fmat el1 in
-         (Gsl_matrix_complex.scale c_el1 (Complex.inv el2);
-         stack#push (RpcComplexMatrix c_el1))
-      |RpcFloatMatrix el2 ->
+         Gsl_matrix_complex.scale c_el1 uquot.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (c_el1, unorm uquot))
+      |RpcFloatMatrixUnit (el2, u2) ->
          let n1, m1 = (Gsl_matrix.dims el1) and
          n2, m2     = (Gsl_matrix.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
+               let uquot = Units.div u1 u2 in
                let copy_el2 = Gsl_vectmat.mat_convert ~protect:true (`M el2) and
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix.create m1 m1 in
                try
                   let sign = Gsl_linalg._LU_decomp copy_el2 perm in
-                  (Gsl_linalg._LU_invert copy_el2 perm (`M inv);
+                  Gsl_linalg._LU_invert copy_el2 perm (`M inv);
                   let result = Gsl_matrix.create n1 m2 in
                   Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-                     1.0 el1 inv 0.0 result;
-                  stack#push (RpcFloatMatrix result))
+                  uquot.Units.coeff.Complex.re el1 inv 0.0 result;
+                  stack#push (RpcFloatMatrixUnit (result, unorm uquot))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
                   stack#push gen_el2;
@@ -113,24 +116,25 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "divisor matrix is non-square"))
-      |RpcComplexMatrix el2 ->
+      |RpcComplexMatrixUnit (el2, u2) ->
          let n1, m1 = (Gsl_matrix.dims el1) and
          n2, m2     = (Gsl_matrix_complex.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
+               let uquot = Units.div u1 u2 in
                let copy_el2 = Gsl_matrix_complex.copy el2 and
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix_complex.create m1 m1 in
                try
                   let sign = Gsl_linalg.complex_LU_decomp (`CM
-                     copy_el2) perm in
-                  (Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
-                     (`CM inv);
+                  copy_el2) perm in
+                  Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                  (`CM inv);
                   let result = Gsl_matrix_complex.create n1 m2 in
                   Gsl_blas.Complex.gemm Gsl_blas.NoTrans
-                     Gsl_blas.NoTrans Complex.one (cmat_of_fmat el1) inv
-                     Complex.zero result;
-                  stack#push (RpcComplexMatrix result))
+                  Gsl_blas.NoTrans uquot.Units.coeff (cmat_of_fmat el1) inv
+                  Complex.zero result;
+                  stack#push (RpcComplexMatrixUnit (result, unorm uquot))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
                   stack#push gen_el2;
@@ -148,35 +152,35 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for division"))
       )
-   |RpcComplexMatrix el1 -> (
+   |RpcComplexMatrixUnit (el1, u1) -> (
       match gen_el2 with
       |RpcInt el2 ->
          let c_el2 = cmpx_of_int el2 in
-         (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
-         stack#push (RpcComplexMatrix el1))
-      |RpcFloat el2 ->
-         let c_el2 = cmpx_of_float el2 in
-         (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
-         stack#push (RpcComplexMatrix el1))
-      |RpcComplex el2 ->
-         (Gsl_matrix_complex.scale el1 (Complex.inv el2);
-         stack#push (RpcComplexMatrix el1))
-      |RpcFloatMatrix el2 ->
+         let result = Gsl_matrix_complex.copy el1 in
+         Gsl_matrix_complex.scale result (Complex.inv c_el2);
+         stack#push (RpcComplexMatrixUnit (result, u1))
+      |RpcFloatUnit el2 | RpcComplexUnit el2 ->
+         let uquot = Units.div u1 el2 in
+         let result = Gsl_matrix_complex.copy el1 in
+         Gsl_matrix_complex.scale result uquot.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (result, unorm uquot))
+      |RpcFloatMatrixUnit (el2, u2) ->
          let n1, m1 = (Gsl_matrix_complex.dims el1) and
          n2, m2     = (Gsl_matrix.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
+               let uquot = Units.div u1 u2 in
                let copy_el2 = Gsl_matrix.copy el2 and
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix.create m1 m1 in
                try
                   let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
-                  (Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
+                  Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
                   let result = Gsl_matrix_complex.create n1 m2 in
                   Gsl_blas.Complex.gemm Gsl_blas.NoTrans
-                     Gsl_blas.NoTrans Complex.one el1 (cmat_of_fmat inv)
-                     Complex.zero result;
-                  stack#push (RpcComplexMatrix result))
+                  Gsl_blas.NoTrans uquot.Units.coeff el1 (cmat_of_fmat inv)
+                  Complex.zero result;
+                  stack#push (RpcComplexMatrixUnit (result, unorm uquot))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
                   stack#push gen_el2;
@@ -189,24 +193,25 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "divisor matrix is non-square"))
-      |RpcComplexMatrix el2 ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1) and
-         n2, m2     = (Gsl_matrix_complex.dims el2) in
+      |RpcComplexMatrixUnit (el2, u2) ->
+         let n1, m1 = (Gsl_matrix_complex.dims el1)
+         and n2, m2 = (Gsl_matrix_complex.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
+               let uquot = Units.div u1 u2 in
                (* FIXME: do we need to use Gsl_vectmat.cmat_convert here? *)
                let copy_el2 = Gsl_matrix_complex.copy el2 and
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix_complex.create m1 m1 in
                try
                   let sign = Gsl_linalg.complex_LU_decomp (`CM
-                     copy_el2) perm in
-                  (Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
-                     (`CM inv);
+                  copy_el2) perm in
+                  Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                  (`CM inv);
                   let result = Gsl_matrix_complex.create n1 m2 in
-                  Gsl_blas.Complex.gemm Gsl_blas.NoTrans
-                     Gsl_blas.NoTrans Complex.one el1 inv Complex.zero result;
-                  stack#push (RpcComplexMatrix result))
+                  Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 
+                  uquot.Units.coeff el1 inv Complex.zero result;
+                  stack#push (RpcComplexMatrixUnit (result, unorm uquot))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
                   stack#push gen_el2;

@@ -38,49 +38,92 @@ let pow (stack : rpc_stack) (evaln : int -> unit) =
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "integer power function requires nonnegative power"))
-      |RpcFloat el2 ->
-         let f_el1 = float_of_big_int el1 in
-         (* if power is nonnegative or if power is integer *)
-         if f_el1 >= 0.0 || el2 = float_of_int (int_of_float el2) then
-            stack#push (RpcFloat (f_el1 ** el2))
-         else
-            let c_el1 = cmpx_of_float f_el1 in
-            let c_el2 = cmpx_of_float el2 in
-            stack#push (RpcComplex (Complex.pow c_el1 c_el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_int el1 in
-         stack#push (RpcComplex (Complex.pow c_el1 el2))
+      |RpcFloatUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else
+            let f_el1 = float_of_big_int el1 in
+            let f_el2 = el2.Units.coeff.Complex.re in
+            (* if power is nonnegative or if power is integer *)
+            if f_el1 >= 0.0 || f_el2 = float_of_int (int_of_float f_el2) then
+               stack#push (RpcFloatUnit (funit_of_float (f_el1 ** f_el2)))
+            else
+               let c_el1 = cmpx_of_float f_el1 in
+               let c_el2 = cmpx_of_float f_el2 in
+               stack#push (RpcComplexUnit (cunit_of_cpx
+               (Complex.pow c_el1 c_el2)))
+      |RpcComplexUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else
+            let c_el1 = cmpx_of_int el1 in
+            stack#push (RpcComplexUnit (cunit_of_cpx
+            (Complex.pow c_el1 el2.Units.coeff)))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types"))
       )
-   |RpcFloat el1 -> (
+   |RpcFloatUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         stack#push (RpcFloat (el1 ** (float_of_big_int el2)))
-      |RpcFloat el2 ->
-         if el1 >= 0.0 || el2 = float_of_int (int_of_float el2) then
-            stack#push (RpcFloat (el1 ** el2))
-         else
-            let c_el1 = cmpx_of_float el1 in
-            let c_el2 = cmpx_of_float el2 in
-            stack#push (RpcComplex (Complex.pow c_el1 c_el2))
-      |RpcComplex el2 ->
-         stack#push (RpcComplex (Complex.pow (cmpx_of_float el1) el2))
+         stack#push (RpcFloatUnit (Units.pow el1 (float_of_big_int el2)))
+      |RpcFloatUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else
+            let new_unit = Units.pow el1 el2.Units.coeff.Complex.re in
+            if new_unit.Units.coeff.Complex.im = 0.0 then
+               stack#push (RpcFloatUnit new_unit)
+            else
+               stack#push (RpcComplexUnit new_unit)
+      |RpcComplexUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else if has_units el1 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise dimensioned value to complex power"
+         end else
+            stack#push (RpcComplexUnit (cunit_of_cpx
+            (Complex.pow el1.Units.coeff el2.Units.coeff)))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types"))
       )
-   |RpcComplex el1 -> (
+   |RpcComplexUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         stack#push (RpcComplex (Complex.pow el1 (cmpx_of_int el2)))
-      |RpcFloat el2 ->
-         stack#push (RpcComplex (Complex.pow el1 (cmpx_of_float el2)))
-      |RpcComplex el2 ->
-         stack#push (RpcComplex (Complex.pow el1 el2))
+         stack#push (RpcComplexUnit (Units.pow el1 (float_of_big_int el2)))
+      |RpcFloatUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else
+            stack#push (RpcComplexUnit 
+            (Units.pow el1 el2.Units.coeff.Complex.re))
+      |RpcComplexUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise to a dimensioned power"
+         end else if has_units el1 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "cannot raise dimensioned value to complex power"
+         end else
+            stack#push (RpcComplexUnit (cunit_of_cpx
+            (Complex.pow el1.Units.coeff el2.Units.coeff)))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;

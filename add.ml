@@ -32,11 +32,24 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with 
       |RpcInt el2 ->
          stack#push (RpcInt (add_big_int el1 el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat ((float_of_big_int el1) +. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_int el1 in
-         stack#push (RpcComplex (Complex.add c_el1 el2))
+      |RpcFloatUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "inconsistent units"
+         end else
+            let f_el2 = el2.Units.coeff.Complex.re in
+            stack#push (RpcFloatUnit (funit_of_float 
+            ((float_of_big_int el1) +.  f_el2)))
+      |RpcComplexUnit el2 ->
+         if has_units el2 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "inconsistent units"
+         end else
+            let c_el1 = cmpx_of_int el1 in
+            stack#push (RpcComplexUnit (cunit_of_cpx
+            (Complex.add c_el1 el2.Units.coeff)))
       |_ ->
          (* if the elements are incompatible, we have to
             put them back on the stack *)
@@ -44,15 +57,43 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for addition"))
       )
-   |RpcFloat el1 -> (
+   |RpcFloatUnit el1 -> (
       match gen_el2 with 
       |RpcInt el2 ->
-         stack#push (RpcFloat (el1 +. float_of_big_int el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat (el1 +. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_float el1 in
-         stack#push (RpcComplex (Complex.add c_el1 el2))
+         if has_units el1 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "inconsistent units"
+         end else
+            let f_el1 = el1.Units.coeff.Complex.re in
+            stack#push (RpcFloatUnit (funit_of_float 
+            (f_el1 +. float_of_big_int el2)))
+      |RpcFloatUnit el2 ->
+         begin try 
+            let conv = Units.conversion_factor_unitary el2 el1 in
+            let new_el = {
+               Units.coeff   = Complex.add el1.Units.coeff conv;
+               Units.factors = el1.Units.factors
+            } in
+            stack#push (RpcFloatUnit new_el)
+         with Units.Units_error s -> 
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid s
+         end
+      |RpcComplexUnit el2 ->
+         begin try
+            let conv = Units.conversion_factor_unitary el2 el1 in
+            let new_el = {
+               Units.coeff   = Complex.add el1.Units.coeff conv;
+               Units.factors = el1.Units.factors
+            } in
+            stack#push (RpcComplexUnit new_el)
+         with Units.Units_error s ->
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid s
+         end
       |_ ->
          (* if the elements are incompatible, we have to
             put them back on the stack *)
@@ -60,16 +101,30 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for addition"))
       )
-   |RpcComplex el1 -> (
+   |RpcComplexUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         let c_el2 = cmpx_of_int el2 in
-         stack#push (RpcComplex (Complex.add el1 c_el2))
-      |RpcFloat el2 ->
-         let c_el2 = cmpx_of_float el2 in
-         stack#push (RpcComplex (Complex.add el1 c_el2))
-      |RpcComplex el2 ->
-         stack#push (RpcComplex (Complex.add el1 el2))
+         if has_units el1 then begin
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid "inconsistent units"
+         end else
+            let c_el2 = cmpx_of_int el2 in
+            stack#push (RpcComplexUnit (cunit_of_cpx 
+            (Complex.add el1.Units.coeff c_el2)))
+      |RpcFloatUnit el2 | RpcComplexUnit el2 ->
+         begin try
+            let conv = Units.conversion_factor_unitary el2 el1 in
+            let new_el = {
+               Units.coeff = Complex.add el1.Units.coeff conv;
+               Units.factors = el1.Units.factors
+            } in
+            stack#push (RpcComplexUnit new_el)
+         with Units.Units_error s ->
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid s
+         end
       |_ ->
          (* if the elements are incompatible, we have to
             put them back on the stack *)
@@ -77,27 +132,42 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for addition"))
       )
-   |RpcFloatMatrix el1 -> (
+   |RpcFloatMatrixUnit (el1, u1) -> (
       match gen_el2 with
-      |RpcFloatMatrix el2 ->
+      |RpcFloatMatrixUnit (el2, u2) ->
          let dim1 = (Gsl_matrix.dims el1) and
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
-            let result = Gsl_matrix.copy el1 in
-            (Gsl_matrix.add result el2;
-            stack#push (RpcFloatMatrix result))
-         else
-            (* clean up *)
-            (stack#push gen_el1;
+            try
+               let conv = Units.conversion_factor_unitary u2 u1 in
+               let result = Gsl_matrix.copy el2 in
+               Gsl_matrix.scale result conv.Complex.re;
+               Gsl_matrix.add result el1;
+               stack#push (RpcFloatMatrixUnit (result, u1))
+            with Units.Units_error s -> 
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise_invalid s
+         else begin
+            stack#push gen_el1;
             stack#push gen_el2;
-            raise (Invalid_argument "incompatible matrix dimensions for addition"))
-      |RpcComplexMatrix el2 ->
+            raise (Invalid_argument "incompatible matrix dimensions for addition")
+         end
+      |RpcComplexMatrixUnit (el2, u2) ->
          let dim1 = (Gsl_matrix.dims el1) and
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
-            let c_el1 = cmat_of_fmat el1 in
-            (Gsl_matrix_complex.add c_el1 el2;
-            stack#push (RpcComplexMatrix c_el1))
+            try
+               let conv = Units.conversion_factor_unitary u2 u1 in
+               let c_el1 = cmat_of_fmat el1 in
+               let result = Gsl_matrix_complex.copy el2 in
+               Gsl_matrix_complex.scale result conv;
+               Gsl_matrix_complex.add result c_el1;
+               stack#push (RpcComplexMatrixUnit (result, u1))
+            with Units.Units_error s ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise_invalid s
          else
             (stack#push gen_el1;
             stack#push gen_el2;
@@ -109,27 +179,41 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for addition"))
       )
-   |RpcComplexMatrix el1 -> (
+   |RpcComplexMatrixUnit (el1, u1) -> (
       match gen_el2 with
-      |RpcFloatMatrix el2 ->
+      |RpcFloatMatrixUnit (el2, u2) ->
          let dim1 = (Gsl_matrix_complex.dims el1) and
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
-            let c_el2 = cmat_of_fmat el2 in
-            let copy = Gsl_matrix_complex.copy el1 in
-            (Gsl_matrix_complex.add copy c_el2;
-            stack#push (RpcComplexMatrix copy))
+            try
+               let conv = Units.conversion_factor_unitary u2 u1 in
+               let c_el2 = cmat_of_fmat el2 in
+               let copy = Gsl_matrix_complex.copy el1 in
+               Gsl_matrix_complex.scale c_el2 conv;
+               Gsl_matrix_complex.add copy c_el2;
+               stack#push (RpcComplexMatrixUnit (copy, u1))
+            with Units.Units_error s ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise_invalid s
          else
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for addition"))
-      |RpcComplexMatrix el2 ->
+      |RpcComplexMatrixUnit (el2, u2) ->
          let dim1 = (Gsl_matrix_complex.dims el1) and
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
-            let copy = Gsl_matrix_complex.copy el1 in
-            (Gsl_matrix_complex.add copy el2;
-            stack#push (RpcComplexMatrix copy))
+            try
+               let conv = Units.conversion_factor_unitary u2 u1 in
+               let copy = Gsl_matrix_complex.copy el2 in
+               Gsl_matrix_complex.scale copy conv;
+               Gsl_matrix_complex.add copy el1;
+               stack#push (RpcComplexMatrixUnit (copy, u1))
+            with Units.Units_error s ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise_invalid s
          else
             (stack#push gen_el1;
             stack#push gen_el2;
@@ -145,5 +229,7 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
       (stack#push gen_el1;
       stack#push gen_el2;
       raise (Invalid_argument "incompatible types for addition"))
+
+
 
 (* arch-tag: DO_NOT_CHANGE_f59cab0f-755e-4d09-9d30-114114945b38 *)

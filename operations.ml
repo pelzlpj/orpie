@@ -35,7 +35,8 @@ type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
                             | Store | Purge | Gcd | Lcm | Binom | Perm
                             | Total | Mean | Sumsq | Var |VarBias
                             | Stdev | StdevBias | Min | Max 
-                            | Utpn;;
+                            | Utpn | StandardizeUnits | ConvertUnits
+                            | UnitValue;;
 
 type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
                             | BeginBrowse | BeginAbbrev | BeginVar | Quit
@@ -47,7 +48,7 @@ type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
 
 type edit_operation_t     = | Digit | Enter | Backspace | Minus | SciNotBase 
                             | BeginInteger | BeginComplex | BeginMatrix
-                            | Separator | Angle;;
+                            | Separator | Angle | BeginUnits;;
 
 type browse_operation_t   = | EndBrowse
                             | ScrollLeft | ScrollRight | RollDown | RollUp

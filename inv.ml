@@ -28,11 +28,13 @@ let inv (stack : rpc_stack) (evaln : int -> unit) =
    evaln 1;
    let gen_el = stack#pop () in
    match gen_el with
-   |RpcFloat el ->
-      stack#push (RpcFloat (1.0 /. el))
-   |RpcComplex el ->
-      stack#push (RpcComplex (Complex.inv el))
-   |RpcFloatMatrix el ->
+   |RpcFloatUnit el ->
+      stack#push (RpcFloatUnit (Units.div (funit_of_float 1.0) el))
+   |RpcComplexUnit el ->
+      stack#push (RpcComplexUnit (Units.div 
+      (cunit_of_cpx Complex.one) el))
+   |RpcFloatMatrixUnit (el, uu) ->
+      let new_unit = Units.pow uu (-1.0) in
       let n, m = (Gsl_matrix.dims el) in
       if n = m then
          let copy_el1 = Gsl_matrix.copy el
@@ -62,12 +64,13 @@ let inv (stack : rpc_stack) (evaln : int -> unit) =
             else
                let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
                (Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
-               stack#push (RpcFloatMatrix inv))
+               stack#push (RpcFloatMatrixUnit (inv, new_unit)))
          end
       else
          (stack#push gen_el;
          raise (Invalid_argument "cannot invert non-square matrix"))
-   |RpcComplexMatrix el ->
+   |RpcComplexMatrixUnit (el, uu) ->
+      let new_unit = Units.pow uu (-1.0) in
       let n, m = (Gsl_matrix_complex.dims el) in
       if n = m then
          let copy_el = Gsl_vectmat.cmat_convert ~protect:true (`CM el) and
@@ -75,8 +78,8 @@ let inv (stack : rpc_stack) (evaln : int -> unit) =
          inv = Gsl_matrix_complex.create m m in
          try
             let sign = Gsl_linalg.complex_LU_decomp copy_el perm in
-            (Gsl_linalg.complex_LU_invert copy_el perm (`CM inv);
-            stack#push (RpcComplexMatrix inv))
+            Gsl_linalg.complex_LU_invert copy_el perm (`CM inv);
+            stack#push (RpcComplexMatrixUnit (inv, new_unit))
          with Gsl_exn _ ->
             (stack#push gen_el;
             raise (Invalid_argument "cannot invert singular matrix"))

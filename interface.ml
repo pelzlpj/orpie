@@ -39,7 +39,7 @@ type entry_t     = | IntEntry | FloatEntry | ComplexEntry
                    | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;
 
 type interface_mode_t = | StandardEntryMode | IntEditMode | AbbrevEntryMode 
-                        | VarEditMode | BrowsingMode;;
+                        | VarEditMode | BrowsingMode | UnitEditMode;;
 
 type complex_entry_element_t = 
    {mutable re_mantissa : string; mutable re_exponent : string;
@@ -95,7 +95,9 @@ type interface_state_t =
    mutable curr_buf                    : int;                           (* which element of gen_buffer is being edited *)
    mutable is_entering_imag            : bool;                          (* is the imaginary component being edited *)
    mutable matrix_cols                 : int;                           (* how many cols in the matrix being entered *)
-   mutable has_multiple_rows           : bool}                          (* does the matrix being entered have >1 row *)
+   mutable has_multiple_rows           : bool;                          (* does the matrix being entered have >1 row *)
+   mutable units_entry_buffer          : string;                        (* stores unit characters entered *)
+   mutable is_entering_units           : bool}                          (* is the user appending units *)
    
 
 
@@ -103,8 +105,8 @@ type interface_state_t =
 let make (c : rpc_calc) (std : screen_t) =
    Random.self_init ();
    let tagline_index = Random.int (Array.length all_taglines) in
-   let iface =
-      {version = Version.version;
+   let iface = {
+      version = Version.version;
       tagline = all_taglines.(tagline_index);
       calc = c;
       scr = std;
@@ -135,8 +137,10 @@ let make (c : rpc_calc) (std : screen_t) =
       curr_buf = 0;
       is_entering_imag = false;
       matrix_cols = 1;
-      has_multiple_rows = false}
-   in
+      has_multiple_rows = false;
+      units_entry_buffer = "";
+      is_entering_units = false
+   } in 
    iface
                                                
 

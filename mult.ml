@@ -32,102 +32,112 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with
       |RpcInt el2 ->
          stack#push (RpcInt (mult_big_int el1 el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat ((float_of_big_int el1) *. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_int el1 in
-         stack#push (RpcComplex (Complex.mul c_el1 el2))
-      |RpcFloatMatrix el2 ->
+      |RpcFloatUnit el2 ->
+         let fu_el1 = funit_of_float (float_of_big_int el1) in
+         stack#push (RpcFloatUnit (Units.mult fu_el1 el2))
+      |RpcComplexUnit el2 ->
+         let cu_el1 = cunit_of_cpx (cmpx_of_int el1) in
+         stack#push (RpcComplexUnit (Units.mult cu_el1 el2))
+      |RpcFloatMatrixUnit (el2, uu) ->
          let result = Gsl_matrix.copy el2 in
-         (Gsl_matrix.scale result (float_of_big_int el1);
-         stack#push (RpcFloatMatrix result))
-      |RpcComplexMatrix el2 ->
+         Gsl_matrix.scale result (float_of_big_int el1);
+         stack#push (RpcFloatMatrixUnit (result, uu))
+      |RpcComplexMatrixUnit (el2, uu) ->
          let c_el1 = cmpx_of_int el1 in
-         (Gsl_matrix_complex.scale el2 c_el1;
-         stack#push (RpcComplexMatrix el2))
+         let result = Gsl_matrix_complex.copy el2 in
+         Gsl_matrix_complex.scale result c_el1;
+         stack#push (RpcComplexMatrixUnit (result, uu))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for multiplication"))
       )
-   |RpcFloat el1 -> (
+   |RpcFloatUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         stack#push (RpcFloat (el1 *. float_of_big_int el2))
-      |RpcFloat el2 ->
-         stack#push (RpcFloat (el1 *. el2))
-      |RpcComplex el2 ->
-         let c_el1 = cmpx_of_float el1 in
-         stack#push (RpcComplex (Complex.mul c_el1 el2))
-      |RpcFloatMatrix el2 ->
+         let fu_el2 = funit_of_float (float_of_big_int el2) in
+         stack#push (RpcFloatUnit (Units.mult el1 fu_el2))
+      |RpcFloatUnit el2 ->
+         stack#push (RpcFloatUnit (Units.mult el1 el2))
+      |RpcComplexUnit el2 ->
+         stack#push (RpcComplexUnit (Units.mult el1 el2))
+      |RpcFloatMatrixUnit (el2, uu) ->
+         let uprod = Units.mult el1 uu in
          let result = Gsl_matrix.copy el2 in
-         (Gsl_matrix.scale result el1;
-         stack#push (RpcFloatMatrix result))
-      |RpcComplexMatrix el2 ->
-         let c_el1 = cmpx_of_float el1 in
-         (Gsl_matrix_complex.scale el2 c_el1;
-         stack#push (RpcComplexMatrix el2))
+         Gsl_matrix.scale result uprod.Units.coeff.Complex.re;
+         stack#push (RpcFloatMatrixUnit (result, unorm uprod))
+      |RpcComplexMatrixUnit (el2, uu) ->
+         let uprod = Units.mult el1 uu in
+         let c_el1 = cmpx_of_float el1.Units.coeff.Complex.re in
+         let result = Gsl_matrix_complex.copy el2 in
+         Gsl_matrix_complex.scale result uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (result, unorm uprod))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for multiplication"))
       )
-   |RpcComplex el1 -> (
+   |RpcComplexUnit el1 -> (
       match gen_el2 with
       |RpcInt el2 ->
-         let c_el2 = cmpx_of_int el2 in
-         stack#push (RpcComplex (Complex.mul el1 c_el2))
-      |RpcFloat el2 ->
-         let c_el2 = cmpx_of_float el2 in
-         stack#push (RpcComplex (Complex.mul el1 c_el2))
-      |RpcComplex el2 ->
-         stack#push (RpcComplex (Complex.mul el1 el2))
-      |RpcFloatMatrix el2 ->
+         let cu_el2 = cunit_of_cpx (cmpx_of_int el2) in
+         stack#push (RpcComplexUnit (Units.mult el1 cu_el2))
+      |RpcFloatUnit el2 | RpcComplexUnit el2 ->
+         stack#push (RpcComplexUnit (Units.mult el1 el2))
+      |RpcFloatMatrixUnit (el2, u2) ->
+         let uprod = Units.mult el1 u2 in
          let c_el2 = cmat_of_fmat el2 in
-         (Gsl_matrix_complex.scale c_el2 el1;
-         stack#push (RpcComplexMatrix c_el2))
-      |RpcComplexMatrix el2 ->
-         (Gsl_matrix_complex.scale el2 el1;
-         stack#push (RpcComplexMatrix el2))
+         Gsl_matrix_complex.scale c_el2 uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (c_el2, unorm uprod))
+      |RpcComplexMatrixUnit (el2, u2) ->
+         let uprod = Units.mult el1 u2 in
+         let result = Gsl_matrix_complex.copy el2 in
+         Gsl_matrix_complex.scale result uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (result, unorm uprod))
       |_ ->
          (stack#push gen_el1;
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for multiplication"))
       )
-   |RpcFloatMatrix el1 -> (
+   |RpcFloatMatrixUnit (el1, u1) -> (
       match gen_el2 with
       |RpcInt el2 ->
          let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result (float_of_big_int el2);
-         stack#push (RpcFloatMatrix result))
-      |RpcFloat el2 ->
+         Gsl_matrix.scale result (float_of_big_int el2);
+         stack#push (RpcFloatMatrixUnit (result, u1))
+      |RpcFloatUnit el2 ->
+         let uprod = Units.mult u1 el2 in
          let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result el2;
-         stack#push (RpcFloatMatrix result))
-      |RpcComplex el2 ->
+         Gsl_matrix.scale result uprod.Units.coeff.Complex.re;
+         stack#push (RpcFloatMatrixUnit (result, unorm uprod))
+      |RpcComplexUnit el2 ->
+         let uprod = Units.mult u1 el2 in
          let c_el1 = cmat_of_fmat el1 in
-         (Gsl_matrix_complex.scale c_el1 el2;
-         stack#push (RpcComplexMatrix c_el1))
-      |RpcFloatMatrix el2 ->
-         let n1, m1 = (Gsl_matrix.dims el1) and
-         n2, m2     = (Gsl_matrix.dims el2) in
+         Gsl_matrix_complex.scale c_el1 uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (c_el1, unorm uprod))
+      |RpcFloatMatrixUnit (el2, u2) ->
+         let n1, m1 = (Gsl_matrix.dims el1)
+         and n2, m2 = (Gsl_matrix.dims el2) in
          if m1 = n2 then
+            let uprod = Units.mult u1 u2 in
             let result = Gsl_matrix.create n1 m2 in
-            (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el1 el2 0.0 result;
-            stack#push (RpcFloatMatrix result))
+            Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+            uprod.Units.coeff.Complex.re el1 el2 0.0 result;
+            stack#push (RpcFloatMatrixUnit (result, unorm uprod))
          else
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
-      |RpcComplexMatrix el2 ->
-         let n1, m1 = (Gsl_matrix.dims el1) and
-         n2, m2     = (Gsl_matrix_complex.dims el2) in
+      |RpcComplexMatrixUnit (el2, u2) ->
+         let n1, m1 = (Gsl_matrix.dims el1)
+         and n2, m2 = (Gsl_matrix_complex.dims el2) in
          if m1 = n2 then
-            let c_el1 = cmat_of_fmat el1 and
-            result = Gsl_matrix_complex.create n1 m2 in
-            (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-               Complex.one c_el1 el2 Complex.zero result;
-            stack#push (RpcComplexMatrix result))
+            let uprod = Units.mult u1 u2 in
+            let c_el1 = cmat_of_fmat el1
+            and result = Gsl_matrix_complex.create n1 m2 in
+            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+            uprod.Units.coeff c_el1 el2 Complex.zero result;
+            stack#push (RpcComplexMatrixUnit (result, unorm uprod))
          else
             (stack#push gen_el1; 
             stack#push gen_el2;
@@ -137,40 +147,46 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for multiplication"))
       )
-   |RpcComplexMatrix el1 -> (
+   |RpcComplexMatrixUnit (el1, u1) -> (
       match gen_el2 with
       |RpcInt el2 ->
          let c_el2 = cmpx_of_int el2 in
-         (Gsl_matrix_complex.scale el1 c_el2;
-         stack#push (RpcComplexMatrix el1))
-      |RpcFloat el2 ->
-         let c_el2 = cmpx_of_float el2 in
-         (Gsl_matrix_complex.scale el1 c_el2;
-         stack#push (RpcComplexMatrix el1))
-      |RpcComplex el2 ->
-         (Gsl_matrix_complex.scale el1 el2;
-         stack#push (RpcComplexMatrix el1))
-      |RpcFloatMatrix el2 ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1) and
-         n2, m2     = (Gsl_matrix.dims el2) in
+         let result = Gsl_matrix_complex.copy el1 in
+         Gsl_matrix_complex.scale result c_el2;
+         stack#push (RpcComplexMatrixUnit (result, u1))
+      |RpcFloatUnit el2 ->
+         let uprod = Units.mult u1 el2 in
+         let result = Gsl_matrix_complex.copy el1 in
+         Gsl_matrix_complex.scale result uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (result, unorm uprod))
+      |RpcComplexUnit el2 ->
+         let uprod = Units.mult u1 el2 in
+         let result = Gsl_matrix_complex.copy el1 in
+         Gsl_matrix_complex.scale result uprod.Units.coeff;
+         stack#push (RpcComplexMatrixUnit (result, unorm uprod))
+      |RpcFloatMatrixUnit (el2, u2) ->
+         let n1, m1 = (Gsl_matrix_complex.dims el1)
+         and n2, m2 = (Gsl_matrix.dims el2) in
          if m1 = n2 then
-            let c_el2 = cmat_of_fmat el2 and
-            result = Gsl_matrix_complex.create n1 m2 in
-            (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-               Complex.one el1 c_el2 Complex.zero result;
-            stack#push (RpcComplexMatrix result))
+            let uprod = Units.mult u1 u2 in
+            let c_el2 = cmat_of_fmat el2
+            and result = Gsl_matrix_complex.create n1 m2 in
+            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+            uprod.Units.coeff el1 c_el2 Complex.zero result;
+            stack#push (RpcComplexMatrixUnit (result, unorm uprod))
          else
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
-      |RpcComplexMatrix el2 ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1) and
-         n2, m2     = (Gsl_matrix_complex.dims el2) in
+      |RpcComplexMatrixUnit (el2, u2) ->
+         let n1, m1 = (Gsl_matrix_complex.dims el1)
+         and n2, m2 = (Gsl_matrix_complex.dims el2) in
          if m1 = n2 then
+            let uprod = Units.mult u1 u2 in
             let result = Gsl_matrix_complex.create n1 m2 in
-            (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-               Complex.one el1 el2 Complex.zero result;
-            stack#push (RpcComplexMatrix result))
+            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+            uprod.Units.coeff el1 el2 Complex.zero result;
+            stack#push (RpcComplexMatrixUnit (result, unorm uprod))
          else
             (stack#push gen_el1;
             stack#push gen_el2;
