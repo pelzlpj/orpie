@@ -1,0 +1,186 @@
+open Genlex;;
+open Curses;;
+
+exception Config_failure of string;;
+let config_failwith s = raise (Config_failure s);;
+
+let table_key_command = Hashtbl.create 20;;
+let table_command_key = Hashtbl.create 20;;
+
+let command_of_key key =
+   Hashtbl.find table_key_command key;;
+let key_of_command command =
+   Hashtbl.find table_command_key command;;
+
+
+(* Register a key binding.  This adds hash table entries for translation
+ * between curses chtypes and commands (in both directions). *)
+let register_binding key_string command_string =
+   let make_entries k k_string =
+      (Printf.fprintf stderr "registering binding %d (%s) -> %s\n" k k_string
+      command_string;
+      Hashtbl.add table_key_command k command_string;
+      Hashtbl.add table_command_key command_string k_string)
+   in
+   match key_string with
+   |"<esc>" ->
+      make_entries 27 "<esc>"
+   |"<tab>" ->
+      make_entries 9 "<tab>"
+   |"<enter>" ->
+      make_entries Key.enter "<enter>"
+   |"<return>" ->
+      make_entries 10 "<return>"
+   |"<insert>" ->
+      make_entries Key.ic "<insert>"
+   |"<delete>" ->
+      make_entries Key.dc "<delete>"
+   |"<home>" ->
+      make_entries Key.home "<home>"
+   |"<end>" ->
+      make_entries Key.end_ "<end>"
+   |"<pageup>" ->
+      make_entries Key.ppage "<pageup>"
+   |"<pagedown>" ->
+      make_entries Key.npage "<pagedown>"
+   |"<space>" ->
+      make_entries 32 "<space>"
+   |"<left>" ->
+      make_entries Key.left "<left>"
+   |"<right>" ->
+      make_entries Key.right "<right>"
+   |"<up>" ->
+      make_entries Key.up "<up>"
+   |"<down>" ->
+      make_entries Key.down "<down>"
+   |"<f1>" ->
+      make_entries (Key.f 1) "<f1>"
+   |"<f2>" ->
+      make_entries (Key.f 2) "<f2>"
+   |"<f3>" ->
+      make_entries (Key.f 3) "<f3>"
+   |"<f4>" ->
+      make_entries (Key.f 4) "<f4>"
+   |"<f5>" ->
+      make_entries (Key.f 5) "<f5>"
+   |"<f6>" ->
+      make_entries (Key.f 6) "<f6>"
+   |"<f7>" ->
+      make_entries (Key.f 7) "<f7>"
+   |"<f8>" ->
+      make_entries (Key.f 8) "<f8>"
+   |"<f9>" ->
+      make_entries (Key.f 9) "<f9>"
+   |"<f10>" ->
+      make_entries (Key.f 10) "<f10>"
+   |"<f11>" ->
+      make_entries (Key.f 11) "<f11>"
+   |"<f12>" ->
+      make_entries (Key.f 12) "<f12>"
+   |_ ->
+      if String.length key_string = 1 then
+         make_entries (int_of_char key_string.[0]) key_string
+      else if String.length key_string > 2 then
+         if key_string.[0] = '\\' && key_string.[1] = 'C' then
+            if String.length key_string = 3 then
+               let control_chtype = ((int_of_char key_string.[2]) - 96) and
+               control_str = "^" ^ (String.make 1 key_string.[2]) in
+               make_entries control_chtype control_str
+            else
+               config_failwith ("Illegal control key \"" ^ key_string ^ "\"")
+         else if key_string.[0] = '0' && key_string.[1] = 'o' then
+            (* FIXME: to get the display string, one could do something like
+             * let str = unctrl (ungetch key; getch ()), along with a little
+             * post-processing ala curses-keys.ml *)
+            let substr = String.sub key_string 2 ((String.length key_string) - 2) in
+            make_entries (int_of_string key_string) ("\\" ^ substr)
+         else
+            config_failwith ("Unrecognized key string \"" ^ key_string ^ "\"")
+      else
+         config_failwith ("Unrecognized key string \"" ^ key_string ^ "\"");;
+
+
+
+
+
+
+(* Parse a line from an rpc2 configuration file.  This operates on a stream
+ * corresponding to a non-empty line from the file.  It will match commands
+ * of the form
+ *    bind key command
+ *    macro key multiple_keys
+ * where 'key' is either a quoted string containing a key specifier or an octal
+ * key representation of the form \xxx (unquoted), and multiple_keys is a quoted
+ * string containing a number of keypresses to simulate.
+ *)
+let parse_line line_stream = 
+   match line_stream with parser
+   | [< 'Kwd "bind" >] -> 
+      begin 
+         let bind_key key = 
+            begin
+               match line_stream with parser
+               | [< 'Ident command >] ->
+                  let reg () = register_binding key command in
+                  begin
+                     match command with
+                        |"function_add" | "function_sub" | "function_mult"
+                        |"function_div" | "function_inv" ->
+                           reg ()
+                        |_ ->
+                           config_failwith ("Unknown command name \"" ^ command ^ "\"")
+                  end
+               | [< >] ->
+                  config_failwith ("Expected a command name after \"bind \"" ^ key ^ "\"")
+            end
+         in
+         match line_stream with parser
+         | [< 'String k >] -> 
+            bind_key k
+         | [< 'Ident "\\" >] ->
+            begin
+               match line_stream with parser
+               | [< 'Int octal_int >] ->
+                  begin
+                     try
+                        let octal_digits = "0o" ^ (string_of_int octal_int) in
+                        bind_key octal_digits 
+                     with 
+                        (Failure "int_of_string") -> config_failwith "Expected octal digits after \"\\\""
+                  end
+               | [< >]  ->
+                  config_failwith "Expected octal digits after \"\\\""
+            end
+         | [< >] ->
+            config_failwith "Expected a key string after keyword \"bind\""
+      end
+   | [< 'Kwd "macro" >] ->
+      begin
+         match line_stream with parser
+         | [< 'String key >] ->
+            begin
+               match line_stream with parser
+               | [< 'String generated_keys >] ->
+                  Printf.printf "registering macro \"%s\" -> \"%s\"\n" key generated_keys
+               | [< >] ->
+                  config_failwith ("Expected a key string after \"macro \"" ^ key ^ "\"")
+            end
+         | [< >] ->
+            config_failwith "Expected a key string after keyword \"macro\""
+      end
+   | [< 'Kwd "#" >] ->
+      ()
+   | [< >] ->
+      config_failwith "Unknown keyword at start of line";;
+
+
+
+let line_lexer line = make_lexer ["bind"; "macro"; "#"] (Stream.of_string line);;
+
+let line_stream = line_lexer "bind \"\\\\Ca\" function_add" in
+parse_line line_stream;;
+
+
+
+
+(* arch-tag: DO_NOT_CHANGE_614115ed-7d1d-4834-bda4-e6cf93ac3fcd *)

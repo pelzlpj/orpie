@@ -46,6 +46,7 @@ OLFLAGS = -cclib $(CURSES_LIB)
 #############
 
 NAME = rpc2
+NAME2 = rpc2-curses-keys
 
 all: $(OCAMLBEST)
 
@@ -63,14 +64,20 @@ CURSES_OOBJS = curses/ml_curses.o curses/curses.cmx
 
 GENERATED = version.ml
 
-byte: $(NAME).byte
-opt: $(NAME).opt
+byte: $(NAME).byte $(NAME2).byte
+opt: $(NAME).opt $(NAME2).opt
 
 $(NAME).byte: $(CURSES_BOBJS) $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(CMO)
 
+$(NAME2).byte: $(CURSES_BOBJS) curses-keys.ml
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) curses-keys.ml
+
 $(NAME).opt: $(CURSES_OOBJS) $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(CMX)
+
+$(NAME2).opt: $(CURSES_OOBJS) curses-keys.ml
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) curses-keys.ml
 
 $(CURSES_BOBJS):
 	cd curses && $(MAKE) byte
@@ -95,12 +102,15 @@ install-indep:
 
 install: install-indep
 	cp -f $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
+	cp -f $(NAME2).$(OCAMLBEST) $(BINDIR)/$(NAME2)$(EXE)
 
 install-byte: install-indep
 	cp -f $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
+	cp -f $(NAME2).byte $(BINDIR)/$(NAME2)$(EXE)
 
 install-opt: install-indep
 	cp -f $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
+	cp -f $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
 
 # documentation
 ###############
@@ -205,7 +215,7 @@ configure: configure.in
 clean::
 	rm -f *.cm[iox] *.o *~
 	rm -f $(GENERATED) parser.output
-	rm -f $(NAME).byte $(NAME).opt
+	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	cd curses && $(MAKE) clean
 
