@@ -2,6 +2,9 @@
 # autoconf input for Objective Caml programs
 # Copyright (C) 2001 Jean-Christophe Filliâtre
 #   from a first script by Georges Mariano 
+#
+#   modified 10/26/03 by Paul Pelzl, for inclusion with rpc2
+#   (added ocaml-gsl detection, removed unnecessary checks)
 # 
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Library General Public
@@ -22,11 +25,8 @@
 #   OCAMLBEST     either "byte" if no native compiler was found, 
 #                 or "opt" otherwise
 #   OCAMLDEP      "ocamldep"
-#   OCAMLLEX      "ocamllex" (or "ocamllex.opt" if present)
-#   OCAMLYACC     "ocamlyac"
 #   OCAMLLIB      the path to the ocaml standard library
 #   OCAMLVERSION  the ocaml version number
-#   OCAMLWEB      "ocamlweb" (not mandatory)
 #   OCAMLWIN32    "yes"/"no" depending on Sys.os_type = "Win32"
 #   EXE           ".exe" if OCAMLWIN32=yes, "" otherwise
 #   OCAMLGSLLIB   the path to the ocaml gsl library
@@ -96,28 +96,12 @@ if test "$OCAMLOPT" != no ; then
     fi
 fi
 
-# ocamldep, ocamllex and ocamlyacc should also be present in the path
+# ocamldep should also be present in the path
 AC_CHECK_PROG(OCAMLDEP,ocamldep,ocamldep,no)
 if test "$OCAMLDEP" = no ; then
 	AC_MSG_ERROR(Cannot find ocamldep.)
 fi
 
-AC_CHECK_PROG(OCAMLLEX,ocamllex,ocamllex,no)
-if test "$OCAMLLEX" = no ; then
-    AC_MSG_ERROR(Cannot find ocamllex.)
-else
-    AC_CHECK_PROG(OCAMLLEXDOTOPT,ocamllex.opt,ocamllex.opt,no)
-    if test "$OCAMLLEXDOTOPT" != no ; then
-	OCAMLLEX=$OCAMLLEXDOTOPT
-    fi
-fi
-
-AC_CHECK_PROG(OCAMLYACC,ocamlyacc,ocamlyacc,no)
-if test "$OCAMLYACC" = no ; then
-	AC_MSG_ERROR(Cannot find ocamlyacc.)
-fi
-
-AC_CHECK_PROG(OCAMLWEB,ocamlweb,ocamlweb,true)
 
 # platform
 AC_MSG_CHECKING(platform)
@@ -132,6 +116,7 @@ else
 fi
 
 # gsl libs
+# FIXME: this probably should be a linker test, to make sure it *really* works
 help="  --with-ocaml-gsl-dir=DIR  search for Ocaml GNU Scientific Library bindings in DIR\n[$OCAMLLIB/gsl]"
 AC_ARG_WITH(ocaml-gsl-dir, 
             AC_HELP_STRING([--with-ocaml-gsl-dir=DIR],
@@ -147,12 +132,9 @@ fi
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
 AC_SUBST(OCAMLDEP)
-AC_SUBST(OCAMLLEX)
-AC_SUBST(OCAMLYACC)
 AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
-AC_SUBST(OCAMLWEB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(OCAMLGSLLIB)
