@@ -1717,8 +1717,9 @@ made accessible by binding it to a single keypress using the \texttt{bind} keywo
 
 %@% IF !ORPIERC %@%
 \section{Licensing}
-Orpie is Free Software; it has been made available under version 2 of the GNU
-General Public License (GPL).  You should have received a copy of the GPL along
+Orpie is Free Software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License (GPL), Version 2, as published by the
+Free Software Foundation.  You should have received a copy of the GPL along
 with this program, in the file ``COPYING''.
 
 
