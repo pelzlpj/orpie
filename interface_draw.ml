@@ -56,8 +56,40 @@ let draw_stack (iface : interface_state_t) =
          let trunc_num = Str.string_after l_num_str (str_len - 4) in
          (sprintf "%s: %s" trunc_num)
    in
+   (* if there is no help window, then print the calculator mode
+    * information above the stack *)
+   let num_stack_lines =
+      begin match iface.scr.help_win with
+      |Some win ->
+         iface.scr.sw_lines
+      |None ->
+         let modes = iface.calc#get_modes () in
+         assert (wmove iface.scr.stack_win 0 0);
+         wclrtoeol iface.scr.stack_win;
+         wattron iface.scr.stack_win WA.bold;
+         assert (mvwaddstr iface.scr.stack_win 0 2 "angle:      base:      complex:");
+         wattroff iface.scr.stack_win WA.bold;
+         let angle_str = match modes.angle with
+         |Rad -> "RAD"
+         |Deg -> "DEG" in
+         assert (mvwaddstr iface.scr.stack_win 0 9 angle_str);
+         let base_str = match modes.base with
+         |Bin -> "BIN"
+         |Oct -> "OCT"
+         |Hex -> "HEX"
+         |Dec -> "DEC" in
+         assert (mvwaddstr iface.scr.stack_win 0 20 base_str);
+         let complex_str = match modes.complex with
+         |Rect -> "REC"
+         |Polar -> "POL" in
+         assert (mvwaddstr iface.scr.stack_win 0 34 complex_str);
+         assert (mvwaddstr iface.scr.stack_win 1 0 (String.make (iface.scr.sw_cols) '-'));
+         iface.scr.sw_lines - 2
+      end
+   in
+   (* display the stack data itself *)
    for line = iface.stack_bottom_row to 
-   pred (iface.stack_bottom_row + iface.scr.sw_lines) do
+   pred (iface.stack_bottom_row + num_stack_lines) do
       let s = iface.calc#get_display_line line in
       let len = String.length s in
       assert (wmove iface.scr.stack_win 
@@ -559,13 +591,20 @@ let draw_error (iface : interface_state_t) msg =
       else
          error_lines 
    in
+   let top_line =
+      begin match iface.scr.help_win with
+      |Some win -> 0
+      |None     -> 2
+      end
+   in
    for i = 0 to pred (List.length trunc_error_lines) do
-      assert (wmove iface.scr.stack_win i 0);
+      assert (wmove iface.scr.stack_win (i + top_line) 0);
       wclrtoeol iface.scr.stack_win;
-      assert (mvwaddstr iface.scr.stack_win i 1 (List.nth trunc_error_lines i))
+      assert (mvwaddstr iface.scr.stack_win (i + top_line) 1 (List.nth trunc_error_lines i))
    done;
    let s = String.make iface.scr.sw_cols '-' in
-   assert (mvwaddstr iface.scr.stack_win (List.length trunc_error_lines) 0 s);
+   assert (mvwaddstr iface.scr.stack_win ((List.length trunc_error_lines) +
+   top_line) 0 s);
    assert (wnoutrefresh iface.scr.stack_win);
    assert (wmove iface.scr.entry_win (iface.scr.ew_lines - 1) (iface.scr.ew_cols - 1))
 

@@ -822,8 +822,14 @@ let handle_prev_line (iface : interface_state_t) =
    if iface.stack_selection < iface.calc#get_stack_size () then
       (iface.stack_selection <- succ iface.stack_selection;
       iface.horiz_scroll <- 0;
-      (if iface.stack_selection > pred (iface.stack_bottom_row + iface.scr.sw_lines) then
-         iface.stack_bottom_row <- iface.stack_selection - iface.scr.sw_lines + 1
+      let num_stack_lines =
+         begin match iface.scr.help_win with
+         |Some win -> iface.scr.sw_lines
+         |None     -> iface.scr.sw_lines - 2
+         end
+      in
+      (if iface.stack_selection > pred (iface.stack_bottom_row + num_stack_lines) then
+         iface.stack_bottom_row <- iface.stack_selection - num_stack_lines + 1
       else
          ());
       draw_update_stack iface)
