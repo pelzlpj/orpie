@@ -104,9 +104,9 @@ let mult (stack : rpc_stack) =
                (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el1 el2 0.0 result;
                stack#push (RpcFloatMatrix result))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimensions"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
          |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
@@ -117,9 +117,9 @@ let mult (stack : rpc_stack) =
                   Complex.one c_el1 el2 Complex.zero result;
                stack#push (RpcComplexMatrix result))
             else
-               (stack#push gen_el2; 
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimensions"))
+               (stack#push gen_el1; 
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
          )
       |RpcComplexMatrix el1 -> (
          match gen_el2 with
@@ -139,27 +139,29 @@ let mult (stack : rpc_stack) =
             n2, m2     = (Gsl_matrix.dims el2) in
             if m1 = n2 then
                let c_el2 = cmat_of_fmat el2 and
-               result = Gsl_matrix_complex.create m1 n2 in
+               result = Gsl_matrix_complex.create n1 m2 in
                (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
                   Complex.one el1 c_el2 Complex.zero result;
                stack#push (RpcComplexMatrix result))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimensions"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
          |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix_complex.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
             if m1 = n2 then
-               let result = Gsl_matrix_complex.create m1 n2 in
+               let result = Gsl_matrix_complex.create n1 m2 in
                (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
                   Complex.one el1 el2 Complex.zero result;
                stack#push (RpcComplexMatrix result))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimensions"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
          )
    else
-      raise (Invalid_argument "insufficient arguments")
+      raise (Invalid_argument "insufficient arguments for multiplication")
+
+
 (* arch-tag: DO_NOT_CHANGE_5fc03e41-d1d3-40da-8b68-9a85d96148d0 *)

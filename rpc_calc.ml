@@ -29,28 +29,39 @@ class rpc_calc =
       val stack = new rpc_stack
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
 
-      method add =
+      method add () =
          Add.add stack
 
-      method sub =
+      method sub () =
          Sub.sub stack
 
-      method mult =
+      method mult () =
          Mult.mult stack
 
-      method div =
+      method div () =
          Div.div stack
 
-      method inv =
+      method inv () =
          Inv.inv stack
 
-      method pow =
+      method pow () =
          Pow.pow stack
 
       method get_modes () =
          modes
 
-      method neg =
+      (* Warning: dup() creates multiple references to the same object.
+       * Therefore all operations need to leave the original stack elements
+       * unaltered. *)
+      method dup () =
+         if stack#length > 0 then
+            let gen_el = stack#pop () in
+            stack#push gen_el;
+            stack#push gen_el
+         else
+            raise (Invalid_argument "empty stack")
+
+      method neg () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -61,15 +72,17 @@ class rpc_calc =
             |RpcComplex el ->
                stack#push (RpcComplex (Complex.neg el))
             |RpcFloatMatrix el ->
-               (Gsl_matrix.scale el (-1.0);
-               stack#push (RpcFloatMatrix el))
+               let copy = Gsl_matrix.copy el in
+               (Gsl_matrix.scale copy (-1.0);
+               stack#push (RpcFloatMatrix copy))
             |RpcComplexMatrix el ->
-               (Gsl_matrix_complex.scale el {Complex.re=(-1.0); Complex.im=0.0};
-               stack#push (RpcComplexMatrix el))
+               let copy = Gsl_matrix_complex.copy el in
+               (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
+               stack#push (RpcComplexMatrix copy))
          else
             raise (Invalid_argument "empty stack")
 
-      method sqrt =
+      method sqrt () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -83,7 +96,7 @@ class rpc_calc =
          else
             raise (Invalid_argument "empty stack")
 
-      method abs =
+      method abs () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -99,7 +112,7 @@ class rpc_calc =
          else
             raise (Invalid_argument "empty stack")
 
-      method arg =
+      method arg () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -112,7 +125,7 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
-      method exp =
+      method exp () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -129,7 +142,7 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
-      method ln =
+      method ln () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -146,7 +159,7 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
-      method conj =
+      method conj () =
          if stack#length > 0 then
             let gen_el = stack#pop () in
             match gen_el with
@@ -170,7 +183,10 @@ class rpc_calc =
       method get_display_line line_num =
          stack#get_display_line line_num modes
 
-      method drop = stack#pop ()
+      method drop () = stack#pop ()
+
+      method push (v : rpc_data) =
+         stack#push v
 
       method enter_int i =
          stack#push (RpcInt i)
@@ -187,11 +203,12 @@ class rpc_calc =
       method enter_cmat cm =
          stack#push (RpcComplexMatrix cm)
 
-      method print_stack =
+(*      method print_stack () =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in
          for i = stack#length downto 1 do
             print_el i (stack#get_display_line i modes)
          done
+*)
 
    end;;
 

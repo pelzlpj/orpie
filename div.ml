@@ -39,9 +39,9 @@ let div (stack : rpc_stack) =
             let c_el1 = cmpx_of_int el1 in
             stack#push (RpcComplex (Complex.div c_el1 el2))
          |_ ->
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for division"))
          )
       |RpcFloat el1 -> (
          match gen_el2 with
@@ -53,9 +53,9 @@ let div (stack : rpc_stack) =
             let c_el1 = cmpx_of_float el1 in
             stack#push (RpcComplex (Complex.div c_el1 el2))
          |_ ->
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for division"))
          )
       |RpcComplex el1 -> (
          match gen_el2 with
@@ -68,9 +68,9 @@ let div (stack : rpc_stack) =
          |RpcComplex el2 ->
             stack#push (RpcComplex (Complex.div el1 el2))
          |_ ->
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for division"))
          )
       |RpcFloatMatrix el1 -> (
          match gen_el2 with
@@ -102,17 +102,17 @@ let div (stack : rpc_stack) =
                         1.0 el1 inv 0.0 result;
                      stack#push (RpcFloatMatrix result))
                   with Gsl_exn _ -> 
-                     (stack#push gen_el2;
-                     stack#push gen_el1;
-                     raise (Invalid_argument "singular matrix"))
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "divisor matrix is singular"))
                else
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "incompatible dimensions"))
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "incompatible dimensions for division"))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "non-square matrix"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "divisor matrix is non-square"))
          |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
@@ -132,17 +132,17 @@ let div (stack : rpc_stack) =
                         Complex.zero result;
                      stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
-                     (stack#push gen_el2;
-                     stack#push gen_el1;
-                     raise (Invalid_argument "singular matrix"))
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "divisor matrix is singular"))
                else
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "incompatible dimensions"))
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "incompatible matrix dimensions for division"))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "non-square matrix"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "divisor matrix is non-square"))
          )
       |RpcComplexMatrix el1 -> (
          match gen_el2 with
@@ -174,17 +174,17 @@ let div (stack : rpc_stack) =
                         Complex.zero result;
                      stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
-                     (stack#push gen_el2;
-                     stack#push gen_el1;
-                     raise (Invalid_argument "singular matrix"))
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "divisor matrix is singular"))
                else
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "incompatible dimensions"))
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "incompatible matrix dimensions for division"))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "non-square matrix"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "divisor matrix is non-square"))
          |RpcComplexMatrix el2 ->
             let n1, m1 = (Gsl_matrix_complex.dims el1) and
             n2, m2     = (Gsl_matrix_complex.dims el2) in
@@ -204,20 +204,20 @@ let div (stack : rpc_stack) =
                         Gsl_blas.NoTrans Complex.one el1 inv Complex.zero result;
                      stack#push (RpcComplexMatrix result))
                   with Gsl_exn _ -> 
-                     (stack#push gen_el2;
-                     stack#push gen_el1;
-                     raise (Invalid_argument "singular matrix"))
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "divisor matrix is singular"))
                else
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "incompatible dimensions"))
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "incompatible matrix dimensions for division"))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "non-square matrix"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "divisor matrix is non-square"))
          )
    else
-      raise (Invalid_argument "insufficient arguments")
+      raise (Invalid_argument "insufficient arguments for division")
 
 
 (* arch-tag: DO_NOT_CHANGE_c2535853-756a-4574-8f36-1103a81d053b *)

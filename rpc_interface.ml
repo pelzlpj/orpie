@@ -45,7 +45,11 @@ type rpc_bindings = {
    begin_matrix        : int;
    enter               : int;
    scientific_notation : int;
-   neg                 : int
+   neg                 : int;
+   add                 : int;
+   sub                 : int;
+   mult                : int;
+   div                 : int
 };;
 
 
@@ -55,7 +59,11 @@ let bindings = {
    begin_matrix        = int_of_char '[';
    enter               = 10;   (* standard enter key *)
    scientific_notation = int_of_char ' ';
-   neg                 = int_of_char 'n'
+   neg                 = int_of_char 'n';
+   add                 = int_of_char '+';
+   sub                 = int_of_char '-';
+   mult                = int_of_char '*';
+   div                 = int_of_char '/'
 };;
 
 
@@ -250,7 +258,8 @@ object(self)
 
    (* write an error message to the stack window *)
    method draw_error msg =
-      let error_lines = Utility.wordwrap msg (scr.sw_cols-3) in
+      self#draw_stack ();
+      let error_lines = Utility.wordwrap ("Error: " ^ msg) (scr.sw_cols-2) in
       let trunc_error_lines = 
          if List.length error_lines > 4 then
             (List.nth error_lines 0) :: (List.nth error_lines 1) ::
@@ -261,7 +270,7 @@ object(self)
       for i = 0 to pred (List.length trunc_error_lines) do
          assert (wmove scr.stack_win i 0);
          wclrtoeol scr.stack_win;
-         assert (mvwaddstr scr.stack_win i 2 (List.nth trunc_error_lines i))
+         assert (mvwaddstr scr.stack_win i 1 (List.nth trunc_error_lines i))
       done;
       let s = String.make scr.sw_cols '-' in
       assert (mvwaddstr scr.stack_win (List.length trunc_error_lines) 0 s);
@@ -269,21 +278,8 @@ object(self)
 
 
 
-   (* parse the entry buffers to obtain an rpc object, then stack#push it *)
-   method push_entry () =
-      (* perform this cleanup routine after every entry, so we are prepared
-         to receive a new object. *)
-      let post_entry_cleanup () =
-         has_entry <- false;
-         entry_type <- FloatEntry;
-         int_entry_buffer <- "";
-         int_base_string <- "";
-         is_entering_base <- false;
-         float_mantissa_buffer <- "";
-         float_exponent_buffer <- "";
-         is_entering_exponent <- false;
-         self#draw_entry ()
-      in
+   (* parse the entry buffers to obtain an rpc object *)
+   method private get_entry_from_buffer () =
       match entry_type with
       |IntEntry ->
          let base_mode = 
@@ -305,32 +301,53 @@ object(self)
          begin
             try
                let ival = Big_int_str.big_int_of_string_base int_entry_buffer base in
-               calc#enter_int ival;
-               self#draw_stack ();
+               RpcInt ival
             with Big_int_str.Big_int_string_failure error_msg ->
-               self#draw_error ("Error: " ^ error_msg)
-         end;
-         post_entry_cleanup ()
+               raise (Invalid_argument error_msg)
+         end
       |FloatEntry ->
          begin
             try
-               begin
-                  if is_entering_exponent && String.length float_exponent_buffer > 0 then
-                     let ff = float_of_string (float_mantissa_buffer ^ "e" ^
-                     float_exponent_buffer) in
-                     calc#enter_float ff
-                  else
-                     let ff = float_of_string float_mantissa_buffer in
-                     calc#enter_float ff
-               end;
-               self#draw_stack ();
+               if is_entering_exponent && String.length float_exponent_buffer > 0 then
+                  let ff = float_of_string (float_mantissa_buffer ^ "e" ^
+                  float_exponent_buffer) in
+                  RpcFloat ff
+               else
+                  let ff = float_of_string float_mantissa_buffer in
+                  RpcFloat ff
             with Failure "float_of_string" ->
-               self#draw_error "Error: improperly formatted floating point data"    
-         end;
-         post_entry_cleanup ()
+               raise (Invalid_argument "improperly formatted floating point data")
+         end
       |_ ->
          (* handle entry of other data types *)
-         ()
+         failwith "entry of unhandled data type"
+
+
+   (* parse the entry buffers to obtain an rpc object, then stack#push it *)
+   method push_entry () =
+      (* perform this cleanup routine after every entry, so we are prepared
+         to receive a new object. *)
+      let post_entry_cleanup () =
+         has_entry <- false;
+         entry_type <- FloatEntry;
+         int_entry_buffer <- "";
+         int_base_string <- "";
+         is_entering_base <- false;
+         float_mantissa_buffer <- "";
+         float_exponent_buffer <- "";
+         is_entering_exponent <- false;
+         self#draw_entry ()
+      in
+      begin
+         try
+            calc#push (self#get_entry_from_buffer ())
+         with
+            Invalid_argument error_msg ->
+               (post_entry_cleanup ();
+               (* raise the EXN again, so it can be caught within do_main_loop *)
+               raise (Invalid_argument error_msg))
+      end;
+      post_entry_cleanup ()
 
 
 
@@ -346,11 +363,16 @@ object(self)
 (*               Printf.fprintf stdout "key = %d\n" key;
                flush stdout; *)
                if key = bindings.enter then
-                  if has_entry then
-                     self#push_entry ()
-                  else
-                     (* FIXME: duplicate last stack element *)
-                     ()
+                  try
+                     begin
+                        if has_entry then
+                           self#push_entry ()
+                        else
+                           calc#dup () 
+                     end;
+                     self#draw_stack ()
+                  with Invalid_argument error_msg ->
+                     self#draw_error error_msg
                else if key = bindings.begin_int then
                   if entry_type = FloatEntry then
                      (entry_type <- IntEntry;
@@ -405,9 +427,54 @@ object(self)
                      |_ ->
                         ()
                   else
-                     (* execute calc#neg () *)
-                     ()
-               else
+                     try calc#neg (); self#draw_stack ()
+                     with Invalid_argument error_msg ->
+                        self#draw_error error_msg
+               else if key = bindings.add then
+                  try 
+                     (if has_entry then
+                        self#push_entry ()
+                     else
+                        ());
+                     calc#add (); 
+                     self#draw_stack ()
+                  with 
+                     Invalid_argument error_msg ->
+                        self#draw_error error_msg
+               else if key = bindings.sub then
+                  try 
+                     (if has_entry then
+                        self#push_entry ()
+                     else
+                        ());
+                     calc#sub (); 
+                     self#draw_stack ()
+                  with 
+                     Invalid_argument error_msg ->
+                        self#draw_error error_msg
+               else if key = bindings.mult then
+                  try 
+                     (if has_entry then
+                        self#push_entry ()
+                     else
+                        ());
+                     calc#mult (); 
+                     self#draw_stack ()
+                  with 
+                     Invalid_argument error_msg ->
+                        self#draw_error error_msg
+               else if key = bindings.div then
+                  try 
+                     (if has_entry then
+                        self#push_entry ()
+                     else
+                        ());
+                     calc#div (); 
+                     self#draw_stack ()
+                  with 
+                     Invalid_argument error_msg ->
+                        self#draw_error error_msg
+               else (* handle entry of digits *)
                   match entry_type with
                   |IntEntry ->
                      begin

@@ -44,10 +44,10 @@ let inv (stack : rpc_stack) =
                stack#push (RpcFloatMatrix inv))
             with Gsl_exn _ ->
                (stack#push gen_el;
-               raise (Invalid_argument "singular matrix"))
+               raise (Invalid_argument "cannot invert singular matrix"))
          else
             (stack#push gen_el;
-            raise (Invalid_argument "non-square matrix"))
+            raise (Invalid_argument "cannot invert non-square matrix"))
       |RpcComplexMatrix el ->
          let n, m = (Gsl_matrix_complex.dims el) in
          if n = m then
@@ -60,12 +60,12 @@ let inv (stack : rpc_stack) =
                stack#push (RpcComplexMatrix inv))
             with Gsl_exn _ ->
                (stack#push gen_el;
-               raise (Invalid_argument "singular matrix"))
+               raise (Invalid_argument "cannot invert singular matrix"))
          else
             (stack#push gen_el;
-            raise (Invalid_argument "non-square matrix"))
+            raise (Invalid_argument "cannot invert non-square matrix"))
       |_ ->
-         raise (Invalid_argument "invalid argument")
+         raise (Invalid_argument "inversion is undefined for this data type")
 
    else
       raise (Invalid_argument "empty stack")

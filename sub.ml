@@ -40,9 +40,9 @@ let sub (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
          )
       |RpcFloat el1 -> (
          match gen_el2 with
@@ -56,9 +56,9 @@ let sub (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
          )
       |RpcComplex el1 -> (
          match gen_el2 with
@@ -73,9 +73,9 @@ let sub (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
          )
       |RpcFloatMatrix el1 -> (
          match gen_el2 with
@@ -87,9 +87,9 @@ let sub (stack : rpc_stack) =
                (Gsl_matrix.sub result el2;
                stack#push (RpcFloatMatrix result))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
          |RpcComplexMatrix el2 ->
             let dim1 = (Gsl_matrix.dims el1) and
             dim2     = (Gsl_matrix_complex.dims el2) in
@@ -98,15 +98,15 @@ let sub (stack : rpc_stack) =
                (Gsl_matrix_complex.sub c_el1 el2;
                stack#push (RpcComplexMatrix c_el1))
             else
-               (stack#push gen_el2;
+               (stack#push gen_el1;
                stack#push gen_el2;
-               raise (Invalid_argument "incompatible dimension"))
+               raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
          )
       |RpcComplexMatrix el1 -> (
          match gen_el2 with 
@@ -118,9 +118,9 @@ let sub (stack : rpc_stack) =
                (Gsl_matrix_complex.sub el1 c_el2;
                stack#push (RpcComplexMatrix el1))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
          |RpcComplexMatrix el2 ->
             let dim1 = (Gsl_matrix_complex.dims el1) and
             dim2     = (Gsl_matrix_complex.dims el2) in
@@ -128,17 +128,20 @@ let sub (stack : rpc_stack) =
                (Gsl_matrix_complex.sub el1 el2;
                stack#push (RpcComplexMatrix el1))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for subtraction"))
          )
 
    else
-      raise (Invalid_argument "insufficient arguments")
+      raise (Invalid_argument "insufficient arguments for subtraction")
+
+
+
 (* arch-tag: DO_NOT_CHANGE_f9044e6f-03c7-465a-b8ab-87cf65a0bc37 *)

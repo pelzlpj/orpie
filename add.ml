@@ -40,9 +40,9 @@ let add (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for addition"))
          )
       |RpcFloat el1 -> (
          match gen_el2 with 
@@ -56,9 +56,9 @@ let add (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for addition"))
          )
       |RpcComplex el1 -> (
          match gen_el2 with
@@ -73,9 +73,9 @@ let add (stack : rpc_stack) =
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for addition"))
          )
       |RpcFloatMatrix el1 -> (
          match gen_el2 with
@@ -88,9 +88,9 @@ let add (stack : rpc_stack) =
                stack#push (RpcFloatMatrix result))
             else
                (* clean up *)
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for addition"))
          |RpcComplexMatrix el2 ->
             let dim1 = (Gsl_matrix.dims el1) and
             dim2     = (Gsl_matrix_complex.dims el2) in
@@ -99,15 +99,15 @@ let add (stack : rpc_stack) =
                (Gsl_matrix_complex.add c_el1 el2;
                stack#push (RpcComplexMatrix c_el1))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for addition"))
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for addition"))
          )
       |RpcComplexMatrix el1 -> (
          match gen_el2 with
@@ -116,30 +116,32 @@ let add (stack : rpc_stack) =
             dim2     = (Gsl_matrix.dims el2) in
             if dim1 = dim2 then
                let c_el2 = cmat_of_fmat el2 in
-               (Gsl_matrix_complex.add el1 c_el2;
-               stack#push (RpcComplexMatrix el1))
+               let copy = Gsl_matrix_complex.copy el1 in
+               (Gsl_matrix_complex.add copy c_el2;
+               stack#push (RpcComplexMatrix copy))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for addition"))
          |RpcComplexMatrix el2 ->
             let dim1 = (Gsl_matrix_complex.dims el1) and
             dim2     = (Gsl_matrix_complex.dims el2) in
             if dim1 = dim2 then
-               (Gsl_matrix_complex.add el1 el2;
-               stack#push (RpcComplexMatrix el1))
+               let copy = Gsl_matrix_complex.copy el1 in
+               (Gsl_matrix_complex.add copy el2;
+               stack#push (RpcComplexMatrix copy))
             else
-               (stack#push gen_el2;
-               stack#push gen_el1;
-               raise (Invalid_argument "incompatible dimension"))
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "incompatible matrix dimensions for addition"))
          |_ ->
             (* if the elements are incompatible, we have to
                put them back on the stack *)
-            (stack#push gen_el2;
-            stack#push gen_el1;
-            raise (Invalid_argument "incompatible types"))
+            (stack#push gen_el1;
+            stack#push gen_el2;
+            raise (Invalid_argument "incompatible types for addition"))
          )
    else
-      raise (Invalid_argument "insufficient arguments")
+      raise (Invalid_argument "insufficient arguments for addition")
 
 (* arch-tag: DO_NOT_CHANGE_f59cab0f-755e-4d09-9d30-114114945b38 *)

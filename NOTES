@@ -1,10 +1,6 @@
-Printing and reading arbitrary integers:
-   Implemented some stuff in big_int_str.ml.  Algorithms seem plenty
-   fast for smallish strings, and are roughly linear in the size of the
-   input (whether big_int or string).  It might be good to cache the
-   display string for these, but maybe the computation time is
-   negligible...
-
+to do:
+   * make sure that all operations leave the original stack elements
+     unaltered, so that dup() works properly.
 
 Potential improvements for rpc2:
 
