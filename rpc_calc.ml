@@ -1567,6 +1567,9 @@ class rpc_calc =
       method enter_cmat cm uu =
          stack#push (RpcComplexMatrixUnit (cm, uu))
 
+      method enter_const cc =
+         stack#push (RpcFloatUnit cc)
+
       (* evaluate last n variables of the stack (internal use only) *)
       method private evaln (num : int) =
          (* grab the last n stack elements into a list *)

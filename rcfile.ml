@@ -462,6 +462,7 @@ let operation_of_string command_str =
    |"command_undo"                  -> (Command Undo)
    |"command_begin_browsing"        -> (Command BeginBrowse)
    |"command_begin_abbrev"          -> (Command BeginAbbrev)
+   |"command_begin_constant"        -> (Command BeginConst)
    |"command_begin_variable"        -> (Command BeginVar)
    |"command_quit"                  -> (Command Quit)
    |"command_rad"                   -> (Command SetRadians)

@@ -11,11 +11,11 @@ Orpie To-Do List (roughly in order of priority)
 
 * add additional units
 
-* add physical constants
-
 * add additional statistical functions (multivariate, distributions, ...)
 
 * add finance functions
+
+* refactor do_main_loop, draw_help, maybe other massive functions
 
 * i18n
 

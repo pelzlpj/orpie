@@ -911,6 +911,19 @@ let handle_begin_abbrev (iface : interface_state_t) =
    if iface.interface_mode <> AbbrevEntryMode then begin
       iface.interface_mode <- AbbrevEntryMode;
       iface.help_mode <- AbbrevHelp;
+      iface.abbrev_or_const <- IsAbbrev;
+      draw_help iface;
+      draw_update_entry iface
+      (* do other cleanup stuff *)
+   end else
+      ()
+
+(* begin constant entry *)
+let handle_begin_const (iface : interface_state_t) =
+   if iface.interface_mode <> AbbrevEntryMode then begin
+      iface.interface_mode <- AbbrevEntryMode;
+      iface.help_mode <- AbbrevHelp;
+      iface.abbrev_or_const <- IsConst;
       draw_help iface;
       draw_update_entry iface
       (* do other cleanup stuff *)
@@ -1530,6 +1543,8 @@ let process_command (iface : interface_state_t) cc =
       handle_begin_browse iface
    |BeginAbbrev ->
       handle_begin_abbrev iface
+   |BeginConst ->
+      handle_begin_const iface
    |BeginVar ->
       handle_begin_variable iface
    |Quit ->
@@ -1597,7 +1612,7 @@ let process_command (iface : interface_state_t) cc =
 
 
 (****************************************************************)
-(* IMPLEMENTATION OF ABBREVIATION ENTRY SYSTEM                  *)
+(* IMPLEMENTATION OF ABBREVIATION AND CONSTANT ENTRY SYSTEM     *)
 (****************************************************************)
 
 
@@ -1626,14 +1641,26 @@ let match_abbrev_buffer (iface : interface_state_t) buf =
       let regex = Str.regexp regex_str in
       let rec find_matching_strings starting_pos matches_list =
          try
-            let next_pos = 
-               Str.search_backward regex !Rcfile.abbrev_commands starting_pos
-            in
-            let m = Str.matched_string !Rcfile.abbrev_commands in
-            if next_pos >= 1 then
-               find_matching_strings (pred next_pos) (m :: matches_list)
-            else
-               (m :: matches_list)
+            begin match iface.abbrev_or_const with
+            |IsAbbrev ->
+               let next_pos = 
+                  Str.search_backward regex !Rcfile.abbrev_commands starting_pos
+               in
+               let m = Str.matched_string !Rcfile.abbrev_commands in
+               if next_pos >= 1 then
+                  find_matching_strings (pred next_pos) (m :: matches_list)
+               else
+                  (m :: matches_list)
+            |IsConst ->
+               let next_pos = 
+                  Str.search_backward regex Const.constant_symbols starting_pos
+               in
+               let m = Str.matched_string Const.constant_symbols in
+               if next_pos >= 1 then
+                  find_matching_strings (pred next_pos) (m :: matches_list)
+               else
+                  (m :: matches_list)
+            end
          with
             Not_found ->
                begin
@@ -1644,7 +1671,12 @@ let match_abbrev_buffer (iface : interface_state_t) buf =
       in
       iface.matched_abbrev_entry <- "";
       let m_list =
-         find_matching_strings (pred (String.length !Rcfile.abbrev_commands)) [];
+         begin match iface.abbrev_or_const with
+         |IsAbbrev ->
+            find_matching_strings (pred (String.length !Rcfile.abbrev_commands)) [];
+         |IsConst ->
+            find_matching_strings (pred (String.length Const.constant_symbols)) [];
+         end
       in
       iface.matched_abbrev_entry <- List.hd m_list;
       m_list)
@@ -1691,34 +1723,42 @@ let handle_abbrev_character (iface : interface_state_t) key =
 
 (* enter an abbrev entry *)
 let handle_enter_abbrev (iface : interface_state_t) =
-   if iface.interface_mode = AbbrevEntryMode then
-      (iface.interface_mode <- StandardEntryMode;
+   if iface.interface_mode = AbbrevEntryMode then begin
+      iface.interface_mode <- StandardEntryMode;
       iface.help_mode <- StandardHelp;
-      (try
+      begin try
          iface.matched_abbrev_entry_list <- 
             match_abbrev_buffer iface iface.abbrev_entry_buffer;
-         let operation = Rcfile.translate_abbrev
-         iface.matched_abbrev_entry in
-         begin match operation with
-         |Function ff -> 
-            process_function iface ff
-         |Command cc  -> process_command iface cc
-         |_ -> failwith 
-            "found abbrev command that is neither Function nor Command"
-         end;
-         (* check whether ff should be autobound *)
-         begin try
-            let _ = Rcfile.key_of_operation operation in ()
-         with Not_found ->
-            register_autobinding operation
+         begin match iface.abbrev_or_const with
+         |IsAbbrev ->
+            let operation = Rcfile.translate_abbrev
+            iface.matched_abbrev_entry in
+            begin match operation with
+            |Function ff -> 
+               process_function iface ff
+            |Command cc  -> process_command iface cc
+            |_ -> failwith 
+               "found abbrev command that is neither Function nor Command"
+            end;
+            (* check whether ff should be autobound *)
+            begin try
+               let _ = Rcfile.key_of_operation operation in ()
+            with Not_found ->
+               register_autobinding operation
+            end
+         |IsConst ->
+            let con = Const.translate_symbol iface.matched_abbrev_entry in
+            iface.calc#enter_const con;
          end
       with
-         Not_found -> ());
+         Not_found -> ()
+      end;
       iface.abbrev_entry_buffer <- "";
       iface.matched_abbrev_entry <- "";
       draw_help iface;
-      draw_update_entry iface)
-   else
+      draw_stack iface;
+      draw_update_entry iface
+   end else
       ()
 
 

@@ -40,6 +40,8 @@ type entry_t     = | IntEntry | FloatEntry | ComplexEntry
 type interface_mode_t = | StandardEntryMode | IntEditMode | AbbrevEntryMode 
                         | VarEditMode | BrowsingMode | UnitEditMode;;
 
+type abbrev_const_t = IsAbbrev | IsConst;;
+
 type complex_entry_element_t = 
    {mutable re_mantissa : string; mutable re_exponent : string;
     mutable im_mantissa : string; mutable im_exponent : string; 
@@ -86,6 +88,7 @@ type interface_state_t =
    mutable matched_abbrev_entry        : string;                        (* stores the command-completed abbrev entry *)
    mutable matched_abbrev_entry_list   : string list;                   (* stores the list of all possible command completions *)
    gen_buffer                          : complex_entry_element_t array; (* storage for floating-point (array)-based types *)
+   mutable abbrev_or_const             : abbrev_const_t;                (* in AbbrevEntryMode, are we entering an abbrev or a constant? *)
    mutable variable_entry_buffer       : string;                        (* stores characters entered in variable entry mode *)
    mutable variable_entry_buffer_back  : string;                        (* used in variable completion *)
    mutable matched_variables           : string list;                   (* stores the list of all matching variable completions *)
@@ -125,6 +128,7 @@ let make (c : rpc_calc) (std : screen_t) =
       abbrev_entry_buffer = "";
       matched_abbrev_entry = "";
       matched_abbrev_entry_list = [];
+      abbrev_or_const = IsAbbrev;
       variable_entry_buffer = "";
       variable_entry_buffer_back = "";
       matched_variables = [];

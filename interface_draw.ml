@@ -298,18 +298,26 @@ let draw_entry (iface : interface_state_t) =
    |AbbrevEntryMode ->
       let highlight_len = String.length iface.abbrev_entry_buffer in
       if highlight_len = 0 then
-         draw_entry_string "<enter command abbreviation>" 0
+         begin match iface.abbrev_or_const with
+         |IsAbbrev -> draw_entry_string "<enter command abbreviation>" 0
+         |IsConst  -> draw_entry_string "<enter constant symbol>" 0
+         end
       else
-         let is_function =
-            match (Rcfile.translate_abbrev iface.matched_abbrev_entry) with
-            |Function ff -> true
-            |_ -> false
-         in
-         if is_function then
-            draw_entry_string (iface.matched_abbrev_entry ^ 
-            "( )") highlight_len
-         else
+         begin match iface.abbrev_or_const with
+         |IsAbbrev ->
+            let is_function =
+               match (Rcfile.translate_abbrev iface.matched_abbrev_entry) with
+               |Function ff -> true
+               |_ -> false
+            in
+            if is_function then
+               draw_entry_string (iface.matched_abbrev_entry ^ 
+               "( )") highlight_len
+            else
+               draw_entry_string iface.matched_abbrev_entry highlight_len
+         |IsConst ->
             draw_entry_string iface.matched_abbrev_entry highlight_len
+         end
    |BrowsingMode ->
       ()
    |VarEditMode ->
@@ -400,6 +408,27 @@ let generate_abbrev_help () =
    {functions = functions_str_wrap;
    modes      = modes_str_wrap;
    misc       = misc_str_wrap}
+
+
+
+(* create the list of constants to display in the abbrev command
+ * help screen *)
+let generate_const_help () =
+   let rec trunc_list lst n =
+      if n = 0 then
+         []
+      else
+         match lst with
+         |[] ->
+            []
+         |head :: tail ->
+            head :: (trunc_list tail (pred n))
+   in
+   let symbols = 
+      "NA   Vm  R  stdT  stdP  sigma  c  eps0  u0  g  G  h  hbar  " ^
+      "e  me  mp  alpha  phi  F  Rinf  a0  uB  uN  lam0  f0  lamc  c3"
+   in
+   trunc_list (Utility.wordwrap_nspace symbols 34 2) 5
 
 
 
@@ -566,8 +595,9 @@ let draw_help (iface : interface_state_t) =
             try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
             assert (wnoutrefresh win)
          |AbbrevHelp ->
-            if String.length iface.abbrev_entry_buffer = 0 then
+            if String.length iface.abbrev_entry_buffer = 0 then begin
                let abbr_strings = generate_abbrev_help () in
+               let const_strings = generate_const_help () in
                let rec print_help_lines lines v_pos =
                   begin match lines with
                   |[] ->
@@ -577,7 +607,8 @@ let draw_help (iface : interface_state_t) =
                      print_help_lines tail (succ v_pos)
                   end
                in
-               begin
+               begin match iface.abbrev_or_const with
+               |IsAbbrev ->
                   wattron win WA.bold;
                   mvwaddstr_safe win 5 0 "Abbreviations:";
                   wattroff win WA.bold;
@@ -591,38 +622,44 @@ let draw_help (iface : interface_state_t) =
                   try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
                   mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
                   try_find Rcfile.key_of_abbrev (Abbrev ExitAbbrev));
-                  assert (wnoutrefresh win)
-               end
-            else
-               begin
+               |IsConst ->
                   wattron win WA.bold;
-                  assert (mvwaddstr win 5 0 "Matched Abbreviations:");
+                  mvwaddstr_safe win 5 0 "Constants:";
                   wattroff win WA.bold;
-                  let highlight_len = String.length iface.abbrev_entry_buffer in
-                  let rec draw_matches v_pos match_list =
-                     if v_pos < iface.scr.hw_lines then
-                        begin match match_list with
-                        |[] ->
-                           ()
-                        |m :: tail ->
-                           begin
-                              (* highlight the first 'highlight_len' characters *)
-                              wattron win WA.bold;
-                              let len_str = String.length m in
-                              mvwaddstr_safe win v_pos 2
-                                 (Str.string_before m (highlight_len));
-                              wattroff win WA.bold;
-                              mvwaddstr_safe win v_pos (2 + highlight_len)
-                                 (Str.string_after m (highlight_len));
-                              draw_matches (succ v_pos) tail
-                           end
-                        end
-                     else
+                  print_help_lines const_strings 7;
+                  mvwaddstr_safe win 12 1 ("enter constant : " ^
+                  try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+               end;
+               assert (wnoutrefresh win)
+            end else begin
+               wattron win WA.bold;
+               assert (mvwaddstr win 5 0 "Matched Abbreviations:");
+               wattroff win WA.bold;
+               let highlight_len = String.length iface.abbrev_entry_buffer in
+               let rec draw_matches v_pos match_list =
+                  if v_pos < iface.scr.hw_lines then
+                     begin match match_list with
+                     |[] ->
                         ()
-                  in
-                  draw_matches 6 iface.matched_abbrev_entry_list;
-                  assert (wnoutrefresh win)
-               end 
+                     |m :: tail ->
+                        begin
+                           (* highlight the first 'highlight_len' characters *)
+                           wattron win WA.bold;
+                           let len_str = String.length m in
+                           mvwaddstr_safe win v_pos 2
+                              (Str.string_before m (highlight_len));
+                           wattroff win WA.bold;
+                           mvwaddstr_safe win v_pos (2 + highlight_len)
+                              (Str.string_after m (highlight_len));
+                           draw_matches (succ v_pos) tail
+                        end
+                     end
+                  else
+                     ()
+               in
+               draw_matches 6 iface.matched_abbrev_entry_list;
+               assert (wnoutrefresh win)
+            end 
          |VarHelp ->
             wattron win WA.bold;
             mvwaddstr_safe win 5 0 "Variable Mode Commands:";
