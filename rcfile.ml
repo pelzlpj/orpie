@@ -504,7 +504,7 @@ let parse_line line_stream =
  * then looking at $PREFIX/etc/orpierc *)
 let open_rcfile () =
    let home_rcfile =
-      let homedir = Unix.getenv "HOME" in
+      let homedir = Sys.getenv "HOME" in
       homedir ^ "/.orpierc"
    in
    let prefix_rcfile = 

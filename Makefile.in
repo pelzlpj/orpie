@@ -63,7 +63,7 @@ CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo rcfile.cmo \
 		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo interface.cmo interface_draw.cmo \
 		interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
-CMA = nums.cma bigarray.cma str.cma unix.cma
+CMA = nums.cma bigarray.cma str.cma
 CMXA = $(CMA:.cma=.cmxa)
 
 CURSES_CMO = curses/curses.cmo

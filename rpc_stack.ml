@@ -72,8 +72,8 @@ class rpc_stack =
             Marshal.to_channel save_channel (modes, variables, stack, len) [];
             close_out save_channel
          with
-            |Unix.Unix_error (err, msg1, msg2) -> raise (Invalid_argument "can't open data file for writing")
-            |Failure ff -> raise (Invalid_argument "can't serialize calculator data to file")
+            |Sys_error ss -> raise (Invalid_argument "can't open data file for writing")
+            |Failure ff   -> raise (Invalid_argument "can't serialize calculator data to file")
 
       (* load from a datafile using the Marshal module *)
       (* FIXME: if the datafile is corrupted, this can segfault... *)
@@ -81,37 +81,40 @@ class rpc_stack =
          try
             (* check whether the version file exists *)
             let version_file = Utility.join_path !(Rcfile.datadir) "version" in
-            Unix.access (Utility.expand_file version_file) [Unix.F_OK];
-            (* if it does exist, try loading it *)
-            let version_channel = 
-               Utility.expand_open_in_ascii version_file
-            in
-            let ver_string = input_line version_channel in
-            close_in version_channel;
-            (* if the version strings match, then assume it's okay to use
-             * Marshal. *)
-            if ver_string = Version.version then begin
-               (* check whether the state file exists *)
-               let datafile = Utility.join_path !(Rcfile.datadir) "calc_state" in
-               Unix.access (Utility.expand_file datafile) [Unix.F_OK];
+            if Sys.file_exists (Utility.expand_file version_file) then begin
                (* if it does exist, try loading it *)
-               let load_channel = Utility.expand_open_in_bin datafile in
-               let data_modes, data_variables, data_stack, data_len = 
-                  (Marshal.from_channel load_channel : calculator_modes * 
-                  ((string, orpie_data) Hashtbl.t) * (orpie_data array) * int)
+               let version_channel = 
+                  Utility.expand_open_in_ascii version_file
                in
-               close_in load_channel;
-               stack <- data_stack;
-               len <- data_len;
-               data_modes, data_variables
+               let ver_string = input_line version_channel in
+               close_in version_channel;
+               (* if the version strings match, then assume it's okay to use
+                * Marshal. *)
+               if ver_string = Version.version then begin
+                  (* check whether the state file exists *)
+                  let datafile = Utility.join_path !(Rcfile.datadir) "calc_state" in
+                  if Sys.file_exists (Utility.expand_file datafile) then begin
+                     (* if it does exist, try loading it *)
+                     let load_channel = Utility.expand_open_in_bin datafile in
+                     let data_modes, data_variables, data_stack, data_len = 
+                        (Marshal.from_channel load_channel : calculator_modes * 
+                        ((string, orpie_data) Hashtbl.t) * (orpie_data array) * int)
+                     in
+                     close_in load_channel;
+                     stack <- data_stack;
+                     len <- data_len;
+                     data_modes, data_variables
+                  end else
+                     (* if the datafile is missing, do nothing as it will be
+                      * created later *)
+                     ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
+               end else
+                  (* if the version strings don't match, don't try loading anything *)
+                  ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
             end else
-               (* if the version strings don't match, don't try loading anything *)
-               ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
+               (* if the version file does not exist, don't try loading anything *)
+                  ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
          with
-            (* this gets raised if the file does not exist; in that case do *
-             * nothing, as it should be created later. *)
-            |Unix.Unix_error (err_num, err_str1, err_str2) ->
-               ({angle = Rad; base = Dec; complex = Rect}, Hashtbl.create 20)
             (* this gets raised if, for example, we don't have read permission
              * on the state data file *)
             |Sys_error ss -> raise (Invalid_argument "can't open calculator state data file")

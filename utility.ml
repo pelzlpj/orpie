@@ -91,7 +91,7 @@ let join_path dirname filename =
 (* If the filename starts with "~", substitute $HOME *)
 let expand_file filename =
    if Str.string_before filename 2 = "~/" then
-      let homedir = Unix.getenv "HOME" in
+      let homedir = Sys.getenv "HOME" in
       homedir ^ Str.string_after filename 1
    else
       filename
@@ -125,13 +125,12 @@ let open_or_create_out_gen is_binary filename =
             ()
          | d :: tail ->
             begin
-               try Unix.chdir d
-               with Unix.Unix_error (err, msg1, msg2) ->
-                  if err = Unix.ENOENT then
-                     (Unix.mkdir d 493;  (* equivalent to \755 or rwxr-xr-x *)
-                     Unix.chdir d)
-                  else
-                     raise (Unix.Unix_error (err, msg1, msg2))
+               try Sys.chdir d
+               with Sys_error err_msg ->
+                  begin 
+                     let _ = Sys.command ("mkdir " ^ d) in
+                     Sys.chdir d
+                  end
             end;
             make_directories tail
       in

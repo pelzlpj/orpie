@@ -1,6 +1,11 @@
 Orpie ChangeLog
 ------------------------------------------------------------------------
 
+v1.3
+
+   2004-06-22        Removed dependence on Ocaml Unix module
+
+
 v1.2
 
    2004-06-16        Version 1.2.0 release.

@@ -1027,7 +1027,7 @@ let handle_browse_view (iface : interface_state_t) =
       output_string buf fs_string;
       close_out buf;
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ fs_file)
+         Sys.command (!(Rcfile.editor) ^ " " ^ fs_file)
       in ();
       draw_help iface;
       draw_stack iface;
@@ -1089,7 +1089,7 @@ let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
    try
       let input_file = Utility.join_path !(Rcfile.datadir) "input" in
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ input_file)
+         Sys.command (!(Rcfile.editor) ^ " " ^ input_file)
       in ();
       (* wake up curses again, and check for resize *)
       assert (refresh ());
@@ -1177,7 +1177,7 @@ let handle_view (iface : interface_state_t) =
       output_string buf fs_string;
       close_out buf;
       let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ fs_file)
+         Sys.command (!(Rcfile.editor) ^ " " ^ fs_file)
       in ();
       draw_help iface;
       draw_stack iface;
