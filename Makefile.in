@@ -37,10 +37,11 @@ EXE = @EXE@
 CURSES_LIB = @CURSES_LIB@
 
 INCLUDES = -I $(OCAMLGSLLIB) -I ./curses
-BFLAGS = -g $(INCLUDES)
-OFLAGS = $(INCLUDES)
+BFLAGS = -pp camlp4o -g $(INCLUDES)
+OFLAGS = -pp camlp4o $(INCLUDES)
 BLFLAGS = -custom -cclib $(CURSES_LIB)
 OLFLAGS = -cclib $(CURSES_LIB)
+DEPFLAGS = -pp camlp4o
 
 # main target
 #############
@@ -54,7 +55,8 @@ all: $(OCAMLBEST)
 ######################################
 
 CMO = big_int_str.cmo rpc_stack.cmo utility.cmo add.cmo sub.cmo \
-		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo rpc_interface.cmo main.cmo
+		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo operations.cmo \
+		rcfile.cmo rpc_interface.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma gsl.cma
 CMXA = $(CMA:.cma=.cmxa)
@@ -228,7 +230,7 @@ dist-clean distclean:: clean
 
 .depend depend:: $(GENERATED)
 	rm -f .depend
-	$(OCAMLDEP) $(INCLUDES) *.ml *.mli > .depend
+	$(OCAMLDEP) $(DEPFLAGS) $(INCLUDES) *.ml *.mli > .depend
 
 include .depend
 

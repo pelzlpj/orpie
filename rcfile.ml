@@ -1,26 +1,51 @@
 open Genlex;;
 open Curses;;
+open Operations;;
+
 
 exception Config_failure of string;;
 let config_failwith s = raise (Config_failure s);;
 
-let table_key_command = Hashtbl.create 20;;
-let table_command_key = Hashtbl.create 20;;
 
+(* These hashtables store conversions between curses keys and the operations
+ * they are associated with. *)
+let table_key_function = Hashtbl.create 20;;
+let table_function_key = Hashtbl.create 20;;
+let table_key_command  = Hashtbl.create 20;;
+let table_command_key  = Hashtbl.create 20;;
+let table_key_edit     = Hashtbl.create 20;;
+
+
+let function_of_key key =
+   Hashtbl.find table_key_function key;;
+let key_of_function f =
+   Hashtbl.find table_function_key f;;
 let command_of_key key =
    Hashtbl.find table_key_command key;;
 let key_of_command command =
    Hashtbl.find table_command_key command;;
+let edit_of_key key =
+   Hashtbl.find table_key_edit key;;
+
 
 
 (* Register a key binding.  This adds hash table entries for translation
  * between curses chtypes and commands (in both directions). *)
-let register_binding key_string command_string =
+let register_binding key_string op =
    let make_entries k k_string =
-      (Printf.fprintf stderr "registering binding %d (%s) -> %s\n" k k_string
-      command_string;
-      Hashtbl.add table_key_command k command_string;
-      Hashtbl.add table_command_key command_string k_string)
+      begin
+         Printf.fprintf stderr "registering binding %d (%s)\n" k k_string;
+         flush stderr;
+         match op with
+         |Function f ->
+            (Hashtbl.add table_key_function k op;
+            Hashtbl.add table_function_key op k_string)
+         |Command c ->
+            (Hashtbl.add table_key_command k op;
+            Hashtbl.add table_command_key op k_string)
+         |Edit e ->
+            Hashtbl.add table_key_edit k op
+      end
    in
    match key_string with
    |"<esc>" ->
@@ -45,6 +70,8 @@ let register_binding key_string command_string =
       make_entries Key.npage "<pagedown>"
    |"<space>" ->
       make_entries 32 "<space>"
+   |"<backspace>" ->
+      make_entries Key.backspace "<backspace>"
    |"<left>" ->
       make_entries Key.left "<left>"
    |"<right>" ->
@@ -102,8 +129,6 @@ let register_binding key_string command_string =
 
 
 
-
-
 (* Parse a line from an rpc2 configuration file.  This operates on a stream
  * corresponding to a non-empty line from the file.  It will match commands
  * of the form
@@ -121,12 +146,44 @@ let parse_line line_stream =
             begin
                match line_stream with parser
                | [< 'Ident command >] ->
-                  let reg () = register_binding key command in
                   begin
                      match command with
-                        |"function_add" | "function_sub" | "function_mult"
-                        |"function_div" | "function_inv" ->
-                           reg ()
+                        |"function_add" ->
+                           register_binding key (Function Add)
+                        |"function_sub" ->
+                           register_binding key (Function Sub)
+                        |"function_mult" ->
+                           register_binding key (Function Mult)
+                        |"function_div" ->
+                           register_binding key (Function Div)
+                        |"function_neg" ->
+                           register_binding key (Function Neg)
+                        |"function_inv" ->
+                           register_binding key (Function Inv)
+                        |"edit_integer" ->
+                           register_binding key (Edit BeginInteger)
+                        |"edit_complex" ->
+                           register_binding key (Edit BeginComplex)
+                        |"edit_matrix" ->
+                           register_binding key (Edit BeginMatrix)
+                        |"edit_separator" ->
+                           register_binding key (Edit Separator)
+                        |"edit_minus" ->
+                           register_binding key (Edit Minus)
+                        |"edit_backspace" ->
+                           register_binding key (Edit Backspace)
+                        |"edit_enter" ->
+                           register_binding key (Edit Enter)
+                        |"edit_scientific_notation_base" ->
+                           register_binding key (Edit SciNotBase)
+                        |"command_drop" ->
+                           register_binding key (Command Drop)
+                        |"command_clear" ->
+                           register_binding key (Command Clear)
+                        |"command_swap" ->
+                           register_binding key (Command Swap)
+                        |"command_dup" ->
+                           register_binding key (Command Dup)
                         |_ ->
                            config_failwith ("Unknown command name \"" ^ command ^ "\"")
                   end
@@ -161,7 +218,9 @@ let parse_line line_stream =
             begin
                match line_stream with parser
                | [< 'String generated_keys >] ->
-                  Printf.printf "registering macro \"%s\" -> \"%s\"\n" key generated_keys
+                  (Printf.fprintf stderr "registering macro \"%s\" -> \"%s\"\n"
+                  key generated_keys;
+                  flush stderr)
                | [< >] ->
                   config_failwith ("Expected a key string after \"macro \"" ^ key ^ "\"")
             end
@@ -175,41 +234,52 @@ let parse_line line_stream =
 
 
 
-let line_lexer line = make_lexer ["bind"; "macro"; "#"] (Stream.of_string line);;
+let process_rcfile () =
+   let line_lexer line = 
+      make_lexer ["bind"; "macro"; "#"] (Stream.of_string line)
+   in
+   let empty_regexp = Str.regexp "^[\t ]*$" in
+   let backslash_regexp = try Str.regexp "[\\]" with Failure q -> failwith "failed backslash" in
+   let config_stream = 
+      try
+         open_in "rpc2rc"
+      with
+         Sys_error error_str -> failwith "Could not find configuration file \"rpc2rc\"."
+   in
+   let line_num = ref 0 in
+   try
+      while true do
+         line_num := succ !line_num;
+         let initial_string = input_line config_stream in
+         Printf.fprintf stderr "initial_string = %s\n" initial_string;
+         flush stderr;
+         (* replace backslashes with doubled backslashes FIXME: not working *)
+         let line_string = 
+            try
+               Str.global_replace backslash_regexp "\\\\" initial_string
+            with Failure ff ->
+               failwith "failed global_replace"
+         in
+         if Str.string_match empty_regexp line_string 0 then
+            (* do nothing on an empty line *)
+            ()
+         else
+            try
+               let line_stream = line_lexer line_string in
+               parse_line line_stream
+            with
+               |Config_failure s ->
+                  (let error_str = Printf.sprintf "Syntax error on line %d of \"rpc2rc\": %s"
+                  !line_num s in
+                  failwith error_str)
+               |Stream.Failure ->
+                  failwith (Printf.sprintf "Syntax error on line %d of \"rpc2rc\"" 
+                  !line_num)
 
-let empty_regexp = Str.regexp "^[\t ]*$" in
-let backslash_regexp = try Str.regexp "[\\]" with Failure q -> failwith "failed backslash" in
-let config_stream = open_in "rpc2rc" in
-let line_num = ref 0 in
-try
-   while true do
-      line_num := succ !line_num;
-      let initial_string = input_line config_stream in
-      Printf.fprintf stdout "initial_string = %s\n" initial_string;
-      (* replace backslashes with doubled backslashes FIXME: not working *)
-      let line_string = 
-         try
-            Str.global_replace backslash_regexp "\\\\" initial_string
-         with Failure ff ->
-            failwith "failed global_replace"
-      in
-      if Str.string_match empty_regexp line_string 0 then
-         (* do nothing on an empty line *)
-         ()
-      else
-         try
-            let line_stream = line_lexer line_string in
-            parse_line line_stream
-         with
-            Config_failure s ->
-               (let error_str = Printf.sprintf "Syntax error on line %d of \"rpc2rc\": %s"
-               !line_num s in
-               failwith error_str)
-   done
-with
-   End_of_file ->
-      ()
-
+      done
+   with
+      End_of_file ->
+         close_in config_stream
 
 
 

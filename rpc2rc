@@ -1,0 +1,31 @@
+# rpc2rc
+# default key bindings for rpc2 calculator
+
+# keys for "edit" operations, which affect the data that
+# is currently being entered
+bind "n" edit_minus
+bind "<backspace>" edit_backspace
+bind "<return>" edit_enter
+bind "<space>" edit_scientific_notation_base
+bind "#" edit_integer
+bind "(" edit_complex
+bind "[" edit_matrix
+bind "," edit_separator
+
+# keys for "function" operations, which operate on an argument
+bind "+" function_add
+bind "-" function_sub
+bind "*" function_mult
+bind "/" function_div
+bind "n" function_neg
+
+# keys for "command" operations, which do not take an argument
+bind "\\" command_drop
+bind "|" command_clear
+bind "<pageup>" command_swap
+bind "<pagedown>" command_swap
+bind "<return>" command_dup
+
+
+
+# arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  

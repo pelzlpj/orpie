@@ -26,7 +26,9 @@ open Rpc_calc;;
 open Rpc_stack;;
 open Complex;;
 open Big_int;;
+open Operations;;
 
+exception Not_handled;;
 
 (* help_win is provided as an option, because it may be dropped if
  * the screen width is too small *)
@@ -113,6 +115,7 @@ object(self)
                                                
 
    method run () =
+      Rcfile.process_rcfile ();
       wclear scr.stack_win;
       wclear scr.entry_win;
       calc#enter_int (big_int_of_string "5");
@@ -509,45 +512,85 @@ object(self)
 
 
 
-   (* accept and process input *)
    method do_main_loop () =
       while true do
          let key = getch () in
-         if is_extended_entry then
-            (* do something here *)
-            ()
-         else if key = bindings.enter then
-            self#handle_enter ()
-         else if key = bindings.begin_int then
-            self#handle_begin_int ()
-         else if key = bindings.begin_complex then
-            self#handle_begin_complex ()
-         else if key = bindings.begin_matrix then
-            self#handle_begin_matrix ()
-         else if key = bindings.separator then
-            self#handle_separator ()
-         else if key = bindings.backspace then
-            self#handle_backspace ()
-         else if key = bindings.scientific_notation then
-            self#handle_scientific_notation ()
-         else if key = bindings.neg then
-            self#handle_neg ()
-         else if key = bindings.add then
-            self#handle_add ()
-         else if key = bindings.sub then
-            self#handle_sub ()
-         else if key = bindings.mult then
-            self#handle_mult ()
-         else if key = bindings.div then
-            self#handle_div ()
-         else if key = bindings.drop then
-            self#handle_drop ()
-         else if key = bindings.swap then
-            self#handle_swap ()
-         else if key = bindings.clear then
-            self#handle_clear ()
-         else (* handle entry of digits *)
-            self#handle_digit key
+         (* editing operations take priority *)
+         try 
+            let edit_op = Rcfile.edit_of_key key in
+            match edit_op with
+            |Edit ee ->
+               begin
+                  match ee with
+                  |Digit ->
+                     self#handle_digit key
+                  |Enter ->
+                     self#handle_enter ()
+                  |Backspace ->
+                     self#handle_backspace ()
+                  |Minus ->
+                     self#handle_minus ()
+                  |BeginInteger ->
+                     self#handle_begin_int ()
+                  |BeginComplex ->
+                     self#handle_begin_complex ()
+                  |BeginMatrix ->
+                     self#handle_begin_matrix ()
+                  |Separator ->
+                     self#handle_separator ()
+                  |SciNotBase ->
+                     self#handle_scientific_notation ()
+               end
+            |_ ->
+               failwith "Non-Edit operation found in Edit Hashtbl"
+         with Not_found | Not_handled ->
+            (* next we try to match on functions *)
+            try 
+               let function_op = Rcfile.function_of_key key in
+               match function_op with
+               |Function ff ->
+                  begin
+                     match ff with
+                     |Add ->
+                        self#handle_add ()
+                     |Sub ->
+                        self#handle_sub ()
+                     |Mult ->
+                        self#handle_mult ()
+                     |Div ->
+                        self#handle_div ()
+                     |Neg ->
+                        self#handle_neg ()
+                     |Inv ->
+                        ()
+                  end
+               |_ ->
+                  failwith "Non-Function operation found in Function Hashtbl"
+            with Not_found ->
+               if has_entry then
+                  (* finally we try entry of digits *)
+                  self#handle_digit key
+               else
+                  (* commands are only suitable when there is no entry *)
+                  try 
+                     let command_op = Rcfile.command_of_key key in
+                     match command_op with
+                     |Command cc ->
+                        begin
+                           match cc with
+                           |Drop ->
+                              self#handle_drop ()
+                           |Clear ->
+                              self#handle_clear ()
+                           |Swap ->
+                              self#handle_swap ()
+                           |Dup ->
+                              self#handle_dup ()
+                        end
+                     |_ ->
+                        failwith "Non-Command operation found in Command Hashtbl"
+                  with Not_found ->
+                     self#handle_digit key
       done
 
 
@@ -559,10 +602,16 @@ object(self)
          (if has_entry then
             self#push_entry ()
          else
-            calc#dup ());
+            raise Not_handled);
          self#draw_stack ()
       with Invalid_argument error_msg ->
          self#draw_error error_msg
+
+
+   (* handle the 'dup' command *)
+   method private handle_dup () =
+      calc#dup ();
+      self#draw_stack ()
 
 
    (* handle a 'begin_int' keypress *)
@@ -865,8 +914,8 @@ object(self)
                ()
 
 
-   (* handle a 'neg' keypress *)
-   method private handle_neg () =
+   (* handle a 'minus' keypress *)
+   method private handle_minus () =
       if has_entry then
          match entry_type with
          |IntEntry ->
@@ -936,8 +985,20 @@ object(self)
             end;
             self#draw_entry ()
       else
-         try calc#neg (); self#draw_stack ()
-         with Invalid_argument error_msg ->
+         raise Not_handled
+
+
+   (* handle a 'neg' keypress *)
+   method private handle_neg () =
+      try 
+         (if has_entry then
+            self#push_entry ()
+         else
+            ());
+         calc#neg (); 
+         self#draw_stack ()
+      with 
+         Invalid_argument error_msg ->
             self#draw_error error_msg
 
 
