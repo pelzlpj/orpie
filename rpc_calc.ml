@@ -25,6 +25,7 @@ open Big_int;;
 
 type interruptable_args_t =
    | Gcd_args of big_int * big_int * orpie_data * orpie_data
+   | Lcm_args of big_int * big_int * big_int * orpie_data * orpie_data
    | Fact_args of big_int * big_int * orpie_data
    | NoArgs;;
 
@@ -100,6 +101,10 @@ class rpc_calc =
       method abort_computation () =
          match interr_args with
          |Gcd_args (a, b, el1, el2) ->
+            stack#push el1;
+            stack#push el2;
+            interr_args <- NoArgs
+         |Lcm_args (coeff, a, b, el1, el2) ->
             stack#push el1;
             stack#push el2;
             interr_args <- NoArgs
@@ -1489,6 +1494,55 @@ class rpc_calc =
             false
             
 
+      (* least common multiple
+       * This is an interruptible computation, and should be
+       * called multiple times until it returns true.
+       * If computation is aborted, the interface should call
+       * abort_computation() to clean up. *)
+      method lcm () =
+         match interr_args with
+         |Lcm_args (coeff, a, b, el1, el2) ->
+            if eq_big_int b zero_big_int then begin
+               let result = div_big_int coeff a in
+               stack#push (RpcInt result);
+               interr_args <- NoArgs;
+               true
+            end else begin
+               let a_mod_b = mod_big_int a b in
+               interr_args <- Lcm_args (coeff, b, a_mod_b, el1, el2);
+               false
+            end
+         |NoArgs ->
+            if stack#length > 1 then begin
+               self#backup ();
+               self#evaln 2;
+               let gen_el2 = stack#pop () in
+               let gen_el1 = stack#pop () in
+               begin match gen_el1 with
+               |RpcInt a ->
+                  begin match gen_el2 with
+                  |RpcInt b ->
+                     let coeff = mult_big_int a b
+                     and abs_a = abs_big_int a
+                     and abs_b = abs_big_int b in
+                     interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
+                     false
+                  |_ ->
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "lcm requires integer arguments")
+                  end
+               |_ ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "lcm requires integer arguments")
+               end
+            end else
+               raise (Invalid_argument "insufficient arguments for lcm")
+         |_ ->
+            (* shouldn't hit this point if interface is well-behaved *)
+            self#abort_computation ();
+            false
 
 
 

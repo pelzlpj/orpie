@@ -32,7 +32,7 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Gamma | LnGamma | Erf | Erfc | Fact
                           | Transpose | Mod | Floor | Ceiling
                           | ToInt | ToFloat | SolveLin | Eval
-                          | Store | Purge | Gcd | FactInt;;
+                          | Store | Purge | Gcd | Lcm | FactInt;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | BeginVar | Quit

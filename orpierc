@@ -134,6 +134,7 @@ abbrev "eval"    function_eval
 abbrev "store"   function_store
 abbrev "purge"   function_purge
 abbrev "gcd"     function_gcd
+abbrev "lcm"     function_lcm
 abbrev "factint" function_factorial_exact
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
