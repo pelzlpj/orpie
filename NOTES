@@ -1,12 +1,4 @@
-Ideas for refactoring interface:
-
-   * use modules rather than a class
-
-   * instead of using member variables, functions get passed a big (mutable)
-     record that stores the calculator state
-
-   * interface_draw contains only functions that write to the screen: ~400 lines
-
+------------------------------------------------------------------------
 
 Potential improvements for rpc2:
 

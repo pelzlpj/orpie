@@ -47,9 +47,25 @@ type complex_entry_element_t =
 
 let max_matrix_size = 1000;;
 
+let all_taglines = [| "RPN for the masses";
+                      "'=' is for the weak";
+                      "swap drop dup view";
+                      "I hate the mouse";
+                      "now w/ 800% more stack";
+                      "powered by Ocaml";
+                      "compute _this_";
+                      "interface as art";
+                      "kick that data's ass";
+                      "Nice.";
+                      "configurability is key";
+                      ":wq";
+                      "the \"Mutt\" of calcs"|];
+
+
 (* everything you need to know about the interface state goes in this variable *)
 type interface_state_t =
    {version                            : string;                        (* program version string *)
+   tagline                             : string;
    calc                                : rpc_calc;
    mutable scr                         : screen_t;                      (* curses screen with two or three subwindows *)
    mutable run_calc                    : bool;                          (* exit when run_true becomes false *)
@@ -77,8 +93,11 @@ type interface_state_t =
 
 (* create and initialize an interface with default settings *)
 let make (c : rpc_calc) (std : screen_t) =
+   Random.self_init ();
+   let tagline_index = Random.int (Array.length all_taglines) in
    let iface =
       {version = "1.0";
+      tagline = all_taglines.(tagline_index);
       calc = c;
       scr = std;
       run_calc = true;

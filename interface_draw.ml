@@ -354,8 +354,10 @@ let draw_help (iface : interface_state_t) =
       wclear win;
       wattron win WA.bold;
       let s = sprintf "Orpie v%s" iface.version in
-      assert (mvwaddstr win 0 0 s);
+      mvwaddstr_safe win 0 0 s;
       wattroff win WA.bold;
+      let h_pos = String.length s in
+      mvwaddstr_safe win 0 (h_pos + 1) ("-- " ^ iface.tagline);
       assert (mvwaddstr win 1 0 "--------------------------------------");
       for i = 0 to pred iface.scr.hw_lines do
          assert (mvwaddch win i 38 (int_of_char '|'))
