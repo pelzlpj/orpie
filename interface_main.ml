@@ -1236,7 +1236,7 @@ let handle_quit (iface : interface_state_t) =
 (* register an autobinding.
  * The autobindings are stored both in an array for quick ordered
  * access, and in the standard keybinding hashtables. *)
-let register_autobinding (iface : interface_state_t) (ff : function_operation)=
+let register_autobinding (op : operation_t) =
    (* find oldest autobinding *)
    let oldest     = ref 0 in
    let oldest_age = ref (-1) in
@@ -1254,10 +1254,10 @@ let register_autobinding (iface : interface_state_t) (ff : function_operation)=
       let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(!oldest) in
       begin match bound_f with
       |None         -> ()
-      |Some func_op -> Rcfile.remove_binding key (Function func_op)
+      |Some op -> Rcfile.remove_binding key op
       end;
-      Rcfile.register_binding_internal key key_string (Function ff);
-      !Rcfile.autobind_keys.(!oldest) <- (key, key_string, Some ff, 0) 
+      Rcfile.register_binding_internal key key_string op;
+      !Rcfile.autobind_keys.(!oldest) <- (key, key_string, Some op, 0) 
    end else
       ()
 
@@ -1324,12 +1324,6 @@ let handle_interr_function_call (iface : interface_state_t) calc_function =
 
 
 let process_function (iface : interface_state_t) ff =
-   (* check whether ff should be autobound *)
-   begin try
-      let _ = Rcfile.key_of_function (Function ff) in ()
-   with Not_found ->
-      register_autobinding iface ff
-   end;
    begin match ff with
    |Add ->
       handle_function_call iface iface.calc#add
@@ -1636,11 +1630,21 @@ let handle_enter_extended (iface : interface_state_t) =
       (try
          iface.matched_extended_entry_list <- 
             match_extended_buffer iface iface.extended_entry_buffer;
-         match (Rcfile.translate_extended_abbrev iface.matched_extended_entry) with
-         |Function ff -> process_function iface ff
+         let operation = Rcfile.translate_extended_abbrev
+         iface.matched_extended_entry in
+         begin match operation with
+         |Function ff -> 
+            process_function iface ff
          |Command cc  -> process_command iface cc
          |_ -> failwith 
             "found extended command that is neither Function nor Command"
+         end;
+         (* check whether ff should be autobound *)
+         begin try
+            let _ = Rcfile.key_of_operation operation in ()
+         with Not_found ->
+            register_autobinding operation
+         end
       with
          Not_found -> ());
       iface.extended_entry_buffer <- "";

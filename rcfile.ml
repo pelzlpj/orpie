@@ -57,7 +57,7 @@ let hide_help = ref false;;
 (* Whether or not to conserve memory in favor of faster display *)
 let conserve_memory = ref false;;
 (* Autobinding keys *)
-let autobind_keys_list : (int * string * function_operation option * int) list ref = ref [];;
+let autobind_keys_list : (int * string * operation_t option * int) list ref = ref [];;
 let autobind_keys = ref (Array.make 1 (0, "", None, 0));;
 
 
@@ -91,6 +91,17 @@ let varedit_of_key key =
    Hashtbl.find table_key_varedit key;;
 let key_of_varedit edit_op =
    Hashtbl.find table_varedit_key edit_op;;
+
+
+let key_of_operation (op : operation_t) =
+   match op with
+   |Function _ -> Hashtbl.find table_function_key op
+   |Command _  -> Hashtbl.find table_command_key op
+   |Edit _     -> Hashtbl.find table_edit_key op
+   |Browse _   -> Hashtbl.find table_browse_key op
+   |Extend _   -> Hashtbl.find table_extended_key op
+   |IntEdit _  -> Hashtbl.find table_intedit_key op
+   |VarEdit _  -> Hashtbl.find table_varedit_key op
 
 
 (* abbreviations used in extended entry mode *)
@@ -606,6 +617,8 @@ let generate_autobind_array () =
    autobind_keys := Array.sub temp_arr 0 !pointer
 
 
+
+
 (* compare a set of autobindings saved to disk to the set loaded from the
  * orpierc file.  If the autobindings match and the hashtbl abbreviations
  * are the same, then use the saved version. *)
@@ -619,8 +632,8 @@ let validate_saved_autobindings saved_autobind =
             try
                begin match s_bound_f with
                |None -> ()
-               |Some ff ->
-                  let _ = abbrev_of_operation (Function ff) in ()
+               |Some op ->
+                  let _ = abbrev_of_operation op in ()
                end
             with Not_found ->
                (* if the function has no associated abbreviation, then consider
@@ -631,9 +644,15 @@ let validate_saved_autobindings saved_autobind =
              * consider the saved set to be flawed. *)
             is_valid := false
       done;
-      if !is_valid then
-         autobind_keys := saved_autobind
-      else
+      if !is_valid then begin
+         autobind_keys := saved_autobind;
+         for i = 0 to pred (Array.length !autobind_keys) do
+            let (n_key, n_key_str, n_bound_f, n_age) = !autobind_keys.(i) in
+            match n_bound_f with
+            |None    -> ()
+            |Some op -> register_binding_internal n_key n_key_str op
+         done
+      end else
          ()
    else
       ()

@@ -194,7 +194,7 @@ class rpc_stack =
                      let data_modes, data_variables, data_autobind_keys, data_stack, data_len = 
                         (Marshal.from_channel load_channel : calculator_modes * 
                         ((string, orpie_data_t) Hashtbl.t) * 
-                        (int * string * Operations.function_operation option * int) array *
+                        (int * string * Operations.operation_t option * int) array *
                         (stack_data_t array) * int)
                      in
                      close_in load_channel;

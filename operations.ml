@@ -24,51 +24,51 @@
  * operation.  A command does not take input, so it is not allowed when data is
  * in the entry buffer.  An edit is an operation that acts on the data in the
  * entry buffer (e.g. backspace). *)
-type function_operation = | Add | Sub | Mult | Div | Neg | Inv
-                          | Pow | Sqrt | Sq | Abs | Arg | Exp | Ln 
-                          | Ten_x | Log10 | Conj | Sin | Cos | Tan 
-                          | Asin | Acos | Atan | Sinh | Cosh | Tanh
-                          | Asinh | Acosh | Atanh | Re | Im 
-                          | Gamma | LnGamma | Erf | Erfc | Fact
-                          | Transpose | Mod | Floor | Ceiling
-                          | ToInt | ToFloat | SolveLin | Eval
-                          | Store | Purge | Gcd | Lcm | Binom | Perm
-                          | Total | Mean | Sumsq | Var |VarBias
-                          | Stdev | StdevBias | Min | Max 
-                          | Utpn | Rand;;
+type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
+                            | Pow | Sqrt | Sq | Abs | Arg | Exp | Ln 
+                            | Ten_x | Log10 | Conj | Sin | Cos | Tan 
+                            | Asin | Acos | Atan | Sinh | Cosh | Tanh
+                            | Asinh | Acosh | Atanh | Re | Im 
+                            | Gamma | LnGamma | Erf | Erfc | Fact
+                            | Transpose | Mod | Floor | Ceiling
+                            | ToInt | ToFloat | SolveLin | Eval
+                            | Store | Purge | Gcd | Lcm | Binom | Perm
+                            | Total | Mean | Sumsq | Var |VarBias
+                            | Stdev | StdevBias | Min | Max 
+                            | Utpn | Rand;;
 
-type command_operation  = | Drop | Clear | Swap | Dup | Undo
-                          | BeginBrowse | BeginExtended | BeginVar | Quit
-                          | SetRadians | SetDegrees | SetRect | SetPolar
-                          | SetBin | SetOct | SetDec | SetHex
-                          | ToggleAngleMode | ToggleComplexMode | CycleBase
-                          | View | About | Refresh | EnterPi 
-                          | EditInput | CycleHelp;;
+type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
+                            | BeginBrowse | BeginExtended | BeginVar | Quit
+                            | SetRadians | SetDegrees | SetRect | SetPolar
+                            | SetBin | SetOct | SetDec | SetHex
+                            | ToggleAngleMode | ToggleComplexMode | CycleBase
+                            | View | About | Refresh | EnterPi 
+                            | EditInput | CycleHelp;;
 
-type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
-                          | BeginInteger | BeginComplex | BeginMatrix
-                          | Separator | Angle;;
+type edit_operation_t     = | Digit | Enter | Backspace | Minus | SciNotBase 
+                            | BeginInteger | BeginComplex | BeginMatrix
+                            | Separator | Angle;;
 
-type browse_operation   = | EndBrowse
-                          | ScrollLeft | ScrollRight | RollDown | RollUp
-                          | PrevLine | NextLine | Echo | ViewEntry
-                          | Drop1 | DropN | Keep | KeepN
-                          | EditEntry;;
+type browse_operation_t   = | EndBrowse
+                            | ScrollLeft | ScrollRight | RollDown | RollUp
+                            | PrevLine | NextLine | Echo | ViewEntry
+                            | Drop1 | DropN | Keep | KeepN
+                            | EditEntry;;
 
-type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
+type extended_operation_t = | ExitExtended | EnterExtended | ExtBackspace;;
 
-type integer_edit_operation = | ExitIntEdit;;
+type integer_edit_operation_t = | ExitIntEdit;;
 
-type var_edit_operation  = | ExitVarEdit | EnterVarEdit | VarEditBackspace
-                           | CompleteVarEdit;;
+type var_edit_operation_t = | ExitVarEdit | EnterVarEdit | VarEditBackspace
+                            | CompleteVarEdit;;
 
-type operation = | Function of function_operation 
-                 | Command of command_operation
-                 | Edit of edit_operation
-                 | Browse of browse_operation
-                 | Extend of extended_operation
-                 | IntEdit of integer_edit_operation
-                 | VarEdit of var_edit_operation;;
+type operation_t = | Function of function_operation_t 
+                   | Command  of command_operation_t
+                   | Edit     of edit_operation_t
+                   | Browse   of browse_operation_t
+                   | Extend   of extended_operation_t
+                   | IntEdit  of integer_edit_operation_t
+                   | VarEdit  of var_edit_operation_t;;
 
 
 

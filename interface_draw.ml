@@ -533,7 +533,7 @@ let draw_help (iface : interface_state_t) =
                      let (key, key_string, bound_f, age) = !Rcfile.autobind_keys.(i) in
                      let abbr = match bound_f with
                         |None    -> "(none)"
-                        |Some ff -> Rcfile.abbrev_of_operation (Function ff)
+                        |Some op -> Rcfile.abbrev_of_operation op
                      in
                      mvwaddstr_safe win (i + 6) 2 (make_string 12 key_string abbr)
                   done;

@@ -558,7 +558,7 @@ The following functions are available as extended commands:
 %@% END-IF %@%
 
 The extended command abbreviations can become tedious when performing repetitive calculations.
-To save some keystrokes, Orpie will automatically bind recently-used functions with no prexisting
+To save some keystrokes, Orpie will automatically bind recently-used operations with no prexisting
 binding to keys \texttt{<f5>-<f12>}.  The current autobindings can be viewed by pressing \texttt{'h'}
 to cycle between the various pages of the help panel.
 
@@ -829,10 +829,10 @@ Multiple keys may be bound to the same operation, if desired.
 %@% END-IF %@%
 Syntax: \texttt{autobind \emph{key\_identifier}} \\ \\
 In order to make repetitive calculations more pleasant, Orpie offers an automatic key
-binding feature.  When a function is executed using its extended command abbreviation,
-one of the keys selected by the \texttt{autobind} syntax will be automatically bound to 
-that function (unless the function has already been bound to a key).  The
-current set of autobindings can be viewed in the help panel by executing
+binding feature.  When an operation (function or command) is executed using its extended 
+command abbreviation, one of the keys selected by the \texttt{autobind} syntax will be 
+automatically bound to that operation (unless the operation has already been bound 
+to a key).  The current set of autobindings can be viewed in the help panel by executing
 \texttt{command\_cycle\_help} (bound to \texttt{'h'} by default).
 
 The syntax for the key identifiers is provided in the previous section.
