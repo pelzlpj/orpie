@@ -253,6 +253,8 @@ The following functions are available as extended commands:
       {\tt fact} & factorial function \\
       {\tt trans} & matrix transpose \\
       {\tt mod} & element 2 mod element 1 \\
+      {\tt floor} & floor function \\
+      {\tt ceil} & ceiling function \\
       {\tt add} & add last two elements \\
       {\tt sub} & subtract element 1 from element 2 \\
       {\tt mult} & multiply last two elements \\
@@ -477,6 +479,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       the angle mode of the calculator.
    \item {\tt function\_atanh} \\
       Compute the inverse hyperbolic tangent of the last stack element.
+   \item {\tt function\_ceiling} \\
+      Compute the ceiling of the last stack element.
    \item {\tt function\_cos} \\
       Compute the cosine of the last stack element.  If the argument is real,
       it will be assumed to be either degrees or radians, depending on the
@@ -498,6 +502,8 @@ to a real number, and as such the arithmetic will no longer be exact.
       exact, even for the integer constant data type.  It is computed using
       an approximation to the gamma function, and therefore is subject to rounding 
       errors.
+   \item {\tt function\_floor} \\
+      Compute the floor of the last stack element.
    \item {\tt function\_gamma} \\
       Compute the Euler gamma function of the last stack element.
    \item {\tt function\_im} \\
@@ -549,7 +555,6 @@ to a real number, and as such the arithmetic will no longer be exact.
 \label{commands}
 The following operations are referred to as commands; they differ from functions because
 they do not take an argument.  Many calculator interface settings are implemented as commands.
-
 \begin{itemize}
    \item {\tt command\_about} \\
       Display a nifty ``about Orpie'' credits screen.

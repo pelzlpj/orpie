@@ -939,6 +939,54 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* floor function *)
+      method floor () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloat el ->
+                  let adjusted_el =
+                     if el < 0.0 then
+                        el -. 1.0
+                     else
+                        el
+                  in
+                  stack#push (RpcFloat (float_of_int (int_of_float
+                  adjusted_el)))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "floor can only be applied to real data"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      (* ceiling function *)
+      method ceiling () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcFloat el ->
+                  let adjusted_el =
+                     if el < 0.0 then
+                        el
+                     else
+                        el +. 1.0
+                  in
+                  stack#push (RpcFloat (float_of_int (int_of_float
+                  adjusted_el)))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "ceiling can only be applied to real data"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
 
       method enter_pi () =
          stack#push (RpcFloat pi)
