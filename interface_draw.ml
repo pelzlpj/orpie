@@ -517,7 +517,7 @@ let draw_help (iface : interface_state_t) =
                wattron win WA.bold;
                mvwaddstr_safe win 16 0 "Miscellaneous:";
                wattroff win WA.bold;
-               mvwaddstr_safe win 17 2 ("scientific notation : " ^
+               mvwaddstr_safe win 17 2 ("scientific notation     : " ^
                try_find Rcfile.key_of_edit (Edit SciNotBase));
                mvwaddstr_safe win 18 2 ("abbreviation entry mode : " ^
                try_find Rcfile.key_of_command  (Command BeginAbbrev));
