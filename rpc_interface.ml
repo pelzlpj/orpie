@@ -44,8 +44,8 @@ type rpc_entry_type          = | IntEntry | FloatEntry | ComplexEntry
 type rpc_interface_mode = | StandardEntryMode | ExtendedEntryMode | BrowsingMode;;
 
 type complex_entry_element = 
-   {mutable re_mantissa : string; mutable re_exponent : string; mutable re_has_dot : bool; 
-    mutable im_mantissa : string; mutable im_exponent : string; mutable im_has_dot : bool};;
+   {mutable re_mantissa : string; mutable re_exponent : string;
+    mutable im_mantissa : string; mutable im_exponent : string};;
 
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\n" ^
@@ -104,8 +104,8 @@ object(self)
       types.  Each element has string storage (and other bits) that can hold the
       state of a single complex number. *)
    val mutable gen_buffer = Array.make max_matrix_size
-      {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
-      im_mantissa = ""; im_exponent = ""; im_has_dot = false}
+      {re_mantissa = ""; re_exponent = "";
+      im_mantissa = ""; im_exponent = ""}
    val mutable current_buffer = 0
    val mutable is_entering_imag = false
    val mutable matrix_cols = 1
@@ -135,8 +135,8 @@ object(self)
       (* initialize buffers for matrix entry *)
       for i = 1 to pred max_matrix_size do
          gen_buffer.(i) <- 
-            {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
-            im_mantissa = ""; im_exponent = ""; im_has_dot = false}
+            {re_mantissa = ""; re_exponent = "";
+            im_mantissa = ""; im_exponent = ""}
       done;
       self#draw_stack ();
       self#draw_help ();
@@ -564,8 +564,8 @@ object(self)
          is_entering_exponent <- false;
          for i = 0 to pred max_matrix_size do
             gen_buffer.(i) <- 
-               {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
-               im_mantissa = ""; im_exponent = ""; im_has_dot = false}
+               {re_mantissa = ""; re_exponent = "";
+               im_mantissa = ""; im_exponent = ""}
          done;
          current_buffer <- 0;
          is_entering_imag <- false;
@@ -1338,9 +1338,10 @@ object(self)
          and mantissa_buffer =
             if is_imag then buffer.im_mantissa
             else buffer.re_mantissa
-         and has_dot =
-            if is_imag then buffer.im_has_dot
-            else buffer.re_has_dot
+         in 
+         let has_decimal =
+            let dot_regex = Str.regexp "^.*\..*$" in
+            Str.string_match dot_regex mantissa_buffer 0
          in
          begin
             if is_entering_exponent then
@@ -1374,7 +1375,7 @@ object(self)
                   ()
             else if String.length mantissa_buffer < 17 then
                let digits =
-                  if has_dot then "0123456789"
+                  if has_decimal then "0123456789"
                   else "0123456789."
                in
                try
@@ -1382,15 +1383,11 @@ object(self)
                   if String.contains digits c then
                      begin
                         (if is_imag then
-                           (buffer.im_mantissa <- mantissa_buffer ^
-                           (String.make 1 c);
-                           if c = '.' then buffer.im_has_dot <- true
-                           else ())
+                           buffer.im_mantissa <- mantissa_buffer ^
+                           (String.make 1 c)
                         else
-                           (buffer.re_mantissa <- mantissa_buffer ^
-                           (String.make 1 c);
-                           if c = '.' then buffer.re_has_dot <- true
-                           else ()));
+                           buffer.re_mantissa <- mantissa_buffer ^
+                           (String.make 1 c));
                         has_entry <- true;
                         self#draw_entry ()
                      end
