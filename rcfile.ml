@@ -36,6 +36,7 @@ let table_function_key = Hashtbl.create 20;;
 let table_key_command  = Hashtbl.create 20;;
 let table_command_key  = Hashtbl.create 20;;
 let table_key_edit     = Hashtbl.create 20;;
+let table_edit_key     = Hashtbl.create 20;;
 let table_key_browse   = Hashtbl.create 20;;
 let table_browse_key   = Hashtbl.create 20;;
 let table_extended_key = Hashtbl.create 20;;
@@ -59,6 +60,8 @@ let key_of_command command =
    Hashtbl.find table_command_key command;;
 let edit_of_key key =
    Hashtbl.find table_key_edit key;;
+let key_of_edit edit_op =
+   Hashtbl.find table_edit_key edit_op;;
 let browse_of_key key =
    Hashtbl.find table_key_browse key;;
 let key_of_browse browse_op =
@@ -85,7 +88,8 @@ let register_binding key_string op =
             (Hashtbl.add table_key_command k op;
             Hashtbl.add table_command_key op k_string)
          |Edit e ->
-            Hashtbl.add table_key_edit k op
+            (Hashtbl.add table_key_edit k op;
+            Hashtbl.add table_edit_key op k_string)
          |Browse b ->
             (Hashtbl.add table_key_browse k op;
             Hashtbl.add table_browse_key op k_string)

@@ -268,8 +268,18 @@ let draw_update_entry iface =
    assert (doupdate ())
 
 
+
 (* display the help window *)
 let draw_help (iface : interface_state_t) =
+   let mvwaddstr_safe w vert horiz st =
+      let st_trunc =
+         if String.length st > 36 then
+            Str.string_before st 36
+         else
+            st
+      in
+      assert (mvwaddstr w vert horiz st_trunc)
+   in
    let modes = iface.calc#get_modes () in
    begin match iface.scr.help_win with
    |Some win ->
@@ -300,16 +310,24 @@ let draw_help (iface : interface_state_t) =
       |Rect -> "REC"
       |Polar -> "POL" in
       assert (mvwaddstr win 3 34 complex_str);
+      let try_find fn el =
+         try fn el
+         with Not_found -> ""
+      in
       begin
          match iface.help_mode with
          |Standard ->
             wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Default Hotkeys:");
+            assert (mvwaddstr win 5 0 "Hotkeys:");
             wattroff win WA.bold;
-            assert (mvwaddstr win 6 2 "<Enter> : enter number on stack");
-            assert (mvwaddstr win 7 2 "      \\ : drop last stack item");
-            assert (mvwaddstr win 8 2 " <PgDn> : swap last two stack items");
-            assert (mvwaddstr win 9 2 "      | : clear stack");
+            mvwaddstr_safe win 6 2 ("enter number on stack: " ^
+            try_find Rcfile.key_of_edit (Edit Enter));
+            mvwaddstr_safe win 7 2 ("drop last stack item:  " ^
+            try_find Rcfile.key_of_command (Command Drop));
+            mvwaddstr_safe win 8 2 ("swap last two items:   " ^
+            try_find Rcfile.key_of_command (Command Swap));
+            mvwaddstr_safe win 9 2 ("clear stack:           " ^
+            try_find Rcfile.key_of_command (Command Clear));
             assert (mvwaddstr win 10 2 "+ : add               - : subtract");
             assert (mvwaddstr win 11 2 "* : multiply          / : divide");
             assert (mvwaddstr win 12 2 "^ : power (x^y)       ! : factorial");

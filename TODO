@@ -2,6 +2,9 @@ rpc2 to-do list
 --------------------------------------------------------------------------------
 Definitely before release:
 
+   * why did the build process suddenly decide that rpc_stack needs to
+     *always* be recompiled?
+
    * make sure all the rpc 0.98 functions are in rpc2 (gamma, pi, ...)
 
    * clean up the help panel; ideally, the hotkeys should be displayed

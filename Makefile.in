@@ -85,14 +85,14 @@ opt: $(NAME).opt $(NAME2).opt
 $(NAME).byte: subdirs_byte $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
 
-$(NAME2).byte: subdirs_byte curses-keys.ml
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses-keys.ml
+$(NAME2).byte: subdirs_byte utility.ml curses-keys.ml
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) utility.ml curses-keys.ml
 
 $(NAME).opt: subdirs_opt $(CMX)
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
 
-$(NAME2).opt: subdirs_opt curses-keys.ml
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses-keys.ml
+$(NAME2).opt: subdirs_opt utility.ml curses-keys.ml
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.ml curses-keys.ml
 
 
 # curses and gsl bindings

@@ -28,31 +28,41 @@
  *)
 
 
-exception Stack_error of string;;
+exception Stack_error of string
 
 
-open Big_int;;
-open Big_int_str;;
-open Printf;;
+open Big_int
+open Big_int_str
+open Printf
+
+
+let cmpx_of_int i   = {Complex.re=Big_int.float_of_big_int i; Complex.im=0.0}
+let cmpx_of_float f = {Complex.re=f; Complex.im=0.0}
+let cmat_of_fmat fm =
+   let rows, cols = Gsl_matrix.dims fm and
+   f_array = Gsl_matrix.to_array fm in
+   let c_array = Array.map cmpx_of_float f_array in
+   Gsl_matrix_complex.of_array c_array rows cols
+
 
 type orpie_data = | RpcInt of Big_int.big_int
                   | RpcFloat of float
                   | RpcComplex of Complex.t
                   | RpcFloatMatrix of Gsl_matrix.matrix 
-                  | RpcComplexMatrix of Gsl_matrix_complex.matrix;;
+                  | RpcComplexMatrix of Gsl_matrix_complex.matrix
 
-type angle_mode   = | Rad | Deg;;
-type base_mode    = | Bin | Oct | Hex | Dec;;
-type complex_mode = | Rect | Polar;;
+type angle_mode   = | Rad | Deg
+type base_mode    = | Bin | Oct | Hex | Dec
+type complex_mode = | Rect | Polar
       
 type calculator_modes = {angle : angle_mode; base : base_mode; 
-                         complex : complex_mode};;
+                         complex : complex_mode}
 
 (* type datafile_t = ModesData of calculator_modes | StackData of orpie_data
  * array;; *)
 
-let size_inc = 100;;
-let pi = 3.14159265358979323846;;
+let size_inc = 100
+let pi = 3.14159265358979323846
 
 class rpc_stack =
    object(self)
@@ -443,7 +453,7 @@ class rpc_stack =
             raise (Stack_error ("cannot display nonexistent stack element " ^
                (string_of_int line_num)))
 
-   end;;
+   end
 
 
 
