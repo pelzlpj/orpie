@@ -211,8 +211,38 @@ calc#add ();
 mat_error ();
 test_result_float_tol 0.0 uprec "add_fmat_cmat_2";
 
+load_data "[[(6, 6), (9, 8)][(12, 10), (15, 12)]]
+           [[(5, 6), (7, 8)][(9, 10), (11, 12)]] [[1, 2][3, 4]]";
+calc#add ();
+mat_error ();
+test_result_float_tol 0.0 mprec "add-cmat-fmat-1";
 
+load_data "[[(55.1676416, 10.0), (106.3352832, 20.0)]
+            [(157.5029248, 30.0), (208.6705664, 40.0)]]_m^2/min
+           [[(5, 10.0), (6, 20.0)][(7, 30.0), (8, 40.0)]]_m^2/min
+           [[1, 2][3, 4]]_yd^2/s";
+calc#add ();
+load_data "1_m^2/min";
+calc#convert_units ();
+mat_error ();
+test_result_float_tol 0.0 uprec "add-cmat-fmat-2";
 
+load_data "[[(-4, 12), (17, 24)][(105, 9), (-5, -7)]]
+           [[(1, 2), (3, 4)][(5, 6), (7, 8)]]
+           [[(-5, 10), (14, 20)][(100, 3), (-12, -15)]]";
+calc#add ();
+mat_error ();
+test_result_float_tol 0.0 mprec "add-cmat-cmat-1";
+
+load_data "[[(12.0231131092, 20.0462262185), (9.22773573109, 144.092452437)]
+            [(65.4323583529, 76.1386786555), (8.63698097479, 58.184904874)]]_lb
+           [[(5, 10), (6, 20)][(7, 30), (8, 40)]]_kg
+           [[(1, -2), (-4, 100)][(50, 10), (-9, -30)]]_lb";
+calc#add ();
+mat_error ();
+test_result_float_tol 0.0 uprec "add-cmat-cmat-2";
+
+calc#clear ();
 
 
 print_endline "rpc_calc tested OK!";;
