@@ -269,6 +269,13 @@ tags:
 	      "--regex=/val[ \t]+\([^ \t]+\)/\1/" \
 	      "--regex=/module[ \t]+\([^ \t]+\)/\1/"
 
+# vi tags
+#########
+
+vtags:
+	otags -vi *.ml
+
+
 # Makefile is rebuilt whenever Makefile.in or configure.in is modified
 ######################################################################
 
