@@ -47,6 +47,7 @@ bind "c" function_conj
 bind "!" function_factorial
 bind "%" function_mod
 bind "S" function_store
+bind ";" function_eval
 
 # keys for "command" operations, which do not take an argument
 bind "\\" command_drop
