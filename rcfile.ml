@@ -19,6 +19,12 @@ let table_browse_key   = Hashtbl.create 20;;
 let table_extended_key = Hashtbl.create 20;;
 let table_key_extended = Hashtbl.create 20;;
 
+(* Default datafile for loading and saving state *)
+let datafile = ref "~/.rpc2/calc_state";;
+(* Default datafile for a fullscreen viewing buffer *)
+let fullscreenfile = ref "~/.rpc2/fullscreen";;
+(* Default editor for fullscreen viewing *)
+let editor = ref "vi";;
 
 
 let function_of_key key =
@@ -282,6 +288,8 @@ let parse_line line_stream =
                            register_binding key (Command ToggleComplexMode)
                         |"command_cycle_base" ->
                            register_binding key (Command CycleBase)
+                        |"command_view" ->
+                           register_binding key (Command View)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->
@@ -298,6 +306,8 @@ let parse_line line_stream =
                            register_binding key (Browse RollDown)
                         |"browse_rollup" ->
                            register_binding key (Browse RollUp)
+                        |"browse_view" ->
+                           register_binding key (Browse ViewEntry)
                         |"extended_exit" ->
                            register_binding key (Extend ExitExtended)
                         |"extended_enter" ->
@@ -347,6 +357,60 @@ let parse_line line_stream =
          | [< >] ->
             config_failwith "Expected a key string after keyword \"macro\""
       end
+   | [< 'Kwd "set" >] ->
+      begin
+         match line_stream with parser
+         | [< 'Ident "datafile" >] ->
+            begin
+               match line_stream with parser
+               | [< 'Ident "=" >] ->
+                  begin
+                     match line_stream with parser
+                     | [< 'String file >] ->
+                        (Printf.fprintf stderr "using datafile \"%s\"\n" file;
+                        datafile := file)
+                     | [< >] ->
+                        config_failwith ("Expected a datafile string after " ^
+                        "\"set datafile = \"")
+                  end
+               | [< >] ->
+                  config_failwith ("Expected \"=\" after \"set datafile\"")
+            end
+         | [< 'Ident "buffer" >] ->
+            begin
+               match line_stream with parser
+               | [< 'Ident "=" >] ->
+                  begin
+                     match line_stream with parser
+                     | [< 'String file >] ->
+                        (Printf.fprintf stderr "using bufferfile \"%s\"\n" file;
+                        fullscreenfile := file)
+                     | [< >] ->
+                        config_failwith ("Expected a buffer file string after " ^
+                        "\"set buffer = \"")
+                  end
+               | [< >] ->
+                  config_failwith ("Expected \"=\" after \"set buffer\"")
+            end
+         | [< 'Ident "editor" >] ->
+            begin
+               match line_stream with parser
+               | [< 'Ident "=" >] ->
+                  begin
+                     match line_stream with parser
+                     | [< 'String executable >] ->
+                        (Printf.fprintf stderr "using editor \"%s\"\n" executable;
+                        editor := executable)
+                     | [< >] ->
+                        config_failwith ("Expected an executable filename string after " ^
+                        "\"set editor = \"")
+                  end
+               | [< >] ->
+                  config_failwith ("Expected \"=\" after \"set editor\"")
+            end
+         | [< >] ->
+            config_failwith ("Unmatched variable name after \"set\"")
+      end
    | [< 'Kwd "#" >] ->
       ()
    | [< >] ->
@@ -356,7 +420,7 @@ let parse_line line_stream =
 
 let process_rcfile () =
    let line_lexer line = 
-      make_lexer ["bind"; "macro"; "#"] (Stream.of_string line)
+      make_lexer ["bind"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
    let config_stream = 

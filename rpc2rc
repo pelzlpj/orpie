@@ -1,6 +1,13 @@
 # rpc2rc
 # default key bindings for rpc2 calculator
 
+# datafile for loading and saving calculator state
+set datafile="~/.rpc2/calc_state"
+# buffer file used for fullscreen viewing of stack elements
+set buffer="~/.rpc2/fullscreen"
+# editor used for fullscreen viewing of stack elements
+set editor="vi"
+
 # keys for "edit" operations, which affect the data that
 # is currently being entered
 bind "n" edit_minus
@@ -39,6 +46,7 @@ bind "'" command_begin_extended
 bind "r" command_toggle_angle_mode
 bind "p" command_toggle_complex_mode
 bind "b" command_cycle_base
+bind "v" command_view
 bind "Q" command_quit
 
 # keys for "browse" operations, which are active during
@@ -50,6 +58,7 @@ bind "<up>" browse_prev_line
 bind "<down>" browse_next_line
 bind "r" browse_rolldown
 bind "R" browse_rollup
+bind "v" browse_view
 bind "<return>" browse_echo
 
 # keys for extended mode operations

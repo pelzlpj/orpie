@@ -48,6 +48,9 @@ type complex_mode = | Rect | Polar;;
 type calculator_modes = {angle : angle_mode; base : base_mode; 
                          complex : complex_mode};;
 
+(* type datafile_t = ModesData of calculator_modes | StackData of rpc_data
+ * array;; *)
+
 let size_inc = 100;;
 let pi = 3.14159265358979323846;;
 
@@ -58,6 +61,35 @@ class rpc_stack =
 
       method length = len
 
+
+      (* save to a datafile using the Marshal module *)
+      method save_state (modes : calculator_modes) =
+         try
+            let save_file = Utility.open_or_create_out_bin !(Rcfile.datafile) in
+            Marshal.to_channel save_file (modes, stack, len) [];
+            close_out save_file
+         with
+            |Unix.Unix_error (err, msg1, msg2) -> raise (Invalid_argument "can't open data file for writing")
+            |Failure ff -> raise (Invalid_argument "can't serialize calculator data to file")
+
+      (* load from a datafile using the Marshal module *)
+      (* FIXME: if the datafile is corrupted, this can segfault... *)
+      method load_state () =
+         try
+            let load_file = Utility.expand_open_in_bin !(Rcfile.datafile) in
+            let data_modes, data_stack, data_len = 
+               (Marshal.from_channel load_file : calculator_modes * (rpc_data
+               array) * int)
+            in
+            (close_in load_file;
+            stack <- data_stack;
+            len <- data_len;
+            data_modes)
+         with
+            |Sys_error ss -> raise (Invalid_argument "can't open calculator state data file")
+            |Failure ff -> raise (Invalid_argument "can't deserialize calculator data from file")
+
+            
       method backup () =
          let b_stack = Array.copy stack and
          b_len = len in
@@ -139,7 +171,7 @@ class rpc_stack =
       (* generate a string to represent a particular stack element.
        * The top stack element (stack.(len-1)) is defined to be element 
        * number 1. *)
-      method get_display_line line_num calc_modes =
+      method get_display_string is_fullscreen line_num calc_modes =
          if line_num > 0 then
             if line_num <= len then
                (* this is the actual index into the array *)
@@ -192,7 +224,11 @@ class rpc_stack =
                            for m = 0 to cols - 2 do
                               line := !line ^ (sprintf "%.15g, " el.{n, m})
                            done;
-                           line := !line ^ (sprintf "%.15g ]" el.{n, cols-1})
+                           line := !line ^ (sprintf "%.15g ]" el.{n, cols-1});
+                           (if is_fullscreen && n < (rows - 1) then
+                              line := !line ^ "\n "
+                           else
+                              ())
                         done;
                         line := !line ^ "]";
                         !line
@@ -227,7 +263,11 @@ class rpc_stack =
                            match calc_modes.complex with
                            |Rect ->
                               line := !line ^ (sprintf "(%.15g, %.15g) ]" 
-                                 el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
+                                 el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im);
+                              (if is_fullscreen && n < (rows - 1) then
+                                 line := !line ^ "\n "
+                              else
+                                 ())
                            |Polar ->
                               begin
                                  let rr = el.{n, cols-1}.Complex.re
@@ -240,7 +280,11 @@ class rpc_stack =
                                     r theta)
                                  |Deg ->
                                     line := !line ^ (sprintf "(%.15g <%.15g) ]" 
-                                    r (180.0 /. pi *. theta))
+                                    r (180.0 /. pi *. theta));
+                                    (if is_fullscreen && n < (rows - 1) then
+                                       line := !line ^ "\n "
+                                    else
+                                       ())
                               end
                         done;
                         line := !line ^ "]";

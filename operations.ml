@@ -12,13 +12,14 @@ type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit
                           | SetRadians | SetDegrees | SetRect | SetPolar
                           | SetBin | SetOct | SetDec | SetHex
-                          | ToggleAngleMode | ToggleComplexMode | CycleBase;;
+                          | ToggleAngleMode | ToggleComplexMode | CycleBase
+                          | View;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;
 type browse_operation   = | EndBrowse
                           | ScrollLeft | ScrollRight | RollDown | RollUp
-                          | PrevLine | NextLine | Echo;;
+                          | PrevLine | NextLine | Echo | ViewEntry;;
 type extended_operation = | ExitExtended | EnterExtended | ExtBackspace;;
 
 type operation = | Function of function_operation 

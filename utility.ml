@@ -71,6 +71,88 @@ let wordwrap s cols =
       List.rev (process_words words [])
 
 
+(* Do whatever is necessary to open up a file for writing.  If it already exists,
+ * open it as-is.  If it does not exist, make sure that all prefix directories
+ * do exist, then open a new file. *)
+let open_or_create_out_gen is_binary filename =
+   (* If the filename starts with "~", substitute $HOME *)
+   let expand_file =
+      if Str.string_before filename 2 = "~/" then
+         let homedir = Unix.getenv "HOME" in
+         homedir ^ Str.string_after filename 1
+      else
+         filename
+   in
+   (* Test whether the file exists *)
+   if Sys.file_exists expand_file then
+      if is_binary then
+         open_out_bin expand_file
+      else
+         open_out expand_file
+   else
+      (* Check whether all directories exist *)
+      let dir_path = Filename.dirname expand_file in
+      let dir_list = Str.split (Str.regexp "/+") dir_path in
+      (* if necessary, add the first "/" to the first directory *)
+      let slash_dir_list =
+         if not (Filename.is_relative dir_path) then
+            ("/" ^ (List.hd dir_list)) :: (List.tl dir_list)
+         else
+            dir_list
+      in
+      let rec make_directories d_list =
+         match d_list with
+         | [] ->
+            ()
+         | d :: tail ->
+            begin
+               try Unix.chdir d
+               with Unix.Unix_error (err, msg1, msg2) ->
+                  if err = Unix.ENOENT then
+                     (Unix.mkdir d 493;  (* equivalent to \755 or rwxr-xr-x *)
+                     Unix.chdir d)
+                  else
+                     raise (Unix.Unix_error (err, msg1, msg2))
+            end;
+            make_directories tail
+      in
+      make_directories slash_dir_list;
+      if is_binary then
+         open_out_bin (Filename.basename expand_file)
+      else
+         open_out (Filename.basename expand_file)
+
+
+let open_or_create_out_bin filename =
+   open_or_create_out_gen true filename
+
+let open_or_create_out_ascii filename =
+   open_or_create_out_gen false filename
+
+
+
+(* open a filename, with tilde expansion *)
+let expand_open_in_gen is_binary filename =
+   (* If the filename starts with "~", substitute $HOME *)
+   let expand_file =
+      if Str.string_before filename 2 = "~/" then
+         let homedir = Unix.getenv "HOME" in
+         homedir ^ Str.string_after filename 1
+      else
+         filename
+   in
+   if is_binary then
+      open_in_bin expand_file
+   else
+      open_in expand_file
+
+
+let expand_open_in_bin filename =
+   expand_open_in_gen true filename
+
+let expand_open_in_ascii filename =
+   expand_open_in_gen false filename
+
 
 
 (* arch-tag: DO_NOT_CHANGE_a87790db-2dd0-496c-9620-ed968f3253fd *)

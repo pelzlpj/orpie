@@ -51,7 +51,7 @@ let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
     "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n" ^
-    "bin\noct\ndec\nhex");;
+    "bin\noct\ndec\nhex\nview");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -96,6 +96,7 @@ Hashtbl.add command_abbrev_table "bin" (Command SetBin);;
 Hashtbl.add command_abbrev_table "oct" (Command SetOct);;
 Hashtbl.add command_abbrev_table "dec" (Command SetDec);;
 Hashtbl.add command_abbrev_table "hex" (Command SetHex);;
+Hashtbl.add command_abbrev_table "view" (Command View);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -112,7 +113,7 @@ object(self)
    val mutable stack_selection = 1            (* in stack browsing mode, this item is selected *)
    val mutable interface_mode = StandardEntryMode  (* standard mode or stack browsing mode *)
    val mutable horiz_scroll = 0
-   val mutable help_mode = Extended           (* controls the mode of context-sensitive help *)
+   val mutable help_mode = Standard           (* controls the mode of context-sensitive help *)
 
    val mutable has_entry = false              (* whether or not the entry buffer has anything in it *)
    val mutable is_extended_entry = false      (* is the current entry "extended" or not? *)
@@ -123,6 +124,8 @@ object(self)
    val mutable is_entering_exponent = false   (* whether or not the user is entering a scientific notation exponent *)
    val mutable extended_entry_buffer = ""     (* stores characters entered in extended entry mode *)
    val mutable matched_extended_entry = ""    (* stores the command-completed extended entry *)
+   val mutable matched_extended_entry_list = []  (* stores the list of all possible command completions *)
+
 
    (* Holds a list of complex_entry_elements used for float, complex, and matrix
       types.  Each element has string storage (and other bits) that can hold the
@@ -155,16 +158,26 @@ object(self)
       calc#enter_cmat (Gsl_matrix_complex.of_array [| {re=2.3; im=3.1}; 
          {re=0.2; im=4.0}; {re=(-3.0); im=10.0}; {re=(-14.0); im=0.0} |] 2 2);
 
-
       (* initialize buffers for matrix entry *)
       for i = 1 to pred max_matrix_size do
          gen_buffer.(i) <- 
             {re_mantissa = ""; re_exponent = "";
             im_mantissa = ""; im_exponent = ""}
       done;
-      self#draw_stack ();
-      self#draw_help ();
-      self#draw_entry ();
+
+      begin
+         try
+            calc#load_state ();
+            self#draw_stack ();
+            self#draw_help ();
+            self#draw_entry ();
+         with
+            Invalid_argument err ->
+               self#draw_stack ();
+               self#draw_help ();
+               self#draw_entry ();
+               self#draw_error err
+      end;
       self#do_main_loop ()
         
 
@@ -429,22 +442,56 @@ object(self)
                assert (mvwaddstr win 21 2 "      Q : quit");
                assert (wrefresh win)
             |Extended ->
-               wattron win WA.bold;
-               assert (mvwaddstr win 5 0 "Extended Commands:");
-               wattroff win WA.bold;
-               assert (mvwaddstr win 6 1 "Functions:");
-               assert (mvwaddstr win 7 2 "sin   asin  cos   acos  tan   atan");
-               assert (mvwaddstr win 8 2 "exp   ln    10^x  log10 sq    sqrt");
-               assert (mvwaddstr win 9 2 "sinh  asinh cosh  acosh tanh  atanh");
-               assert (mvwaddstr win 10 2 "erf   erfc  inv   gamma lngamma");
-               assert (mvwaddstr win 11 2 "real  imag  floor ceil  nearint");
-               assert (mvwaddstr win 13 1 "Change Modes:");
-               assert (mvwaddstr win 14 2 "rad   deg   bin   oct   hex   dec");
-               assert (mvwaddstr win 15 2 "rect  polar");
-               assert (mvwaddstr win 17 1 "Miscellaneous:");
-               assert (mvwaddstr win 18 2 "pi   undo  view");
-               assert (mvwaddstr win 20 1 "<Backspace> : exit extended entry");
-               assert (wrefresh win)
+               if String.length extended_entry_buffer = 0 then
+                  begin
+                     wattron win WA.bold;
+                     assert (mvwaddstr win 5 0 "Extended Commands:");
+                     wattroff win WA.bold;
+                     assert (mvwaddstr win 6 1 "Functions:");
+                     assert (mvwaddstr win 7 2 "sin   asin  cos   acos  tan   atan");
+                     assert (mvwaddstr win 8 2 "exp   ln    10^x  log10 sq    sqrt");
+                     assert (mvwaddstr win 9 2 "sinh  asinh cosh  acosh tanh  atanh");
+                     assert (mvwaddstr win 10 2 "erf   erfc  inv   gamma lngamma");
+                     assert (mvwaddstr win 11 2 "real  imag  floor ceil  nearint");
+                     assert (mvwaddstr win 13 1 "Change Modes:");
+                     assert (mvwaddstr win 14 2 "rad   deg   bin   oct   hex   dec");
+                     assert (mvwaddstr win 15 2 "rect  polar");
+                     assert (mvwaddstr win 17 1 "Miscellaneous:");
+                     assert (mvwaddstr win 18 2 "pi   undo  view");
+                     assert (mvwaddstr win 20 1 "<Backspace> : exit extended entry");
+                     assert (wrefresh win)
+                  end
+               else
+                  begin
+                     wattron win WA.bold;
+                     assert (mvwaddstr win 5 0 "Matched Extended Commands:");
+                     wattroff win WA.bold;
+                     let highlight_len = String.length extended_entry_buffer in
+                     let rec draw_matches v_pos match_list =
+                        if v_pos < scr.hw_lines then
+                           begin
+                              match match_list with
+                              |[] ->
+                                 ()
+                              |m :: tail ->
+                                 begin
+                                    (* highlight the first 'highlight_len' characters *)
+                                    wattron win WA.bold;
+                                    let len_str = String.length m in
+                                    assert (mvwaddstr win v_pos 2
+                                       (Str.string_before m (highlight_len)));
+                                    wattroff win WA.bold;
+                                    assert (mvwaddstr win v_pos (2 + highlight_len)
+                                       (Str.string_after m (highlight_len)));
+                                    draw_matches (succ v_pos) tail
+                                 end
+                           end
+                        else
+                           ()
+                     in
+                     draw_matches 7 matched_extended_entry_list;
+                     assert (wrefresh win)
+                  end 
          end
       |None ->
          ()
@@ -734,7 +781,8 @@ object(self)
             self#handle_command_call calc#cycle_base;
             self#draw_help ();
             self#draw_stack ()
-
+         |View ->
+            self#handle_view ()
       end
 
 
@@ -842,6 +890,8 @@ object(self)
                         self#handle_next_line ()
                      |Echo ->
                         self#handle_browse_echo ()
+                     |ViewEntry ->
+                        self#handle_browse_view ()
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"
@@ -1326,9 +1376,44 @@ object(self)
       self#draw_stack ()
       
 
+   (* handle fullscreen viewing of a selected stack element *)
+   method private handle_browse_view () =
+      try
+         let fs_string = calc#get_fullscreen_display stack_selection in
+         let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreenfile) in
+         output_string buf fs_string;
+         close_out buf;
+         let _ = 
+            Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreenfile))
+         in ();
+         self#draw_help ();
+         self#draw_stack ();
+         self#draw_entry ()
+      with
+         Sys_error ss -> self#draw_error ss
+      
+
    (* quit the calculator *)
    method private handle_quit () =
+      calc#save_state ();
       run_calc <- false
+
+
+   (* view the last stack element in fullscreen *)
+   method private handle_view () =
+      try
+         let fs_string = calc#get_fullscreen_display 1 in
+         let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreenfile) in
+         output_string buf fs_string;
+         close_out buf;
+         let _ = 
+            Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreenfile))
+         in ();
+         self#draw_help ();
+         self#draw_stack ();
+         self#draw_entry ()
+      with
+         Sys_error ss -> self#draw_error ss
 
 
    (* begin extended entry *)
@@ -1336,6 +1421,7 @@ object(self)
       if interface_mode != ExtendedEntryMode then
          (interface_mode <- ExtendedEntryMode;
          help_mode <- Extended;
+         self#draw_help ();
          self#draw_entry ())
          (* do other cleanup stuff *)
       else
@@ -1349,6 +1435,7 @@ object(self)
          help_mode <- Standard;
          extended_entry_buffer <- "";
          matched_extended_entry <- "";
+         self#draw_help ();
          self#draw_entry ())
       else
          ()
@@ -1361,7 +1448,8 @@ object(self)
          (interface_mode <- StandardEntryMode;
          help_mode <- Standard;
          (try
-            self#match_extended_buffer extended_entry_buffer;
+            matched_extended_entry_list <- 
+               self#match_extended_buffer extended_entry_buffer;
             match (translate_extended_abbrev matched_extended_entry) with
             |Function ff -> self#process_function ff
             |Command cc  -> self#process_command cc
@@ -1371,20 +1459,45 @@ object(self)
             Not_found -> ());
          extended_entry_buffer <- "";
          matched_extended_entry <- "";
+         self#draw_help ();
          self#draw_entry ())
       else
          ()
 
 
-   (* search through the list of commands for the first one that matches
-    * extended_entry_buffer *)
+   (* search through a list of commands and find all that match
+    * extended_entry_buffer.  As a side effect, set matched_extended_entry
+    * to the head of this list.
+    * The list is built up in reverse order using Str.search_backward,
+    * so the head of the list is actually the first match. *)
    method private match_extended_buffer buf =
       if String.length buf > 0 then
          (let regex_str = "^" ^ buf ^ ".*$" in
          let regex = Str.regexp regex_str in
-         let dummy = Str.search_forward regex extended_commands 0 in
-         let matched_command = Str.matched_string extended_commands in
-         matched_extended_entry <- matched_command)
+         let rec find_matching_strings starting_pos matches_list =
+            try
+               let next_pos = 
+                  Str.search_backward regex extended_commands starting_pos
+               in
+               let m = Str.matched_string extended_commands in
+               if next_pos >= 1 then
+                  find_matching_strings (pred next_pos) (m :: matches_list)
+               else
+                  (m :: matches_list)
+            with
+               Not_found ->
+                  begin
+                     match matches_list with
+                     |[] -> raise Not_found
+                     |_ -> matches_list
+                  end
+         in
+         matched_extended_entry <- "";
+         let m_list =
+            find_matching_strings (pred (String.length extended_commands)) [];
+         in
+         matched_extended_entry <- List.hd m_list;
+         m_list)
       else
          (matched_extended_entry <- "";
          raise Not_found)
@@ -1396,12 +1509,16 @@ object(self)
       if len > 0 then
          (extended_entry_buffer <- Str.string_before extended_entry_buffer 
          (pred len);
-         (try self#match_extended_buffer extended_entry_buffer
-         with Not_found -> ());
+         (try 
+            matched_extended_entry_list <- 
+               self#match_extended_buffer extended_entry_buffer
+         with 
+            Not_found -> ());
          (if len = 1 then
             matched_extended_entry <- ""
          else
             ());
+         self#draw_help ();
          self#draw_entry ())
       else
          ()
@@ -1414,8 +1531,9 @@ object(self)
       (* search through the list of commands for the first one that matches
        * extended_entry_buffer *)
       try
-         self#match_extended_buffer test_buffer;
+         matched_extended_entry_list <- self#match_extended_buffer test_buffer;
          extended_entry_buffer <- test_buffer;
+         self#draw_help ();
          self#draw_entry ()
       with
          Not_found -> let err = beep () in ()

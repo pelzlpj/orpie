@@ -23,6 +23,7 @@ open Rpc_stack;;
 open Utility;;
 open Big_int;;
 
+
 let pi = 3.14159265358979323846;;
 
 class rpc_calc =
@@ -77,6 +78,13 @@ class rpc_calc =
          |Oct -> self#mode_dec ()
          |Dec -> self#mode_hex ()
          |Hex -> self#mode_bin ()
+
+      method save_state () =
+         stack#save_state modes
+
+      method load_state () =
+         modes <- stack#load_state ();
+         self#backup ()
 
       method add () =
          Add.add stack self#backup
@@ -658,7 +666,10 @@ class rpc_calc =
 
 
       method get_display_line line_num =
-         stack#get_display_line line_num modes
+         stack#get_display_string false line_num modes
+
+      method get_fullscreen_display line_num =
+         stack#get_display_string true line_num modes
 
       method drop () = 
          if stack#length > 0 then
