@@ -1,8 +1,10 @@
 # orpierc
-# default key bindings for the Orpie calculator
+# default key bindings and other settings for the Orpie calculator
 
 # datafile for loading and saving calculator state
 set datafile="~/.orpie/calc_state"
+# file for storing the version of Orpie used to create datafile
+set versionfile="~/.orpie/version"
 # buffer file used for fullscreen viewing of stack elements
 set buffer="~/.orpie/fullscreen"
 # buffer file used for input of data via an external editor

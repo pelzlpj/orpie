@@ -31,7 +31,7 @@ class rpc_calc =
       val mutable stack = new rpc_stack
       val mutable backup_stack = new rpc_stack
       val mutable modes = {angle = Rad; base = Dec; complex = Rect}
-      val mutable variables = Hashtbl.create 1
+      val mutable variables = Hashtbl.create 10
 
       method backup () =
          backup_stack <- stack#backup ()
@@ -84,10 +84,12 @@ class rpc_calc =
          |Hex -> self#mode_bin ()
 
       method save_state () =
-         stack#save_state modes
+         stack#save_state modes variables
 
       method load_state () =
-         modes <- stack#load_state ();
+         let m, v = stack#load_state () in
+         modes     <- m;
+         variables <- v;
          self#backup ()
 
       method add () =

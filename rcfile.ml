@@ -50,6 +50,8 @@ let table_varedit_key  = Hashtbl.create 20;;
 
 (* Default datafile for loading and saving state *)
 let datafile = ref "~/.orpie/calc_state";;
+(* Default file for checking what version created the stack datafile *)
+let versionfile = ref "~/.orpie/version";;
 (* Default datafile for a fullscreen viewing buffer *)
 let fullscreenfile = ref "~/.orpie/fullscreen";;
 (* Default textfile for editing input *)
@@ -460,6 +462,19 @@ let parse_line line_stream =
             end
          | [< >] ->
             config_failwith ("Expected \"=\" after \"set datafile\"")
+         end
+      | [< 'Ident "versionfile" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String file >] ->
+               versionfile := file
+            | [< >] ->
+               config_failwith ("Expected a versionfile string after " ^
+               "\"set versionfile = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set versionfile\"")
          end
       | [< 'Ident "buffer" >] ->
          begin match line_stream with parser
