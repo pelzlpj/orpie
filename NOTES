@@ -1,0 +1,45 @@
+
+Potential improvements for rpc2:
+
+   * based on GSL rather than ccmath
+
+   * arbitrary precision integers
+
+   * arbitrary precision rationals (is this useful?)
+
+   * separate threads for GUI and calc, so computations
+     can be interrupted
+
+
+------------------------------------------------------------------------
+
+What's good about OCaml:
+
+* Pretty syntax, for the most part.  The "let name = expr in" construct
+  is nice, as is pattern matching, class formulation, recursive
+  functions, etc.
+
+* Strong typing/type safety.
+
+* Type inferrence.
+
+* First-class functions.
+
+* Excellent (and fast!) standard library.
+
+
+What's not so good:
+
+* Type safety requirements can be limiting; sometimes duplicate code is
+  required simply to satisfy the parser.  Polymorphism doesn't seem to
+  be as powerful as indicated, unless I'm doing it wrong.
+
+* Error messages can be hard to decipher.
+
+* Imperative syntax is bit of a pain at times.  All too frequently
+  imperative blocks must be closed off with () or begin...end.
+
+
+
+
+# arch-tag: DO_NOT_CHANGE_26d2d56c-11b2-40d0-aa03-3bfc572cf9e0 

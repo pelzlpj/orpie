@@ -1,0 +1,200 @@
+open Rpc_stack
+open Gsl_error
+open Utility
+open Big_int
+
+let div (stack : rpc_stack) =
+   if stack#length > 1 then
+      let gen_el2 = stack#pop in
+      let gen_el1 = stack#pop in
+      match gen_el1 with
+      |`Int el1 -> (
+         match gen_el2 with
+         |`Int el2 ->
+            stack#push (`Int (div_big_int el1 el2))
+         |`Float el2 ->
+            stack#push (`Float ((float_of_big_int el1) /. el2))
+         |`Complex el2 ->
+            let c_el1 = cmpx_of_int el1 in
+            stack#push (`Complex (Complex.div c_el1 el2))
+         |_ ->
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "incompatible types"))
+         )
+      |`Float el1 -> (
+         match gen_el2 with
+         |`Int el2 ->
+            stack#push (`Float (el1 /. float_of_big_int el2))
+         |`Float el2 ->
+            stack#push (`Float (el1 /. el2))
+         |`Complex el2 ->
+            let c_el1 = cmpx_of_float el1 in
+            stack#push (`Complex (Complex.div c_el1 el2))
+         |_ ->
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "incompatible types"))
+         )
+      |`Complex el1 -> (
+         match gen_el2 with
+         |`Int el2 ->
+            let c_el2 = cmpx_of_int el2 in
+            stack#push (`Complex (Complex.div el1 c_el2))
+         |`Float el2 ->
+            let c_el2 = cmpx_of_float el2 in
+            stack#push (`Complex (Complex.div el1 c_el2))
+         |`Complex el2 ->
+            stack#push (`Complex (Complex.div el1 el2))
+         |_ ->
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "incompatible types"))
+         )
+      |`FloatMatrix el1 -> (
+         match gen_el2 with
+         |`Int el2 ->
+            let result = Gsl_matrix.copy el1 in
+            (Gsl_matrix.scale result (1.0 /. float_of_big_int el2);
+            stack#push (`FloatMatrix result))
+         |`Float el2 ->
+            let result = Gsl_matrix.copy el1 in
+            (Gsl_matrix.scale result (1.0 /. el2);
+            stack#push (`FloatMatrix result))
+         |`Complex el2 ->
+            let c_el1 = cmat_of_fmat el1 in
+            (Gsl_matrix_complex.scale c_el1 (Complex.inv el2);
+            stack#push (`ComplexMatrix c_el1))
+         |`FloatMatrix el2 ->
+            let n1, m1 = (Gsl_matrix.dims el1) and
+            n2, m2     = (Gsl_matrix.dims el2) in
+            if n2 = m2 then
+               if m1 = n2 then
+                  let copy_el2 = Gsl_vectmat.mat_convert ~protect:true (`M el2) and
+                  perm = Gsl_permut.create m1 and
+                  inv = Gsl_matrix.create m1 m1 in
+                  try
+                     let sign = Gsl_linalg._LU_decomp copy_el2 perm in
+                     (Gsl_linalg._LU_invert copy_el2 perm (`M inv);
+                     let result = Gsl_matrix.create n1 m2 in
+                     Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+                        1.0 el1 inv 0.0 result;
+                     stack#push (`FloatMatrix result))
+                  with Gsl_exn _ -> 
+                     (stack#push gen_el2;
+                     stack#push gen_el1;
+                     raise (Invalid_argument "singular matrix"))
+               else
+                  (stack#push gen_el2;
+                  stack#push gen_el1;
+                  raise (Invalid_argument "incompatible dimensions"))
+            else
+               (stack#push gen_el2;
+               stack#push gen_el1;
+               raise (Invalid_argument "non-square matrix"))
+         |`ComplexMatrix el2 ->
+            let n1, m1 = (Gsl_matrix.dims el1) and
+            n2, m2     = (Gsl_matrix_complex.dims el2) in
+            if n2 = m2 then
+               if m1 = n2 then
+                  let copy_el2 = Gsl_matrix_complex.copy el2 and
+                  perm = Gsl_permut.create m1 and
+                  inv = Gsl_matrix_complex.create m1 m1 in
+                  try
+                     let sign = Gsl_linalg.complex_LU_decomp (`CM
+                        copy_el2) perm in
+                     (Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                        (`CM inv);
+                     let result = Gsl_matrix_complex.create n1 m2 in
+                     Gsl_blas.Complex.gemm Gsl_blas.NoTrans
+                        Gsl_blas.NoTrans Complex.one (cmat_of_fmat el1) inv
+                        Complex.zero result;
+                     stack#push (`ComplexMatrix result))
+                  with Gsl_exn _ -> 
+                     (stack#push gen_el2;
+                     stack#push gen_el1;
+                     raise (Invalid_argument "singular matrix"))
+               else
+                  (stack#push gen_el2;
+                  stack#push gen_el1;
+                  raise (Invalid_argument "incompatible dimensions"))
+            else
+               (stack#push gen_el2;
+               stack#push gen_el1;
+               raise (Invalid_argument "non-square matrix"))
+         )
+      |`ComplexMatrix el1 -> (
+         match gen_el2 with
+         |`Int el2 ->
+            let c_el2 = cmpx_of_int el2 in
+            (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
+            stack#push (`ComplexMatrix el1))
+         |`Float el2 ->
+            let c_el2 = cmpx_of_float el2 in
+            (Gsl_matrix_complex.scale el1 (Complex.inv c_el2);
+            stack#push (`ComplexMatrix el1))
+         |`Complex el2 ->
+            (Gsl_matrix_complex.scale el1 (Complex.inv el2);
+            stack#push (`ComplexMatrix el1))
+         |`FloatMatrix el2 ->
+            let n1, m1 = (Gsl_matrix_complex.dims el1) and
+            n2, m2     = (Gsl_matrix.dims el2) in
+            if n2 = m2 then
+               if m1 = n2 then
+                  let copy_el2 = Gsl_matrix.copy el2 and
+                  perm = Gsl_permut.create m1 and
+                  inv = Gsl_matrix.create m1 m1 in
+                  try
+                     let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
+                     (Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
+                     let result = Gsl_matrix_complex.create n1 m2 in
+                     Gsl_blas.Complex.gemm Gsl_blas.NoTrans
+                        Gsl_blas.NoTrans Complex.one el1 (cmat_of_fmat inv)
+                        Complex.zero result;
+                     stack#push (`ComplexMatrix result))
+                  with Gsl_exn _ -> 
+                     (stack#push gen_el2;
+                     stack#push gen_el1;
+                     raise (Invalid_argument "singular matrix"))
+               else
+                  (stack#push gen_el2;
+                  stack#push gen_el1;
+                  raise (Invalid_argument "incompatible dimensions"))
+            else
+               (stack#push gen_el2;
+               stack#push gen_el1;
+               raise (Invalid_argument "non-square matrix"))
+         |`ComplexMatrix el2 ->
+            let n1, m1 = (Gsl_matrix_complex.dims el1) and
+            n2, m2     = (Gsl_matrix_complex.dims el2) in
+            if n2 = m2 then
+               if m1 = n2 then
+                  (* FIXME: do we need to use Gsl_vectmat.cmat_convert here? *)
+                  let copy_el2 = Gsl_matrix_complex.copy el2 and
+                  perm = Gsl_permut.create m1 and
+                  inv = Gsl_matrix_complex.create m1 m1 in
+                  try
+                     let sign = Gsl_linalg.complex_LU_decomp (`CM
+                        copy_el2) perm in
+                     (Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                        (`CM inv);
+                     let result = Gsl_matrix_complex.create n1 m2 in
+                     Gsl_blas.Complex.gemm Gsl_blas.NoTrans
+                        Gsl_blas.NoTrans Complex.one el1 inv Complex.zero result;
+                     stack#push (`ComplexMatrix result))
+                  with Gsl_exn _ -> 
+                     (stack#push gen_el2;
+                     stack#push gen_el1;
+                     raise (Invalid_argument "singular matrix"))
+               else
+                  (stack#push gen_el2;
+                  stack#push gen_el1;
+                  raise (Invalid_argument "incompatible dimensions"))
+            else
+               (stack#push gen_el2;
+               stack#push gen_el1;
+               raise (Invalid_argument "non-square matrix"))
+         )
+   else
+      raise (Invalid_argument "insufficient arguments")
+(* arch-tag: DO_NOT_CHANGE_c2535853-756a-4574-8f36-1103a81d053b *)

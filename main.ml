@@ -1,0 +1,53 @@
+open Big_int
+
+(* test *)
+let calc = new Rpc_calc.rpc_calc;;
+
+calc#enter_int (big_int_of_string
+"1234567890123456789123456789123456789123456789123456789123456789");;
+calc#enter_int (big_int_of_string "5");;
+calc#enter_cmpx {Complex.re=1.5; Complex.im=2.4};;
+calc#enter_cmpx {Complex.re=(-3.5); Complex.im=1.0};;
+calc#enter_float 12.5;;
+calc#enter_int (big_int_of_string "2");;
+calc#enter_fmat (Gsl_matrix.of_array [|1.0; 2.0; 3.0; 4.0; 5.0; 6.0|] 3 2);;
+calc#enter_fmat (Gsl_matrix.of_array [|7.0; 8.0; 9.0; 10.0; 11.0; 12.0|] 2 3);;
+
+open Complex;;
+calc#enter_cmat (Gsl_matrix_complex.of_array [| {re=1.0; im=1.0}; {re=2.0;
+   im=2.0}; {re=3.0; im=3.0}; {re=4.0; im=4.0}; {re=5.0; im=5.0}; {re=6.0;
+   im=6.0} |] 3 2);;
+calc#enter_cmat (Gsl_matrix_complex.of_array [| {re=2.3; im=3.1}; 
+   {re=0.2; im=4.0}; {re=(-3.0); im=10.0}; {re=(-14.0); im=0.0} |] 2 2);;
+
+calc#print_stack;;
+Printf.printf "\ndividing...\n\n";;
+calc#div;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\ndropping...\n\n";;
+calc#drop;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\nmultiplying...\n\n";;
+calc#mult;;
+calc#print_stack;;
+Printf.printf "\nadding...\n\n";;
+calc#add;;
+calc#print_stack;;
+
+
+(* arch-tag: DO_NOT_CHANGE_eeac13df-e93f-4359-8b70-44fefc40e225 *)
