@@ -949,6 +949,27 @@ Note: No, Celsius and Fahrenheit will not be supported.  Because these
 temperature units do not share a common zero point, their behavior is
 ill-defined under many operations.
 
+
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & ``Amount of Substance'' Unit \\
+      \hline
+      \texttt{mol} & Mole \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+
+
 %@% IF LATEX %@%
 \begin{center}
    \begin{tabular}[t]{|r|l|}
