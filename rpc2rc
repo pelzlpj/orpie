@@ -47,6 +47,7 @@ bind "r" command_toggle_angle_mode
 bind "p" command_toggle_complex_mode
 bind "b" command_cycle_base
 bind "v" command_view
+bind "\\Cl" command_refresh
 bind "Q" command_quit
 
 # keys for "browse" operations, which are active during

@@ -51,7 +51,7 @@ let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
     "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n" ^
-    "bin\noct\ndec\nhex\nview");;
+    "bin\noct\ndec\nhex\nview\nabout\nrefresh");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -97,6 +97,8 @@ Hashtbl.add command_abbrev_table "oct" (Command SetOct);;
 Hashtbl.add command_abbrev_table "dec" (Command SetDec);;
 Hashtbl.add command_abbrev_table "hex" (Command SetHex);;
 Hashtbl.add command_abbrev_table "view" (Command View);;
+Hashtbl.add command_abbrev_table "about" (Command About);;
+Hashtbl.add command_abbrev_table "refresh" (Command Refresh);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -790,6 +792,10 @@ object(self)
             self#draw_update_stack ()
          |View ->
             self#handle_view ()
+         |About ->
+            self#handle_about ()
+         |Refresh ->
+            self#handle_refresh ()
       end
 
 
@@ -1427,6 +1433,58 @@ object(self)
          Sys_error ss -> 
             self#draw_error ss;
             assert (doupdate ())
+
+
+   (* display an "about" screen *)
+   method private handle_about () =
+      erase ();
+      (* draw the box outline *)
+      let horiz_line = String.make scr.cols '*' in
+      let vert_line_piece = String.make scr.cols ' ' in
+      vert_line_piece.[0] <- '*';
+      vert_line_piece.[pred scr.cols] <- '*';
+      assert (mvaddstr 0 0 horiz_line);
+      assert (mvaddstr (scr.lines - 2) 0 horiz_line);
+      for i = 1 to scr.lines - 3 do
+         assert (mvaddstr i 0 vert_line_piece)
+      done;
+      (* draw the text *)
+      let vert_center  = (scr.lines - 2) / 2
+      and horiz_center = scr.cols / 2 in
+      let left_shift = 30 in
+      attron A.bold;
+      assert (mvaddstr (vert_center - 3) (horiz_center - left_shift) 
+      ("rpc2 v" ^ version));
+      attroff A.bold;
+      assert (mvaddstr (vert_center - 2) (horiz_center - left_shift) 
+      "Copyright (C) 2004 Paul Pelzl");
+      assert (mvaddstr (vert_center) (horiz_center - left_shift)
+      "\"Because, frankly, GUI calculator programs are pure evil.");
+      attron A.bold;
+      assert (mvaddstr (vert_center + 1) (horiz_center - left_shift) " rpc2");
+      attroff A.bold;
+      assert (mvaddstr (vert_center + 1) (horiz_center - left_shift + 5)
+      ", on the other hand, is only a little bit evil.\"");
+      assert (mvaddstr (vert_center + 4) (horiz_center - left_shift)
+      "rpc2 comes with ABSOLUTELY NO WARRANTY.  This is free software,");
+      assert (mvaddstr (vert_center + 5) (horiz_center - left_shift)
+      "and you are welcome to redistribute it under certain");
+      assert (mvaddstr (vert_center + 6) (horiz_center - left_shift)
+      "conditions; see 'COPYING' for details.");
+      assert (mvaddstr (scr.lines - 4) (horiz_center - 12)
+      "Press any key to continue.");
+      assert (move (scr.lines - 1) (scr.cols - 2));
+      assert (refresh ());
+      let a = getch () in ();
+      self#handle_refresh ()
+
+
+   (* refresh the screen *)
+   method private handle_refresh () =
+      erase ();
+      self#draw_help ();
+      self#draw_stack ();
+      self#draw_update_entry ()
 
 
    (* begin extended entry *)
