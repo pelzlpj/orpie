@@ -29,7 +29,6 @@
 #   OCAMLVERSION  the ocaml version number
 #   OCAMLWIN32    "yes"/"no" depending on Sys.os_type = "Win32"
 #   EXE           ".exe" if OCAMLWIN32=yes, "" otherwise
-#   OCAMLGSLLIB   the path to the ocaml gsl library
 
 # check for one particular file of the sources 
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
@@ -115,19 +114,6 @@ else
     EXE=
 fi
 
-# gsl libs
-# FIXME: this probably should be a linker test, to make sure it *really* works
-help="  --with-ocaml-gsl-dir=DIR  search for Ocaml GNU Scientific Library bindings in DIR\n[$OCAMLLIB/gsl]"
-AC_ARG_WITH(ocaml-gsl-dir, 
-            AC_HELP_STRING([--with-ocaml-gsl-dir=DIR],
-                           [search for Ocaml GNU Scientific Library bindings in directory DIR]),
-            OCAMLGSLLIB="$withval", OCAMLGSLLIB=$OCAMLLIB/gsl)
-AC_CHECK_FILE($OCAMLGSLLIB/gsl.cma, HASGSL=yes, HASGSL=no)
-if test "$HASGSL" = no ; then
-   AC_MSG_ERROR(Cannot find ocaml-gsl.)
-fi
-
-
 # check for curses
 MP_WITH_CURSES
 if test ! "$CURSES_LIB"; then
@@ -144,14 +130,14 @@ AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
-AC_SUBST(OCAMLGSLLIB)
 AC_SUBST(CURSES_LIB)
 AC_SUBST(DEFS)
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile curses/Makefile)
+AC_OUTPUT(Makefile curses/Makefile gsl/Makefile)
 chmod a-w Makefile
 chmod a-w curses/Makefile
+chmod a-w gsl/Makefile
 
 
 

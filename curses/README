@@ -1,4 +1,4 @@
-rpc2 makes use of the curses bindings provided by the Objective Caml Text Mode
+Orpie makes use of the curses bindings provided by the Objective Caml Text Mode
 Kit (ocaml-tmk).  This code is released under the GNU LGPL; for details, see
 COPYING in the 'curses' subdirectory.
 

@@ -10,8 +10,6 @@ Definitely before release:
    * improve the build script (link directly with relevant portions of
      ocamlgsl-0.3.2, so the user will need only GSL and ncurses)
 
-   * change the name: "Orpie"?
-
 
 * create a parser that can read data structures entered into an ascii file,
   so I can use $EDITOR to enter big matrices (for example)
@@ -22,8 +20,6 @@ Definitely before release:
 * command completion (optionally) matches *only* operations that make sense
   in context.  e.g. sin() doesn't work on matrices, so it is not included in
   the extended entry completion list when the toplevel element is a matrix.
-
-* see if interface can be refactored at all...  rpc_interface.ml is too big
 
 * try to clean up the rcfile syntax a bit, maybe by introducing modes
 

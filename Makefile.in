@@ -31,16 +31,15 @@ OCAMLLIB = @OCAMLLIB@
 OCAMLBEST= @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
 OCAMLWIN32 = @OCAMLWIN32@
-OCAMLGSLLIB = @OCAMLGSLLIB@
 EXE = @EXE@
 
 CURSES_LIB = @CURSES_LIB@
 
-INCLUDES = -I $(OCAMLGSLLIB) -I ./curses
+INCLUDES = -I ./curses -I ./gsl
 BFLAGS = -pp camlp4o -g $(INCLUDES)
 OFLAGS = -pp camlp4o $(INCLUDES)
-BLFLAGS = -custom -cclib $(CURSES_LIB)
-OLFLAGS = -cclib $(CURSES_LIB)
+BLFLAGS = -custom -cclib '$(CURSES_LIB) -lgsl -lgslcblas'
+OLFLAGS = -cclib '$(CURSES_LIB) -lgsl -lgslcblas'
 DEPFLAGS = -pp camlp4o
 
 # main target
@@ -51,6 +50,14 @@ NAME2 = orpie-curses-keys
 
 all: $(OCAMLBEST)
 
+SUBDIRS = curses gsl
+
+.PHONY: subdirs $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@
+
+
 # bytecode and native-code compilation
 ######################################
 
@@ -58,37 +65,43 @@ CMO = big_int_str.cmo utility.cmo rcfile.cmo rpc_stack.cmo add.cmo sub.cmo \
 		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
 		operations.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
-CMA = nums.cma bigarray.cma str.cma gsl.cma unix.cma
+CMA = nums.cma bigarray.cma str.cma unix.cma
 CMXA = $(CMA:.cma=.cmxa)
 
-CURSES_BOBJS = curses/ml_curses.o curses/curses.cmo
-CURSES_OOBJS = curses/ml_curses.o curses/curses.cmx
+CURSES_BOBJS = curses/ml_curses.o curses.cmo
+CURSES_OOBJS = curses/ml_curses.o curses.cmx
+
+GSL_CMO = gsl_error.cmo gsl_blas.cmo gsl_complex.cmo gsl_matrix.cmo gsl_matrix_complex.cmo \
+		gsl_vector.cmo gsl_vector_complex.cmo gsl_vector_flat.cmo gsl_matrix_flat.cmo \
+		gsl_vector_complex_flat.cmo gsl_matrix_complex_flat.cmo gsl_vectmat.cmo \
+		gsl_permut.cmo gsl_linalg.cmo gsl_fun.cmo
+GSL_CMX = $(GSL_CMO:.cmo=.cmx)
+GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o \
+		 gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_vector_double.o gsl/mlgsl_permut.o \
+		 gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o 
+
+GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
+GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
 GENERATED = version.ml
 
 byte: $(NAME).byte $(NAME2).byte
 opt: $(NAME).opt $(NAME2).opt
 
-$(NAME).byte: $(CURSES_BOBJS) $(CMO)
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(CMO)
+$(NAME).byte: $(SUBDIRS) $(CMO)
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
 
-$(NAME2).byte: $(CURSES_BOBJS) curses-keys.ml
+$(NAME2).byte: $(SUBDIRS) curses-keys.ml
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses-keys.ml
 
-$(NAME).opt: $(CURSES_OOBJS) $(CMX)
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(CMX)
+$(NAME).opt: $(SUBDIRS) $(CMX)
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(CMX)
 
-$(NAME2).opt: $(CURSES_OOBJS) curses-keys.ml
-	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA)  curses-keys.ml
-
-$(CURSES_BOBJS):
-	cd curses && $(MAKE) byte
-
-$(CURSES_OOBJS):
-	cd curses && $(MAKE) opt
+$(NAME2).opt: $(SUBDIRS) curses-keys.ml
+	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses-keys.ml
 
 
-VERSION=0.10
+VERSION=1.0
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -220,9 +233,11 @@ clean::
 	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 	cd curses && $(MAKE) clean
+	cd gsl && $(MAKE) clean
 
 dist-clean distclean:: clean
 	cd curses && $(MAKE) distclean
+	cd gsl && $(MAKE) distclean
 	rm -f Makefile config.cache config.log config.status
 
 # depend
