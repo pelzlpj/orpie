@@ -140,7 +140,7 @@ subdirs_opt: $(SUBDIRS)
 	export BUILD_TYPE=opt && $(MAKE) -C $$dir; \
 	done
 
-VERSION=1.1
+VERSION=1.2.0
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
