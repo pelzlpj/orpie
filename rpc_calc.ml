@@ -968,6 +968,9 @@ class rpc_calc =
       method rollup i =
          stack#rollup i
 
+      method delete i = 
+         stack#delete i
+
       method enter_int i =
          stack#push (RpcInt i)
 

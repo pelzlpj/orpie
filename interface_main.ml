@@ -869,6 +869,23 @@ let handle_browse_view (iface : interface_state_t) =
          draw_error iface ss;
          assert (doupdate ())
             
+
+(* drop a particular stack element *)
+let handle_browse_drop1 (iface : interface_state_t) =
+   iface.calc#delete iface.stack_selection;
+   (if iface.stack_selection > iface.calc#get_stack_size () then
+      iface.stack_selection <- iface.calc#get_stack_size ()
+   else
+      ());
+   (if iface.stack_selection < iface.stack_bottom_row then
+      iface.stack_bottom_row <- iface.stack_selection
+   else
+      ());
+   if iface.calc#get_stack_size () < 1 then
+      handle_end_browse iface
+   else
+      draw_update_stack iface
+
    
 (* view the last stack element in fullscreen *)
 let handle_view (iface : interface_state_t) =
@@ -1473,6 +1490,8 @@ let do_main_loop (iface : interface_state_t) =
                         handle_browse_echo iface
                      |ViewEntry ->
                         handle_browse_view iface
+                     |Drop1 ->
+                        handle_browse_drop1 iface
                   end
                |_ ->
                   failwith "Non-Browsing operation found in Browse Hashtbl"

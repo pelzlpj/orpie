@@ -67,12 +67,12 @@ bind "r" browse_rolldown
 bind "R" browse_rollup
 bind "v" browse_view
 bind "<return>" browse_echo
+bind "d" browse_drop
 
 # keys for extended mode operations
 bind "'" extended_exit
 bind "<return>" extended_enter
 bind "<backspace>" extended_backspace
-
 
 # extended command abbreviations
 # these should be given in the desired order of matching precedence
