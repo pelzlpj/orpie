@@ -2,6 +2,28 @@ to do:
    * make sure that all operations leave the original stack elements
      unaltered, so that dup() works properly.
 
+   * seems like rpc_interface.gen_buffer should be a linked list rather
+     than an array.  Using an array has the following disadvantages:
+         - places a limit on maximum array size
+         - wasteful of memory
+         - need to spend time clearing the array every time an item is
+           entered (with linked list, we can just throw away the old
+           list...)
+     If a list is used, then the head has to be the matrix element
+     currently being edited; this is the last item that would be
+     printed, so having it at the head of the list seems problematic.
+     Maybe we can get around this by building up the display string in
+     reverse order, i.e.
+                  3]]
+               2, 3]]
+            1][2, 3]]
+       [[0, 1][2, 3]]
+     If that doesn't work, we'd have to List.rev before creating the
+     display string.  Which, of course, is time-consuming for big lists.
+     (Need a doubly-linked list in the standard library!)
+
+
+
 Potential improvements for rpc2:
 
    * based on GSL rather than ccmath

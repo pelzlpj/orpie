@@ -106,6 +106,7 @@ object(self)
       im_mantissa = ""; im_exponent = ""; im_has_dot = false}
    val mutable current_buffer = 0
    val mutable is_entering_imag = false
+   val mutable matrix_cols = max_matrix_size
                                                
 
    method run () =
@@ -124,6 +125,14 @@ object(self)
          im=6.0} |] 3 2);
       calc#enter_cmat (Gsl_matrix_complex.of_array [| {re=2.3; im=3.1}; 
          {re=0.2; im=4.0}; {re=(-3.0); im=10.0}; {re=(-14.0); im=0.0} |] 2 2);
+
+
+      (* initialize buffers for matrix entry *)
+      for i = 1 to pred max_matrix_size do
+         gen_buffer.(i) <- 
+            {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
+            im_mantissa = ""; im_exponent = ""; im_has_dot = false}
+      done;
       self#draw_stack ();
       self#draw_help ();
       self#draw_entry ();
@@ -153,7 +162,7 @@ object(self)
 
 
 
-   (* display the entry area *)
+   (* display the data that the user is in the process of entering *)
    method draw_entry () =
       assert (mvwaddstr scr.entry_win 0 0 (String.make scr.ew_cols '-'));
       assert (wmove scr.entry_win 1 0);
@@ -212,8 +221,49 @@ object(self)
          else
             let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
             draw_entry_string ("(" ^ re_str ^ ")")
-      |_ ->
-         draw_entry_string ""
+      |FloatMatrixEntry ->
+         let ss = ref "[[" in
+         let matrix_rows = succ (current_buffer / matrix_cols) in
+         begin
+            for el = 0 to pred current_buffer do
+               (if (el mod matrix_cols) = 0 && el > 0 then
+                  ss := !ss ^ "]["
+               else
+                  ());
+               let temp_re = get_float_str false gen_buffer.(el).re_mantissa
+               gen_buffer.(el).re_exponent in
+               ss := !ss ^ temp_re ^ ", "
+            done;
+            let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
+            gen_buffer.(current_buffer).re_exponent in
+            ss := !ss ^ temp_re ^ "]]";
+            draw_entry_string !ss
+         end
+      |ComplexMatrixEntry ->
+         let ss = ref "[[" in
+         let matrix_rows = succ (current_buffer / matrix_cols) in
+         for el = 0 to pred current_buffer do
+            (if (el mod matrix_cols) = 0 && el > 0 then
+               ss := !ss ^ "]["
+            else
+               ());
+            let temp_re = get_float_str false gen_buffer.(el).re_mantissa
+            gen_buffer.(el).re_exponent and
+            temp_im = get_float_str false gen_buffer.(el).im_mantissa
+            gen_buffer.(el).im_exponent in
+            ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), "
+         done;
+         (if is_entering_imag then
+            let temp_re = get_float_str false gen_buffer.(current_buffer).re_mantissa
+            gen_buffer.(current_buffer).re_exponent and
+            temp_im = get_float_str true gen_buffer.(current_buffer).im_mantissa
+            gen_buffer.(current_buffer).im_exponent in
+            ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]]"
+         else
+            let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
+            gen_buffer.(current_buffer).re_exponent in
+            ss := !ss ^ "(" ^ temp_re ^ ")]]");
+         draw_entry_string !ss
 
 
 
@@ -400,11 +450,14 @@ object(self)
          int_base_string <- "";
          is_entering_base <- false;
          is_entering_exponent <- false;
-         gen_buffer <- Array.make max_matrix_size
-            {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
-            im_mantissa = ""; im_exponent = ""; im_has_dot = false};
+         for i = 0 to pred max_matrix_size do
+            gen_buffer.(i) <- 
+               {re_mantissa = ""; re_exponent = ""; re_has_dot = false; 
+               im_mantissa = ""; im_exponent = ""; im_has_dot = false}
+         done;
          current_buffer <- 0;
          is_entering_imag <- false;
+         matrix_cols <- max_matrix_size;
          self#draw_entry ()
       in
       begin
@@ -479,8 +532,29 @@ object(self)
                         self#draw_entry ())
                      else
                         ()
+                  |FloatMatrixEntry ->
+                     if current_buffer < pred max_matrix_size then
+                        (current_buffer <- succ current_buffer;
+                        is_entering_exponent <- false;
+                        (*FIXME: any other items to reset here?*)
+                        self#draw_entry ())
+                     else
+                        ()
+                  |ComplexMatrixEntry ->
+                     if is_entering_imag then
+                        if current_buffer < pred max_matrix_size then
+                           (current_buffer <- succ current_buffer;
+                           is_entering_exponent <- false;
+                           is_entering_imag <- false;
+                           (*FIXME: any other items to reset here?*)
+                           self#draw_entry ())
+                        else
+                           ()
+                     else
+                        (is_entering_imag <- true;
+                        is_entering_exponent <- false;
+                        self#draw_entry ())
                   |_ ->
-                     (* FIXME: matrix types *)
                      ()
                else if key = bindings.scientific_notation then
                   match entry_type with 
@@ -490,15 +564,15 @@ object(self)
                         self#draw_entry ())
                      else
                         ()
-                  |FloatEntry ->
-                     if String.length gen_buffer.(0).re_mantissa > 0 then
+                  |FloatEntry | FloatMatrixEntry ->
+                     if String.length gen_buffer.(current_buffer).re_mantissa > 0 then
                         (is_entering_exponent <- true;
                         self#draw_entry ())
                      else
                         ()
-                  |ComplexEntry ->
+                  |ComplexEntry | ComplexMatrixEntry ->
                      if is_entering_imag then
-                        if String.length gen_buffer.(0).im_mantissa > 0 then
+                        if String.length gen_buffer.(current_buffer).im_mantissa > 0 then
                            (is_entering_exponent <- true;
                            self#draw_entry ())
                         else
@@ -509,8 +583,6 @@ object(self)
                            self#draw_entry ())
                         else
                            ()
-                  |_ ->
-                     ()
                else if key = bindings.neg then
                   if has_entry then
                      match entry_type with
@@ -522,9 +594,9 @@ object(self)
                            |_ -> int_entry_buffer <- "-" ^ int_entry_buffer
                         end;
                         self#draw_entry ())
-                     |FloatEntry ->
+                     |FloatEntry | FloatMatrixEntry ->
                         begin
-                           let buffer = gen_buffer.(0) in
+                           let buffer = gen_buffer.(current_buffer) in
                            if is_entering_exponent then
                               if String.length buffer.re_exponent > 0 then
                                  match buffer.re_exponent.[0] with
@@ -540,9 +612,9 @@ object(self)
                               |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
                         end;
                         self#draw_entry ()
-                     |ComplexEntry ->
+                     |ComplexEntry | ComplexMatrixEntry ->
                         begin
-                           let buffer = gen_buffer.(0) in
+                           let buffer = gen_buffer.(current_buffer) in
                            let mantissa = 
                               if is_entering_imag then
                                  buffer.im_mantissa
@@ -580,8 +652,6 @@ object(self)
                                  ()
                         end;
                         self#draw_entry ()
-                     |_ ->
-                        ()
                   else
                      try calc#neg (); self#draw_stack ()
                      with Invalid_argument error_msg ->
@@ -741,24 +811,19 @@ object(self)
                            with Invalid_argument "char_of_int" ->
                               ()
                      end (* IntEntry *)
-                  |FloatEntry ->
-                     let buffer = gen_buffer.(0) in
+                  |FloatEntry | FloatMatrixEntry ->
+                     let buffer = gen_buffer.(current_buffer) in
                      process_float_digit buffer false
-                  |ComplexEntry ->
+                  |ComplexEntry | ComplexMatrixEntry ->
                      begin
-                        let buffer = gen_buffer.(0) in
+                        let buffer = gen_buffer.(current_buffer) in
                         if is_entering_imag then
                            process_float_digit buffer true
                         else
                            process_float_digit buffer false
                      end
-                  |_ ->
-                     (* handle other entry types *)
-                     ()
             end
       done
-
-
 
 
 end;;
