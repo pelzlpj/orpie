@@ -5,6 +5,8 @@
 set datafile="~/.orpie/calc_state"
 # buffer file used for fullscreen viewing of stack elements
 set buffer="~/.orpie/fullscreen"
+# buffer file used for input of data via an external editor
+set input_buffer="~/.orpie/input"
 # editor used for fullscreen viewing of stack elements
 set editor="vi"
 # whether or not to hide the help panel
@@ -58,6 +60,7 @@ bind "b" command_cycle_base
 bind "v" command_view
 bind "\\Cl" command_refresh
 bind "P" command_enter_pi
+bind "E" command_edit_input
 bind "Q" command_quit
 
 # keys for "browse" operations, which are active during
@@ -136,6 +139,7 @@ abbrev "hex"     command_hex
 abbrev "view"    command_view
 abbrev "refresh" command_refresh
 abbrev "pi"      command_enter_pi
+abbrev "edit"    command_edit_input
 abbrev "add"     function_add
 abbrev "sub"     function_sub
 abbrev "mult"    function_mult

@@ -23,8 +23,10 @@
  *
  * miscellaneous helper functions that don't really fit elsewhere *)
 
-open Curses;;
+open Curses
 
+(* for some reason this is unrecognized if I leave it in txtin_parser.mly *)
+exception Txtin_error of string
 
 (* Word wrap a string to a width of 'cols', placing 'num_spaces' spaces between
  * the words.  Breaks lines on whitespace; if a word is too long, it will be

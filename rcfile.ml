@@ -50,6 +50,8 @@ let table_key_macro    = Hashtbl.create 20;;
 let datafile = ref "~/.orpie/calc_state";;
 (* Default datafile for a fullscreen viewing buffer *)
 let fullscreenfile = ref "~/.orpie/fullscreen";;
+(* Default textfile for editing input *)
+let fullscreen_input = ref "~/.orpie/input"
 (* Default editor for fullscreen viewing *)
 let editor = ref "vi";;
 (* Whether or not to hide the help panel *)
@@ -339,6 +341,7 @@ let operation_of_string command_str =
    |"command_refresh"               -> (Command Refresh)
    |"command_about"                 -> (Command About)
    |"command_enter_pi"              -> (Command EnterPi)
+   |"command_edit_input"            -> (Command EditInput)
    |"browse_end"                    -> (Browse EndBrowse)
    |"browse_scroll_left"            -> (Browse ScrollLeft)
    |"browse_scroll_right"           -> (Browse ScrollRight)
@@ -453,6 +456,19 @@ let parse_line line_stream =
             end
          | [< >] ->
             config_failwith ("Expected \"=\" after \"set buffer\"")
+         end
+      | [< 'Ident "input_buffer" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String file >] ->
+               fullscreen_input := file
+            | [< >] ->
+               config_failwith ("Expected an input filename string after " ^
+               "\"set input_buffer = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set buffer \"")
          end
       | [< 'Ident "editor" >] ->
          begin match line_stream with parser

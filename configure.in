@@ -101,6 +101,22 @@ if test "$OCAMLDEP" = no ; then
 	AC_MSG_ERROR(Cannot find ocamldep.)
 fi
 
+AC_CHECK_PROG(OCAMLLEX,ocamllex,ocamllex,no)
+if test "$OCAMLLEX" = no ; then
+    AC_MSG_ERROR(Cannot find ocamllex.)
+else
+    AC_CHECK_PROG(OCAMLLEXDOTOPT,ocamllex.opt,ocamllex.opt,no)
+    if test "$OCAMLLEXDOTOPT" != no ; then
+   OCAMLLEX=$OCAMLLEXDOTOPT
+    fi
+fi
+
+AC_CHECK_PROG(OCAMLYACC,ocamlyacc,ocamlyacc,no)
+if test "$OCAMLYACC" = no ; then
+   AC_MSG_ERROR(Cannot find ocamlyacc.)
+fi
+
+
 # platform
 AC_MSG_CHECKING(platform)
 if echo "let _ = Sys.os_type" | ocaml | grep -q Win32; then
@@ -138,6 +154,8 @@ GSL_LIB="-lgsl -lgslcblas"
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
 AC_SUBST(OCAMLDEP)
+AC_SUBST(OCAMLLEX)
+AC_SUBST(OCAMLYACC)
 AC_SUBST(OCAMLBEST)
 AC_SUBST(OCAMLVERSION)
 AC_SUBST(OCAMLLIB)

@@ -950,6 +950,49 @@ let handle_refresh (iface : interface_state_t) =
    draw_update_entry iface
 
 
+(* handle a call to edit a new input buffer *)
+let handle_edit_input (iface : interface_state_t) =
+   try
+      let _ = 
+         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreen_input))
+      in ();
+      let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
+      let lexbuf = Lexing.from_channel edited_buf in
+      let data = Txtin_parser.data_list Txtin_lexer.token lexbuf in
+      let rec push_data d =
+         begin match d with
+         |[] -> 
+            ()
+         |hd :: tl -> 
+            iface.calc#push hd;
+            push_data tl
+         end
+      in
+      push_data data;
+      close_in edited_buf;
+      draw_help iface;
+      draw_stack iface;
+      draw_update_entry iface
+   with
+      |Sys_error ss -> 
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+      |Parsing.Parse_error ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface "syntax error in input";
+         draw_update_entry iface)
+      |Utility.Txtin_error ss ->
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
+         draw_update_entry iface)
+
+
+
+
 (* display an "about" screen *)
 let handle_about (iface : interface_state_t) =
    draw_about iface;
@@ -1157,6 +1200,8 @@ let process_command (iface : interface_state_t) cc =
       handle_refresh iface
    |EnterPi ->
       handle_command_call iface iface.calc#enter_pi
+   |EditInput ->
+      handle_edit_input iface
    end
 
 
@@ -1378,6 +1423,7 @@ let handle_resize (iface : interface_state_t) =
    let rows, cols = get_size () in
    resize_subwins iface.scr;
    handle_refresh iface;;
+
 
 
 
