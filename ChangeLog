@@ -3,6 +3,9 @@ Orpie ChangeLog
 
 v1.0
 
+   2004-04-07        Version 1.0.2 release.  Added a manpage for
+                     orpie-curses-keys(1).
+
    2004-04-05        Version 1.0.1 release.  Minor changes to the build
                      script, to assist in package creation (thanks to
                      Uwe Steinmann for the patch).
