@@ -1,8 +1,16 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* support parallel make (maybe use a hand-edited dependency tree to get around
-  the ocamldep issues)
+* test linear-time table lookup algorithm for power-of-two base conversions,
+  and compare to current algorithm
+
+* after all operations that create new data, launch a background thread that traverses
+  the stack and fills in all unknown (i.e. None) strings, then exits
+
+* try to improve general base conversion algorithm (decimal representation is 
+  relatively slow at present)
+
+* add statistical and financial functions
 
 * detect ill-conditioned complex matrices when performing inversion
 
@@ -11,7 +19,7 @@ Orpie To-Do List (roughly in order of priority)
 
 * command completion (optionally) matches *only* operations that make sense
   in context.  e.g. sin() doesn't work on matrices, so it is not included in
-  the extended entry completion list when the toplevel element is a matrix.
+  the extended entry completion list when the toplevel element is a matrix
 
 
 

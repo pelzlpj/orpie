@@ -24,11 +24,11 @@ open Gsl_assist;;
 open Big_int;;
 
 type interruptable_args_t =
-   | Gcd_args of big_int * big_int * orpie_data * orpie_data
-   | Lcm_args of big_int * big_int * big_int * orpie_data * orpie_data
-   | Fact_args of big_int * big_int * orpie_data
+   | Gcd_args of big_int * big_int * orpie_data_t * orpie_data_t
+   | Lcm_args of big_int * big_int * big_int * orpie_data_t * orpie_data_t
+   | Fact_args of big_int * big_int * orpie_data_t
    | Binom_args of big_int * big_int * big_int * 
-                   big_int * orpie_data * orpie_data
+                   big_int * orpie_data_t * orpie_data_t
    | NoArgs;;
 
 let pi = 3.14159265358979323846;;
@@ -1292,7 +1292,7 @@ class rpc_calc =
             let dummy = stack#pop () in ()
          done
 
-      method push (v : orpie_data) =
+      method push (v : orpie_data_t) =
          self#backup ();
          stack#push v
 
