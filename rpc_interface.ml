@@ -51,6 +51,30 @@ let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\n" ^
     "drop\nclear\nswap\ndup\nundo");;
 
+(* abbreviations used in extended entry mode *)
+let command_abbrev_table = Hashtbl.create 30;;
+Hashtbl.add command_abbrev_table "add" (Function Add);;
+Hashtbl.add command_abbrev_table "sub" (Function Sub);;
+Hashtbl.add command_abbrev_table "mult" (Function Mult);;
+Hashtbl.add command_abbrev_table "div" (Function Div);;
+Hashtbl.add command_abbrev_table "neg" (Function Neg);;
+Hashtbl.add command_abbrev_table "inv" (Function Inv);;
+Hashtbl.add command_abbrev_table "pow" (Function Pow);;
+Hashtbl.add command_abbrev_table "sqrt" (Function Sqrt);;
+Hashtbl.add command_abbrev_table "abs" (Function Abs);;
+Hashtbl.add command_abbrev_table "arg" (Function Arg);;
+Hashtbl.add command_abbrev_table "exp" (Function Exp);;
+Hashtbl.add command_abbrev_table "ln" (Function Ln);;
+Hashtbl.add command_abbrev_table "conj" (Function Conj);;
+Hashtbl.add command_abbrev_table "drop" (Command Drop);;
+Hashtbl.add command_abbrev_table "clear" (Command Clear);;
+Hashtbl.add command_abbrev_table "swap" (Command Swap);;
+Hashtbl.add command_abbrev_table "dup" (Command Dup);;
+Hashtbl.add command_abbrev_table "undo" (Command Undo);;
+let translate_extended_abbrev abb =
+   Hashtbl.find command_abbrev_table abb;;
+
+
 let max_matrix_size = 1000;;
 
 class rpc_interface (c : rpc_calc) (std : rpc_interface_screen) =
@@ -72,6 +96,7 @@ object(self)
    val mutable int_base_string = ""           (* one-character representation of the base *)
    val mutable is_entering_exponent = false   (* whether or not the user is entering a scientific notation exponent *)
    val mutable extended_entry_buffer = ""     (* stores characters entered in extended entry mode *)
+   val mutable matched_extended_entry = ""    (* stores the command-completed extended entry *)
 
    (* Holds a list of complex_entry_elements used for float, complex, and matrix
       types.  Each element has string storage (and other bits) that can hold the
@@ -189,16 +214,28 @@ object(self)
       assert (mvwaddstr scr.entry_win 0 0 (String.make scr.ew_cols '-'));
       assert (wmove scr.entry_win 1 0);
       wclrtoeol scr.entry_win;
-      (* safely draw a string into the entry window, with "..." when
-       * truncation occurs *)
-      let draw_entry_string str =
+      (* Safely draw a string into the entry window, with "..." when
+       * truncation occurs.  Highlight the first 'highlight_len'
+       * characters. *)
+      let draw_entry_string str highlight_len =
          let len_str = String.length str in
          begin
             if len_str > scr.ew_cols - 1 then
                let trunc_str = String.sub str (len_str - scr.ew_cols + 5) (scr.ew_cols - 5) in
                assert (mvwaddstr scr.entry_win 1 0 ("... " ^ trunc_str))
             else
-               assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str - 1) str)
+               if highlight_len <= len_str then
+                  begin
+                     (* highlight the first 'highlight_len' characters *)
+                     wattron scr.entry_win WA.bold;
+                     assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str - 1)
+                        (Str.string_before str (highlight_len)));
+                     wattroff scr.entry_win WA.bold;
+                     assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str -
+                        1 + highlight_len) (Str.string_after str (highlight_len)))
+                  end
+               else
+                  assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str - 1) str)
          end;
          assert (wrefresh scr.entry_win)
       in
@@ -220,71 +257,91 @@ object(self)
          else 
             "0"
       in
-      match entry_type with
-      |IntEntry ->
-         if is_entering_base then
-            let s = "# " ^ int_entry_buffer ^ " " ^ int_base_string in
-            draw_entry_string s
-         else
-            let s = "# " ^ int_entry_buffer in
-            draw_entry_string s
-      |FloatEntry ->
-         let mantissa_str = gen_buffer.(0).re_mantissa and
-         exponent_str = gen_buffer.(0).re_exponent in
-         draw_entry_string (get_float_str true mantissa_str exponent_str)
-      |ComplexEntry ->
-         let buffer = gen_buffer.(0) in
-         if is_entering_imag then
-            let temp = get_float_str false buffer.re_mantissa buffer.re_exponent in
-            let re_str = 
-               if String.length temp > 0 then temp
-               else "0"
-            in
-            let im_str = get_float_str true buffer.im_mantissa buffer.im_exponent in
-            draw_entry_string ("(" ^ re_str ^ ", " ^ im_str ^ ")")
-         else
-            let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
-            draw_entry_string ("(" ^ re_str ^ ")")
-      |FloatMatrixEntry ->
-         let ss = ref "[[" in
-         begin
+      (* get a string representation of the data that is in the entry buffer *)
+      let data_string =
+         match entry_type with
+         |IntEntry ->
+            if is_entering_base then
+               "# " ^ int_entry_buffer ^ " " ^ int_base_string
+            else
+               "# " ^ int_entry_buffer
+         |FloatEntry ->
+            let mantissa_str = gen_buffer.(0).re_mantissa and
+            exponent_str = gen_buffer.(0).re_exponent in
+            get_float_str true mantissa_str exponent_str
+         |ComplexEntry ->
+            let buffer = gen_buffer.(0) in
+            if is_entering_imag then
+               let temp = get_float_str false buffer.re_mantissa buffer.re_exponent in
+               let re_str = 
+                  if String.length temp > 0 then temp
+                  else "0"
+               in
+               let im_str = get_float_str true buffer.im_mantissa buffer.im_exponent in
+               "(" ^ re_str ^ ", " ^ im_str ^ ")"
+            else
+               let re_str = get_float_str true buffer.re_mantissa buffer.re_exponent in
+               "(" ^ re_str ^ ")"
+         |FloatMatrixEntry ->
+            let ss = ref "[[" in
+            begin
+               for el = 0 to pred current_buffer do
+                  let temp_re = get_float_str false gen_buffer.(el).re_mantissa
+                  gen_buffer.(el).re_exponent in
+                  (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
+                     ss := !ss ^ temp_re ^ "]["
+                  else
+                     ss := !ss ^ temp_re ^ ", ")
+               done;
+               let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
+               gen_buffer.(current_buffer).re_exponent in
+               ss := !ss ^ temp_re ^ "]]";
+               !ss
+            end
+         |ComplexMatrixEntry ->
+            let ss = ref "[[" in
             for el = 0 to pred current_buffer do
                let temp_re = get_float_str false gen_buffer.(el).re_mantissa
-               gen_buffer.(el).re_exponent in
+               gen_buffer.(el).re_exponent and
+               temp_im = get_float_str false gen_buffer.(el).im_mantissa
+               gen_buffer.(el).im_exponent in
                (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
-                  ss := !ss ^ temp_re ^ "]["
+                  ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]["
                else
-                  ss := !ss ^ temp_re ^ ", ")
+                  ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), ")
             done;
-            let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
-            gen_buffer.(current_buffer).re_exponent in
-            ss := !ss ^ temp_re ^ "]]";
-            draw_entry_string !ss
-         end
-      |ComplexMatrixEntry ->
-         let ss = ref "[[" in
-         for el = 0 to pred current_buffer do
-            let temp_re = get_float_str false gen_buffer.(el).re_mantissa
-            gen_buffer.(el).re_exponent and
-            temp_im = get_float_str false gen_buffer.(el).im_mantissa
-            gen_buffer.(el).im_exponent in
-            (if has_multiple_rows && ((succ el) mod matrix_cols) = 0 then
-               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]["
+            (if is_entering_imag then
+               let temp_re = get_float_str false gen_buffer.(current_buffer).re_mantissa
+               gen_buffer.(current_buffer).re_exponent and
+               temp_im = get_float_str true gen_buffer.(current_buffer).im_mantissa
+               gen_buffer.(current_buffer).im_exponent in
+               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]]"
             else
-               ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ "), ")
-         done;
-         (if is_entering_imag then
-            let temp_re = get_float_str false gen_buffer.(current_buffer).re_mantissa
-            gen_buffer.(current_buffer).re_exponent and
-            temp_im = get_float_str true gen_buffer.(current_buffer).im_mantissa
-            gen_buffer.(current_buffer).im_exponent in
-            ss := !ss ^ "(" ^ temp_re ^ ", " ^ temp_im ^ ")]]"
+               let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
+               gen_buffer.(current_buffer).re_exponent in
+               ss := !ss ^ "(" ^ temp_re ^ ")]]");
+            !ss
+      in
+      match interface_mode with
+      |StandardEntryMode ->
+         draw_entry_string data_string 0
+      |ExtendedEntryMode ->
+         let highlight_len = String.length extended_entry_buffer in
+         if highlight_len = 0 then
+            draw_entry_string "<enter extended command>" 0
          else
-            let temp_re = get_float_str true gen_buffer.(current_buffer).re_mantissa
-            gen_buffer.(current_buffer).re_exponent in
-            ss := !ss ^ "(" ^ temp_re ^ ")]]");
-         draw_entry_string !ss
-
+            let is_function =
+               match (translate_extended_abbrev matched_extended_entry) with
+               |Function ff -> true
+               |_ -> false
+            in
+            if is_function then
+               draw_entry_string (matched_extended_entry ^ 
+               "( )") highlight_len
+            else
+               draw_entry_string matched_extended_entry highlight_len
+      |BrowsingMode ->
+         ()
 
 
    (* display the help window *)
@@ -526,6 +583,57 @@ object(self)
       post_entry_cleanup ()
 
 
+   method private process_function ff =
+      begin
+         match ff with
+         |Add ->
+            self#handle_function_call calc#add
+         |Sub ->
+            self#handle_function_call calc#sub
+         |Mult ->
+            self#handle_function_call calc#mult
+         |Div ->
+            self#handle_function_call calc#div
+         |Neg ->
+            self#handle_function_call calc#neg
+         |Inv ->
+            self#handle_function_call calc#inv
+         |Pow ->
+            self#handle_function_call calc#pow
+         |Sqrt ->
+            self#handle_function_call calc#sqrt
+         |Abs ->
+            self#handle_function_call calc#abs
+         |Arg ->
+            self#handle_function_call calc#arg
+         |Exp ->
+            self#handle_function_call calc#exp
+         |Ln ->
+            self#handle_function_call calc#ln
+         |Conj ->
+            self#handle_function_call calc#conj
+      end
+
+
+   method private process_command cc =
+      begin
+         match cc with
+         |Drop ->
+            self#handle_command_call calc#drop
+         |Clear ->
+            self#handle_command_call calc#clear
+         |Swap ->
+            self#handle_command_call calc#swap
+         |Dup ->
+            self#handle_command_call calc#dup
+         |Undo ->
+            self#handle_command_call calc#undo
+         |BeginBrowse ->
+            self#handle_begin_browse ()
+         |BeginExtended ->
+            self#handle_begin_extended ()
+      end
+
 
    method do_main_loop () =
       while true do
@@ -567,35 +675,7 @@ object(self)
                   let function_op = Rcfile.function_of_key key in
                   match function_op with
                   |Function ff ->
-                     begin
-                        match ff with
-                        |Add ->
-                           self#handle_function_call calc#add
-                        |Sub ->
-                           self#handle_function_call calc#sub
-                        |Mult ->
-                           self#handle_function_call calc#mult
-                        |Div ->
-                           self#handle_function_call calc#div
-                        |Neg ->
-                           self#handle_function_call calc#neg
-                        |Inv ->
-                           self#handle_function_call calc#inv
-                        |Pow ->
-                           self#handle_function_call calc#pow
-                        |Sqrt ->
-                           self#handle_function_call calc#sqrt
-                        |Abs ->
-                           self#handle_function_call calc#abs
-                        |Arg ->
-                           self#handle_function_call calc#arg
-                        |Exp ->
-                           self#handle_function_call calc#exp
-                        |Ln ->
-                           self#handle_function_call calc#ln
-                        |Conj ->
-                           self#handle_function_call calc#conj
-                     end
+                     self#process_function ff
                   |_ ->
                      failwith "Non-Function operation found in Function Hashtbl"
                with Not_found ->
@@ -608,23 +688,7 @@ object(self)
                         let command_op = Rcfile.command_of_key key in
                         match command_op with
                         |Command cc ->
-                           begin
-                              match cc with
-                              |Drop ->
-                                 self#handle_command_call calc#drop
-                              |Clear ->
-                                 self#handle_command_call calc#clear
-                              |Swap ->
-                                 self#handle_command_call calc#swap
-                              |Dup ->
-                                 self#handle_command_call calc#dup
-                              |Undo ->
-                                 self#handle_command_call calc#undo
-                              |BeginBrowse ->
-                                 self#handle_begin_browse ()
-                              |BeginExtended ->
-                                 self#handle_begin_extended ()
-                           end
+                           self#process_command cc
                         |_ ->
                            failwith "Non-Command operation found in Command Hashtbl"
                      with Not_found ->
@@ -1142,7 +1206,8 @@ object(self)
    method private handle_begin_extended () =
       if interface_mode != ExtendedEntryMode then
          (interface_mode <- ExtendedEntryMode;
-         help_mode <- Extended)
+         help_mode <- Extended;
+         self#draw_entry ())
          (* do other cleanup stuff *)
       else
          ()
@@ -1152,7 +1217,10 @@ object(self)
    method private handle_exit_extended () =
       if interface_mode = ExtendedEntryMode then
          (interface_mode <- StandardEntryMode;
-         help_mode <- Standard)
+         help_mode <- Standard;
+         extended_entry_buffer <- "";
+         matched_extended_entry <- "";
+         self#draw_entry ())
       else
          ()
 
@@ -1162,17 +1230,45 @@ object(self)
       (* FIXME: obviously this needs stuff added *)
       if interface_mode = ExtendedEntryMode then
          (interface_mode <- StandardEntryMode;
-         help_mode <- Standard)
+         help_mode <- Standard;
+         (try
+            self#match_extended_buffer extended_entry_buffer;
+            match (translate_extended_abbrev matched_extended_entry) with
+            |Function ff -> self#process_function ff
+            |Command cc  -> self#process_command cc
+            |_ -> failwith 
+               "found extended command that is neither Function nor Command"
+         with
+            Not_found -> ());
+         extended_entry_buffer <- "";
+         matched_extended_entry <- "";
+         self#draw_entry ())
       else
          ()
+
+
+   (* search through the list of commands for the first one that matches
+    * extended_entry_buffer *)
+   method private match_extended_buffer buf =
+      let regex_str = "^" ^ buf ^ ".*$" in
+      let regex = Str.regexp regex_str in
+      let dummy = Str.search_forward regex extended_commands 0 in
+      let matched_command = Str.matched_string extended_commands in
+      matched_extended_entry <- matched_command;
 
 
    (* backspace during extended entry *)
    method private handle_extended_backspace () =
       let len = String.length extended_entry_buffer in
       if len > 0 then
-         extended_entry_buffer <- Str.string_before extended_entry_buffer (pred
-         len)
+         (extended_entry_buffer <- Str.string_before extended_entry_buffer 
+         (pred len);
+         self#match_extended_buffer extended_entry_buffer;
+         (if len = 1 then
+            matched_extended_entry <- ""
+         else
+            ());
+         self#draw_entry ())
       else
          ()
 
@@ -1183,13 +1279,10 @@ object(self)
       let test_buffer = extended_entry_buffer ^ (String.make 1 ch) in
       (* search through the list of commands for the first one that matches
        * extended_entry_buffer *)
-      let regex_str = "^" ^ test_buffer ^ ".*$" in
-      let regex = Str.regexp regex_str in
       try
-         let dummy = Str.search_forward regex extended_commands 0 in
-         let matched_command = Str.matched_string extended_commands in
-         self#draw_error ("caught extended command: " ^ matched_command);
-         extended_entry_buffer <- test_buffer
+         self#match_extended_buffer test_buffer;
+         extended_entry_buffer <- test_buffer;
+         self#draw_entry ()
       with
          Not_found -> let err = beep () in ()
       
