@@ -186,6 +186,83 @@ let register_binding key_string op =
 
 
 
+(* translate a command string to the command type it represents *)
+let operation_of_string command_str =
+   begin match command_str with
+   |"function_add"                  -> (Function Add)
+   |"function_sub"                  -> (Function Sub)
+   |"function_mult"                 -> (Function Mult)
+   |"function_div"                  -> (Function Div)
+   |"function_neg"                  -> (Function Neg)
+   |"function_inv"                  -> (Function Inv)
+   |"function_pow"                  -> (Function Pow)
+   |"function_sq"                   -> (Function Sq)
+   |"function_sqrt"                 -> (Function Sqrt)
+   |"function_abs"                  -> (Function Abs)
+   |"function_arg"                  -> (Function Arg)
+   |"function_exp"                  -> (Function Exp)
+   |"function_ln"                   -> (Function Ln)
+   |"function_10^x"                 -> (Function Ten_x)
+   |"function_log10"                -> (Function Log10)
+   |"function_conj"                 -> (Function Conj)
+   |"function_sin"                  -> (Function Sin)
+   |"function_cos"                  -> (Function Cos)
+   |"function_tan"                  -> (Function Tan)
+   |"function_asin"                 -> (Function Asin)
+   |"function_acos"                 -> (Function Acos)
+   |"function_atan"                 -> (Function Atan)
+   |"function_sinh"                 -> (Function Sinh)
+   |"function_cosh"                 -> (Function Cosh)
+   |"function_tanh"                 -> (Function Tanh)
+   |"function_re"                   -> (Function Re)
+   |"function_im"                   -> (Function Im)
+   |"edit_integer"                  -> (Edit BeginInteger)
+   |"edit_complex"                  -> (Edit BeginComplex)
+   |"edit_matrix"                   -> (Edit BeginMatrix)
+   |"edit_separator"                -> (Edit Separator)
+   |"edit_angle"                    -> (Edit Angle)
+   |"edit_minus"                    -> (Edit Minus)
+   |"edit_backspace"                -> (Edit Backspace)
+   |"edit_enter"                    -> (Edit Enter)
+   |"edit_scientific_notation_base" -> (Edit SciNotBase)
+   |"command_drop"                  -> (Command Drop)
+   |"command_clear"                 -> (Command Clear)
+   |"command_swap"                  -> (Command Swap)
+   |"command_dup"                   -> (Command Dup)
+   |"command_undo"                  -> (Command Undo)
+   |"command_begin_browsing"        -> (Command BeginBrowse)
+   |"command_begin_extended"        -> (Command BeginExtended)
+   |"command_quit"                  -> (Command Quit)
+   |"command_rad"                   -> (Command SetRadians)
+   |"command_deg"                   -> (Command SetDegrees)
+   |"command_rect"                  -> (Command SetRect)
+   |"command_polar"                 -> (Command SetPolar)
+   |"command_bin"                   -> (Command SetBin)
+   |"command_oct"                   -> (Command SetOct)
+   |"command_dec"                   -> (Command SetDec)
+   |"command_hex"                   -> (Command SetHex)
+   |"command_toggle_angle_mode"     -> (Command ToggleAngleMode)
+   |"command_toggle_complex_mode"   -> (Command ToggleComplexMode)
+   |"command_cycle_base"            -> (Command CycleBase)
+   |"command_view"                  -> (Command View)
+   |"command_refresh"               -> (Command Refresh)
+   |"command_enter_pi"              -> (Command EnterPi)
+   |"browse_end"                    -> (Browse EndBrowse)
+   |"browse_scroll_left"            -> (Browse ScrollLeft)
+   |"browse_scroll_right"           -> (Browse ScrollRight)
+   |"browse_prev_line"              -> (Browse PrevLine)
+   |"browse_next_line"              -> (Browse NextLine)
+   |"browse_echo"                   -> (Browse Echo)
+   |"browse_rolldown"               -> (Browse RollDown)
+   |"browse_rollup"                 -> (Browse RollUp)
+   |"browse_view"                   -> (Browse ViewEntry)
+   |"extended_exit"                 -> (Extend ExitExtended)
+   |"extended_enter"                -> (Extend EnterExtended)
+   |"extended_backspace"            -> (Extend ExtBackspace)
+   |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
+   end
+
+
 
 (* Parse a line from an Orpie configuration file.  This operates on a stream
  * corresponding to a non-empty line from the file.  It will match commands
@@ -199,249 +276,106 @@ let register_binding key_string op =
 let parse_line line_stream = 
    match line_stream with parser
    | [< 'Kwd "bind" >] -> 
-      begin 
-         let bind_key key = 
-            begin
-               match line_stream with parser
-               | [< 'Ident command >] ->
-                  begin
-                     match command with
-                        |"function_add" ->
-                           register_binding key (Function Add)
-                        |"function_sub" ->
-                           register_binding key (Function Sub)
-                        |"function_mult" ->
-                           register_binding key (Function Mult)
-                        |"function_div" ->
-                           register_binding key (Function Div)
-                        |"function_neg" ->
-                           register_binding key (Function Neg)
-                        |"function_inv" ->
-                           register_binding key (Function Inv)
-                        |"function_pow" ->
-                           register_binding key (Function Pow)
-                        |"function_sq" ->
-                           register_binding key (Function Sq)
-                        |"function_sqrt" ->
-                           register_binding key (Function Sqrt)
-                        |"function_abs" ->
-                           register_binding key (Function Abs)
-                        |"function_arg" ->
-                           register_binding key (Function Arg)
-                        |"function_exp" ->
-                           register_binding key (Function Exp)
-                        |"function_ln" ->
-                           register_binding key (Function Ln)
-                        |"function_10^x" ->
-                           register_binding key (Function Ten_x)
-                        |"function_log10" ->
-                           register_binding key (Function Log10)
-                        |"function_conj" ->
-                           register_binding key (Function Conj)
-                        |"function_sin" ->
-                           register_binding key (Function Sin)
-                        |"function_cos" ->
-                           register_binding key (Function Cos)
-                        |"function_tan" ->
-                           register_binding key (Function Tan)
-                        |"function_asin" ->
-                           register_binding key (Function Asin)
-                        |"function_acos" ->
-                           register_binding key (Function Acos)
-                        |"function_atan" ->
-                           register_binding key (Function Atan)
-                        |"function_sinh" ->
-                           register_binding key (Function Sinh)
-                        |"function_cosh" ->
-                           register_binding key (Function Cosh)
-                        |"function_tanh" ->
-                           register_binding key (Function Tanh)
-                        |"function_re" ->
-                           register_binding key (Function Re)
-                        |"function_im" ->
-                           register_binding key (Function Im)
-                        |"edit_integer" ->
-                           register_binding key (Edit BeginInteger)
-                        |"edit_complex" ->
-                           register_binding key (Edit BeginComplex)
-                        |"edit_matrix" ->
-                           register_binding key (Edit BeginMatrix)
-                        |"edit_separator" ->
-                           register_binding key (Edit Separator)
-                        |"edit_angle" ->
-                           register_binding key (Edit Angle)
-                        |"edit_minus" ->
-                           register_binding key (Edit Minus)
-                        |"edit_backspace" ->
-                           register_binding key (Edit Backspace)
-                        |"edit_enter" ->
-                           register_binding key (Edit Enter)
-                        |"edit_scientific_notation_base" ->
-                           register_binding key (Edit SciNotBase)
-                        |"command_drop" ->
-                           register_binding key (Command Drop)
-                        |"command_clear" ->
-                           register_binding key (Command Clear)
-                        |"command_swap" ->
-                           register_binding key (Command Swap)
-                        |"command_dup" ->
-                           register_binding key (Command Dup)
-                        |"command_undo" ->
-                           register_binding key (Command Undo)
-                        |"command_begin_browsing" ->
-                           register_binding key (Command BeginBrowse)
-                        |"command_begin_extended" ->
-                           register_binding key (Command BeginExtended)
-                        |"command_quit" ->
-                           register_binding key (Command Quit)
-                        |"command_rad" ->
-                           register_binding key (Command SetRadians)
-                        |"command_deg" ->
-                           register_binding key (Command SetDegrees)
-                        |"command_rect" ->
-                           register_binding key (Command SetRect)
-                        |"command_polar" ->
-                           register_binding key (Command SetPolar)
-                        |"command_bin" ->
-                           register_binding key (Command SetBin)
-                        |"command_oct" ->
-                           register_binding key (Command SetOct)
-                        |"command_dec" ->
-                           register_binding key (Command SetDec)
-                        |"command_hex" ->
-                           register_binding key (Command SetHex)
-                        |"command_toggle_angle_mode" ->
-                           register_binding key (Command ToggleAngleMode)
-                        |"command_toggle_complex_mode" ->
-                           register_binding key (Command ToggleComplexMode)
-                        |"command_cycle_base" ->
-                           register_binding key (Command CycleBase)
-                        |"command_view" ->
-                           register_binding key (Command View)
-                        |"command_refresh" ->
-                           register_binding key (Command Refresh)
-                        |"command_enter_pi" ->
-                           register_binding key (Command EnterPi)
-                        |"browse_end" ->
-                           register_binding key (Browse EndBrowse)
-                        |"browse_scroll_left" ->
-                           register_binding key (Browse ScrollLeft)
-                        |"browse_scroll_right" ->
-                           register_binding key (Browse ScrollRight)
-                        |"browse_prev_line" ->
-                           register_binding key (Browse PrevLine)
-                        |"browse_next_line" ->
-                           register_binding key (Browse NextLine)
-                        |"browse_echo" ->
-                           register_binding key (Browse Echo)
-                        |"browse_rolldown" ->
-                           register_binding key (Browse RollDown)
-                        |"browse_rollup" ->
-                           register_binding key (Browse RollUp)
-                        |"browse_view" ->
-                           register_binding key (Browse ViewEntry)
-                        |"extended_exit" ->
-                           register_binding key (Extend ExitExtended)
-                        |"extended_enter" ->
-                           register_binding key (Extend EnterExtended)
-                        |"extended_backspace" ->
-                           register_binding key (Extend ExtBackspace)
-                        |_ ->
-                           config_failwith ("Unknown command name \"" ^ command ^ "\"")
-                  end
-               | [< >] ->
-                  config_failwith ("Expected a command name after \"bind \"" ^ key ^ "\"")
-            end
-         in
-         match line_stream with parser
-         | [< 'String k >] -> 
-            bind_key k
-         | [< 'Ident "\\" >] ->
-            begin
-               match line_stream with parser
-               | [< 'Int octal_int >] ->
-                  begin
-                     try
-                        let octal_digits = "0o" ^ (string_of_int octal_int) in
-                        bind_key octal_digits 
-                     with 
-                        (Failure "int_of_string") -> config_failwith "Expected octal digits after \"\\\""
-                  end
-               | [< >]  ->
-                  config_failwith "Expected octal digits after \"\\\""
-            end
+      let bind_key key = 
+         begin match line_stream with parser
+         | [< 'Ident command_str >] ->
+            let command = operation_of_string command_str in
+            register_binding key command
          | [< >] ->
-            config_failwith "Expected a key string after keyword \"bind\""
+            config_failwith ("Expected a command name after \"bind \"" ^ key ^ "\"")
+         end
+      in
+      begin match line_stream with parser
+      | [< 'String k >] -> 
+         bind_key k
+      | [< 'Ident "\\" >] ->
+         begin match line_stream with parser
+         | [< 'Int octal_int >] ->
+            begin
+               try
+                  let octal_digits = "0o" ^ (string_of_int octal_int) in
+                  bind_key octal_digits 
+               with 
+                  (Failure "int_of_string") -> config_failwith "Expected octal digits after \"\\\""
+            end
+         | [< >]  ->
+            config_failwith "Expected octal digits after \"\\\""
+         end
+      | [< >] ->
+         config_failwith "Expected a key string after keyword \"bind\""
       end
    | [< 'Kwd "macro" >] ->
-      begin
-         match line_stream with parser
-         | [< 'String key >] ->
-            begin
-               match line_stream with parser
-               | [< 'String generated_keys >] ->
-                  (Printf.fprintf stderr "registering macro \"%s\" -> \"%s\"\n"
-                  key generated_keys;
-                  flush stderr)
-               | [< >] ->
-                  config_failwith ("Expected a key string after \"macro \"" ^ key ^ "\"")
-            end
+      begin match line_stream with parser
+      | [< 'String key >] ->
+         begin match line_stream with parser
+         | [< 'String generated_keys >] ->
+            (Printf.fprintf stderr "registering macro \"%s\" -> \"%s\"\n"
+            key generated_keys;
+            flush stderr)
          | [< >] ->
-            config_failwith "Expected a key string after keyword \"macro\""
+            config_failwith ("Expected a key string after \"macro \"" ^ key ^ "\"")
+         end
+      | [< >] ->
+         config_failwith "Expected a key string after keyword \"macro\""
+      end
+   | [< 'Kwd "abbrev" >] ->
+      begin match line_stream with parser
+      | [< 'String abbr >] ->
+         begin match line_stream with parser
+         | [< 'Ident command_str >] ->
+            let command = operation_of_string command_str in
+            (* register_abbrev abbr command *)
+            ()
+         | [< >] ->
+            config_failwith ("Expected a command name after \"abbrev \"" ^ abbr ^ "\"")
+         end
       end
    | [< 'Kwd "set" >] ->
-      begin
-         match line_stream with parser
-         | [< 'Ident "datafile" >] ->
-            begin
-               match line_stream with parser
-               | [< 'Ident "=" >] ->
-                  begin
-                     match line_stream with parser
-                     | [< 'String file >] ->
-                        ( (* Printf.fprintf stderr "using datafile \"%s\"\n" file; *)
-                        datafile := file)
-                     | [< >] ->
-                        config_failwith ("Expected a datafile string after " ^
-                        "\"set datafile = \"")
-                  end
-               | [< >] ->
-                  config_failwith ("Expected \"=\" after \"set datafile\"")
-            end
-         | [< 'Ident "buffer" >] ->
-            begin
-               match line_stream with parser
-               | [< 'Ident "=" >] ->
-                  begin
-                     match line_stream with parser
-                     | [< 'String file >] ->
-                        ( (* Printf.fprintf stderr "using bufferfile \"%s\"\n" file; *)
-                        fullscreenfile := file)
-                     | [< >] ->
-                        config_failwith ("Expected a buffer file string after " ^
-                        "\"set buffer = \"")
-                  end
-               | [< >] ->
-                  config_failwith ("Expected \"=\" after \"set buffer\"")
-            end
-         | [< 'Ident "editor" >] ->
-            begin
-               match line_stream with parser
-               | [< 'Ident "=" >] ->
-                  begin
-                     match line_stream with parser
-                     | [< 'String executable >] ->
-                        ( (* Printf.fprintf stderr "using editor \"%s\"\n" executable; *)
-                        editor := executable)
-                     | [< >] ->
-                        config_failwith ("Expected an executable filename string after " ^
-                        "\"set editor = \"")
-                  end
-               | [< >] ->
-                  config_failwith ("Expected \"=\" after \"set editor\"")
+      begin match line_stream with parser
+      | [< 'Ident "datafile" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String file >] ->
+               ( (* Printf.fprintf stderr "using datafile \"%s\"\n" file; *)
+               datafile := file)
+            | [< >] ->
+               config_failwith ("Expected a datafile string after " ^
+               "\"set datafile = \"")
             end
          | [< >] ->
-            config_failwith ("Unmatched variable name after \"set\"")
+            config_failwith ("Expected \"=\" after \"set datafile\"")
+         end
+      | [< 'Ident "buffer" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String file >] ->
+               ( (* Printf.fprintf stderr "using bufferfile \"%s\"\n" file; *)
+               fullscreenfile := file)
+            | [< >] ->
+               config_failwith ("Expected a buffer file string after " ^
+               "\"set buffer = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set buffer\"")
+         end
+      | [< 'Ident "editor" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String executable >] ->
+               ( (* Printf.fprintf stderr "using editor \"%s\"\n" executable; *)
+               editor := executable)
+            | [< >] ->
+               config_failwith ("Expected an executable filename string after " ^
+               "\"set editor = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set editor\"")
+         end
+      | [< >] ->
+         config_failwith ("Unmatched variable name after \"set\"")
       end
    | [< 'Kwd "#" >] ->
       ()
@@ -469,7 +403,7 @@ let open_rcfile () =
 
 let process_rcfile () =
    let line_lexer line = 
-      make_lexer ["bind"; "macro"; "set"; "#"] (Stream.of_string line)
+      make_lexer ["bind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
    let config_stream = open_rcfile () in
