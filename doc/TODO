@@ -1,10 +1,14 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* add additional statistical functions (multivariate, distributions, ...)
+
+* add finance functions
+
+* unit conversions (maybe)
+
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
-
-* add statistical and financial functions
 
 * detect ill-conditioned complex matrices when performing inversion
 
