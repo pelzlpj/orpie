@@ -570,6 +570,64 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* real part of complex (or complex matrix) *)
+      method re () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push gen_el
+               |RpcFloat el ->
+                  stack#push gen_el
+               |RpcComplex el ->
+                  stack#push (RpcFloat el.Complex.re)
+               |RpcFloatMatrix el ->
+                  stack#push gen_el
+               |RpcComplexMatrix el ->
+                  let n, m = Gsl_matrix_complex.dims el
+                  and carr = Gsl_matrix_complex.to_array el in
+                  let farr = Array.make (n * m) 0.0 in
+                  for i = 0 to pred (n * m) do
+                     farr.(i) <- carr.(i).Complex.re
+                  done;
+                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      (* imaginary part of complex (or complex matrix) *)
+      method im () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcInt zero_big_int)
+               |RpcFloat el ->
+                  stack#push (RpcFloat 0.0)
+               |RpcComplex el ->
+                  stack#push (RpcFloat el.Complex.im)
+               |RpcFloatMatrix el ->
+                  let n, m = Gsl_matrix.dims el in
+                  let farr = Array.make (n * m) 0.0 in
+                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+               |RpcComplexMatrix el ->
+                  let n, m = Gsl_matrix_complex.dims el
+                  and carr = Gsl_matrix_complex.to_array el in
+                  let farr = Array.make (n * m) 0.0 in
+                  for i = 0 to pred (n * m) do
+                     farr.(i) <- carr.(i).Complex.im
+                  done;
+                  stack#push (RpcFloatMatrix (Gsl_matrix.of_array farr n m))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
       method get_display_line line_num =
          stack#get_display_line line_num modes
 

@@ -50,7 +50,7 @@ type complex_entry_element =
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
     "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
-    "drop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n");;
+    "re\nim\ndrop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg\nrect\npolar\n");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -79,6 +79,8 @@ Hashtbl.add command_abbrev_table "tanh" (Function Tanh);;
 Hashtbl.add command_abbrev_table "asin" (Function Asin);;
 Hashtbl.add command_abbrev_table "acos" (Function Acos);;
 Hashtbl.add command_abbrev_table "atan" (Function Atan);;
+Hashtbl.add command_abbrev_table "re" (Function Re);;
+Hashtbl.add command_abbrev_table "im" (Function Im);;
 Hashtbl.add command_abbrev_table "drop" (Command Drop);;
 Hashtbl.add command_abbrev_table "clear" (Command Clear);;
 Hashtbl.add command_abbrev_table "swap" (Command Swap);;
@@ -657,6 +659,10 @@ object(self)
             self#handle_function_call calc#acos
          |Atan ->
             self#handle_function_call calc#atan
+         |Re ->
+            self#handle_function_call calc#re
+         |Im ->
+            self#handle_function_call calc#im
       end
 
 

@@ -224,6 +224,10 @@ let parse_line line_stream =
                            register_binding key (Function Cosh)
                         |"function_tanh" ->
                            register_binding key (Function Tanh)
+                        |"function_re" ->
+                           register_binding key (Function Re)
+                        |"function_im" ->
+                           register_binding key (Function Im)
                         |"edit_integer" ->
                            register_binding key (Edit BeginInteger)
                         |"edit_complex" ->
