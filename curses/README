@@ -1,9 +1,0 @@
-Orpie makes use of the curses bindings provided by the Objective Caml Text Mode
-Kit (ocaml-tmk).  This code is released under the GNU LGPL; for details, see
-COPYING in the 'curses' subdirectory.
-
-The ocaml-tmk project may be found at http://www.nongnu.org/ocaml-tmk/ .
-
-
-
-# arch-tag: DO_NOT_CHANGE_cedb4af0-0885-493c-8ee9-5ff62b5e4c89 
