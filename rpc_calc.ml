@@ -49,7 +49,7 @@ class rpc_calc =
 
       method neg =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
                stack#push (RpcInt (minus_big_int el))
@@ -68,7 +68,7 @@ class rpc_calc =
 
       method sqrt =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcFloat el ->
                stack#push (RpcFloat (sqrt el))
@@ -82,7 +82,7 @@ class rpc_calc =
 
       method abs =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
                stack#push (RpcInt (abs_big_int el))
@@ -98,7 +98,7 @@ class rpc_calc =
 
       method arg =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcComplex el ->
                stack#push (RpcFloat (Complex.arg el))
@@ -111,7 +111,7 @@ class rpc_calc =
 
       method exp =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
                stack#push (RpcFloat (exp (float_of_big_int el)))
@@ -128,7 +128,7 @@ class rpc_calc =
 
       method ln =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
                stack#push (RpcFloat (log (float_of_big_int el)))
@@ -145,7 +145,7 @@ class rpc_calc =
 
       method conj =
          if stack#length > 0 then
-            let gen_el = stack#pop in
+            let gen_el = stack#pop () in
             match gen_el with
             |RpcInt el ->
                stack#push (RpcInt el)
@@ -164,7 +164,10 @@ class rpc_calc =
                stack#push (RpcComplexMatrix conj_mat)
 
 
-      method drop = stack#pop
+      method get_display_line line_num =
+         stack#get_display_line line_num modes
+
+      method drop = stack#pop ()
 
       method enter_int i =
          stack#push (RpcInt i)

@@ -71,7 +71,7 @@ class rpc_stack =
             len <- len + 1)
          end
 
-      method pop =
+      method pop () =
          (* compact stack memory by size_inc whenever we have 2 * size_inc
           * elements free *)
          begin
@@ -95,67 +95,70 @@ class rpc_stack =
        * The top stack element (stack.(len-1)) is defined to be element 
        * number 1. *)
       method get_display_line line_num calc_modes =
-         if line_num > 0 && line_num <= len then
-            (* this is the actual index into the array *)
-            let index = len - line_num and
-            make_string gen_el =
-               begin
-                  match gen_el with
-                  |RpcInt el -> 
-                     begin
-                        match calc_modes.base with
-                        |Bin ->
-                           let s = string_of_big_int_base el 2 in
-                           "# " ^ s ^ " b"
-                        |Oct ->
-                           let s = string_of_big_int_base el 8 in
-                           "# " ^ s ^ " o"
-                        |Hex ->
-                           let s = string_of_big_int_base el 16 in
-                           "# " ^ s ^ " h"
-                        |Dec ->
-                           let s = string_of_big_int el in
-                           "# " ^ s ^ " d"
-                     end
-                  |RpcFloat el ->
-                     sprintf "%g" el
-                  |RpcComplex el ->
-                     sprintf "(%g, %g)" el.Complex.re el.Complex.im
-                  |RpcFloatMatrix el ->
-                     (* looks like [[ a11, a12 ][ a21, a22 ]] *)
-                     let rows, cols = (Gsl_matrix.dims el) in
-                     let initial_string = "[" in
-                     let line = ref initial_string in
-                     for n = 0 to rows - 1 do
-                        line := !line ^ "[ ";
-                        for m = 0 to cols - 2 do
-                           line := !line ^ (sprintf "%g, " el.{n, m})
+         if line_num > 0 then
+            if line_num <= len then
+               (* this is the actual index into the array *)
+               let index = len - line_num and
+               make_string gen_el =
+                  begin
+                     match gen_el with
+                     |RpcInt el -> 
+                        begin
+                           match calc_modes.base with
+                           |Bin ->
+                              let s = string_of_big_int_base el 2 in
+                              "# " ^ s ^ " b"
+                           |Oct ->
+                              let s = string_of_big_int_base el 8 in
+                              "# " ^ s ^ " o"
+                           |Hex ->
+                              let s = string_of_big_int_base el 16 in
+                              "# " ^ s ^ " h"
+                           |Dec ->
+                              let s = string_of_big_int el in
+                              "# " ^ s ^ " d"
+                        end
+                     |RpcFloat el ->
+                        sprintf "%g" el
+                     |RpcComplex el ->
+                        sprintf "(%g, %g)" el.Complex.re el.Complex.im
+                     |RpcFloatMatrix el ->
+                        (* looks like [[ a11, a12 ][ a21, a22 ]] *)
+                        let rows, cols = (Gsl_matrix.dims el) in
+                        let initial_string = "[" in
+                        let line = ref initial_string in
+                        for n = 0 to rows - 1 do
+                           line := !line ^ "[ ";
+                           for m = 0 to cols - 2 do
+                              line := !line ^ (sprintf "%g, " el.{n, m})
+                           done;
+                           line := !line ^ (sprintf "%g ]" el.{n, cols-1})
                         done;
-                        line := !line ^ (sprintf "%g ]" el.{n, cols-1})
-                     done;
-                     line := !line ^ "]";
-                     !line
-                  |RpcComplexMatrix el ->
-                     (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
-                        a21im), (a22re, a22im) ] *)
-                     let rows, cols = (Gsl_matrix_complex.dims el) in
-                     let initial_string = "[" in
-                     let line = ref initial_string in
-                     for n = 0 to rows - 1 do
-                        line := !line ^ "[ ";
-                        for m = 0 to cols - 2 do
-                           line := !line ^ (sprintf "(%g, %g), " 
-                              el.{n, m}.Complex.re el.{n, m}.Complex.im)
+                        line := !line ^ "]";
+                        !line
+                     |RpcComplexMatrix el ->
+                        (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
+                           a21im), (a22re, a22im) ] *)
+                        let rows, cols = (Gsl_matrix_complex.dims el) in
+                        let initial_string = "[" in
+                        let line = ref initial_string in
+                        for n = 0 to rows - 1 do
+                           line := !line ^ "[ ";
+                           for m = 0 to cols - 2 do
+                              line := !line ^ (sprintf "(%g, %g), " 
+                                 el.{n, m}.Complex.re el.{n, m}.Complex.im)
+                           done;
+                           line := !line ^ (sprintf "(%g, %g) ]" 
+                              el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
                         done;
-                        line := !line ^ (sprintf "(%g, %g) ]" 
-                           el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
-                     done;
-                     line := !line ^ "]";
-                     !line
-               end
-            in
-            make_string stack.(index)
-         else
+                        line := !line ^ "]";
+                        !line
+                  end
+               in
+               make_string stack.(index)
+            else (* line_num > len *)
+               ""
+         else (* line_num <= 0 *)
             raise (Stack_error ("cannot print nonexistent stack element" ^
                (string_of_int line_num)))
 

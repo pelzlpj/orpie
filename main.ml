@@ -24,7 +24,7 @@ open Big_int
 (* test *)
 let calc = new Rpc_calc.rpc_calc;;
 
-calc#enter_int (big_int_of_string
+(* calc#enter_int (big_int_of_string
 "1234567890123456789123456789123456789123456789123456789123456789");;
 calc#enter_int (big_int_of_string "5");;
 calc#enter_cmpx {Complex.re=1.5; Complex.im=2.4};;
@@ -70,13 +70,31 @@ Printf.printf "\nadding...\n\n";;
 calc#add;;
 calc#print_stack;;
 
+*)
 
+(* initialize curses and return a record with screen information *)
 open Rpc_interface;;
-let scr = initialize_screen;;
-test_screen scr;;
+open Curses;;
+
+let initialize_screen () =
+   let std = initscr () in
+   let height, width = get_size () in
+   if width >= 80 then
+      let left_win   = subwin std (height - 2) 40 0 0 in
+      let right_win  = subwin std (height - 2) 40 0 40 in
+      let bottom_win = subwin std 2 80 (height - 2) 0 in
+      {stdscr = std; lines = height; cols = width; 
+      help_win = left_win; hw_lines = (height - 2); hw_cols = 40;
+      stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
+      entry_win = bottom_win; ew_lines = 2; ew_cols = 80}
+   else
+      failwith "rpc2 requires an 80 column window."
+
+let iface = new Rpc_interface.rpc_interface calc (initialize_screen ());;
+iface#run ();;
 
 (* For some reason this call fails if it is moved to rpc_interface... *)
-Curses.endwin ();;
+endwin ();;
 
 
 (* arch-tag: DO_NOT_CHANGE_eeac13df-e93f-4359-8b70-44fefc40e225 *)

@@ -25,8 +25,8 @@ open Big_int
 
 let mult (stack : rpc_stack) =
    if stack#length > 1 then
-      let gen_el2 = stack#pop in
-      let gen_el1 = stack#pop in
+      let gen_el2 = stack#pop () in
+      let gen_el1 = stack#pop () in
       match gen_el1 with
       |RpcInt el1 -> (
          match gen_el2 with

@@ -26,7 +26,7 @@ open Utility
 
 let inv (stack : rpc_stack) =
    if stack#length > 0 then
-      let gen_el = stack#pop in
+      let gen_el = stack#pop () in
       match gen_el with
       |RpcFloat el ->
          stack#push (RpcFloat (1.0 /. el))
