@@ -293,23 +293,28 @@ let generate_abbrev_help () =
       with Not_found -> (Printf.fprintf stderr "can't find op\n"; "")
    in
    let functions_str =
-      (get_abbr (Function Sin))   ^ "  " ^ 
-      (get_abbr (Function Asin))  ^ "  " ^ 
-      (get_abbr (Function Cos))   ^ "  " ^ 
-      (get_abbr (Function Acos))  ^ "  " ^ 
-      (get_abbr (Function Tan))   ^ "  " ^ 
-      (get_abbr (Function Atan))  ^ "  " ^ 
-      (get_abbr (Function Exp))   ^ "  " ^ 
-      (get_abbr (Function Ln))    ^ "  " ^ 
-      (get_abbr (Function Ten_x)) ^ "  " ^ 
-      (get_abbr (Function Log10)) ^ "  " ^ 
-      (get_abbr (Function Sq))    ^ "  " ^ 
-      (get_abbr (Function Sqrt))  ^ "  " ^ 
-      (get_abbr (Function Inv))   ^ "  " ^ 
-      (get_abbr (Function Sinh))  ^ "  " ^ 
-      (get_abbr (Function Cosh))  ^ "  " ^ 
-      (get_abbr (Function Tanh))  ^ "  " ^ 
-      (get_abbr (Function Re))    ^ "  " ^ 
+      (get_abbr (Function Sin))       ^ "  " ^ 
+      (get_abbr (Function Asin))      ^ "  " ^ 
+      (get_abbr (Function Cos))       ^ "  " ^ 
+      (get_abbr (Function Acos))      ^ "  " ^ 
+      (get_abbr (Function Tan))       ^ "  " ^ 
+      (get_abbr (Function Atan))      ^ "  " ^ 
+      (get_abbr (Function Exp))       ^ "  " ^ 
+      (get_abbr (Function Ln))        ^ "  " ^ 
+      (get_abbr (Function Ten_x))     ^ "  " ^ 
+      (get_abbr (Function Log10))     ^ "  " ^ 
+      (get_abbr (Function Sq))        ^ "  " ^ 
+      (get_abbr (Function Sqrt))      ^ "  " ^ 
+      (get_abbr (Function Inv))       ^ "  " ^ 
+      (get_abbr (Function Sinh))      ^ "  " ^ 
+      (get_abbr (Function Cosh))      ^ "  " ^ 
+      (get_abbr (Function Tanh))      ^ "  " ^ 
+      (get_abbr (Function Gamma))     ^ "  " ^ 
+      (get_abbr (Function LnGamma))   ^ "  " ^ 
+      (get_abbr (Function Erf))       ^ "  " ^ 
+      (get_abbr (Function Erfc))      ^ "  " ^ 
+      (get_abbr (Function Transpose)) ^ "  " ^ 
+      (get_abbr (Function Re))        ^ "  " ^ 
       (get_abbr (Function Im))
    in
    let functions_str_wrap = trunc_list 
