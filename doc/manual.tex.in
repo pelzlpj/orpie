@@ -1111,6 +1111,31 @@ Note: Although the lumen is defined by
 a dimensionless unit and therefore is of questionable use to a calculator.
 
 
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      String & Volume Unit \\
+      \hline
+      \texttt{ozfl} & fluid ounce (US) \\
+      \texttt{cup}  & cup (US) \\
+      \texttt{pt}   & pint (US) \\
+      \texttt{qt}   & quart (US) \\
+      \texttt{gal}  & gallon (US) \\
+      \texttt{L}    & liter \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+
+
 %@% END-IF %@%
 % (!ORPIERC)
 
