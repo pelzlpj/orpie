@@ -171,14 +171,45 @@ let parse_line line_stream =
    | [< 'Kwd "#" >] ->
       ()
    | [< >] ->
-      config_failwith "Unknown keyword at start of line";;
+      config_failwith "Expected a keyword at start of line";;
 
 
 
 let line_lexer line = make_lexer ["bind"; "macro"; "#"] (Stream.of_string line);;
 
-let line_stream = line_lexer "bind \"\\\\Ca\" function_add" in
-parse_line line_stream;;
+let empty_regexp = Str.regexp "^[\t ]*$" in
+let backslash_regexp = try Str.regexp "[\\]" with Failure q -> failwith "failed backslash" in
+let config_stream = open_in "rpc2rc" in
+let line_num = ref 0 in
+try
+   while true do
+      line_num := succ !line_num;
+      let initial_string = input_line config_stream in
+      Printf.fprintf stdout "initial_string = %s\n" initial_string;
+      (* replace backslashes with doubled backslashes FIXME: not working *)
+      let line_string = 
+         try
+            Str.global_replace backslash_regexp "\\\\" initial_string
+         with Failure ff ->
+            failwith "failed global_replace"
+      in
+      if Str.string_match empty_regexp line_string 0 then
+         (* do nothing on an empty line *)
+         ()
+      else
+         try
+            let line_stream = line_lexer line_string in
+            parse_line line_stream
+         with
+            Config_failure s ->
+               (let error_str = Printf.sprintf "Syntax error on line %d of \"rpc2rc\": %s"
+               !line_num s in
+               failwith error_str)
+   done
+with
+   End_of_file ->
+      ()
+
 
 
 
