@@ -5,7 +5,13 @@
 #include <caml/fail.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
+#else
+#include <curses.h>
+#endif
+
 #include <term.h>
 /* Du travail pour les esclaves de M$ */
 #include <signal.h>

@@ -1,0 +1,137 @@
+#
+# sample Makefile for Objective Caml
+# Copyright (C) 2001 Jean-Christophe FILLIATRE
+#
+# modified 10/31/2003 by Paul Pelzl, for the purpose of building
+# curses bindings for ocaml
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License version 2, as published by the Free Software Foundation.
+# 
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+# 
+# See the GNU Library General Public License version 2 for more details
+# (enclosed in the file LGPL).
+
+# where to install the binaries
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+BINDIR=@bindir@
+
+# where to install the man page
+MANDIR=@mandir@
+
+# other variables set by ./configure
+OCAMLC   = @OCAMLC@
+OCAMLOPT = @OCAMLOPT@
+OCAMLDEP = @OCAMLDEP@
+OCAMLLIB = @OCAMLLIB@
+OCAMLBEST= @OCAMLBEST@
+OCAMLVERSION = @OCAMLVERSION@
+OCAMLWIN32 = @OCAMLWIN32@
+EXE = @EXE@
+DEFS = @DEFS@
+
+INCLUDES =
+BFLAGS = -g $(INCLUDES)
+OFLAGS = $(INCLUDES)
+CFLAGS = -Wall -fPIC -DPIC
+
+# main target
+#############
+
+all: $(OCAMLBEST)
+
+# bytecode and native-code compilation
+######################################
+
+CMO = curses.cmo
+CMX = $(CMO:.cmo=.cmx)
+CMA =
+CMXA = $(CMA:.cma=.cmxa)
+COBJ = ml_curses.o
+
+GENERATED = version.ml
+
+byte: $(CMO) $(COBJ)
+opt: $(CMX) $(COBJ)
+
+
+VERSION=0.10
+
+version.ml: Makefile
+	echo "let version = \""$(VERSION)"\"" > version.ml
+	echo "let date = \""`date`"\"" >> version.ml
+
+# generic rules
+###############
+
+.SUFFIXES: .mli .ml .cmi .cmo .cmx .o
+
+.mli.cmi:
+	$(OCAMLC) -pp cpp -c $(BFLAGS) $<
+
+.ml.cmo:
+	$(OCAMLC) -pp cpp -c $(BFLAGS) $<
+
+.ml.o:
+	$(OCAMLOPT) -pp cpp -c $(OFLAGS) $<
+
+.ml.cmx:
+	$(OCAMLOPT) -pp cpp -c $(OFLAGS) $<
+
+.c.o:
+	$(OCAMLC) -ccopt "$(CFLAGS) $(DEFS)" -c $<
+
+
+# Emacs tags
+############
+
+tags:
+	find . -name "*.ml*" | sort -r | xargs \
+	etags "--regex=/let[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/let[ \t]+rec[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/and[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/type[ \t]+\([^ \t]+\)/\1/" \
+              "--regex=/exception[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/val[ \t]+\([^ \t]+\)/\1/" \
+	      "--regex=/module[ \t]+\([^ \t]+\)/\1/"
+
+# Makefile is rebuilt whenever Makefile.in or configure.in is modified
+######################################################################
+
+Makefile: Makefile.in ../config.status
+	cd .. && ./config.status
+
+../config.status: ../configure
+	cd .. && ./configure
+
+../configure: ../configure.in
+	cd .. && autoconf 
+
+# clean
+#######
+
+clean::
+	rm -f *.cm[iox] *.o *~
+	rm -f $(GENERATED) parser.output
+
+dist-clean distclean:: clean
+	rm -f Makefile
+
+# depend
+########
+
+.depend depend:: $(GENERATED)
+	rm -f .depend
+	$(OCAMLDEP) $(INCLUDES) -pp cpp *.ml *.mli > .depend
+
+include .depend
+
+
+
+
+# arch-tag: DO_NOT_CHANGE_a00584e4-fa77-41f4-bd10-37906fbd9a76 

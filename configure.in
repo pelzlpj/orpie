@@ -128,6 +128,13 @@ if test "$HASGSL" = no ; then
 fi
 
 
+# check for curses
+MP_WITH_CURSES
+if test ! "$CURSES_LIB"; then
+   AC_MSG_ERROR(Cannot find a curses library.  Perhaps you failed to install an ncurses development package?)
+fi
+
+
 # substitutions to perform
 AC_SUBST(OCAMLC)
 AC_SUBST(OCAMLOPT)
@@ -138,10 +145,13 @@ AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(OCAMLGSLLIB)
+AC_SUBST(CURSES_LIB)
+AC_SUBST(DEFS)
 
 # Finally create the Makefile from Makefile.in
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile curses/Makefile)
 chmod a-w Makefile
+chmod a-w curses/Makefile
 
 
 

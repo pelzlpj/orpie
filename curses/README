@@ -1,6 +1,6 @@
 rpc2 makes use of the curses bindings provided by the Objective Caml Text Mode
 Kit (ocaml-tmk).  This code is released under the GNU LGPL; for details, see
-COPYING in the ocaml-tmk subdirectory.
+COPYING in the 'curses' subdirectory.
 
 The ocaml-tmk project may be found at http://www.nongnu.org/ocaml-tmk/ .
 
