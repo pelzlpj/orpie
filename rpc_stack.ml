@@ -32,12 +32,21 @@ exception Stack_error of string;;
 
 
 open Big_int;;
+open Big_int_str;;
 open Printf;;
+
 type rpc_data = | RpcInt of Big_int.big_int
                 | RpcFloat of float
                 | RpcComplex of Complex.t
                 | RpcFloatMatrix of Gsl_matrix.matrix 
                 | RpcComplexMatrix of Gsl_matrix_complex.matrix;;
+
+type angle_mode   = | Rad | Deg;;
+type base_mode    = | Bin | Oct | Hex | Dec;;
+type complex_mode = | Rect | Polar;;
+      
+type calculator_modes = {angle : angle_mode; base : base_mode; 
+                         complex : complex_mode};;
 
 let size_inc = 100;;
 
@@ -85,15 +94,29 @@ class rpc_stack =
       (* generate a string to represent a particular stack element.
        * The top stack element (stack.(len-1)) is defined to be element 
        * number 1. *)
-      method get_display_line (line_num : int) (calc_mode : unit) =
+      method get_display_line line_num calc_modes =
          if line_num > 0 && line_num <= len then
             (* this is the actual index into the array *)
             let index = len - line_num and
             make_string gen_el =
                begin
                   match gen_el with
-                  |RpcInt el ->
-                     sprintf "# %s d" (string_of_big_int el)
+                  |RpcInt el -> 
+                     begin
+                        match calc_modes.base with
+                        |Bin ->
+                           let s = string_of_big_int_base el 2 in
+                           "# " ^ s ^ " b"
+                        |Oct ->
+                           let s = string_of_big_int_base el 8 in
+                           "# " ^ s ^ " o"
+                        |Hex ->
+                           let s = string_of_big_int_base el 16 in
+                           "# " ^ s ^ " h"
+                        |Dec ->
+                           let s = string_of_big_int el in
+                           "# " ^ s ^ " d"
+                     end
                   |RpcFloat el ->
                      sprintf "%g" el
                   |RpcComplex el ->

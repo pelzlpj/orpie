@@ -19,13 +19,15 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
-open Rpc_stack
-open Utility
-open Big_int
-      
+open Rpc_stack;;
+open Utility;;
+open Big_int;;
+
+
 class rpc_calc =
    object
       val stack = new rpc_stack
+      val mutable modes = {angle = Rad; base = Dec; complex = Rect}
 
       method add =
          Add.add stack
@@ -182,7 +184,7 @@ class rpc_calc =
       method print_stack =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in
          for i = stack#length downto 1 do
-            print_el i (stack#get_display_line i ())
+            print_el i (stack#get_display_line i modes)
          done
 
    end;;
