@@ -96,7 +96,7 @@ let make (c : rpc_calc) (std : screen_t) =
    Random.self_init ();
    let tagline_index = Random.int (Array.length all_taglines) in
    let iface =
-      {version = "1.0";
+      {version = Version.version;
       tagline = all_taglines.(tagline_index);
       calc = c;
       scr = std;

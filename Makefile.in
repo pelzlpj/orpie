@@ -58,7 +58,7 @@ all: $(OCAMLBEST)
 
 CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo rcfile.cmo \
 		utility.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
-		interface.cmo interface_draw.cmo interface_main.cmo main.cmo
+		version.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma
 CMXA = $(CMA:.cma=.cmxa)
@@ -130,7 +130,7 @@ subdirs_opt: $(SUBDIRS)
 	export BUILD_TYPE=opt && $(MAKE) -C $$dir; \
 	done
 
-VERSION=1.0
+VERSION=1.1
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
