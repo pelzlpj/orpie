@@ -47,8 +47,8 @@ let pow (stack : rpc_stack) (do_backup : unit -> unit) =
                let c_el1 = cmpx_of_int el1 in
                stack#push (RpcComplex (Complex.pow c_el1 el2))
             |_ ->
-               (stack#push gen_el2;
-               stack#push gen_el1;
+               (stack#push gen_el1;
+               stack#push gen_el2;
                raise (Invalid_argument "incompatible types"))
             )
          |RpcFloat el1 -> (
@@ -60,8 +60,8 @@ let pow (stack : rpc_stack) (do_backup : unit -> unit) =
             |RpcComplex el2 ->
                stack#push (RpcComplex (Complex.pow (cmpx_of_float el1) el2))
             |_ ->
-               (stack#push gen_el2;
-               stack#push gen_el1;
+               (stack#push gen_el1;
+               stack#push gen_el2;
                raise (Invalid_argument "incompatible types"))
             )
          |RpcComplex el1 -> (
@@ -73,13 +73,13 @@ let pow (stack : rpc_stack) (do_backup : unit -> unit) =
             |RpcComplex el2 ->
                stack#push (RpcComplex (Complex.pow el1 el2))
             |_ ->
-               (stack#push gen_el2;
-               stack#push gen_el1;
+               (stack#push gen_el1;
+               stack#push gen_el2;
                raise (Invalid_argument "incompatible types"))
             )
          |_ ->
-            (stack#push gen_el2;
-            stack#push gen_el1;
+            (stack#push gen_el1;
+            stack#push gen_el2;
             raise (Invalid_argument "invalid argument"))
       end
    else

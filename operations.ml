@@ -4,10 +4,12 @@
  * in the entry buffer.  An edit is an operation that acts on the data in the
  * entry buffer (e.g. backspace). *)
 type function_operation = | Add | Sub | Mult | Div | Neg | Inv
-                          | Pow | Sqrt | Abs | Arg | Exp | Ln 
-                          | Conj | Sin;;
+                          | Pow | Sqrt | Sq | Abs | Arg | Exp | Ln 
+                          | Ten_x | Log10 | Conj | Sin | Cos | Tan 
+                          | Asin | Acos | Atan | Sinh | Cosh | Tanh;;
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
-                          | BeginBrowse | BeginExtended | Quit;;
+                          | BeginBrowse | BeginExtended | Quit
+                          | SetRadians | SetDegrees;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;

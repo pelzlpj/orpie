@@ -23,6 +23,7 @@ open Rpc_stack;;
 open Utility;;
 open Big_int;;
 
+let pi = 3.14159265358979323846;;
 
 class rpc_calc =
    object(self)
@@ -35,6 +36,12 @@ class rpc_calc =
 
       method undo () =
          stack <- backup_stack
+
+      method mode_rad () =
+         modes <- {angle = Rad; base = modes.base; complex = modes.complex}
+
+      method mode_deg () =
+         modes <- {angle = Deg; base = modes.base; complex = modes.complex}
 
       method add () =
          Add.add stack self#backup
@@ -97,6 +104,43 @@ class rpc_calc =
             end
          else
             raise (Invalid_argument "empty stack")
+
+
+      method sq () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcInt (mult_big_int el el))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (el *. el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.mul el el))
+               |RpcFloatMatrix el ->
+                  let n, m = (Gsl_matrix.dims el) in
+                  if n = m then
+                     let result = Gsl_matrix.create n m in
+                     (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el el 0.0 result;
+                     stack#push (RpcFloatMatrix result))
+                  else
+                     (stack#push gen_el;
+                     raise (Invalid_argument "matrix is non-square"))
+               |RpcComplexMatrix el ->
+                  let n, m = (Gsl_matrix_complex.dims el) in
+                  if m = n then
+                     let result = Gsl_matrix_complex.create n m in
+                     (Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
+                        Complex.one el el Complex.zero result;
+                     stack#push (RpcComplexMatrix result))
+                  else
+                     (stack#push gen_el;
+                     raise (Invalid_argument "matrix is non-square"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
 
       method sqrt () =
          if stack#length > 0 then
@@ -190,6 +234,26 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      method ten_pow_x () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (10.0 ** (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (10.0 ** el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Complex.pow (cmpx_of_float 10.0) el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+            
+
       method log10 () =
          if stack#length > 0 then
             begin
@@ -243,9 +307,23 @@ class rpc_calc =
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (sin (float_of_big_int el)))
+                  stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        sin (float_of_big_int el)
+                     |Deg ->
+                        sin (pi /. 180.0 *. (float_of_big_int el))
+                  end)
                |RpcFloat el ->
-                  stack#push (RpcFloat (sin el))
+                  stack#push (RpcFloat 
+                  begin
+                     match modes.angle with
+                     |Rad ->
+                        sin el
+                     |Deg ->
+                        sin (pi /. 180.0 *. el)
+                  end)
                |RpcComplex el ->
                   stack#push (RpcComplex (Gsl_complex.sin el))
                |_ ->
@@ -258,16 +336,98 @@ class rpc_calc =
 
       method cos () =
          if stack#length > 0 then
+         begin
+            self#backup ();
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     cos (float_of_big_int el)
+                  |Deg ->
+                     cos (pi /. 180.0 *. (float_of_big_int el))
+               end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     cos el
+                  |Deg ->
+                     cos (pi /. 180.0 *. el)
+               end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.cos el))
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+         end
+      else
+         raise (Invalid_argument "empty stack")
+
+
+      method tan () =
+         if stack#length > 0 then
+            begin
+            self#backup ();
+            let gen_el = stack#pop () in
+            match gen_el with
+            |RpcInt el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     tan (float_of_big_int el)
+                  |Deg ->
+                     tan (pi /. 180.0 *. (float_of_big_int el))
+               end)
+            |RpcFloat el ->
+               stack#push (RpcFloat 
+               begin
+                  match modes.angle with
+                  |Rad ->
+                     tan el
+                  |Deg ->
+                     tan (pi /. 180.0 *. el)
+               end)
+            |RpcComplex el ->
+               stack#push (RpcComplex (Gsl_complex.tan el))
+            |_ ->
+               (stack#push gen_el;
+               raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method asin () =
+         if stack#length > 0 then
             begin
                self#backup ();
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (cos (float_of_big_int el)))
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           asin (float_of_big_int el)
+                        |Deg ->
+                           180.0 /. pi *. asin (float_of_big_int el)
+                     end)
                |RpcFloat el ->
-                  stack#push (RpcFloat (cos el))
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           asin el
+                        |Deg ->
+                           180.0 /. pi *. asin el
+                     end)
                |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.cos el))
+                  stack#push (RpcComplex (Gsl_complex.arcsin el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))
@@ -276,18 +436,126 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
-      method tan () =
+      method acos () =
          if stack#length > 0 then
             begin
                self#backup ();
                let gen_el = stack#pop () in
                match gen_el with
                |RpcInt el ->
-                  stack#push (RpcFloat (tan (float_of_big_int el)))
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           acos (float_of_big_int el)
+                        |Deg ->
+                           180.0 /. pi *. acos (float_of_big_int el)
+                     end)
                |RpcFloat el ->
-                  stack#push (RpcFloat (tan el))
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           acos el
+                        |Deg ->
+                           180.0 /. pi *. acos el
+                     end)
                |RpcComplex el ->
-                  stack#push (RpcComplex (Gsl_complex.tan el))
+                  stack#push (RpcComplex (Gsl_complex.arcsin el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method atan () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           atan (float_of_big_int el)
+                        |Deg ->
+                           180.0 /. pi *. atan (float_of_big_int el)
+                     end)
+               |RpcFloat el ->
+                  stack#push (RpcFloat 
+                     begin
+                        match modes.angle with
+                        |Rad ->
+                           atan el
+                        |Deg ->
+                           180.0 /. pi *. atan el
+                     end)
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.arcsin el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method sinh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (sinh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (sinh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.sinh el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method cosh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (cosh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (cosh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.cosh el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      method tanh () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (tanh (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (tanh el))
+               |RpcComplex el ->
+                  stack#push (RpcComplex (Gsl_complex.tanh el))
                |_ ->
                   (stack#push gen_el;
                   raise (Invalid_argument "invalid argument"))

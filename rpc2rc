@@ -19,7 +19,7 @@ bind "*" function_mult
 bind "/" function_div
 bind "n" function_neg
 bind "i" function_inv
-bind "p" function_pow
+bind "^" function_pow
 bind "s" function_sqrt
 bind "a" function_abs
 bind "\\Ca" function_arg

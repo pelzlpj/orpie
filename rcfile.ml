@@ -188,6 +188,8 @@ let parse_line line_stream =
                            register_binding key (Function Inv)
                         |"function_pow" ->
                            register_binding key (Function Pow)
+                        |"function_sq" ->
+                           register_binding key (Function Sq)
                         |"function_sqrt" ->
                            register_binding key (Function Sqrt)
                         |"function_abs" ->
@@ -198,10 +200,30 @@ let parse_line line_stream =
                            register_binding key (Function Exp)
                         |"function_ln" ->
                            register_binding key (Function Ln)
+                        |"function_10^x" ->
+                           register_binding key (Function Ten_x)
+                        |"function_log10" ->
+                           register_binding key (Function Log10)
                         |"function_conj" ->
                            register_binding key (Function Conj)
                         |"function_sin" ->
                            register_binding key (Function Sin)
+                        |"function_cos" ->
+                           register_binding key (Function Cos)
+                        |"function_tan" ->
+                           register_binding key (Function Tan)
+                        |"function_asin" ->
+                           register_binding key (Function Asin)
+                        |"function_acos" ->
+                           register_binding key (Function Acos)
+                        |"function_atan" ->
+                           register_binding key (Function Atan)
+                        |"function_sinh" ->
+                           register_binding key (Function Sinh)
+                        |"function_cosh" ->
+                           register_binding key (Function Cosh)
+                        |"function_tanh" ->
+                           register_binding key (Function Tanh)
                         |"edit_integer" ->
                            register_binding key (Edit BeginInteger)
                         |"edit_complex" ->
@@ -234,6 +256,10 @@ let parse_line line_stream =
                            register_binding key (Command BeginExtended)
                         |"command_quit" ->
                            register_binding key (Command Quit)
+                        |"command_rad" ->
+                           register_binding key (Command SetRadians)
+                        |"command_deg" ->
+                           register_binding key (Command SetDegrees)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->

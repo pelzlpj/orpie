@@ -48,8 +48,9 @@ type complex_entry_element =
     mutable im_mantissa : string; mutable im_exponent : string};;
 
 let extended_commands =
-   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\nsin\n" ^
-    "drop\nclear\nswap\ndup\nundo\nquit");;
+   ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsq\nsqrt\nabs\narg\nexp\nln\n" ^
+    "10^\nlog10\nconj\nsin\ncos\ntan\nasin\nacos\natan\nsinh\ncosh\ntanh\n" ^
+    "drop\nclear\nswap\ndup\nundo\nquit\nrad\ndeg");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -60,19 +61,32 @@ Hashtbl.add command_abbrev_table "div" (Function Div);;
 Hashtbl.add command_abbrev_table "neg" (Function Neg);;
 Hashtbl.add command_abbrev_table "inv" (Function Inv);;
 Hashtbl.add command_abbrev_table "pow" (Function Pow);;
+Hashtbl.add command_abbrev_table "sq" (Function Sq);;
 Hashtbl.add command_abbrev_table "sqrt" (Function Sqrt);;
 Hashtbl.add command_abbrev_table "abs" (Function Abs);;
 Hashtbl.add command_abbrev_table "arg" (Function Arg);;
 Hashtbl.add command_abbrev_table "exp" (Function Exp);;
 Hashtbl.add command_abbrev_table "ln" (Function Ln);;
+Hashtbl.add command_abbrev_table "10^" (Function Ten_x);;
+Hashtbl.add command_abbrev_table "log10" (Function Log10);;
 Hashtbl.add command_abbrev_table "conj" (Function Conj);;
 Hashtbl.add command_abbrev_table "sin" (Function Sin);;
+Hashtbl.add command_abbrev_table "cos" (Function Cos);;
+Hashtbl.add command_abbrev_table "tan" (Function Tan);;
+Hashtbl.add command_abbrev_table "sinh" (Function Sinh);;
+Hashtbl.add command_abbrev_table "cosh" (Function Cosh);;
+Hashtbl.add command_abbrev_table "tanh" (Function Tanh);;
+Hashtbl.add command_abbrev_table "asin" (Function Asin);;
+Hashtbl.add command_abbrev_table "acos" (Function Acos);;
+Hashtbl.add command_abbrev_table "atan" (Function Atan);;
 Hashtbl.add command_abbrev_table "drop" (Command Drop);;
 Hashtbl.add command_abbrev_table "clear" (Command Clear);;
 Hashtbl.add command_abbrev_table "swap" (Command Swap);;
 Hashtbl.add command_abbrev_table "dup" (Command Dup);;
 Hashtbl.add command_abbrev_table "undo" (Command Undo);;
 Hashtbl.add command_abbrev_table "quit" (Command Quit);;
+Hashtbl.add command_abbrev_table "rad" (Command SetRadians);;
+Hashtbl.add command_abbrev_table "deg" (Command SetDegrees);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -605,6 +619,8 @@ object(self)
             self#handle_function_call calc#inv
          |Pow ->
             self#handle_function_call calc#pow
+         |Sq ->
+            self#handle_function_call calc#sq
          |Sqrt ->
             self#handle_function_call calc#sqrt
          |Abs ->
@@ -615,10 +631,30 @@ object(self)
             self#handle_function_call calc#exp
          |Ln ->
             self#handle_function_call calc#ln
+         |Ten_x ->
+            self#handle_function_call calc#ten_pow_x
+         |Log10 ->
+            self#handle_function_call calc#log10
          |Conj ->
             self#handle_function_call calc#conj
          |Sin ->
             self#handle_function_call calc#sin
+         |Cos ->
+            self#handle_function_call calc#cos
+         |Tan ->
+            self#handle_function_call calc#tan
+         |Sinh ->
+            self#handle_function_call calc#sinh
+         |Cosh ->
+            self#handle_function_call calc#cosh
+         |Tanh ->
+            self#handle_function_call calc#tanh
+         |Asin ->
+            self#handle_function_call calc#asin
+         |Acos ->
+            self#handle_function_call calc#acos
+         |Atan ->
+            self#handle_function_call calc#atan
       end
 
 
@@ -641,6 +677,12 @@ object(self)
             self#handle_begin_extended ()
          |Quit ->
             self#handle_quit ()
+         |SetRadians ->
+            self#handle_command_call calc#mode_rad;
+            self#draw_help ()
+         |SetDegrees ->
+            self#handle_command_call calc#mode_deg;
+            self#draw_help ()
       end
 
 
