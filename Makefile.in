@@ -81,6 +81,7 @@ GENERATED = version.ml
 
 byte: $(NAME).byte $(NAME2).byte
 opt: $(NAME).opt $(NAME2).opt
+static: $(NAME).static-opt $(NAME2).static-opt
 
 $(NAME).byte: subdirs_byte $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(CMO) 
@@ -94,6 +95,21 @@ $(NAME).opt: subdirs_opt $(CMX)
 $(NAME2).opt: subdirs_opt utility.cmx curses-keys.cmx
 	$(OCAMLOPT) $(OFLAGS) $(OLFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
+# static build seems to require mashing all the C objects into a library
+$(NAME).static-opt: subdirs_opt $(CMX) my-static-libs
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB)' -o $@ $(CMXA) \
+	curses.cmx $(GSL_CMX) $(CMX)
+
+$(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx my-static-libs
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB)' -o $@ $(CMXA) curses.cmx \
+	utility.cmx curses-keys.cmx
+
+my-static-libs:
+	ar cr libmycurses.a curses/*.o
+	ar cr libmygsl.a gsl/*.o
+
+#$(NAME2).static-opt: subdirs_opt utility.cmx curses-keys.cmx
+#	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) utility.cmx curses-keys.cmx
 
 # curses and gsl bindings
 #####################################
@@ -243,7 +259,7 @@ configure: configure.in
 partly-clean::
 	rm -f *.cm[iox] *.o *~
 	rm -f $(GENERATED) parser.output
-	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt
+	rm -f $(NAME).byte $(NAME).opt $(NAME2).byte $(NAME2).opt $(NAME).static-opt $(NAME2).static-opt
 	rm -f *.aux *.log $(NAME).tex $(NAME).dvi $(NAME).ps
 
 clean:: partly-clean
