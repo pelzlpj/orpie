@@ -47,7 +47,7 @@ let solve_linear (stack : rpc_stack) (do_backup : unit -> unit) =
                   else if n2 != m1 then
                      (stack#push gen_el1;
                      stack#push gen_el2;
-                     raise (Invalid_argument ("dimensions of multiplier and" ^ 
+                     raise (Invalid_argument ("dimensions of multiplier and " ^ 
                      "resultant matrices do not match")))
                   else begin
                      let b = Gsl_matrix.to_array el2 in
