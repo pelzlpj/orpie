@@ -171,124 +171,111 @@ class rpc_stack =
       (* generate a string to represent a particular stack element.
        * The top stack element (stack.(len-1)) is defined to be element 
        * number 1. *)
-      method get_display_string is_fullscreen line_num calc_modes =
+      method get_display_string line_num calc_modes =
          if line_num > 0 then
             if line_num <= len then
                (* this is the actual index into the array *)
-               let index = len - line_num and
-               make_string gen_el =
-                  begin
-                     match gen_el with
-                     |RpcInt el -> 
-                        begin
-                           match calc_modes.base with
-                           |Bin ->
-                              let s = string_of_big_int_base el 2 in
-                              "# " ^ s ^ " b"
-                           |Oct ->
-                              let s = string_of_big_int_base el 8 in
-                              "# " ^ s ^ " o"
-                           |Hex ->
-                              let s = string_of_big_int_base el 16 in
-                              "# " ^ s ^ " h"
-                           |Dec ->
-                              let s = string_of_big_int el in
-                              "# " ^ s ^ " d"
-                        end
-                     |RpcFloat el ->
-                        sprintf "%.15g" el
-                     |RpcComplex el ->
-                        begin
-                           match calc_modes.complex with
-                           |Rect ->
-                              sprintf "(%.15g, %.15g)" el.Complex.re el.Complex.im
-                           |Polar ->
-                              begin
-                                 let r = sqrt (el.Complex.re *. el.Complex.re +.
-                                 el.Complex.im *. el.Complex.im)
-                                 and theta = atan2 el.Complex.im el.Complex.re in
-                                 match calc_modes.angle with
-                                 |Rad ->
-                                    sprintf "(%.15g <%.15g)" r theta
-                                 |Deg ->
-                                    sprintf "(%.15g <%.15g)" r (180.0 /. pi *. theta)
-                              end
-                        end
-                     |RpcFloatMatrix el ->
-                        (* looks like [[ a11, a12 ][ a21, a22 ]] *)
-                        let rows, cols = (Gsl_matrix.dims el) in
-                        let initial_string = "[" in
-                        let line = ref initial_string in
-                        for n = 0 to rows - 1 do
-                           line := !line ^ "[ ";
-                           for m = 0 to cols - 2 do
-                              line := !line ^ (sprintf "%.15g, " el.{n, m})
-                           done;
-                           line := !line ^ (sprintf "%.15g ]" el.{n, cols-1});
-                           (if is_fullscreen && n < (rows - 1) then
-                              line := !line ^ "\n "
-                           else
-                              ())
+               let index = len - line_num
+               and make_string gen_el =
+                  begin match gen_el with
+                  |RpcInt el -> 
+                     begin
+                        match calc_modes.base with
+                        |Bin ->
+                           let s = string_of_big_int_base el 2 in
+                           "# " ^ s ^ " b"
+                        |Oct ->
+                           let s = string_of_big_int_base el 8 in
+                           "# " ^ s ^ " o"
+                        |Hex ->
+                           let s = string_of_big_int_base el 16 in
+                           "# " ^ s ^ " h"
+                        |Dec ->
+                           let s = string_of_big_int el in
+                           "# " ^ s ^ " d"
+                     end
+                  |RpcFloat el ->
+                     sprintf "%.15g" el
+                  |RpcComplex el ->
+                     begin
+                        match calc_modes.complex with
+                        |Rect ->
+                           sprintf "(%.15g, %.15g)" el.Complex.re el.Complex.im
+                        |Polar ->
+                           begin
+                              let r = sqrt (el.Complex.re *. el.Complex.re +.
+                              el.Complex.im *. el.Complex.im)
+                              and theta = atan2 el.Complex.im el.Complex.re in
+                              match calc_modes.angle with
+                              |Rad ->
+                                 sprintf "(%.15g <%.15g)" r theta
+                              |Deg ->
+                                 sprintf "(%.15g <%.15g)" r (180.0 /. pi *. theta)
+                           end
+                     end
+                  |RpcFloatMatrix el ->
+                     (* looks like [[ a11, a12 ][ a21, a22 ]] *)
+                     let rows, cols = (Gsl_matrix.dims el) in
+                     let initial_string = "[" in
+                     let line = ref initial_string in
+                     for n = 0 to rows - 1 do
+                        line := !line ^ "[ ";
+                        for m = 0 to cols - 2 do
+                           line := !line ^ (sprintf "%.15g, " el.{n, m})
                         done;
-                        line := !line ^ "]";
-                        !line
-                     |RpcComplexMatrix el ->
-                        (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
-                           a21im), (a22re, a22im) ] *)
-                        let rows, cols = (Gsl_matrix_complex.dims el) in
-                        let initial_string = "[" in
-                        let line = ref initial_string in
-                        for n = 0 to rows - 1 do
-                           line := !line ^ "[ ";
-                           for m = 0 to cols - 2 do
-                              match calc_modes.complex with
-                              |Rect ->
-                                 line := !line ^ (sprintf "(%.15g, %.15g), " 
-                                    el.{n, m}.Complex.re el.{n, m}.Complex.im)
-                              |Polar ->
-                                 begin
-                                    let rr = el.{n, m}.Complex.re
-                                    and ii = el.{n, m}.Complex.im in
-                                    let r = sqrt (rr *. rr +. ii *. ii)
-                                    and theta = atan2 ii rr in
-                                    match calc_modes.angle with
-                                    |Rad ->
-                                       line := !line ^ (sprintf "(%.15g <%.15g), " 
-                                       r theta)
-                                    |Deg ->
-                                       line := !line ^ (sprintf "(%.15g <%.15g), " 
-                                       r (180.0 /. pi *. theta))
-                                 end
-                           done;
+                        line := !line ^ (sprintf "%.15g ]" el.{n, cols-1})
+                     done;
+                     line := !line ^ "]";
+                     !line
+                  |RpcComplexMatrix el ->
+                     (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
+                        a21im), (a22re, a22im) ] *)
+                     let rows, cols = (Gsl_matrix_complex.dims el) in
+                     let initial_string = "[" in
+                     let line = ref initial_string in
+                     for n = 0 to rows - 1 do
+                        line := !line ^ "[ ";
+                        for m = 0 to cols - 2 do
                            match calc_modes.complex with
                            |Rect ->
-                              line := !line ^ (sprintf "(%.15g, %.15g) ]" 
-                                 el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im);
-                              (if is_fullscreen && n < (rows - 1) then
-                                 line := !line ^ "\n "
-                              else
-                                 ())
+                              line := !line ^ (sprintf "(%.15g, %.15g), " 
+                                 el.{n, m}.Complex.re el.{n, m}.Complex.im)
                            |Polar ->
                               begin
-                                 let rr = el.{n, cols-1}.Complex.re
-                                 and ii = el.{n, cols-1}.Complex.im in
+                                 let rr = el.{n, m}.Complex.re
+                                 and ii = el.{n, m}.Complex.im in
                                  let r = sqrt (rr *. rr +. ii *. ii)
                                  and theta = atan2 ii rr in
                                  match calc_modes.angle with
                                  |Rad ->
-                                    line := !line ^ (sprintf "(%.15g <%.15g) ]" 
+                                    line := !line ^ (sprintf "(%.15g <%.15g), " 
                                     r theta)
                                  |Deg ->
-                                    line := !line ^ (sprintf "(%.15g <%.15g) ]" 
-                                    r (180.0 /. pi *. theta));
-                                    (if is_fullscreen && n < (rows - 1) then
-                                       line := !line ^ "\n "
-                                    else
-                                       ())
+                                    line := !line ^ (sprintf "(%.15g <%.15g), " 
+                                    r (180.0 /. pi *. theta))
                               end
                         done;
-                        line := !line ^ "]";
-                        !line
+                        match calc_modes.complex with
+                        |Rect ->
+                           line := !line ^ (sprintf "(%.15g, %.15g) ]" 
+                              el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
+                        |Polar ->
+                           begin
+                              let rr = el.{n, cols-1}.Complex.re
+                              and ii = el.{n, cols-1}.Complex.im in
+                              let r = sqrt (rr *. rr +. ii *. ii)
+                              and theta = atan2 ii rr in
+                              match calc_modes.angle with
+                              |Rad ->
+                                 line := !line ^ (sprintf "(%.15g <%.15g) ]" 
+                                 r theta)
+                              |Deg ->
+                                 line := !line ^ (sprintf "(%.15g <%.15g) ]" 
+                                 r (180.0 /. pi *. theta))
+                           end
+                     done;
+                     line := !line ^ "]";
+                     !line
                   end
                in
                make_string stack.(index)
@@ -298,6 +285,163 @@ class rpc_stack =
             raise (Stack_error ("cannot display nonexistent stack element " ^
                (string_of_int line_num)))
 
+
+
+      (* generate a string to represent a particular stack element.
+       * The top stack element (stack.(len-1)) is defined to be element 
+       * number 1.  This version contains newlines and spaces matrix
+       * elements in a form suitable for fullscreen display. *)
+      (* FIXME: this is ugly; maybe it can be refactored somehow. *)
+      method get_fullscreen_display_string line_num calc_modes =
+         if line_num > 0 then
+            if line_num <= len then
+               (* this is the actual index into the array *)
+               let index = len - line_num in
+               match stack.(index) with
+               |RpcFloatMatrix el ->
+                  (* looks like [[ a11, a12 ]
+                   *             [ a21, a22 ]] 
+                   * and the columns are aligned. *)
+                  let rows, cols = (Gsl_matrix.dims el) in
+                  (* first get the maximum field width for each column *)
+                  let max_width = Array.make cols 0 in
+                  for m = 0 to pred cols do
+                     for n = 0 to pred rows do
+                        let dummy_string = sprintf "%-.15g" el.{n, m} in
+                        let ds_len = String.length dummy_string in
+                        if ds_len > max_width.(m) then
+                           max_width.(m) <- ds_len
+                        else
+                           ()
+                     done
+                  done;
+                  (* now use the maximum field widths to align the columns
+                   * during string creation *)
+                  let initial_string = "[" in
+                  let line = ref initial_string in
+                  for n = 0 to rows - 1 do
+                     line := !line ^ "[ ";
+                     for m = 0 to cols - 2 do
+                        line := !line ^ (sprintf "%*.15g, " max_width.(m) el.{n, m})
+                     done;
+                     line := !line ^ (sprintf "%*.15g ]" max_width.(cols-1) el.{n, cols-1});
+                     if n < pred rows then
+                        line := !line ^ "\n "
+                     else
+                        ()
+                  done;
+                  line := !line ^ "]";
+                  !line
+               |RpcComplexMatrix el ->
+                  (* looks like [[ (a11re, a11im), (a12re, a12im) ]
+                   *             [ (a21re, a21im), (a22re, a22im) ] 
+                   * with properly aligned columns *)
+                  let rows, cols = (Gsl_matrix_complex.dims el) in
+                  (* first get the maximum field width for each column *)
+                  let max_width = Array.make_matrix cols 2 0 in
+                  for m = 0 to pred cols do
+                     for n = 0 to pred rows do
+                        match calc_modes.complex with
+                        |Rect ->
+                           let dummy_re = sprintf "%-.15g" el.{n, m}.Complex.re in
+                           let dr_len = String.length dummy_re in
+                           if dr_len > max_width.(m).(0) then
+                              max_width.(m).(0) <- dr_len
+                           else
+                              ();
+                           let dummy_im = sprintf "%-.15g" el.{n, m}.Complex.im in
+                           let di_len = String.length dummy_im in
+                           if di_len > max_width.(m).(1) then
+                              max_width.(m).(1) <- di_len
+                           else
+                              ()
+                        |Polar ->
+                           let rr = el.{n, m}.Complex.re
+                           and ii = el.{n, m}.Complex.im in
+                           let r = sqrt (rr *. rr +. ii *. ii)
+                           and theta = atan2 ii rr in
+                           let dummy_r = sprintf "%-.15g" r in
+                           let r_len = String.length dummy_r in
+                           if r_len > max_width.(m).(0) then
+                              max_width.(m).(0) <- r_len
+                           else
+                              ();
+                           let dummy_theta = 
+                              match calc_modes.angle with
+                              |Rad -> sprintf "%-.15g" theta
+                              |Deg -> sprintf "%-.15g" (180.0 /. pi *. theta)
+                           in
+                           let theta_len = String.length dummy_theta in
+                           if theta_len > max_width.(m).(1) then
+                              max_width.(m).(1) <- theta_len
+                           else
+                              ();
+                     done
+                  done;
+                  (* now use the maximum field widths to align the columns
+                   * during string creation *)
+                  let initial_string = "[" in
+                  let line = ref initial_string in
+                  for n = 0 to rows - 1 do
+                     line := !line ^ "[ ";
+                     for m = 0 to cols - 2 do
+                        match calc_modes.complex with
+                        |Rect ->
+                           line := !line ^ (sprintf "(%*.15g, %*.15g), " 
+                              max_width.(m).(0) el.{n, m}.Complex.re 
+                              max_width.(m).(1) el.{n, m}.Complex.im)
+                        |Polar ->
+                           begin
+                              let rr = el.{n, m}.Complex.re
+                              and ii = el.{n, m}.Complex.im in
+                              let r = sqrt (rr *. rr +. ii *. ii)
+                              and theta = atan2 ii rr in
+                              match calc_modes.angle with
+                              |Rad ->
+                                 line := !line ^ (sprintf "(%*.15g <%*.15g), " 
+                                 max_width.(m).(0) r max_width.(m).(1) theta)
+                              |Deg ->
+                                 line := !line ^ (sprintf "(%*.15g <%*.15g), " 
+                                 max_width.(m).(0) r max_width.(m).(1) 
+                                 (180.0 /. pi *. theta))
+                           end
+                     done;
+                     begin match calc_modes.complex with
+                     |Rect ->
+                        line := !line ^ (sprintf "(%*.15g, %*.15g) ]" 
+                           max_width.(cols-1).(0) el.{n, cols-1}.Complex.re 
+                           max_width.(cols-1).(1) el.{n, cols-1}.Complex.im)
+                     |Polar ->
+                        begin
+                           let rr = el.{n, cols-1}.Complex.re
+                           and ii = el.{n, cols-1}.Complex.im in
+                           let r = sqrt (rr *. rr +. ii *. ii)
+                           and theta = atan2 ii rr in
+                           match calc_modes.angle with
+                           |Rad ->
+                              line := !line ^ (sprintf "(%*.15g <%*.15g) ]" 
+                              max_width.(cols-1).(0) r max_width.(cols-1).(1) theta)
+                           |Deg ->
+                              line := !line ^ (sprintf "(%*.15g <%*.15g) ]" 
+                              max_width.(cols-1).(0) r max_width.(cols-1).(1) 
+                              (180.0 /. pi *. theta))
+                        end
+                     end;
+                     if n < pred rows then
+                        line := !line ^ "\n "
+                     else
+                        ()
+                  done;
+                  line := !line ^ "]";
+                  !line
+               |_ ->
+                  (* fall back on single-line display *)
+                  self#get_display_string line_num calc_modes
+            else (* line_num > len *)
+               ""
+         else (* line_num <= 0 *)
+            raise (Stack_error ("cannot display nonexistent stack element " ^
+               (string_of_int line_num)))
 
    end;;
 

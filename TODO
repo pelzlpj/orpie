@@ -2,10 +2,10 @@ rpc2 to-do list
 --------------------------------------------------------------------------------
 Definitely before release:
 
+   * entry of complex numbers in polar notation
+
    * make sure all the rpc 0.98 functions are in rpc2 (gamma, pi, ...)
 
-   * fullscreen display of matrices should align all the columns
-   
    * clean up the help panel; ideally, the hotkeys should be displayed
      in the main help window
 

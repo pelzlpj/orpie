@@ -666,10 +666,10 @@ class rpc_calc =
 
 
       method get_display_line line_num =
-         stack#get_display_string false line_num modes
+         stack#get_display_string line_num modes
 
       method get_fullscreen_display line_num =
-         stack#get_display_string true line_num modes
+         stack#get_fullscreen_display_string line_num modes
 
       method drop () = 
          if stack#length > 0 then
