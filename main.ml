@@ -99,7 +99,7 @@ let initialize_screen () =
          {stdscr = std; lines = height; cols = width; 
          help_win = None; hw_lines = 0; hw_cols = 0;
          stack_win = right_win; sw_lines = (height - 2); sw_cols = 40;
-         entry_win = bottom_win; ew_lines = 2; ew_cols = 80}
+         entry_win = bottom_win; ew_lines = 2; ew_cols = 40}
       else
          (endwin ();
          failwith "rpc2 requires at least a 40 column window.")

@@ -252,7 +252,8 @@ object(self)
                ()
          end
       done;
-      assert (wnoutrefresh scr.stack_win)
+      assert (wnoutrefresh scr.stack_win);
+      assert (move (scr.lines - 1) (scr.ew_cols - 1))
 
 
    method draw_update_entry () =
@@ -372,7 +373,7 @@ object(self)
                ss := !ss ^ "(" ^ temp_re ^ ")]]");
             !ss
       in
-      match interface_mode with
+      begin match interface_mode with
       |StandardEntryMode ->
          draw_entry_string data_string 0
       |ExtendedEntryMode ->
@@ -392,12 +393,15 @@ object(self)
                draw_entry_string matched_extended_entry highlight_len
       |BrowsingMode ->
          ()
+      end;
+      assert (move (scr.lines - 1) (scr.ew_cols - 1)) 
+
 
 
    (* display the help window *)
    method draw_help () =
       let modes = calc#get_modes () in
-      match scr.help_win with
+      begin match scr.help_win with
       |Some win ->
          wclear win;
          wattron win WA.bold;
@@ -504,6 +508,8 @@ object(self)
          end
       |None ->
          ()
+      end;
+      assert (move (scr.lines - 1) (scr.ew_cols - 1))
 
 
    (* write an error message to the stack window *)
@@ -524,7 +530,8 @@ object(self)
       done;
       let s = String.make scr.sw_cols '-' in
       assert (mvwaddstr scr.stack_win (List.length trunc_error_lines) 0 s);
-      assert (wnoutrefresh scr.stack_win)
+      assert (wnoutrefresh scr.stack_win);
+      assert (move (scr.lines - 1) (scr.ew_cols - 1))
 
 
 
@@ -1473,7 +1480,7 @@ object(self)
       "conditions; see 'COPYING' for details.");
       assert (mvaddstr (scr.lines - 4) (horiz_center - 12)
       "Press any key to continue.");
-      assert (move (scr.lines - 1) (scr.cols - 2));
+      assert (move (scr.lines - 1) (scr.cols - 1));
       assert (refresh ());
       let a = getch () in ();
       self#handle_refresh ()
