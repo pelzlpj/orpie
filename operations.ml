@@ -30,7 +30,7 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Asin | Acos | Atan | Sinh | Cosh | Tanh
                           | Asinh | Acosh | Atanh | Re | Im 
                           | Gamma | LnGamma | Erf | Erfc | Fact
-                          | Transpose;;
+                          | Transpose | Mod;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit

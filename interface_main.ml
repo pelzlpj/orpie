@@ -1067,6 +1067,8 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#fact
    |Transpose ->
       handle_function_call iface iface.calc#transpose
+   |Mod ->
+      handle_function_call iface iface.calc#mod_int
    end
 
 

@@ -190,6 +190,7 @@ default, the following keys have been bound to such operations:
       {\tt l} & natural logarithm function \\
       {\tt c} & complex conjugate function \\
       {\tt !} & factorial function  \\
+      {\tt \%} & element 2 mod element 1 \\
       \hline
    \end{tabular}
 \end{center}
@@ -250,6 +251,8 @@ The following functions are available as extended commands:
       {\tt erf} & error function \\
       {\tt erfc} & complementary error function \\
       {\tt fact} & factorial function \\
+      {\tt trans} & matrix transpose \\
+      {\tt mod} & element 2 mod element 1 \\
       {\tt add} & add last two elements \\
       {\tt sub} & subtract element 1 from element 2 \\
       {\tt mult} & multiply last two elements \\
@@ -508,6 +511,9 @@ to a real number, and as such the arithmetic will no longer be exact.
       stack element.
    \item {\tt function\_log10} \\
       Compute the base-10 logarithm of the last stack element.
+   \item {\tt function\_mod} \\
+      Compute element 2 mod element 1.  This operation can be applied only
+      to integer type data.
    \item {\tt function\_mult} \\
       Multiply last two stack elements.
    \item {\tt function\_neg} \\

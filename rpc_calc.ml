@@ -913,6 +913,32 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* mod (remainder) *)
+      method mod_int () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el2 = stack#pop () in
+               let gen_el1 = stack#pop () in
+               match gen_el1 with
+               |RpcInt el1 ->
+                  begin match gen_el2 with
+                  |RpcInt el2 ->
+                     stack#push (RpcInt (mod_big_int el1 el2))
+                  |_ ->
+                     (stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+                  end
+               |_ ->
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
 
       method enter_pi () =
          stack#push (RpcFloat pi)
