@@ -397,11 +397,11 @@ let draw_help (iface : interface_state_t) =
             mvwaddstr_safe win 7 2  ("drop     : " ^
             try_find Rcfile.key_of_command (Command Drop));
             mvwaddstr_safe win 8 2  ("clear    : " ^
-            try_find Rcfile.key_of_command (Command Clear));
-            mvwaddstr_safe win 9 2  ("swap     : " ^
             try_find Rcfile.key_of_command (Command Swap));
-            mvwaddstr_safe win 10 2 ("add      : " ^
+            mvwaddstr_safe win 9 2  ("add      : " ^
             try_find Rcfile.key_of_function (Function Add));
+            mvwaddstr_safe win 10 2 ("backspace: " ^
+            try_find Rcfile.key_of_edit (Edit Backspace));
             mvwaddstr_safe win 11 2 ("subtract : " ^
             try_find Rcfile.key_of_function (Function Sub));
             mvwaddstr_safe win 12 2 ("multiply : " ^

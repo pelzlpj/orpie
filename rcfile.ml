@@ -220,8 +220,14 @@ let register_binding key_string op =
          else
             config_failwith ("Cannot apply \\\\C to key \"" ^ main_key ^ "\";\n" ^
                        "octal notation might let you accomplish this.")
-      else
-         make_entries (decode_alias main_key) main_key
+      else 
+         let octal_regex = Str.regexp "^0o" in
+         try
+            let pos = Str.search_forward octal_regex key_string 0 in
+            make_entries (int_of_string key_string) ("\\" ^ Str.string_after key_string
+            2)
+         with
+            _ -> make_entries (decode_alias main_key) main_key
 
 
 
