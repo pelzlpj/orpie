@@ -13,88 +13,88 @@ set conserve_memory="false"
 
 # keys for "edit" operations, which affect the data that
 # is currently being entered
-bind "n" edit_minus
-bind "<backspace>" edit_backspace
-bind "<return>" edit_enter
-bind "`" edit_scientific_notation_base
-bind "<space>" edit_scientific_notation_base
-bind "#" edit_begin_integer
-bind "(" edit_complex
-bind "[" edit_matrix
-bind "," edit_separator
-bind "<" edit_angle
-bind "_" edit_begin_units
+bind "n"              edit_minus
+bind "<backspace>"    edit_backspace
+bind "<return>"       edit_enter
+bind "`"              edit_scientific_notation_base
+bind "<space>"        edit_scientific_notation_base
+bind "#"              edit_begin_integer
+bind "("              edit_complex
+bind "["              edit_matrix
+bind ","              edit_separator
+bind "<"              edit_angle
+bind "_"              edit_begin_units
 
 # keys for "integer edit" operations
-bind "#" integer_cancel
+bind "#"              integer_cancel
 
 # keys for "function" operations, which operate on an argument
-bind "+" function_add
-bind "-" function_sub
-bind "*" function_mult
-bind "/" function_div
-bind "n" function_neg
-bind "i" function_inv
-bind "^" function_pow
-bind "s" function_sqrt
-bind "a" function_abs
-bind "\\Ca" function_arg
-bind "e" function_exp
-bind "l" function_ln
-bind "c" function_conj
-bind "!" function_factorial
-bind "%" function_mod
-bind "S" function_store
-bind ";" function_eval
+bind "+"              function_add
+bind "-"              function_sub
+bind "*"              function_mult
+bind "/"              function_div
+bind "n"              function_neg
+bind "i"              function_inv
+bind "^"              function_pow
+bind "s"              function_sqrt
+bind "a"              function_abs
+bind "\\Ca"           function_arg
+bind "e"              function_exp
+bind "l"              function_ln
+bind "c"              function_conj
+bind "!"              function_factorial
+bind "%"              function_mod
+bind "S"              function_store
+bind ";"              function_eval
 
 # keys for "command" operations, which do not take an argument
-bind "\\" command_drop
-bind "|" command_clear
-bind "<pageup>" command_swap
-bind "<pagedown>" command_swap
-bind "<return>" command_dup
-bind "u" command_undo
-bind "<up>" command_begin_browsing
-bind "'" command_begin_abbrev
-bind "@" command_begin_variable
-bind "r" command_toggle_angle_mode
-bind "p" command_toggle_complex_mode
-bind "b" command_cycle_base
-bind "v" command_view
-bind "\\Cl" command_refresh
-bind "P" command_enter_pi
-bind "E" command_edit_input
-bind "h" command_cycle_help
-bind "Q" command_quit
+bind "\\"             command_drop
+bind "|"              command_clear
+bind "<pageup>"       command_swap
+bind "<pagedown>"     command_swap
+bind "<return>"       command_dup
+bind "u"              command_undo
+bind "<up>"           command_begin_browsing
+bind "'"              command_begin_abbrev
+bind "@"              command_begin_variable
+bind "r"              command_toggle_angle_mode
+bind "p"              command_toggle_complex_mode
+bind "b"              command_cycle_base
+bind "v"              command_view
+bind "\\Cl"           command_refresh
+bind "P"              command_enter_pi
+bind "E"              command_edit_input
+bind "h"              command_cycle_help
+bind "Q"              command_quit
 
 # keys for "browse" operations, which are active during
 # stack browsing mode
-bind "q" browse_end
-bind "<left>" browse_scroll_left
-bind "<right>" browse_scroll_right
-bind "<up>" browse_prev_line
-bind "<down>" browse_next_line
-bind "r" browse_rolldown
-bind "R" browse_rollup
-bind "v" browse_view
-bind "<return>" browse_echo
-bind "\\" browse_drop
-bind "d" browse_drop
-bind "D" browse_dropn
-bind "k" browse_keep
-bind "K" browse_keepn
-bind "E" browse_edit
+bind "q"              browse_end
+bind "<left>"         browse_scroll_left
+bind "<right>"        browse_scroll_right
+bind "<up>"           browse_prev_line
+bind "<down>"         browse_next_line
+bind "r"              browse_rolldown
+bind "R"              browse_rollup
+bind "v"              browse_view
+bind "<return>"       browse_echo
+bind "\\"             browse_drop
+bind "d"              browse_drop
+bind "D"              browse_dropn
+bind "k"              browse_keep
+bind "K"              browse_keepn
+bind "E"              browse_edit
 
 # keys for abbrev mode operations
-bind "'" abbrev_exit
-bind "<return>" abbrev_enter
-bind "<backspace>" abbrev_backspace
+bind "'"              abbrev_exit
+bind "<return>"       abbrev_enter
+bind "<backspace>"    abbrev_backspace
 
 # keys for variable edit mode operations
-bind "@" variable_cancel
-bind "<return>" variable_enter
-bind "<backspace>" variable_backspace
-bind "<tab>" variable_complete
+bind "@"              variable_cancel
+bind "<return>"       variable_enter
+bind "<backspace>"    variable_backspace
+bind "<tab>"          variable_complete
 
 # autobound keys
 autobind "<f5>"
@@ -108,92 +108,91 @@ autobind "<f12>"
 
 # abbrev command abbreviations
 # these should be given in the desired order of matching precedence
-abbrev "inv"     function_inv
-abbrev "pow"     function_pow
-abbrev "sq"      function_sq
-abbrev "sqrt"    function_sqrt
-abbrev "abs"     function_abs
-abbrev "arg"     function_arg
-abbrev "exp"     function_exp
-abbrev "ln"      function_ln
-abbrev "10^"     function_10_x
-abbrev "log10"   function_log10
-abbrev "conj"    function_conj
-abbrev "sin"     function_sin
-abbrev "cos"     function_cos
-abbrev "tan"     function_tan
-abbrev "sinh"    function_sinh
-abbrev "cosh"    function_cosh
-abbrev "tanh"    function_tanh
-abbrev "asinh"   function_asinh
-abbrev "acosh"   function_acosh
-abbrev "atanh"   function_atanh
-abbrev "asin"    function_asin
-abbrev "acos"    function_acos
-abbrev "atan"    function_atan
-abbrev "re"      function_re
-abbrev "im"      function_im
-abbrev "gamma"   function_gamma
-abbrev "lngamma" function_lngamma
-abbrev "erf"     function_erf
-abbrev "erfc"    function_erfc
-abbrev "fact"    function_factorial
-abbrev "trans"   function_transpose
-abbrev "mod"     function_mod
-abbrev "floor"   function_floor
-abbrev "ceil"    function_ceiling
-abbrev "toint"   function_to_int
-abbrev "toreal"  function_to_real
-abbrev "solvelin" function_solve_linear
-abbrev "eval"    function_eval
-abbrev "store"   function_store
-abbrev "purge"   function_purge
-abbrev "gcd"     function_gcd
-abbrev "lcm"     function_lcm
-abbrev "binom"   function_binomial_coeff
-abbrev "perm"    function_permutation
-abbrev "total"   function_total
-abbrev "mean"    function_mean
-abbrev "sumsq"   function_sumsq
-abbrev "var"     function_var_unbiased
-abbrev "varbias" function_var_biased
-abbrev "stdev"   function_stdev_unbiased
-abbrev "stdevbias" function_stdev_biased
-abbrev "min"     function_minimum
-abbrev "max"     function_maximum
-abbrev "utpn"    function_utpn
-abbrev "ustand"  function_standardize_units
-abbrev "uconvert" function_convert_units
-abbrev "uvalue"  function_unit_value
-abbrev "trace"   function_trace
-abbrev "drop"    command_drop
-abbrev "clear"   command_clear
-abbrev "swap"    command_swap
-abbrev "dup"     command_dup
-abbrev "undo"    command_undo
-abbrev "quit"    command_quit
-abbrev "rad"     command_rad
-abbrev "deg"     command_deg
-abbrev "rect"    command_rect
-abbrev "polar"   command_polar
-abbrev "bin"     command_bin
-abbrev "oct"     command_oct
-abbrev "dec"     command_dec
-abbrev "hex"     command_hex
-abbrev "view"    command_view
-abbrev "refresh" command_refresh
-abbrev "pi"      command_enter_pi
-abbrev "rand"    command_rand
-abbrev "edit"    command_edit_input
-abbrev "add"     function_add
-abbrev "sub"     function_sub
-abbrev "mult"    function_mult
-abbrev "div"     function_div
-abbrev "neg"     function_neg
-abbrev "about"   command_about
+abbrev "inv"               function_inv
+abbrev "pow"               function_pow
+abbrev "sq"                function_sq
+abbrev "sqrt"              function_sqrt
+abbrev "abs"               function_abs
+abbrev "arg"               function_arg
+abbrev "exp"               function_exp
+abbrev "ln"                function_ln
+abbrev "10^"               function_10_x
+abbrev "log10"             function_log10
+abbrev "conj"              function_conj
+abbrev "sin"               function_sin
+abbrev "cos"               function_cos
+abbrev "tan"               function_tan
+abbrev "sinh"              function_sinh
+abbrev "cosh"              function_cosh
+abbrev "tanh"              function_tanh
+abbrev "asinh"             function_asinh
+abbrev "acosh"             function_acosh
+abbrev "atanh"             function_atanh
+abbrev "asin"              function_asin
+abbrev "acos"              function_acos
+abbrev "atan"              function_atan
+abbrev "re"                function_re
+abbrev "im"                function_im
+abbrev "gamma"             function_gamma
+abbrev "lngamma"           function_lngamma
+abbrev "erf"               function_erf
+abbrev "erfc"              function_erfc
+abbrev "fact"              function_factorial
+abbrev "trans"             function_transpose
+abbrev "mod"               function_mod
+abbrev "floor"             function_floor
+abbrev "ceil"              function_ceiling
+abbrev "toint"             function_to_int
+abbrev "toreal"            function_to_real
+abbrev "solvelin"          function_solve_linear
+abbrev "eval"              function_eval
+abbrev "store"             function_store
+abbrev "purge"             function_purge
+abbrev "gcd"               function_gcd
+abbrev "lcm"               function_lcm
+abbrev "binom"             function_binomial_coeff
+abbrev "perm"              function_permutation
+abbrev "total"             function_total
+abbrev "mean"              function_mean
+abbrev "sumsq"             function_sumsq
+abbrev "var"               function_var_unbiased
+abbrev "varbias"           function_var_biased
+abbrev "stdev"             function_stdev_unbiased
+abbrev "stdevbias"         function_stdev_biased
+abbrev "min"               function_minimum
+abbrev "max"               function_maximum
+abbrev "utpn"              function_utpn
+abbrev "ustand"            function_standardize_units
+abbrev "uconvert"          function_convert_units
+abbrev "uvalue"            function_unit_value
+abbrev "trace"             function_trace
+abbrev "drop"              command_drop
+abbrev "clear"             command_clear
+abbrev "swap"              command_swap
+abbrev "dup"               command_dup
+abbrev "undo"              command_undo
+abbrev "quit"              command_quit
+abbrev "rad"               command_rad
+abbrev "deg"               command_deg
+abbrev "rect"              command_rect
+abbrev "polar"             command_polar
+abbrev "bin"               command_bin
+abbrev "oct"               command_oct
+abbrev "dec"               command_dec
+abbrev "hex"               command_hex
+abbrev "view"              command_view
+abbrev "refresh"           command_refresh
+abbrev "pi"                command_enter_pi
+abbrev "rand"              command_rand
+abbrev "edit"              command_edit_input
+abbrev "add"               function_add
+abbrev "sub"               function_sub
+abbrev "mult"              function_mult
+abbrev "div"               function_div
+abbrev "neg"               function_neg
+abbrev "about"             command_about
 
 
-# macro examples
 # base 2 logarithm
 macro "L" "l 2 l /"
 # or alternatively, using abbrev command syntax:
@@ -207,6 +206,7 @@ macro "<f1>" "@ r 0 1 <return>"
 macro "<f2>" "@ r 0 2 <return>"
 macro "<f3>" "@ r 0 3 <return>"
 macro "<f4>" "@ r 0 4 <return>"
+
 
 
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  
