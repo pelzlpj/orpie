@@ -70,6 +70,7 @@ bind "<return>" browse_echo
 bind "d" browse_drop
 bind "D" browse_dropn
 bind "k" browse_keep
+bind "K" browse_keepn
 
 # keys for extended mode operations
 bind "'" extended_exit

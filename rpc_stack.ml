@@ -183,6 +183,17 @@ class rpc_stack =
             raise (Stack_error "insufficient stack elements")
 
 
+      (* keep all elements below the selected (inclusive) *)
+      method keepN num =
+         if num <= len then
+            (for i = 0 to num - 1 do
+               stack.(i) <- stack.(i + len - num)
+            done;
+            len <- num)
+         else
+            raise (Stack_error "insufficient stack elements")
+
+
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =

@@ -314,6 +314,7 @@ let operation_of_string command_str =
    |"browse_drop"                   -> (Browse Drop1)
    |"browse_dropn"                  -> (Browse DropN)
    |"browse_keep"                   -> (Browse Keep)
+   |"browse_keepn"                  -> (Browse KeepN)
    |"extended_exit"                 -> (Extend ExitExtended)
    |"extended_enter"                -> (Extend EnterExtended)
    |"extended_backspace"            -> (Extend ExtBackspace)
