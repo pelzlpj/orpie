@@ -73,7 +73,7 @@ calc#print_stack;;
 *)
 
 (* initialize curses and return a record with screen information *)
-open Rpc_interface;;
+open Interface;;
 open Curses;;
 
 let initialize_screen () =
@@ -108,9 +108,9 @@ let initialize_screen () =
       failwith "rpc2 requires at least a 24 line window.")
 
 
-let iface = new Rpc_interface.rpc_interface calc (initialize_screen ());;
+let iface = Interface.make calc (initialize_screen ());;
 try
-   iface#run ()
+   Interface_main.run iface
 with error ->
    endwin ();
    Printf.fprintf stderr "Caught error at toplevel: %s\n" (Printexc.to_string error);;

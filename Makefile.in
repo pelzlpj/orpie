@@ -56,7 +56,7 @@ all: $(OCAMLBEST)
 
 CMO = big_int_str.cmo utility.cmo rcfile.cmo rpc_stack.cmo add.cmo sub.cmo \
 		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo \
-		operations.cmo rpc_interface.cmo main.cmo
+		operations.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma gsl.cma unix.cma
 CMXA = $(CMA:.cma=.cmxa)
