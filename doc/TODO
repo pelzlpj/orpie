@@ -5,6 +5,9 @@ Orpie To-Do List (roughly in order of priority)
 * implement rcfile macros; e.g. base 2 logarithm could be implemented as
   macro "L" "'ln<enter>2<enter>'ln<enter>/"
 
+* make the help screen optional; when the help screen is hidden, provide
+  mode information somewhere in the stack window
+
 * create a parser that can read data structures entered into an ascii file,
   so one can use $EDITOR to enter big matrices (for example)
 
