@@ -1709,6 +1709,7 @@ let handle_complete_variable (iface : interface_state_t) =
 (****************************************************************)
 let do_main_loop (iface : interface_state_t) =
    while iface.run_calc do
+      iface.calc#launch_fill_in_thread ();
       let key = wgetch iface.scr.entry_win in
       (* using the ncurses SIGWINCH handler to catch window resize events *)
       if key = Key.resize then

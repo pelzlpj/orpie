@@ -104,6 +104,11 @@ end
 
 #include "functions.c"
 
+(* these two were written separately in ml_curses.c,
+ * to permit proper threading behavior *)
+ML0(getch,int)
+ML1(wgetch,int,window)
+
 let null_window = null_window ()
 
 let bool_terminfo_variables = Hashtbl.create 67

@@ -141,6 +141,8 @@ class rpc_stack =
    object(self)
       val mutable len = 0
       val mutable stack = Array.make size_inc (stack_data_of_orpie_data (RpcFloat 0.0))
+      val stack_mutex = Mutex.create ()
+
 
       method length = len
 
@@ -155,7 +157,9 @@ class rpc_stack =
             close_out version_channel;
             let save_file = Utility.join_path !(Rcfile.datadir) "calc_state" in
             let save_channel = Utility.open_or_create_out_bin save_file in
+            Mutex.lock stack_mutex;
             Marshal.to_channel save_channel (modes, variables, stack, len) [];
+            Mutex.unlock stack_mutex;
             close_out save_channel
          with
             |Sys_error ss -> raise (Invalid_argument "can't open data file for writing")
@@ -187,8 +191,10 @@ class rpc_stack =
                         ((string, orpie_data_t) Hashtbl.t) * (stack_data_t array) * int)
                      in
                      close_in load_channel;
+                     Mutex.lock stack_mutex;
                      stack <- data_stack;
                      len <- data_len;
+                     Mutex.unlock stack_mutex;
                      data_modes, data_variables
                   end else
                      (* if the datafile is missing, do nothing as it will be
@@ -209,12 +215,15 @@ class rpc_stack =
 
             
       method backup () =
-         let b_stack = Array.copy stack and
-         b_len = len in
+         Mutex.lock stack_mutex;
+         let b_stack = Array.copy stack 
+         and b_len = len in
+         Mutex.unlock stack_mutex;
          {< len = b_len; stack = b_stack >}
 
 
       method push (v : orpie_data_t) =
+         Mutex.lock stack_mutex;
          (* allocate a new stack if necessary *)
          if len >= Array.length stack then begin
             let new_stack = Array.make ((Array.length stack) + size_inc)
@@ -225,10 +234,12 @@ class rpc_stack =
             ();
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
-         len <- len + 1
+         len <- len + 1;
+         Mutex.unlock stack_mutex
 
 
       method pop () =
+         Mutex.lock stack_mutex;
          (* compact stack memory by size_inc whenever we have 2 * size_inc
           * elements free *)
          if len < (Array.length stack) - 2 * size_inc then
@@ -237,16 +248,21 @@ class rpc_stack =
             stack <- new_stack
          else
             ();
-         if len > 0 then begin
-            len <- len - 1;
-            orpie_data_of_stack_data stack.(len)
-         end else
-            raise (Stack_error "cannot pop empty stack")
+         let pop_result =
+            if len > 0 then begin
+               len <- len - 1;
+               orpie_data_of_stack_data stack.(len)
+            end else
+               raise (Stack_error "cannot pop empty stack");
+         in
+         Mutex.unlock stack_mutex;
+         pop_result
 
 
       (* cyclically roll all stack elements downward (i.e. towards the top
        * of the stack), starting below element number 'num' (inclusive). *)
       method rolldown num =
+         Mutex.lock stack_mutex;
          if num <= len then
             let temp = stack.(pred len) in
             for i = pred len downto len - num + 1 do
@@ -254,12 +270,14 @@ class rpc_stack =
             done;
             stack.(len - num) <- temp
          else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
 
 
       (* cyclically roll all stack elements upward (i.e. away from the top
        * of the stack), starting below element number 'num' (inclusive). *)
       method rollup num =
+         Mutex.lock stack_mutex;
          if num <= len then
             let temp = stack.(len - num) in
             for i = len - num to len - 2 do
@@ -267,58 +285,74 @@ class rpc_stack =
             done;
             stack.(pred len) <- temp
          else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
 
 
       (* delete a particular element *)
       method delete num =
+         Mutex.lock stack_mutex;
          if num <= len then
             (for i = (len - num) to len do
                stack.(i) <- stack.(succ i)
             done;
             len <- (pred len))
          else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
+
 
 
       (* delete all elements below level N *)
       method deleteN num =
+         Mutex.lock stack_mutex;
          if num <= len then
             len <- len - num
          else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
 
 
       (* keep only a particular stack element *)
       method keep num =
+         Mutex.lock stack_mutex;
          if num <= len then
             (stack.(0) <- stack.(len - num);
             len <- 1)
          else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
 
 
       (* keep all elements below the selected (inclusive) *)
       method keepN num =
+         Mutex.lock stack_mutex;
          if num <= len then begin
             for i = 0 to num - 1 do
                stack.(i) <- stack.(i + len - num)
             done;
             len <- num
          end else
-            raise (Stack_error "insufficient stack elements")
+            raise (Stack_error "insufficient stack elements");
+         Mutex.unlock stack_mutex
+
 
 
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =
-         if el_num <= len then
-            let actual_el_num = len - el_num in
-            orpie_data_of_stack_data stack.(actual_el_num)
-         else
-            let s = Printf.sprintf "cannot access nonexistant stack element %d"
-            el_num in
-            raise (Stack_error s)
+         Mutex.lock stack_mutex;
+         let peek_result =
+            if el_num <= len then
+               let actual_el_num = len - el_num in
+               orpie_data_of_stack_data stack.(actual_el_num)
+            else
+               let s = Printf.sprintf "cannot access nonexistant stack element %d"
+               el_num in
+               raise (Stack_error s);
+         in
+         Mutex.unlock stack_mutex;
+         peek_result
 
       
       method private get_display_string_wrap disp_mode line_num calc_modes =
@@ -348,123 +382,129 @@ class rpc_stack =
        * the desired stack element.  If the table lookup fails, then create
        * the representation. *)
       method private lookup_or_create_string disp_mode calc_modes index =
+         Mutex.lock stack_mutex;
          let stack_el = stack.(index) in
-         match stack_el with
-         |StackInt (ii, ii_str) ->
-            let lookup_int_str record =
-               begin match record with
-               |None ->
-                  self#create_int_string disp_mode calc_modes ii ii_str
-               |Some ss ->
-                  ss
-               end
-            in
-            begin match disp_mode with
-            |Line ->
-               begin match calc_modes.base with
-               |Bin -> lookup_int_str ii_str.i_bin_line
-               |Oct -> lookup_int_str ii_str.i_oct_line
-               |Dec -> lookup_int_str ii_str.i_dec_line
-               |Hex -> lookup_int_str ii_str.i_hex_line
-               end
-            |Fullscreen ->
-               begin match calc_modes.base with
-               |Bin -> lookup_int_str ii_str.i_bin_fs
-               |Oct -> lookup_int_str ii_str.i_oct_fs
-               |Dec -> lookup_int_str ii_str.i_dec_fs
-               |Hex -> lookup_int_str ii_str.i_hex_fs
-               end
-            end
-         |StackFloat (ff, ff_str) ->
-            begin match ff_str.f with
-            |None ->
-               self#create_float_string ff ff_str
-            |Some ss ->
-               ss
-            end
-         |StackComplex (cc, cc_str) ->
-            let lookup_cmpx_str record =
-               begin match record with
-               |None ->
-                  self#create_cmpx_string calc_modes cc cc_str
-               |Some ss ->
-                  ss
-               end
-            in
-            begin match calc_modes.complex with
-            |Rect -> 
-               lookup_cmpx_str cc_str.c_rect
-            |Polar ->
-               begin match calc_modes.angle with
-               |Rad -> lookup_cmpx_str cc_str.c_pol_rad
-               |Deg -> lookup_cmpx_str cc_str.c_pol_deg
-               end
-            end
-         |StackFloatMatrix (fm, fm_str) ->
-            begin match disp_mode with
-            |Line ->
-               begin match fm_str.fmat_line with
-               |None ->
-                  self#create_fmat_string disp_mode fm fm_str
-               |Some ss ->
-                  ss
-               end
-            |Fullscreen ->
-               begin match fm_str.fmat_fs with
-               |None ->
-                  self#create_fmat_string disp_mode fm fm_str
-               |Some ss ->
-                  ss
-               end
-            end
-         |StackComplexMatrix (cm, cm_str) ->
-            let lookup_cmat_str record =
-               begin match record with
-               |None ->
-                  self#create_cmat_string disp_mode calc_modes cm cm_str
-               |Some ss ->
-                  ss
-               end
-            in
-            begin match disp_mode with
-            |Line ->
-               begin match calc_modes.complex with
-               |Rect ->
-                  lookup_cmat_str cm_str.cmat_rect_line
-               |Polar ->
-                  begin match calc_modes.angle with
-                  |Rad -> lookup_cmat_str cm_str.cmat_pol_rad_line
-                  |Deg -> lookup_cmat_str cm_str.cmat_pol_deg_line
+         let lookup_result =
+            begin match stack_el with
+            |StackInt (ii, ii_str) ->
+               let lookup_int_str record =
+                  begin match record with
+                  |None ->
+                     self#create_int_string disp_mode calc_modes ii ii_str
+                  |Some ss ->
+                     ss
+                  end
+               in
+               begin match disp_mode with
+               |Line ->
+                  begin match calc_modes.base with
+                  |Bin -> lookup_int_str ii_str.i_bin_line
+                  |Oct -> lookup_int_str ii_str.i_oct_line
+                  |Dec -> lookup_int_str ii_str.i_dec_line
+                  |Hex -> lookup_int_str ii_str.i_hex_line
+                  end
+               |Fullscreen ->
+                  begin match calc_modes.base with
+                  |Bin -> lookup_int_str ii_str.i_bin_fs
+                  |Oct -> lookup_int_str ii_str.i_oct_fs
+                  |Dec -> lookup_int_str ii_str.i_dec_fs
+                  |Hex -> lookup_int_str ii_str.i_hex_fs
                   end
                end
-            |Fullscreen ->
+            |StackFloat (ff, ff_str) ->
+               begin match ff_str.f with
+               |None ->
+                  self#create_float_string ff ff_str
+               |Some ss ->
+                  ss
+               end
+            |StackComplex (cc, cc_str) ->
+               let lookup_cmpx_str record =
+                  begin match record with
+                  |None ->
+                     self#create_cmpx_string calc_modes cc cc_str
+                  |Some ss ->
+                     ss
+                  end
+               in
                begin match calc_modes.complex with
-               |Rect ->
-                  lookup_cmat_str cm_str.cmat_rect_fs
+               |Rect -> 
+                  lookup_cmpx_str cc_str.c_rect
                |Polar ->
                   begin match calc_modes.angle with
-                  |Rad -> lookup_cmat_str cm_str.cmat_pol_rad_fs
-                  |Deg -> lookup_cmat_str cm_str.cmat_pol_deg_fs
+                  |Rad -> lookup_cmpx_str cc_str.c_pol_rad
+                  |Deg -> lookup_cmpx_str cc_str.c_pol_deg
                   end
                end
-            end
-         |StackVariable (vv, vv_str) ->
-            begin match disp_mode with
-            |Line ->
-               begin match vv_str.v_line with
-               |None ->
-                  self#create_var_string disp_mode vv vv_str
-               |Some ss ->
-                  ss
+            |StackFloatMatrix (fm, fm_str) ->
+               begin match disp_mode with
+               |Line ->
+                  begin match fm_str.fmat_line with
+                  |None ->
+                     self#create_fmat_string disp_mode fm fm_str
+                  |Some ss ->
+                     ss
+                  end
+               |Fullscreen ->
+                  begin match fm_str.fmat_fs with
+                  |None ->
+                     self#create_fmat_string disp_mode fm fm_str
+                  |Some ss ->
+                     ss
+                  end
                end
-            |Fullscreen ->
-               begin match vv_str.v_fs with
-               |None ->
-                  self#create_var_string disp_mode vv vv_str
-               |Some ss ->
-                  ss
+            |StackComplexMatrix (cm, cm_str) ->
+               let lookup_cmat_str record =
+                  begin match record with
+                  |None ->
+                     self#create_cmat_string disp_mode calc_modes cm cm_str
+                  |Some ss ->
+                     ss
+                  end
+               in
+               begin match disp_mode with
+               |Line ->
+                  begin match calc_modes.complex with
+                  |Rect ->
+                     lookup_cmat_str cm_str.cmat_rect_line
+                  |Polar ->
+                     begin match calc_modes.angle with
+                     |Rad -> lookup_cmat_str cm_str.cmat_pol_rad_line
+                     |Deg -> lookup_cmat_str cm_str.cmat_pol_deg_line
+                     end
+                  end
+               |Fullscreen ->
+                  begin match calc_modes.complex with
+                  |Rect ->
+                     lookup_cmat_str cm_str.cmat_rect_fs
+                  |Polar ->
+                     begin match calc_modes.angle with
+                     |Rad -> lookup_cmat_str cm_str.cmat_pol_rad_fs
+                     |Deg -> lookup_cmat_str cm_str.cmat_pol_deg_fs
+                     end
+                  end
                end
-            end
+            |StackVariable (vv, vv_str) ->
+               begin match disp_mode with
+               |Line ->
+                  begin match vv_str.v_line with
+                  |None ->
+                     self#create_var_string disp_mode vv vv_str
+                  |Some ss ->
+                     ss
+                  end
+               |Fullscreen ->
+                  begin match vv_str.v_fs with
+                  |None ->
+                     self#create_var_string disp_mode vv vv_str
+                  |Some ss ->
+                     ss
+                  end
+               end
+            end;
+         in
+         Mutex.unlock stack_mutex;
+         lookup_result
 
 
 
@@ -790,7 +830,6 @@ class rpc_stack =
 
 
 
-
       (* generate a string representation for a complex matrix,
        * taking into account the display mode. *)
       method private create_var_string disp_mode vv vv_str =
@@ -802,6 +841,91 @@ class rpc_stack =
          |Line       -> line
          |Fullscreen -> fs
 
+
+      method launch_fill_in_thread () =
+         let _ = Thread.create self#fill_in_all_strings () in ()
+
+
+      (* fill in any unknown string representations from the stack *)
+      method private fill_in_all_strings () =
+         Mutex.lock stack_mutex;
+         let count = ref (pred len) in
+         Mutex.unlock stack_mutex;
+         while !count >= 0 do
+            self#fill_in_string !count;
+            count := pred !count
+         done
+
+
+
+      (* fill in all string representations for a particular stack entry.
+       * FIXME: many redundant lookups are being performed. *)
+      method private fill_in_string index =
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Bin; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Bin; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Oct; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Oct; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Dec; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Dec; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Hex; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Rad; base = Hex; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Bin; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Bin; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Oct; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Oct; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Dec; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Dec; complex = Polar} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Hex; complex = Rect} index in
+         let _ = self#lookup_or_create_string Line 
+         {angle = Deg; base = Hex; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Bin; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Bin; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Oct; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Oct; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Dec; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Dec; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Hex; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Rad; base = Hex; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Bin; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Bin; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Oct; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Oct; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Dec; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Dec; complex = Polar} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Hex; complex = Rect} index in
+         let _ = self#lookup_or_create_string Fullscreen 
+         {angle = Deg; base = Hex; complex = Polar} index in
+         ()
 
 
    end

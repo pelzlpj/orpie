@@ -39,8 +39,8 @@ CURSES_LIB = @CURSES_LIB@
 GSL_LIB    = @GSL_LIB@
 
 INCLUDES = -I ./curses -I ./gsl
-BFLAGS   = -pp camlp4o -g $(INCLUDES)
-OFLAGS   = -pp camlp4o $(INCLUDES)
+BFLAGS   = -pp camlp4o -g $(INCLUDES) -thread
+OFLAGS   = -pp camlp4o $(INCLUDES) -thread
 BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
 OLFLAGS  = -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
 DEPFLAGS = -pp camlp4o
@@ -63,7 +63,7 @@ CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo rcfile.cmo \
 		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo interface.cmo interface_draw.cmo \
 		interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
-CMA = nums.cma bigarray.cma str.cma
+CMA = nums.cma bigarray.cma str.cma unix.cma threads.cma
 CMXA = $(CMA:.cma=.cmxa)
 
 CURSES_CMO = curses/curses.cmo
@@ -183,8 +183,8 @@ gsl-opt: $(GSL_OOBJS)
 gsl-byte: $(GSL_BOBJS)
 
 GSL_INCLUDES = -I ./gsl
-GSL_BFLAGS = -g $(GSL_INCLUDES)
-GSL_OFLAGS = $(GSL_INCLUDES)
+GSL_BFLAGS = -g $(GSL_INCLUDES) -thread
+GSL_OFLAGS = $(GSL_INCLUDES) -thread
 GSL_CFLAGS = -Wall -fPIC -DPIC
 
 gsl/%.cmi : gsl/%.mli
@@ -208,8 +208,8 @@ curses-opt: $(CURSES_OOBJS)
 curses-byte: $(CURSES_BOBJS)
 
 CURSES_INCLUDES =
-CURSES_BFLAGS = -g $(CURSES_INCLUDES)
-CURSES_OFLAGS = $(CURSES_INCLUDES)
+CURSES_BFLAGS = -g $(CURSES_INCLUDES) -thread
+CURSES_OFLAGS = $(CURSES_INCLUDES) -thread
 CURSES_CFLAGS = -Wall -fPIC -DPIC
 
 curses/%.cmi : curses/%.mli

@@ -184,8 +184,9 @@ ML1(winsertln,err,window)
 
 /* getch */
 
-ML0(getch,int)
-ML1(wgetch,int,window)
+/* getch() and wgetch() can be found in curses.ml and ml_curses.c */
+/*ML0(getch,int)
+ML1(wgetch,int,window) */
 ML2(mvgetch,int,int,int)
 ML3(mvwgetch,int,window,int,int)
 ML1(ungetch,err,int)

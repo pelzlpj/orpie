@@ -170,4 +170,34 @@ static void winch_handler(int n)
 }
 
 #include "functions.c"
+#include "caml/signals.h"
+
+/* The following routines were rewritten 07/14/04 by Paul Pelzl
+ * to allow other threads to run while getch() is blocking */
+value mlcurses_getch(void)
+{
+   CAMLparam0();
+   value ch;
+
+   enter_blocking_section();
+   ch = Val_int(getch());
+   leave_blocking_section();
+
+   CAMLreturn(ch);
+}
+
+
+value mlcurses_wgetch(value win)
+{
+   CAMLparam1(win);
+   value ch;
+
+   caml__dummy_win = caml__dummy_win;
+
+   enter_blocking_section();
+   ch = Val_int(wgetch((WINDOW *) win));
+   leave_blocking_section();
+
+   CAMLreturn(ch);
+}
 

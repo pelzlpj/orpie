@@ -1264,6 +1264,10 @@ class rpc_calc =
       method get_fullscreen_display line_num =
          stack#get_fullscreen_display_string line_num modes
 
+      (* fill in the display string lookup table *)
+      method launch_fill_in_thread () =
+         stack#launch_fill_in_thread ()
+
       method drop () = 
          if stack#length > 0 then
             begin
