@@ -96,33 +96,39 @@ let orpie_data_of_stack_data (sd : stack_data_t) =
 let stack_data_of_orpie_data (od : orpie_data_t) =
    match od with
    |RpcInt ii ->
-      StackInt (ii, {i_bin_line = None;
-                i_oct_line = None;
-                i_dec_line = None;
-                i_hex_line = None;
-                i_bin_fs   = None;
-                i_oct_fs   = None;
-                i_dec_fs   = None;
-                i_hex_fs   = None})
+      StackInt (ii, 
+         {i_bin_line = None;
+          i_oct_line = None;
+          i_dec_line = None;
+          i_hex_line = None;
+          i_bin_fs   = None;
+          i_oct_fs   = None;
+          i_dec_fs   = None;
+          i_hex_fs   = None})
    |RpcFloat ff ->
-      StackFloat (ff, {f = None})
+      StackFloat (ff, 
+         {f = None})
    |RpcComplex cc ->
-      StackComplex (cc, {c_rect    = None;
-                    c_pol_rad = None;
-                    c_pol_deg = None})
+      StackComplex (cc, 
+         {c_rect    = None;
+          c_pol_rad = None;
+          c_pol_deg = None})
    |RpcFloatMatrix fm ->
-      StackFloatMatrix (fm, {fmat_line = None;
-                        fmat_fs   = None})
+      StackFloatMatrix (fm, 
+         {fmat_line = None;
+          fmat_fs   = None})
    |RpcComplexMatrix cm ->
-      StackComplexMatrix (cm, {cmat_rect_line    = None;
-                          cmat_pol_rad_line = None;
-                          cmat_pol_deg_line = None;
-                          cmat_rect_fs      = None;
-                          cmat_pol_rad_fs   = None;
-                          cmat_pol_deg_fs   = None})
+      StackComplexMatrix (cm, 
+         {cmat_rect_line    = None;
+          cmat_pol_rad_line = None;
+          cmat_pol_deg_line = None;
+          cmat_rect_fs      = None;
+          cmat_pol_rad_fs   = None;
+          cmat_pol_deg_fs   = None})
    |RpcVariable vv ->
-      StackVariable (vv, {v_line = None;
-                     v_fs   = None})
+      StackVariable (vv, 
+         {v_line = None;
+          v_fs   = None})
 
 
 type display_mode_t = | Line | Fullscreen
@@ -861,71 +867,24 @@ class rpc_stack =
       (* fill in all string representations for a particular stack entry.
        * FIXME: many redundant lookups are being performed. *)
       method private fill_in_string index =
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Bin; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Bin; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Oct; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Oct; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Dec; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Dec; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Hex; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Rad; base = Hex; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Bin; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Bin; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Oct; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Oct; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Dec; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Dec; complex = Polar} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Hex; complex = Rect} index in
-         let _ = self#lookup_or_create_string Line 
-         {angle = Deg; base = Hex; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Bin; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Bin; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Oct; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Oct; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Dec; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Dec; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Hex; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Rad; base = Hex; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Bin; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Bin; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Oct; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Oct; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Dec; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Dec; complex = Polar} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Hex; complex = Rect} index in
-         let _ = self#lookup_or_create_string Fullscreen 
-         {angle = Deg; base = Hex; complex = Polar} index in
-         ()
+         let disp_modes = [Line; Fullscreen]
+         and angles     = [Rad; Deg]
+         and bases      = [Bin; Oct; Dec; Hex]
+         and cpx_modes  = [Rect; Polar] in
+         let f_disp d =
+            let f_angle a =
+               let f_base b =
+                  let f_cpx c =
+                     let _ = self#lookup_or_create_string d
+                     {angle = a; base = b; complex = c} index in ()
+                  in
+                  List.iter f_cpx cpx_modes
+               in
+               List.iter f_base bases
+            in
+            List.iter f_angle angles
+         in
+         List.iter f_disp disp_modes
 
 
    end
