@@ -74,7 +74,8 @@ let key_of_extended ex_op =
 
 (* abbreviations used in extended entry mode *)
 let extended_commands = ref "";;
-let command_abbrev_table = Hashtbl.create 30;;
+let abbrev_command_table = Hashtbl.create 50;;
+let command_abbrev_table = Hashtbl.create 50;;
 
 (* Register an abbreviation for an extended command.
  * This updates the string used in regexp matching, and
@@ -91,10 +92,14 @@ let register_abbrev abbr op =
       extended_commands := before ^ abbr ^ "\n" ^ after
    with Not_found ->
       extended_commands := !extended_commands ^ abbr ^ "\n");
-   Hashtbl.add command_abbrev_table abbr op;;
+   Hashtbl.add abbrev_command_table abbr op;
+   Hashtbl.add command_abbrev_table op abbr;;
+   
 
 let translate_extended_abbrev abb =
-   Hashtbl.find command_abbrev_table abb;;
+   Hashtbl.find abbrev_command_table abb;;
+let abbrev_of_operation op =
+   Hashtbl.find command_abbrev_table op;;
 
 
 (* Register a key binding.  This adds hash table entries for translation

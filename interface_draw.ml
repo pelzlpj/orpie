@@ -30,6 +30,10 @@ open Operations;;
 open Interface;;
 
 
+type abbrev_help_display_t = {functions : string list; 
+                              modes : string list;
+                              misc : string list}
+
 (* display the stack, where the bottom line of the display
  * corresponds to stack level 'stack_bottom_row' *)
 let draw_stack (iface : interface_state_t) =
@@ -269,6 +273,70 @@ let draw_update_entry iface =
 
 
 
+(* create the lists of abbreviations to display in the extended command
+ * help screen *)
+let generate_abbrev_help () =
+   let rec trunc_list lst n =
+      if n = 0 then
+         []
+      else
+         match lst with
+         |[] ->
+            []
+         |head :: tail ->
+            head :: (trunc_list tail (pred n))
+   in
+   let get_abbr op =
+      try Rcfile.abbrev_of_operation op
+      with Not_found -> (Printf.fprintf stderr "can't find op\n"; "")
+   in
+   let functions_str =
+      (get_abbr (Function Sin))   ^ "  " ^ 
+      (get_abbr (Function Asin))  ^ "  " ^ 
+      (get_abbr (Function Cos))   ^ "  " ^ 
+      (get_abbr (Function Acos))  ^ "  " ^ 
+      (get_abbr (Function Tan))   ^ "  " ^ 
+      (get_abbr (Function Atan))  ^ "  " ^ 
+      (get_abbr (Function Exp))   ^ "  " ^ 
+      (get_abbr (Function Ln))    ^ "  " ^ 
+      (get_abbr (Function Ten_x)) ^ "  " ^ 
+      (get_abbr (Function Log10)) ^ "  " ^ 
+      (get_abbr (Function Sq))    ^ "  " ^ 
+      (get_abbr (Function Sqrt))  ^ "  " ^ 
+      (get_abbr (Function Inv))   ^ "  " ^ 
+      (get_abbr (Function Sinh))  ^ "  " ^ 
+      (get_abbr (Function Cosh))  ^ "  " ^ 
+      (get_abbr (Function Tanh))  ^ "  " ^ 
+      (get_abbr (Function Re))    ^ "  " ^ 
+      (get_abbr (Function Im))
+   in
+   let functions_str_wrap = trunc_list 
+   (Utility.wordwrap_nspace functions_str 34 2) 5 in
+   let modes_str = 
+      (get_abbr (Command SetRadians)) ^ "  " ^ 
+      (get_abbr (Command SetDegrees)) ^ "  " ^ 
+      (get_abbr (Command SetBin))     ^ "  " ^ 
+      (get_abbr (Command SetOct))     ^ "  " ^ 
+      (get_abbr (Command SetDec))     ^ "  " ^ 
+      (get_abbr (Command SetHex))     ^ "  " ^ 
+      (get_abbr (Command SetRect))    ^ "  " ^ 
+      (get_abbr (Command SetPolar))
+   in
+   let modes_str_wrap = trunc_list 
+   (Utility.wordwrap_nspace modes_str 34 2) 2 in
+   let misc_str = 
+      (get_abbr (Command EnterPi)) ^ "  " ^ 
+      (get_abbr (Command Undo))    ^ "  " ^ 
+      (get_abbr (Command View))
+   in
+   let misc_str_wrap = trunc_list
+   (Utility.wordwrap_nspace misc_str 34 2) 1 in
+   {functions = functions_str_wrap;
+   modes      = modes_str_wrap;
+   misc       = misc_str_wrap}
+
+
+
 (* display the help window *)
 let draw_help (iface : interface_state_t) =
    let mvwaddstr_safe w vert horiz st =
@@ -345,8 +413,8 @@ let draw_help (iface : interface_state_t) =
             wattroff win WA.bold;
             mvwaddstr_safe win 17 2 ("scientific notation : " ^
             Rcfile.key_of_edit (Edit SciNotBase));
-            mvwaddstr_safe win 18 2 ("extended command    : " ^
-            Rcfile.key_of_extended  (Extend EnterExtended));
+            mvwaddstr_safe win 18 2 ("extended entry mode : " ^
+            Rcfile.key_of_command  (Command BeginExtended));
             mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
             Rcfile.key_of_command (Command BeginBrowse));
             mvwaddstr_safe win 20 2 ("refresh display     : " ^
@@ -356,22 +424,30 @@ let draw_help (iface : interface_state_t) =
             assert (wnoutrefresh win)
          |Extended ->
             if String.length iface.extended_entry_buffer = 0 then
+               let abbr_strings = generate_abbrev_help () in
+               let rec print_help_lines lines v_pos =
+                  begin match lines with
+                  |[] ->
+                     ()
+                  |head :: tail ->
+                     mvwaddstr_safe win v_pos 2 head;
+                     print_help_lines tail (succ v_pos)
+                  end
+               in
                begin
                   wattron win WA.bold;
-                  assert (mvwaddstr win 5 0 "Extended Commands:");
+                  mvwaddstr_safe win 5 0 "Extended Commands:";
                   wattroff win WA.bold;
-                  assert (mvwaddstr win 6 1 "Functions:");
-                  assert (mvwaddstr win 7 2 "sin   asin  cos   acos  tan   atan");
-                  assert (mvwaddstr win 8 2 "exp   ln    10^x  log10 sq    sqrt");
-                  assert (mvwaddstr win 9 2 "sinh  asinh cosh  acosh tanh  atanh");
-                  assert (mvwaddstr win 10 2 "erf   erfc  inv   gamma lngamma");
-                  assert (mvwaddstr win 11 2 "real  imag  floor ceil  nearint");
-                  assert (mvwaddstr win 13 1 "Change Modes:");
-                  assert (mvwaddstr win 14 2 "rad   deg   bin   oct   hex   dec");
-                  assert (mvwaddstr win 15 2 "rect  polar");
-                  assert (mvwaddstr win 17 1 "Miscellaneous:");
-                  assert (mvwaddstr win 18 2 "pi   undo  view");
-                  assert (mvwaddstr win 20 1 "<Backspace> : exit extended entry");
+                  mvwaddstr_safe win 6 1 "Common Functions:";
+                  print_help_lines abbr_strings.functions 7;
+                  mvwaddstr_safe win 13 1 "Change Modes:";
+                  print_help_lines abbr_strings.modes 14;
+                  mvwaddstr_safe win 17 1 "Miscellaneous:";
+                  print_help_lines abbr_strings.misc 18;
+                  mvwaddstr_safe win 20 1 ("execute command : " ^
+                  Rcfile.key_of_extended (Extend EnterExtended));
+                  mvwaddstr_safe win 21 1 ("cancel command  : " ^
+                  Rcfile.key_of_extended (Extend ExitExtended));
                   assert (wnoutrefresh win)
                end
             else

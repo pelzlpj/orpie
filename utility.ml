@@ -26,9 +26,11 @@
 open Curses;;
 
 
-(* Word wrap a string to a width of 'cols'.  Breaks lines on whitespace; if a word is too
- * long, it will be broken and hyphenated.  Return value is a list of strings.  *)
-let wordwrap s cols =
+(* Word wrap a string to a width of 'cols', placing 'num_spaces' spaces between
+ * the words.  Breaks lines on whitespace; if a word is too long, it will be
+ * broken and hyphenated.  Return value is a list of strings.  *)
+let wordwrap_nspace s cols num_spaces =
+   let space_str = String.make num_spaces ' ' in
    if String.length s <= cols then
       s :: []
    else
@@ -38,7 +40,7 @@ let wordwrap s cols =
             begin
                match wrapped_list with
                |line :: line_tail ->
-                  let new_line = line ^ " " ^ word in
+                  let new_line = line ^ space_str ^ word in
                   if String.length new_line <= cols then
                      process_words word_tail (new_line :: line_tail)
                   else if String.length word <= cols then
@@ -67,6 +69,9 @@ let wordwrap s cols =
       let words = Str.split (Str.regexp "[ \t]+") s in
       List.rev (process_words words [])
 
+
+(* wordwrap with single space *)
+let wordwrap s cols = wordwrap_nspace s cols 1
 
 (* Do whatever is necessary to open up a file for writing.  If it already exists,
  * open it as-is.  If it does not exist, make sure that all prefix directories
