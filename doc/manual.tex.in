@@ -1423,8 +1423,9 @@ make Orpie possible.
 
    \item {\bf Orpie crashes with a segmentation fault on startup.  What can I do?}
 
-      Try deleting the calculator state file.  Orpie makes use of Ocaml's marshalling
-      feature, which is very convenient but doesn't respond well to corrupt
+      Try deleting the calculator state file (probably \texttt{\~{}/.orpie/calc\_state} ,
+      unless you changed the \texttt{data\_dir} configuration variable).  Orpie makes use of 
+      Ocaml's marshalling feature, which is very convenient but doesn't respond well to corrupt
       data files.
       
 
