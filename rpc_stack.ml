@@ -121,7 +121,7 @@ class rpc_stack =
                      |RpcFloat el ->
                         sprintf "%.15g" el
                      |RpcComplex el ->
-                        sprintf "(%g, %g)" el.Complex.re el.Complex.im
+                        sprintf "(%.15g, %.15g)" el.Complex.re el.Complex.im
                      |RpcFloatMatrix el ->
                         (* looks like [[ a11, a12 ][ a21, a22 ]] *)
                         let rows, cols = (Gsl_matrix.dims el) in
@@ -130,9 +130,9 @@ class rpc_stack =
                         for n = 0 to rows - 1 do
                            line := !line ^ "[ ";
                            for m = 0 to cols - 2 do
-                              line := !line ^ (sprintf "%g, " el.{n, m})
+                              line := !line ^ (sprintf "%.15g, " el.{n, m})
                            done;
-                           line := !line ^ (sprintf "%g ]" el.{n, cols-1})
+                           line := !line ^ (sprintf "%.15g ]" el.{n, cols-1})
                         done;
                         line := !line ^ "]";
                         !line
@@ -145,10 +145,10 @@ class rpc_stack =
                         for n = 0 to rows - 1 do
                            line := !line ^ "[ ";
                            for m = 0 to cols - 2 do
-                              line := !line ^ (sprintf "(%g, %g), " 
+                              line := !line ^ (sprintf "(%.15g, %.15g), " 
                                  el.{n, m}.Complex.re el.{n, m}.Complex.im)
                            done;
-                           line := !line ^ (sprintf "(%g, %g) ]" 
+                           line := !line ^ (sprintf "(%.15g, %.15g) ]" 
                               el.{n, cols-1}.Complex.re el.{n, cols-1}.Complex.im)
                         done;
                         line := !line ^ "]";

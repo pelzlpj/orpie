@@ -183,7 +183,26 @@ class rpc_calc =
       method get_display_line line_num =
          stack#get_display_line line_num modes
 
-      method drop () = stack#pop ()
+      method drop () = 
+         if stack#length > 0 then
+            let dummy = stack#pop () in 
+            ()
+         else
+            raise (Invalid_argument "empty stack")
+
+      method swap () =
+         if stack#length > 1 then
+            let gen_el1 = stack#pop () in
+            let gen_el2 = stack#pop () in
+            stack#push gen_el1;
+            stack#push gen_el2
+         else
+            raise (Invalid_argument "insufficient arguments for swap")
+
+      method clear () =
+         for i = 1 to stack#length do
+            let dummy = stack#pop () in ()
+         done
 
       method push (v : rpc_data) =
          stack#push v
