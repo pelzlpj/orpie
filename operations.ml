@@ -7,7 +7,7 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Pow | Sqrt | Abs | Arg | Exp | Ln 
                           | Conj ;;
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
-                          | BeginBrowse | BeginExtended;;
+                          | BeginBrowse | BeginExtended | Quit;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;

@@ -230,6 +230,8 @@ let parse_line line_stream =
                            register_binding key (Command BeginBrowse)
                         |"command_begin_extended" ->
                            register_binding key (Command BeginExtended)
+                        |"command_quit" ->
+                           register_binding key (Command Quit)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->

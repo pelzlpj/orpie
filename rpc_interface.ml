@@ -49,7 +49,7 @@ type complex_entry_element =
 
 let extended_commands =
    ("add\nsub\nmult\ndiv\nneg\ninv\npow\nsqrt\nabs\narg\nexp\nln\nconj\n" ^
-    "drop\nclear\nswap\ndup\nundo");;
+    "drop\nclear\nswap\ndup\nundo\nquit");;
 
 (* abbreviations used in extended entry mode *)
 let command_abbrev_table = Hashtbl.create 30;;
@@ -71,6 +71,7 @@ Hashtbl.add command_abbrev_table "clear" (Command Clear);;
 Hashtbl.add command_abbrev_table "swap" (Command Swap);;
 Hashtbl.add command_abbrev_table "dup" (Command Dup);;
 Hashtbl.add command_abbrev_table "undo" (Command Undo);;
+Hashtbl.add command_abbrev_table "quit" (Command Quit);;
 let translate_extended_abbrev abb =
    Hashtbl.find command_abbrev_table abb;;
 
@@ -82,6 +83,7 @@ object(self)
    val version = "0.10"
    val calc = c
    val mutable scr = std                      (* curses screen with two or three subwindows *)
+   val mutable run_calc = true                (* exit when run_true becomes false *)
    val mutable stack_bottom_row = 1           (* controls what portion of the stack is viewable *)
    val mutable stack_selection = 1            (* in stack browsing mode, this item is selected *)
    val mutable interface_mode = StandardEntryMode  (* standard mode or stack browsing mode *)
@@ -632,11 +634,13 @@ object(self)
             self#handle_begin_browse ()
          |BeginExtended ->
             self#handle_begin_extended ()
+         |Quit ->
+            self#handle_quit ()
       end
 
 
    method do_main_loop () =
-      while true do
+      while run_calc do
          let key = getch () in
          match interface_mode with
          |StandardEntryMode ->
@@ -891,12 +895,14 @@ object(self)
             else
                (is_entering_exponent <- false;
                self#draw_entry ())
-         else if String.length buffer.re_mantissa > 0 then
+         else if String.length buffer.re_mantissa > 1 then
                (let len = String.length buffer.re_mantissa in
                buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
                self#draw_entry ())
          else
-            has_entry <- false
+            (has_entry <- false;
+            buffer.re_mantissa <- "";
+            self#draw_entry ())
       |ComplexEntry ->
          if is_entering_imag then
             if is_entering_exponent then
@@ -1201,6 +1207,11 @@ object(self)
       self#handle_prev_line ();
       self#draw_stack ()
       
+
+   (* quit the calculator *)
+   method private handle_quit () =
+      run_calc <- false
+
 
    (* begin extended entry *)
    method private handle_begin_extended () =

@@ -36,6 +36,7 @@ bind "<return>" command_dup
 bind "u" command_undo
 bind "<up>" command_begin_browsing
 bind "'" command_begin_extended
+bind "Q" command_quit
 
 # keys for "browse" operations, which are active during
 # stack browsing mode
