@@ -11,7 +11,8 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit
                           | SetRadians | SetDegrees | SetRect | SetPolar
-                          | SetBin | SetOct | SetDec | SetHex;;
+                          | SetBin | SetOct | SetDec | SetHex
+                          | ToggleAngleMode | ToggleComplexMode | CycleBase;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
                           | Separator;;

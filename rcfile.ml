@@ -276,6 +276,12 @@ let parse_line line_stream =
                            register_binding key (Command SetDec)
                         |"command_hex" ->
                            register_binding key (Command SetHex)
+                        |"command_toggle_angle_mode" ->
+                           register_binding key (Command ToggleAngleMode)
+                        |"command_toggle_complex_mode" ->
+                           register_binding key (Command ToggleComplexMode)
+                        |"command_cycle_base" ->
+                           register_binding key (Command CycleBase)
                         |"browse_end" ->
                            register_binding key (Browse EndBrowse)
                         |"browse_scroll_left" ->

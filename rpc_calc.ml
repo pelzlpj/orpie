@@ -61,6 +61,23 @@ class rpc_calc =
       method mode_hex () =
          modes <- {angle = modes.angle; base = Hex; complex = modes.complex}
 
+      method toggle_angle_mode () =
+         match modes.angle with
+         |Rad -> self#mode_deg ()
+         |Deg -> self#mode_rad ()
+
+      method toggle_complex_mode () =
+         match modes.complex with
+         |Rect  -> self#mode_polar ()
+         |Polar -> self#mode_rect ()
+
+      method cycle_base () =
+         match modes.base with
+         |Bin -> self#mode_oct ()
+         |Oct -> self#mode_dec ()
+         |Dec -> self#mode_hex ()
+         |Hex -> self#mode_bin ()
+
       method add () =
          Add.add stack self#backup
 

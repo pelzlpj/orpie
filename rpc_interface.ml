@@ -722,6 +722,18 @@ object(self)
             self#handle_command_call calc#mode_hex;
             self#draw_help ();
             self#draw_stack ()
+         |ToggleAngleMode ->
+            self#handle_command_call calc#toggle_angle_mode;
+            self#draw_help ();
+            self#draw_stack ()
+         |ToggleComplexMode ->
+            self#handle_command_call calc#toggle_complex_mode;
+            self#draw_help ();
+            self#draw_stack ()
+         |CycleBase ->
+            self#handle_command_call calc#cycle_base;
+            self#draw_help ();
+            self#draw_stack ()
 
       end
 
