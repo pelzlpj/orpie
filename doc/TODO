@@ -1,9 +1,6 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* create a parser that can read data structures entered into an ascii file,
-  so one can use $EDITOR to enter big matrices (for example)
-
 * detect ill-conditioned complex matrices when performing inversion
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but

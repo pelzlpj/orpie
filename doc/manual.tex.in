@@ -16,7 +16,7 @@
 \usepackage{fullpage}
 %@% ELSE %@%
 \usepackage{latex2man}
-\setVersion{1.0}
+\setVersion{1.1}
 %@% END-IF %@%
 
 % End preamble
@@ -24,9 +24,9 @@
 
 \begin{document}
 %@% IF LATEX %@%
-\title{Orpie v1.0 User Manual}
+\title{Orpie v1.1 User Manual}
 \author{Paul J. Pelzl}
-\date{March 27, 2004}
+\date{April 13, 2004}
 \maketitle
 
 \begin{center}
@@ -312,6 +312,52 @@ Note that integer constants may have unlimited length, and the basic arithmetic
 operations (addition, subtraction, multiplication, division) will be performed
 using exact arithmetic when both arguments are integers.
 
+%@% IF LATEX %@%
+\subsubsection{Entering Data With an External Editor}
+\label{editor}
+%@% ELSE %@%
+\subsection{Entering Data With an External Editor}
+%@% END-IF %@%
+Orpie can also parse input entered via an external editor.  You may find this to be
+a convenient method for entering large matrices.  Pressing '\texttt{E}' will
+launch the external editor, and the various data types may be entered as illustrated
+by the examples below:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Data Type & Sample Input String \\
+      \hline
+      integer constant & \texttt{\#12345678\_d}, where the trailing
+                         letter is one of the base characters \{b, o, d, h\} \\
+      real number      & \texttt{-123.45e67} \\
+      complex number   & \texttt{(1e10, 2)} or \texttt{(1 <90)} \\
+      real matrix      & \texttt{[[1, 2][3.1, 4.5e10]]} \\
+      complex matrix   & \texttt{[[(1, 0), 5][1e10, (2 <90)]]} \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
+Notice that the complex matrix input parser is quite flexible; real and complex
+matrix elements may be mixed, and cartesian and polar complex formats may be
+mixed as well.
+
+Multiple stack entries may be specified in the same file, if they are separated
+by whitespace.  For example, entering \texttt{(1, 2) 1.5} into the editor will cause
+the complex value \texttt{(1, 2)} to be placed on the stack, followed by the real
+value \texttt{1.5}.
+
+The input parser will discard whitespace where possible, so feel free to add
+any form of whitespace between matrix rows, matrix elements, real and complex
+components, etc.  
+
 \subsection{Performing Basic Function Operations}
 %@% IF LATEX %@%
 \label{functionops}
@@ -451,7 +497,7 @@ In addition to the function operations listed in
 %@% IF LATEX %@%
 Section \ref{functionops},
 %@% ELSE %@%
-the section PERFORMING BASIC FUNCTION OPS,
+the section PERFORMING BASIC FUNCTION OPERATIONS,
 %@% END-IF %@%
 a number of basic calculator commands have been bound to single keypresses:
 %@% IF LATEX %@%
@@ -476,6 +522,7 @@ a number of basic calculator commands have been bound to single keypresses:
       \texttt{p} & toggle complex display mode between rectangular and polar \\
       \texttt{b} & cycle base display mode between binary, octal, decimal, hex \\
       \texttt{v} & view last stack element in a fullscreen editor \\
+      \texttt{E} & create a new stack element using an external editor \\
 %@% IF LATEX %@%
 %BEGIN LATEX
       \texttt{P} & enter $\pi$ on the stack \\
@@ -527,6 +574,7 @@ have been implemented using the extended command syntax:
       \texttt{dec} & set base display mode to decimal \\
       \texttt{hex} & set base display mode to hexidecimal \\
       \texttt{view} & view last stack element in a fullscreen editor \\
+      \texttt{edit} & create a new stack element using an external editor \\
 %@% IF LATEX %@%
 %BEGIN LATEX
       \texttt{pi} & enter $\pi$ on the stack \\
@@ -567,6 +615,7 @@ browsing mode:
       \texttt{r} & cyclically ``roll'' stack elements downward, below the selected element (inclusive) \\
       \texttt{R} & cyclically ``roll'' stack elements upward, below the selected element (inclusive) \\
       \texttt{v} & view the currently selected element in a fullscreen editor \\
+      \texttt{E} & edit the currently selected element with an external editor \\
       \texttt{<enter>} & duplicate the currently selected element \\
       \hline
 %@% IF LATEX %@%
@@ -577,7 +626,8 @@ browsing mode:
 %@% END-IF %@%
 
 The left and right scrolling option may prove useful for viewing very lengthy
-stack entries, such as large matrices.
+stack entries, such as large matrices.  The edit option provides a convenient
+way to correct data after it has been entered on the stack.
 %@% END-IF %@%
 % (!ORPIERC)
 
@@ -775,6 +825,14 @@ section.
       is \texttt{"\~{}/.orpie/fullscreen"}.
       %@% ELSE %@%
       is "\Bs\Tilde /.orpie/fullscreen".
+      %@% END-IF %@%
+   \item \texttt{input\_buffer} \\
+      This variable should be set to the full path of a buffer file that Orpie uses
+      to read input created by the external editor of your choice.  The default
+      %@% IF LATEX %@%
+      is \texttt{"\~{}/.orpie/input"}.
+      %@% ELSE %@%
+      is "\Bs\Tilde /.orpie/input".
       %@% END-IF %@%
    \item \texttt{editor} \\
       This variable may be set to the fullscreen editor of your choice.  The default
@@ -985,6 +1043,8 @@ they do not take an argument.  Many calculator interface settings are implemente
       Undo the last calculator operation.
    \item \texttt{command\_view} \\
       View the last stack element in an external fullscreen editor.
+   \item \texttt{command\_edit\_input} \\
+      Create a new stack element using an external editor.
 \end{itemize}
 
 
@@ -1066,6 +1126,8 @@ should be bound to single keypresses using the \texttt{bind} keyword.
       Scroll the selected element to the right
    \item \texttt{browse\_view} \\
       View the currently selected stack element in a fullscreen editor
+   \item \texttt{browse\_edit} \\
+      Edit the currently selected stack element using an external editor
 \end{itemize}
 %@% END-IF %@%
 
