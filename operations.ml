@@ -38,7 +38,7 @@ type function_operation_t = | Add | Sub | Mult | Div | Neg | Inv
                             | Utpn;;
 
 type command_operation_t  = | Drop | Clear | Swap | Dup | Undo
-                            | BeginBrowse | BeginExtended | BeginVar | Quit
+                            | BeginBrowse | BeginAbbrev | BeginVar | Quit
                             | SetRadians | SetDegrees | SetRect | SetPolar
                             | SetBin | SetOct | SetDec | SetHex
                             | ToggleAngleMode | ToggleComplexMode | CycleBase
@@ -55,7 +55,7 @@ type browse_operation_t   = | EndBrowse
                             | Drop1 | DropN | Keep | KeepN
                             | EditEntry;;
 
-type extended_operation_t = | ExitExtended | EnterExtended | ExtBackspace;;
+type abbrev_operation_t = | ExitAbbrev | EnterAbbrev | AbbrevBackspace;;
 
 type integer_edit_operation_t = | ExitIntEdit;;
 
@@ -66,7 +66,7 @@ type operation_t = | Function of function_operation_t
                    | Command  of command_operation_t
                    | Edit     of edit_operation_t
                    | Browse   of browse_operation_t
-                   | Extend   of extended_operation_t
+                   | Abbrev   of abbrev_operation_t
                    | IntEdit  of integer_edit_operation_t
                    | VarEdit  of var_edit_operation_t;;
 

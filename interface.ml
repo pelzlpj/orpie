@@ -33,12 +33,12 @@ type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
    mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
    mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
 
-type help_mode_t = | Standard | StandardInt | Extended | VarHelp;;
+type help_mode_t = | StandardHelp | StandardIntHelp | AbbrevHelp | VarHelp;;
 
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;
 
-type interface_mode_t = | StandardEntryMode | IntEditMode | ExtendedEntryMode 
+type interface_mode_t = | StandardEntryMode | IntEditMode | AbbrevEntryMode 
                         | VarEditMode | BrowsingMode;;
 
 type complex_entry_element_t = 
@@ -83,9 +83,9 @@ type interface_state_t =
    mutable is_entering_base            : bool;                          (* is the user is entering a base *)
    mutable int_base_string             : string;                        (* one-character representation of the base *)
    mutable is_entering_exponent        : bool;                          (* is the user entering a scientific notation exponent *)
-   mutable extended_entry_buffer       : string;                        (* stores characters entered in extended entry mode *)
-   mutable matched_extended_entry      : string;                        (* stores the command-completed extended entry *)
-   mutable matched_extended_entry_list : string list;                   (* stores the list of all possible command completions *)
+   mutable abbrev_entry_buffer         : string;                        (* stores characters entered in abbrev entry mode *)
+   mutable matched_abbrev_entry        : string;                        (* stores the command-completed abbrev entry *)
+   mutable matched_abbrev_entry_list   : string list;                   (* stores the list of all possible command completions *)
    gen_buffer                          : complex_entry_element_t array; (* storage for floating-point (array)-based types *)
    mutable variable_entry_buffer       : string;                        (* stores characters entered in variable entry mode *)
    mutable variable_entry_buffer_back  : string;                        (* used in variable completion *)
@@ -113,7 +113,7 @@ let make (c : rpc_calc) (std : screen_t) =
       stack_selection = 1;
       interface_mode = StandardEntryMode;
       horiz_scroll = 0;
-      help_mode = Standard;
+      help_mode = StandardHelp;
       help_page = 0;
       has_entry = false;
       entry_type = FloatEntry;
@@ -121,9 +121,9 @@ let make (c : rpc_calc) (std : screen_t) =
       is_entering_base = false;
       int_base_string = "";
       is_entering_exponent = false;
-      extended_entry_buffer = "";
-      matched_extended_entry = "";
-      matched_extended_entry_list = [];
+      abbrev_entry_buffer = "";
+      matched_abbrev_entry = "";
+      matched_abbrev_entry_list = [];
       variable_entry_buffer = "";
       variable_entry_buffer_back = "";
       matched_variables = [];

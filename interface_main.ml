@@ -349,8 +349,8 @@ let push_entry (iface : interface_state_t) =
 let handle_enter (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
    begin match iface.help_mode with
-   |StandardInt ->
-      iface.help_mode <- Standard;
+   |StandardIntHelp ->
+      iface.help_mode <- StandardHelp;
       draw_help iface
    |_ ->
       ()
@@ -372,7 +372,7 @@ let handle_begin_int (iface : interface_state_t) =
       (iface.entry_type <- IntEntry;
       iface.interface_mode <- IntEditMode;
       iface.int_entry_buffer <- "";
-      iface.help_mode <- StandardInt;
+      iface.help_mode <- StandardIntHelp;
       draw_help iface;
       draw_update_entry iface)
    else
@@ -509,7 +509,7 @@ let handle_angle (iface : interface_state_t) =
 let handle_exit_int (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
    iface.entry_type <- FloatEntry;
-   iface.help_mode <- Standard;
+   iface.help_mode <- StandardHelp;
    iface.is_entering_base <- false;
    iface.int_base_string <- "";
    if (String.length iface.gen_buffer.(0).re_mantissa > 0) or
@@ -886,11 +886,11 @@ let handle_digit (iface : interface_state_t) key =
 
 
 
-(* begin extended entry *)
-let handle_begin_extended (iface : interface_state_t) =
-   if iface.interface_mode != ExtendedEntryMode then begin
-      iface.interface_mode <- ExtendedEntryMode;
-      iface.help_mode <- Extended;
+(* begin abbrev entry *)
+let handle_begin_abbrev (iface : interface_state_t) =
+   if iface.interface_mode != AbbrevEntryMode then begin
+      iface.interface_mode <- AbbrevEntryMode;
+      iface.help_mode <- AbbrevHelp;
       draw_help iface;
       draw_update_entry iface
       (* do other cleanup stuff *)
@@ -1461,8 +1461,8 @@ let process_command (iface : interface_state_t) cc =
       handle_command_call iface iface.calc#undo
    |BeginBrowse ->
       handle_begin_browse iface
-   |BeginExtended ->
-      handle_begin_extended iface
+   |BeginAbbrev ->
+      handle_begin_abbrev iface
    |BeginVar ->
       handle_begin_variable iface
    |Quit ->
@@ -1530,18 +1530,18 @@ let process_command (iface : interface_state_t) cc =
 
 
 (****************************************************************)
-(* IMPLEMENTATION OF EXTENDED ENTRY SYSTEM                      *)
+(* IMPLEMENTATION OF ABBREVIATION ENTRY SYSTEM                  *)
 (****************************************************************)
 
 
 
-(* exit extended entry *)
-let handle_exit_extended (iface : interface_state_t) =
-   if iface.interface_mode = ExtendedEntryMode then
+(* exit abbrev entry *)
+let handle_exit_abbrev (iface : interface_state_t) =
+   if iface.interface_mode = AbbrevEntryMode then
       (iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- Standard;
-      iface.extended_entry_buffer <- "";
-      iface.matched_extended_entry <- "";
+      iface.help_mode <- StandardHelp;
+      iface.abbrev_entry_buffer <- "";
+      iface.matched_abbrev_entry <- "";
       draw_help iface;
       draw_update_entry iface)
    else
@@ -1549,20 +1549,20 @@ let handle_exit_extended (iface : interface_state_t) =
 
 
 (* search through a list of commands and find all that match
- * iface.extended_entry_buffer.  As a side effect, set matched_extended_entry
+ * iface.abbrev_entry_buffer.  As a side effect, set matched_abbrev_entry
  * to the head of this list.
  * The list is built up in reverse order using Str.search_backward,
  * so the head of the list is actually the first match. *)
-let match_extended_buffer (iface : interface_state_t) buf =
+let match_abbrev_buffer (iface : interface_state_t) buf =
    if String.length buf > 0 then
       (let regex_str = "^" ^ (Str.quote buf) ^ ".*$" in
       let regex = Str.regexp regex_str in
       let rec find_matching_strings starting_pos matches_list =
          try
             let next_pos = 
-               Str.search_backward regex !Rcfile.extended_commands starting_pos
+               Str.search_backward regex !Rcfile.abbrev_commands starting_pos
             in
-            let m = Str.matched_string !Rcfile.extended_commands in
+            let m = Str.matched_string !Rcfile.abbrev_commands in
             if next_pos >= 1 then
                find_matching_strings (pred next_pos) (m :: matches_list)
             else
@@ -1575,30 +1575,30 @@ let match_extended_buffer (iface : interface_state_t) buf =
                   |_ -> matches_list
                end
       in
-      iface.matched_extended_entry <- "";
+      iface.matched_abbrev_entry <- "";
       let m_list =
-         find_matching_strings (pred (String.length !Rcfile.extended_commands)) [];
+         find_matching_strings (pred (String.length !Rcfile.abbrev_commands)) [];
       in
-      iface.matched_extended_entry <- List.hd m_list;
+      iface.matched_abbrev_entry <- List.hd m_list;
       m_list)
    else
-      (iface.matched_extended_entry <- "";
+      (iface.matched_abbrev_entry <- "";
       raise Not_found)
 
 
-(* backspace during extended entry *)
-let handle_extended_backspace (iface : interface_state_t) =
-   let len = String.length iface.extended_entry_buffer in
+(* backspace during abbrev entry *)
+let handle_abbrev_backspace (iface : interface_state_t) =
+   let len = String.length iface.abbrev_entry_buffer in
    if len > 0 then
-      (iface.extended_entry_buffer <- Str.string_before iface.extended_entry_buffer 
+      (iface.abbrev_entry_buffer <- Str.string_before iface.abbrev_entry_buffer 
       (pred len);
       (try 
-         iface.matched_extended_entry_list <- 
-            match_extended_buffer iface iface.extended_entry_buffer
+         iface.matched_abbrev_entry_list <- 
+            match_abbrev_buffer iface iface.abbrev_entry_buffer
       with 
          Not_found -> ());
       (if len = 1 then
-         iface.matched_extended_entry <- ""
+         iface.matched_abbrev_entry <- ""
       else
          ());
       draw_help iface;
@@ -1607,37 +1607,37 @@ let handle_extended_backspace (iface : interface_state_t) =
       ()
 
 
-(* handle entry of an arbitrary character in extended mode *)
-let handle_extended_character (iface : interface_state_t) key =
+(* handle entry of an arbitrary character in abbrev mode *)
+let handle_abbrev_character (iface : interface_state_t) key =
    let ch = char_of_int key in
-   let test_buffer = iface.extended_entry_buffer ^ (String.make 1 ch) in
+   let test_buffer = iface.abbrev_entry_buffer ^ (String.make 1 ch) in
    (* search through the list of commands for the first one that matches
-    * iface.extended_entry_buffer *)
+    * iface.abbrev_entry_buffer *)
    try
-      iface.matched_extended_entry_list <- match_extended_buffer iface test_buffer;
-      iface.extended_entry_buffer <- test_buffer;
+      iface.matched_abbrev_entry_list <- match_abbrev_buffer iface test_buffer;
+      iface.abbrev_entry_buffer <- test_buffer;
       draw_help iface;
       draw_update_entry iface
    with
       Not_found -> let err = beep () in ()
 
 
-(* enter an extended entry *)
-let handle_enter_extended (iface : interface_state_t) =
-   if iface.interface_mode = ExtendedEntryMode then
+(* enter an abbrev entry *)
+let handle_enter_abbrev (iface : interface_state_t) =
+   if iface.interface_mode = AbbrevEntryMode then
       (iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- Standard;
+      iface.help_mode <- StandardHelp;
       (try
-         iface.matched_extended_entry_list <- 
-            match_extended_buffer iface iface.extended_entry_buffer;
-         let operation = Rcfile.translate_extended_abbrev
-         iface.matched_extended_entry in
+         iface.matched_abbrev_entry_list <- 
+            match_abbrev_buffer iface iface.abbrev_entry_buffer;
+         let operation = Rcfile.translate_abbrev
+         iface.matched_abbrev_entry in
          begin match operation with
          |Function ff -> 
             process_function iface ff
          |Command cc  -> process_command iface cc
          |_ -> failwith 
-            "found extended command that is neither Function nor Command"
+            "found abbrev command that is neither Function nor Command"
          end;
          (* check whether ff should be autobound *)
          begin try
@@ -1647,8 +1647,8 @@ let handle_enter_extended (iface : interface_state_t) =
          end
       with
          Not_found -> ());
-      iface.extended_entry_buffer <- "";
-      iface.matched_extended_entry <- "";
+      iface.abbrev_entry_buffer <- "";
+      iface.matched_abbrev_entry <- "";
       draw_help iface;
       draw_update_entry iface)
    else
@@ -1663,7 +1663,7 @@ let handle_enter_extended (iface : interface_state_t) =
 let handle_exit_variable (iface : interface_state_t) =
    if iface.interface_mode = VarEditMode then begin
       iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- Standard;
+      iface.help_mode <- StandardHelp;
       iface.entry_type <- FloatEntry;
       iface.variable_entry_buffer <- "";
       draw_help iface;
@@ -1690,7 +1690,7 @@ let match_variable_buffer (iface : interface_state_t) buf =
 
 
 
-(* backspace during extended entry *)
+(* backspace during abbrev entry *)
 let handle_variable_backspace (iface : interface_state_t) =
    let len = String.length iface.variable_entry_buffer in
    if len > 0 then begin
@@ -1705,7 +1705,7 @@ let handle_variable_backspace (iface : interface_state_t) =
       ()
 
 
-(* handle entry of an arbitrary character in extended mode *)
+(* handle entry of an arbitrary character in abbrev mode *)
 let handle_variable_character (iface : interface_state_t) key =
    (* variables with long strings simply aren't useful, and
     * it's possible that deleting them could become difficult. *)
@@ -1744,7 +1744,7 @@ let handle_enter_variable (iface : interface_state_t) =
       else
          iface.entry_type <- FloatEntry;
       iface.interface_mode <- StandardEntryMode;
-      iface.help_mode <- Standard;
+      iface.help_mode <- StandardHelp;
       iface.completion <- None;
       iface.variable_entry_buffer <- "";
       draw_help iface;
@@ -1897,27 +1897,27 @@ let do_main_loop (iface : interface_state_t) =
                   with Not_found | Not_handled ->
                      handle_digit iface key
             end
-         |ExtendedEntryMode ->
+         |AbbrevEntryMode ->
             begin
-            (* check to see whether the user is either exiting extended mode or
-             * is applying the extended command *)
+            (* check to see whether the user is either exiting abbrev mode or
+             * is applying the abbrev command *)
             try
-               let extended_op = Rcfile.extended_of_key key in
-               match extended_op with
-               |Extend ee ->
+               let abbrev_op = Rcfile.abbrev_of_key key in
+               match abbrev_op with
+               |Abbrev ee ->
                   begin
                      match ee with
-                     |ExitExtended ->
-                        handle_exit_extended iface
-                     |EnterExtended ->
-                        handle_enter_extended iface
-                     |ExtBackspace ->
-                        handle_extended_backspace iface
+                     |ExitAbbrev ->
+                        handle_exit_abbrev iface
+                     |EnterAbbrev ->
+                        handle_enter_abbrev iface
+                     |AbbrevBackspace ->
+                        handle_abbrev_backspace iface
                   end
                |_ ->
-                  failwith "Non-Extended command found in Extended Hashtbl"
+                  failwith "Non-Abbrev command found in Abbrev Hashtbl"
             with Not_found ->
-               handle_extended_character iface key
+               handle_abbrev_character iface key
             end
          |VarEditMode ->
             begin try

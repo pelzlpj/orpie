@@ -282,21 +282,21 @@ let draw_entry (iface : interface_state_t) =
       draw_entry_string data_string 0
    |IntEditMode ->
       draw_entry_string data_string 0
-   |ExtendedEntryMode ->
-      let highlight_len = String.length iface.extended_entry_buffer in
+   |AbbrevEntryMode ->
+      let highlight_len = String.length iface.abbrev_entry_buffer in
       if highlight_len = 0 then
-         draw_entry_string "<enter extended command>" 0
+         draw_entry_string "<enter command abbreviation>" 0
       else
          let is_function =
-            match (Rcfile.translate_extended_abbrev iface.matched_extended_entry) with
+            match (Rcfile.translate_abbrev iface.matched_abbrev_entry) with
             |Function ff -> true
             |_ -> false
          in
          if is_function then
-            draw_entry_string (iface.matched_extended_entry ^ 
+            draw_entry_string (iface.matched_abbrev_entry ^ 
             "( )") highlight_len
          else
-            draw_entry_string iface.matched_extended_entry highlight_len
+            draw_entry_string iface.matched_abbrev_entry highlight_len
    |BrowsingMode ->
       ()
    |VarEditMode ->
@@ -314,7 +314,7 @@ let draw_update_entry iface =
 
 
 
-(* create the lists of abbreviations to display in the extended command
+(* create the lists of abbreviations to display in the abbrev command
  * help screen *)
 let generate_abbrev_help () =
    let rec trunc_list lst n =
@@ -473,7 +473,7 @@ let draw_help (iface : interface_state_t) =
          assert (wnoutrefresh win)
       |_ ->
          begin match iface.help_mode with
-         |Standard ->
+         |StandardHelp ->
             if iface.help_page = 0 then begin
                wattron win WA.bold;
                assert (mvwaddstr win 5 0 "Common Operations:");
@@ -503,13 +503,13 @@ let draw_help (iface : interface_state_t) =
                wattroff win WA.bold;
                mvwaddstr_safe win 17 2 ("scientific notation : " ^
                try_find Rcfile.key_of_edit (Edit SciNotBase));
-               mvwaddstr_safe win 18 2 ("extended entry mode : " ^
-               try_find Rcfile.key_of_command  (Command BeginExtended));
-               mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
+               mvwaddstr_safe win 18 2 ("abbreviation entry mode : " ^
+               try_find Rcfile.key_of_command  (Command BeginAbbrev));
+               mvwaddstr_safe win 19 2 ("stack browsing mode     : " ^
                try_find Rcfile.key_of_command (Command BeginBrowse));
-               mvwaddstr_safe win 20 2 ("refresh display     : " ^
+               mvwaddstr_safe win 20 2 ("refresh display         : " ^
                try_find Rcfile.key_of_command (Command Refresh));
-               mvwaddstr_safe win 21 2 ("quit                : " ^
+               mvwaddstr_safe win 21 2 ("quit                    : " ^
                try_find Rcfile.key_of_command (Command Quit));
                assert (wnoutrefresh win)
             end else begin
@@ -539,7 +539,7 @@ let draw_help (iface : interface_state_t) =
                   done;
                assert (wnoutrefresh win)
             end
-         |StandardInt ->
+         |StandardIntHelp ->
             wattron win WA.bold;
             mvwaddstr_safe win 5 0 "Integer Editing Operations:";
             wattroff win WA.bold;
@@ -550,8 +550,8 @@ let draw_help (iface : interface_state_t) =
             mvwaddstr_safe win 8 2 ("cancel   : " ^
             try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
             assert (wnoutrefresh win)
-         |Extended ->
-            if String.length iface.extended_entry_buffer = 0 then
+         |AbbrevHelp ->
+            if String.length iface.abbrev_entry_buffer = 0 then
                let abbr_strings = generate_abbrev_help () in
                let rec print_help_lines lines v_pos =
                   begin match lines with
@@ -564,7 +564,7 @@ let draw_help (iface : interface_state_t) =
                in
                begin
                   wattron win WA.bold;
-                  mvwaddstr_safe win 5 0 "Extended Commands:";
+                  mvwaddstr_safe win 5 0 "Abbreviations:";
                   wattroff win WA.bold;
                   mvwaddstr_safe win 6 1 "Common Functions:";
                   print_help_lines abbr_strings.functions 7;
@@ -572,18 +572,18 @@ let draw_help (iface : interface_state_t) =
                   print_help_lines abbr_strings.modes 14;
                   mvwaddstr_safe win 17 1 "Miscellaneous:";
                   print_help_lines abbr_strings.misc 18;
-                  mvwaddstr_safe win 20 1 ("execute command : " ^
-                  try_find Rcfile.key_of_extended (Extend EnterExtended));
-                  mvwaddstr_safe win 21 1 ("cancel command  : " ^
-                  try_find Rcfile.key_of_extended (Extend ExitExtended));
+                  mvwaddstr_safe win 20 1 ("execute abbreviation : " ^
+                  try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+                  mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
+                  try_find Rcfile.key_of_abbrev (Abbrev ExitAbbrev));
                   assert (wnoutrefresh win)
                end
             else
                begin
                   wattron win WA.bold;
-                  assert (mvwaddstr win 5 0 "Matched Extended Commands:");
+                  assert (mvwaddstr win 5 0 "Matched Abbreviations:");
                   wattroff win WA.bold;
-                  let highlight_len = String.length iface.extended_entry_buffer in
+                  let highlight_len = String.length iface.abbrev_entry_buffer in
                   let rec draw_matches v_pos match_list =
                      if v_pos < iface.scr.hw_lines then
                         begin match match_list with
@@ -605,7 +605,7 @@ let draw_help (iface : interface_state_t) =
                      else
                         ()
                   in
-                  draw_matches 6 iface.matched_extended_entry_list;
+                  draw_matches 6 iface.matched_abbrev_entry_list;
                   assert (wnoutrefresh win)
                end 
          |VarHelp ->

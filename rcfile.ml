@@ -39,8 +39,8 @@ let table_key_edit     = Hashtbl.create 20;;
 let table_edit_key     = Hashtbl.create 20;;
 let table_key_browse   = Hashtbl.create 20;;
 let table_browse_key   = Hashtbl.create 20;;
-let table_extended_key = Hashtbl.create 20;;
-let table_key_extended = Hashtbl.create 20;;
+let table_abbrev_key   = Hashtbl.create 20;;
+let table_key_abbrev   = Hashtbl.create 20;;
 let table_intedit_key  = Hashtbl.create 20;;
 let table_key_intedit  = Hashtbl.create 20;;
 let table_key_macro    = Hashtbl.create 20;;
@@ -79,10 +79,10 @@ let browse_of_key key =
    Hashtbl.find table_key_browse key;;
 let key_of_browse browse_op =
    Hashtbl.find table_browse_key browse_op;;
-let extended_of_key key =
-   Hashtbl.find table_key_extended key;;
-let key_of_extended ex_op =
-   Hashtbl.find table_extended_key ex_op;;
+let abbrev_of_key key =
+   Hashtbl.find table_key_abbrev key;;
+let key_of_abbrev ex_op =
+   Hashtbl.find table_abbrev_key ex_op;;
 let intedit_of_key key =
    Hashtbl.find table_key_intedit key;;
 let key_of_intedit edit_op =
@@ -101,17 +101,17 @@ let key_of_operation (op : operation_t) =
    |Command _  -> Hashtbl.find table_command_key op
    |Edit _     -> Hashtbl.find table_edit_key op
    |Browse _   -> Hashtbl.find table_browse_key op
-   |Extend _   -> Hashtbl.find table_extended_key op
+   |Abbrev _   -> Hashtbl.find table_abbrev_key op
    |IntEdit _  -> Hashtbl.find table_intedit_key op
    |VarEdit _  -> Hashtbl.find table_varedit_key op
 
 
-(* abbreviations used in extended entry mode *)
-let extended_commands = ref "";;
+(* abbreviations used in abbreviation entry mode *)
+let abbrev_commands = ref "";;
 let abbrev_command_table = Hashtbl.create 50;;
 let command_abbrev_table = Hashtbl.create 50;;
 
-(* Register an abbreviation for an extended command.
+(* Register an abbreviation for an operation
  * This updates the string used in regexp matching, and
  * updates the hashtable used to find the corresponding operation. *)
 let register_abbrev abbr op =
@@ -120,19 +120,19 @@ let register_abbrev abbr op =
     * If not, it becomes impossible to execute the prefix command. *)
    let regex = Str.regexp ("^" ^ abbr ^ ".*$") in
    (try
-      let match_pos = Str.search_forward regex !extended_commands 0 in
-      let before = Str.string_before !extended_commands match_pos
-      and after  = Str.string_after !extended_commands match_pos in
-      extended_commands := before ^ abbr ^ "\n" ^ after
+      let match_pos = Str.search_forward regex !abbrev_commands 0 in
+      let before = Str.string_before !abbrev_commands match_pos
+      and after  = Str.string_after !abbrev_commands match_pos in
+      abbrev_commands := before ^ abbr ^ "\n" ^ after
    with Not_found ->
-      extended_commands := !extended_commands ^ abbr ^ "\n");
+      abbrev_commands := !abbrev_commands ^ abbr ^ "\n");
    Hashtbl.add abbrev_command_table abbr op;
    Hashtbl.add command_abbrev_table op abbr;;
    
-(* remove an abbreviation for an extended command. *)
+(* remove an abbreviation for a command. *)
 let unregister_abbrev abbr =
    let regex = Str.regexp ("^" ^ abbr ^ "$") in
-   extended_commands := Str.replace_first regex "" !extended_commands;
+   abbrev_commands := Str.replace_first regex "" !abbrev_commands;
    try
       let op = Hashtbl.find abbrev_command_table abbr in
       Hashtbl.remove abbrev_command_table abbr;
@@ -140,7 +140,7 @@ let unregister_abbrev abbr =
    with Not_found -> ();;
 
 
-let translate_extended_abbrev abb =
+let translate_abbrev abb =
    Hashtbl.find abbrev_command_table abb;;
 let abbrev_of_operation op =
    Hashtbl.find command_abbrev_table op;;
@@ -260,9 +260,9 @@ let register_binding_internal k k_string op =
    |Browse _ ->
       Hashtbl.add table_key_browse k op;
       Hashtbl.add table_browse_key op k_string
-   |Extend _ ->
-      Hashtbl.add table_key_extended k op;
-      Hashtbl.add table_extended_key op k_string
+   |Abbrev _ ->
+      Hashtbl.add table_key_abbrev k op;
+      Hashtbl.add table_abbrev_key op k_string
    |IntEdit _ ->
       Hashtbl.add table_key_intedit k op;
       Hashtbl.add table_intedit_key op k_string
@@ -312,12 +312,12 @@ let unregister_browse_binding key_string =
       Hashtbl.remove table_browse_key op
    with Not_found -> ()
 
-let unregister_extended_binding key_string =
+let unregister_abbrev_binding key_string =
    let k, _ = decode_single_key_string key_string in
    try
-      let op = Hashtbl.find table_key_extended k in
-      Hashtbl.remove table_key_extended k;
-      Hashtbl.remove table_extended_key op
+      let op = Hashtbl.find table_key_abbrev k in
+      Hashtbl.remove table_key_abbrev k;
+      Hashtbl.remove table_abbrev_key op
    with Not_found -> ()
 
 let unregister_intedit_binding key_string =
@@ -354,9 +354,9 @@ let remove_binding k op =
    |Browse _ ->
       Hashtbl.remove table_key_browse k;
       Hashtbl.remove table_browse_key op
-   |Extend _ ->
-      Hashtbl.remove table_key_extended k;
-      Hashtbl.remove table_extended_key op
+   |Abbrev _ ->
+      Hashtbl.remove table_key_abbrev k;
+      Hashtbl.remove table_abbrev_key op
    |IntEdit _ ->
       Hashtbl.remove table_key_intedit k;
       Hashtbl.remove table_intedit_key op
@@ -457,7 +457,7 @@ let operation_of_string command_str =
    |"command_dup"                   -> (Command Dup)
    |"command_undo"                  -> (Command Undo)
    |"command_begin_browsing"        -> (Command BeginBrowse)
-   |"command_begin_extended"        -> (Command BeginExtended)
+   |"command_begin_abbrev"          -> (Command BeginAbbrev)
    |"command_begin_variable"        -> (Command BeginVar)
    |"command_quit"                  -> (Command Quit)
    |"command_rad"                   -> (Command SetRadians)
@@ -492,9 +492,9 @@ let operation_of_string command_str =
    |"browse_keep"                   -> (Browse Keep)
    |"browse_keepn"                  -> (Browse KeepN)
    |"browse_edit"                   -> (Browse EditEntry)
-   |"extended_exit"                 -> (Extend ExitExtended)
-   |"extended_enter"                -> (Extend EnterExtended)
-   |"extended_backspace"            -> (Extend ExtBackspace)
+   |"abbrev_exit"                   -> (Abbrev ExitAbbrev)
+   |"abbrev_enter"                  -> (Abbrev EnterAbbrev)
+   |"abbrev_backspace"              -> (Abbrev AbbrevBackspace)
    |"integer_cancel"                -> (IntEdit ExitIntEdit)
    |"variable_cancel"               -> (VarEdit ExitVarEdit)
    |"variable_enter"                -> (VarEdit EnterVarEdit)
@@ -502,6 +502,14 @@ let operation_of_string command_str =
    |"variable_complete"             -> (VarEdit CompleteVarEdit)
    |"function_rand"                 -> config_failwith 
                                        "operation \"function_rand\" is deprecated; please replace with \"command_rand\"."
+   |"command_begin_extended"        -> config_failwith
+                                       "operation \"command_begin_extended\" is deprecated; please replace with \"command_begin_abbrev\"."
+   |"extended_exit"                 -> config_failwith
+                                       "operation \"extended_exit\" is deprecated; please replace with \"abbrev_exit\"."
+   |"extended_enter"                -> config_failwith
+                                       "operation \"extended_enter\" is deprecated; please replace with \"abbrev_exit\"."
+   |"extended_backspace"            -> config_failwith
+                                       "operation \"extended_backspace\" is deprecated; please replace with \"abbrev_backspace\"."
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
    end
 
@@ -582,12 +590,12 @@ let parse_line line_stream =
       | [< >] ->
          config_failwith ("Expected a key string after keyword \"unbind_browse\"")
       end
-   | [< 'Kwd "unbind_extended" >] ->
+   | [< 'Kwd "unbind_abbrev" >] ->
       begin match line_stream with parser
       | [< 'String k >] ->
-         unregister_extended_binding k
+         unregister_abbrev_binding k
       | [< >] ->
-         config_failwith ("Expected a key string after keyword \"unbind_extended\"")
+         config_failwith ("Expected a key string after keyword \"unbind_abbrev\"")
       end
    | [< 'Kwd "unbind_integer" >] ->
       begin match line_stream with parser
@@ -830,7 +838,7 @@ let rec process_rcfile rcfile_op =
    let line_lexer line = 
       make_lexer 
          ["include"; "bind"; "unbind_function"; "unbind_command";
-         "unbind_edit"; "unbind_browse"; "unbind_extended"; "unbind_integer";
+         "unbind_edit"; "unbind_browse"; "unbind_abbrev"; "unbind_integer";
          "unbind_variable"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; 
          "#"] 
       (Stream.of_string line)
