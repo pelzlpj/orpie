@@ -147,7 +147,6 @@ class rpc_stack =
    object(self)
       val mutable len = 0
       val mutable stack = Array.make size_inc (stack_data_of_orpie_data (RpcFloat 0.0))
-      val stack_mutex = Mutex.create ()
       val render_stack = Stack.create ()
 
 
@@ -164,9 +163,7 @@ class rpc_stack =
             close_out version_channel;
             let save_file = Utility.join_path !(Rcfile.datadir) "calc_state" in
             let save_channel = Utility.open_or_create_out_bin save_file in
-            Mutex.lock stack_mutex;
             Marshal.to_channel save_channel (modes, variables, stack, len) [];
-            Mutex.unlock stack_mutex;
             close_out save_channel
          with
             |Sys_error ss -> raise (Invalid_argument "can't open data file for writing")
@@ -198,10 +195,8 @@ class rpc_stack =
                         ((string, orpie_data_t) Hashtbl.t) * (stack_data_t array) * int)
                      in
                      close_in load_channel;
-                     Mutex.lock stack_mutex;
                      stack <- data_stack;
                      len <- data_len;
-                     Mutex.unlock stack_mutex;
                      data_modes, data_variables
                   end else
                      (* if the datafile is missing, do nothing as it will be
@@ -222,15 +217,12 @@ class rpc_stack =
 
             
       method backup () =
-         Mutex.lock stack_mutex;
          let b_stack = Array.copy stack 
          and b_len = len in
-         Mutex.unlock stack_mutex;
          {< len = b_len; stack = b_stack >}
 
 
       method push (v : orpie_data_t) =
-         Mutex.lock stack_mutex;
          (* allocate a new stack if necessary *)
          if len >= Array.length stack then begin
             let new_stack = Array.make ((Array.length stack) + size_inc)
@@ -242,12 +234,10 @@ class rpc_stack =
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
          len <- len + 1;
-         Stack.push new_el render_stack;
-         Mutex.unlock stack_mutex
+         Stack.push new_el render_stack
 
 
       method pop () =
-         Mutex.lock stack_mutex;
          (* compact stack memory by size_inc whenever we have 2 * size_inc
           * elements free *)
          if len < (Array.length stack) - 2 * size_inc then
@@ -263,14 +253,12 @@ class rpc_stack =
             end else
                raise (Stack_error "cannot pop empty stack");
          in
-         Mutex.unlock stack_mutex;
          pop_result
 
 
       (* cyclically roll all stack elements downward (i.e. towards the top
        * of the stack), starting below element number 'num' (inclusive). *)
       method rolldown num =
-         Mutex.lock stack_mutex;
          if num <= len then
             let temp = stack.(pred len) in
             for i = pred len downto len - num + 1 do
@@ -279,13 +267,11 @@ class rpc_stack =
             stack.(len - num) <- temp
          else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
       (* cyclically roll all stack elements upward (i.e. away from the top
        * of the stack), starting below element number 'num' (inclusive). *)
       method rollup num =
-         Mutex.lock stack_mutex;
          if num <= len then
             let temp = stack.(len - num) in
             for i = len - num to len - 2 do
@@ -294,12 +280,10 @@ class rpc_stack =
             stack.(pred len) <- temp
          else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
       (* delete a particular element *)
       method delete num =
-         Mutex.lock stack_mutex;
          if num <= len then
             (for i = (len - num) to len do
                stack.(i) <- stack.(succ i)
@@ -307,34 +291,28 @@ class rpc_stack =
             len <- (pred len))
          else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
 
       (* delete all elements below level N *)
       method deleteN num =
-         Mutex.lock stack_mutex;
          if num <= len then
             len <- len - num
          else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
       (* keep only a particular stack element *)
       method keep num =
-         Mutex.lock stack_mutex;
          if num <= len then
             (stack.(0) <- stack.(len - num);
             len <- 1)
          else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
       (* keep all elements below the selected (inclusive) *)
       method keepN num =
-         Mutex.lock stack_mutex;
          if num <= len then begin
             for i = 0 to num - 1 do
                stack.(i) <- stack.(i + len - num)
@@ -342,14 +320,12 @@ class rpc_stack =
             len <- num
          end else
             raise (Stack_error "insufficient stack elements");
-         Mutex.unlock stack_mutex
 
 
 
       (* return a particular stack element without removing it from the stack *)
       (* element 1 points to the top of the stack *)
       method peek el_num =
-         Mutex.lock stack_mutex;
          let peek_result =
             if el_num <= len then
                let actual_el_num = len - el_num in
@@ -359,7 +335,6 @@ class rpc_stack =
                el_num in
                raise (Stack_error s);
          in
-         Mutex.unlock stack_mutex;
          peek_result
 
       
@@ -394,7 +369,6 @@ class rpc_stack =
        * the desired stack element.  If the table lookup fails, then create
        * the representation. *)
       method private lookup_or_create_string disp_mode calc_modes index =
-         Mutex.lock stack_mutex;
          let stack_el = stack.(index) in
          let lookup_result =
             begin match stack_el with
@@ -515,7 +489,6 @@ class rpc_stack =
                end
             end;
          in
-         Mutex.unlock stack_mutex;
          lookup_result
 
 
