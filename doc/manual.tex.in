@@ -502,7 +502,23 @@ The following functions are available as extended commands:
       \texttt{lngamma} & natural log of Euler gamma function \\
       \texttt{erf} & error function \\
       \texttt{erfc} & complementary error function \\
-      \texttt{fact} & factorial function \\
+      \texttt{fact} & factorial function (fast approximation) \\
+      \texttt{factint} & factorial function (slow exact integer value) \\
+      \texttt{gcd} & greatest common divisor function \\
+      \texttt{lcm} & least common multiple function \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      \hline
+   \end{tabular}
+\end{center}
+
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+      \hline 
+      Extended Commands (con't) & Functions \\
+      \hline
+%END LATEX
+%@% END-IF %@%
       \texttt{trans} & matrix transpose \\
       \texttt{solvelin} & solve a linear system of the form Ax = b \\
       \texttt{mod} & element 2 mod element 1 \\
@@ -525,6 +541,7 @@ The following functions are available as extended commands:
 %@% ELSE %@%
 \end{Table}
 %@% END-IF %@%
+
 
 \subsection{Performing Basic Command Operations}
 %@% IF LATEX %@%
@@ -950,16 +967,26 @@ to a real number, and as such the arithmetic will no longer be exact.
    \item \texttt{function\_factorial} \\
       Compute the factorial of the last stack element.  Note: this is not
       exact, even for the integer constant data type.  It is computed using
-      an approximation to the gamma function, and therefore is subject to rounding 
+      a fast approximation to the gamma function, and therefore is subject to rounding 
       errors.
+   \item \texttt{function\_factorial\_exact} \\
+      Compute the factorial of the last stack element.  This function requires
+      an integer constant input and returns an integer result.  It is
+      potentially a slow operation.
    \item \texttt{function\_floor} \\
       Compute the floor of the last stack element.
    \item \texttt{function\_gamma} \\
       Compute the Euler gamma function of the last stack element.
+   \item \texttt{function\_gcd} \\
+      Compute the greatest common divisor of the last two stack elements.  This operation
+      may be applied only to integer type data.
    \item \texttt{function\_im} \\
       Compute the imaginary part of the last stack element.
    \item \texttt{function\_inv} \\
       Compute the multiplicative inverse of the last stack element.
+   \item \texttt{function\_lcm} \\
+      Compute the least common multiple of the last two stack elements.  This
+      operation may be applied only to integer type data.
    \item \texttt{function\_ln} \\
       Compute the natural logarithm of the last stack element.
    \item \texttt{function\_lngamma} \\
