@@ -170,16 +170,20 @@ object(self)
             calc#load_state ();
             self#draw_stack ();
             self#draw_help ();
-            self#draw_entry ();
+            self#draw_update_entry ();
          with
             Invalid_argument err ->
                self#draw_stack ();
                self#draw_help ();
-               self#draw_entry ();
-               self#draw_error err
+               self#draw_error err;
+               self#draw_update_entry ()
       end;
       self#do_main_loop ()
         
+
+   method draw_update_stack () =
+      self#draw_stack ();
+      assert (doupdate ())
 
    (* display the stack, where the bottom line of the display
     * corresponds to stack level 'stack_bottom_row' *)
@@ -246,9 +250,12 @@ object(self)
                ()
          end
       done;
-      assert (wrefresh scr.stack_win)
+      assert (wnoutrefresh scr.stack_win)
 
 
+   method draw_update_entry () =
+      self#draw_entry ();
+      assert (doupdate ())
 
    (* display the data that the user is in the process of entering *)
    method draw_entry () =
@@ -278,7 +285,7 @@ object(self)
                else
                   assert (mvwaddstr scr.entry_win 1 (scr.ew_cols - len_str - 1) str)
          end;
-         assert (wrefresh scr.entry_win)
+         assert (wnoutrefresh scr.entry_win)
       in
       (* draw a string for a single floating-point number *)
       let get_float_str is_current mantissa exponent =
@@ -440,7 +447,7 @@ object(self)
                assert (mvwaddstr win 19 2 "   <Up> : enter stack browsing mode");
                assert (mvwaddstr win 20 2 "     ^L : refresh display");
                assert (mvwaddstr win 21 2 "      Q : quit");
-               assert (wrefresh win)
+               assert (wnoutrefresh win)
             |Extended ->
                if String.length extended_entry_buffer = 0 then
                   begin
@@ -459,7 +466,7 @@ object(self)
                      assert (mvwaddstr win 17 1 "Miscellaneous:");
                      assert (mvwaddstr win 18 2 "pi   undo  view");
                      assert (mvwaddstr win 20 1 "<Backspace> : exit extended entry");
-                     assert (wrefresh win)
+                     assert (wnoutrefresh win)
                   end
                else
                   begin
@@ -490,7 +497,7 @@ object(self)
                            ()
                      in
                      draw_matches 7 matched_extended_entry_list;
-                     assert (wrefresh win)
+                     assert (wnoutrefresh win)
                   end 
          end
       |None ->
@@ -499,7 +506,7 @@ object(self)
 
    (* write an error message to the stack window *)
    method draw_error msg =
-      self#draw_stack ();
+      self#draw_update_stack ();
       let error_lines = Utility.wordwrap ("Error: " ^ msg) (scr.sw_cols-2) in
       let trunc_error_lines = 
          if List.length error_lines > 4 then
@@ -515,7 +522,7 @@ object(self)
       done;
       let s = String.make scr.sw_cols '-' in
       assert (mvwaddstr scr.stack_win (List.length trunc_error_lines) 0 s);
-      assert (wrefresh scr.stack_win)
+      assert (wnoutrefresh scr.stack_win)
 
 
 
@@ -644,7 +651,7 @@ object(self)
          is_entering_imag <- false;
          matrix_cols <- 1;
          has_multiple_rows <- false;
-         self#draw_entry ()
+         self#draw_update_entry ()
       in
       begin
          try
@@ -740,47 +747,47 @@ object(self)
          |SetRadians ->
             self#handle_command_call calc#mode_rad;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetDegrees ->
             self#handle_command_call calc#mode_deg;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetRect ->
             self#handle_command_call calc#mode_rect;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetPolar ->
             self#handle_command_call calc#mode_polar;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetBin ->
             self#handle_command_call calc#mode_bin;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetOct ->
             self#handle_command_call calc#mode_oct;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetDec ->
             self#handle_command_call calc#mode_dec;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |SetHex ->
             self#handle_command_call calc#mode_hex;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |ToggleAngleMode ->
             self#handle_command_call calc#toggle_angle_mode;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |ToggleComplexMode ->
             self#handle_command_call calc#toggle_complex_mode;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |CycleBase ->
             self#handle_command_call calc#cycle_base;
             self#draw_help ();
-            self#draw_stack ()
+            self#draw_update_stack ()
          |View ->
             self#handle_view ()
       end
@@ -907,9 +914,10 @@ object(self)
             self#push_entry ()
          else
             raise Not_handled);
-         self#draw_stack ()
+         self#draw_update_stack ()
       with Invalid_argument error_msg ->
-         self#draw_error error_msg
+         self#draw_error error_msg;
+         assert (doupdate ())
 
 
    (* handle a 'begin_int' keypress *)
@@ -917,7 +925,7 @@ object(self)
       if entry_type = FloatEntry then
          (entry_type <- IntEntry;
          int_entry_buffer <- "";
-         self#draw_entry ())
+         self#draw_update_entry ())
       else
          () 
 
@@ -928,10 +936,10 @@ object(self)
       match entry_type with
       |FloatEntry ->
          (entry_type <- ComplexEntry;
-         self#draw_entry ())
+         self#draw_update_entry ())
       |FloatMatrixEntry ->
          (entry_type <- ComplexMatrixEntry;
-         self#draw_entry ())
+         self#draw_update_entry ())
       |_ ->
          ()
 
@@ -942,22 +950,22 @@ object(self)
       match entry_type with
       |FloatEntry ->
          (entry_type <- FloatMatrixEntry;
-         self#draw_entry ())
+         self#draw_update_entry ())
       |ComplexEntry ->
          (entry_type <- ComplexMatrixEntry;
-         self#draw_entry ())
+         self#draw_update_entry ())
       |FloatMatrixEntry ->
          if not has_multiple_rows then
             (has_multiple_rows <- true;
             current_buffer <- succ current_buffer;
             matrix_cols <- current_buffer;
             is_entering_exponent <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
          else if (succ current_buffer) mod matrix_cols = 0 then
             (current_buffer <- succ current_buffer;
             is_entering_exponent <- false;
             (*FIXME: any other items to reset here?*)
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |ComplexMatrixEntry ->
@@ -967,13 +975,13 @@ object(self)
             matrix_cols <- current_buffer;
             is_entering_exponent <- false;
             is_entering_imag <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
          else if (succ current_buffer) mod matrix_cols = 0 then
             (current_buffer <- succ current_buffer;
             is_entering_exponent <- false;
             is_entering_imag <- false;
             (*FIXME: any other items to reset here?*)
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |_ ->
@@ -987,7 +995,7 @@ object(self)
          if not is_entering_imag then
             (is_entering_imag <- true;
             is_entering_exponent <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |FloatMatrixEntry ->
@@ -999,7 +1007,7 @@ object(self)
             else
                ());
             (*FIXME: any other items to reset here?*)
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |ComplexMatrixEntry ->
@@ -1013,13 +1021,13 @@ object(self)
                else
                   ());
                (*FIXME: any other items to reset here?*)
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                ()
          else
             (is_entering_imag <- true;
             is_entering_exponent <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
       |_ ->
          ()
 
@@ -1038,38 +1046,38 @@ object(self)
          else
             (entry_type <- FloatEntry;
             has_entry <- false));
-         self#draw_entry ()
+         self#draw_update_entry ()
       |FloatEntry ->
          if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
                buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                (is_entering_exponent <- false;
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if String.length buffer.re_mantissa > 1 then
                (let len = String.length buffer.re_mantissa in
                buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
          else
             (has_entry <- false;
             buffer.re_mantissa <- "";
-            self#draw_entry ())
+            self#draw_update_entry ())
       |ComplexEntry ->
          if is_entering_imag then
             if is_entering_exponent then
                if String.length buffer.im_exponent > 0 then
                   (let len = String.length buffer.im_exponent in
                   buffer.im_exponent <- String.sub buffer.im_exponent 0 (len - 1);
-                  self#draw_entry ())
+                  self#draw_update_entry ())
                else
                   (is_entering_exponent <- false;
-                  self#draw_entry ())
+                  self#draw_update_entry ())
             else if String.length buffer.im_mantissa > 0 then
                   (let len = String.length buffer.im_mantissa in
                   buffer.im_mantissa <- String.sub buffer.im_mantissa 0 (len - 1);
-                  self#draw_entry ())
+                  self#draw_update_entry ())
             else
                begin
                   is_entering_imag <- false;
@@ -1077,38 +1085,38 @@ object(self)
                      is_entering_exponent <- true
                   else
                      ());
-                  self#draw_entry ()
+                  self#draw_update_entry ()
                end
          (* not entering imag *)
          else if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
                buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                (is_entering_exponent <- false;
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if String.length buffer.re_mantissa > 0 then
                (let len = String.length buffer.re_mantissa in
                buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
          else
             (entry_type <- FloatEntry;
             has_entry <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
       |FloatMatrixEntry ->
          if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
                buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                (is_entering_exponent <- false;
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if String.length buffer.re_mantissa > 0 then
                (let len = String.length buffer.re_mantissa in
                buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if current_buffer > 0 then
             begin
                current_buffer <- pred current_buffer;
@@ -1121,26 +1129,26 @@ object(self)
                   has_multiple_rows <- false)
                else
                   ());
-               self#draw_entry ()
+               self#draw_update_entry ()
             end
          else
             (entry_type <- FloatEntry;
             has_entry <- false;
-            self#draw_entry ())
+            self#draw_update_entry ())
       |ComplexMatrixEntry ->
          if is_entering_imag then
             if is_entering_exponent then
                if String.length buffer.im_exponent > 0 then
                   (let len = String.length buffer.im_exponent in
                   buffer.im_exponent <- String.sub buffer.im_exponent 0 (len - 1);
-                  self#draw_entry ())
+                  self#draw_update_entry ())
                else
                   (is_entering_exponent <- false;
-                  self#draw_entry ())
+                  self#draw_update_entry ())
             else if String.length buffer.im_mantissa > 0 then
                   (let len = String.length buffer.im_mantissa in
                   buffer.im_mantissa <- String.sub buffer.im_mantissa 0 (len - 1);
-                  self#draw_entry ())
+                  self#draw_update_entry ())
             else
                begin
                   is_entering_imag <- false;
@@ -1148,21 +1156,21 @@ object(self)
                      is_entering_exponent <- true
                   else
                      () );
-                  self#draw_entry ()
+                  self#draw_update_entry ()
                end
          (* not entering imag *)
          else if is_entering_exponent then
             if String.length buffer.re_exponent > 0 then
                (let len = String.length buffer.re_exponent in
                buffer.re_exponent <- String.sub buffer.re_exponent 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                (is_entering_exponent <- false;
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if String.length buffer.re_mantissa > 0 then
                (let len = String.length buffer.re_mantissa in
                buffer.re_mantissa <- String.sub buffer.re_mantissa 0 (len - 1);
-               self#draw_entry ())
+               self#draw_update_entry ())
          else if current_buffer > 0 then
             begin
                current_buffer <- pred current_buffer;
@@ -1176,12 +1184,12 @@ object(self)
                   has_multiple_rows <- false)
                else
                   ());
-               self#draw_entry ();
+               self#draw_update_entry ();
             end
          else
             entry_type <- FloatEntry;
             has_entry <- false;
-            self#draw_entry ()
+            self#draw_update_entry ()
 
 
    (* handle a 'scientific_notation' (or base change) keypress *)
@@ -1190,26 +1198,26 @@ object(self)
       |IntEntry ->
          if String.length int_entry_buffer > 0 then
             (is_entering_base <- true;
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |FloatEntry | FloatMatrixEntry ->
          if String.length gen_buffer.(current_buffer).re_mantissa > 0 then
             (is_entering_exponent <- true;
-            self#draw_entry ())
+            self#draw_update_entry ())
          else
             ()
       |ComplexEntry | ComplexMatrixEntry ->
          if is_entering_imag then
             if String.length gen_buffer.(current_buffer).im_mantissa > 0 then
                (is_entering_exponent <- true;
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                ()
          else
             if String.length gen_buffer.(0).re_mantissa > 0 then
                (is_entering_exponent <- true;
-               self#draw_entry ())
+               self#draw_update_entry ())
             else
                ()
 
@@ -1225,7 +1233,7 @@ object(self)
                |'+' -> int_entry_buffer.[0] <- '-'
                |_ -> int_entry_buffer <- "-" ^ int_entry_buffer
             end;
-            self#draw_entry ())
+            self#draw_update_entry ())
          |FloatEntry | FloatMatrixEntry ->
             begin
                let buffer = gen_buffer.(current_buffer) in
@@ -1243,7 +1251,7 @@ object(self)
                   |'+' -> buffer.re_mantissa.[0] <- '-'
                   |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
             end;
-            self#draw_entry ()
+            self#draw_update_entry ()
          |ComplexEntry | ComplexMatrixEntry ->
             begin
                let buffer = gen_buffer.(current_buffer) in
@@ -1283,7 +1291,7 @@ object(self)
                   else
                      ()
             end;
-            self#draw_entry ()
+            self#draw_update_entry ()
       else
          raise Not_handled
 
@@ -1295,7 +1303,7 @@ object(self)
          flush stderr;
          interface_mode <- BrowsingMode;
          calc#backup ();
-         self#draw_stack ())
+         self#draw_update_stack ())
       else
          ()
 
@@ -1306,7 +1314,7 @@ object(self)
       stack_selection <- 1;
       stack_bottom_row <- 1;
       interface_mode <- StandardEntryMode;
-      self#draw_stack ()
+      self#draw_update_stack ()
       
 
    (* handle scrolling left in browsing mode *)
@@ -1315,7 +1323,7 @@ object(self)
          horiz_scroll <- pred horiz_scroll
       else
          ());
-      self#draw_stack ()
+      self#draw_update_stack ()
 
 
    (* handle scrolling right in browsing mode *)
@@ -1326,19 +1334,19 @@ object(self)
          horiz_scroll <- succ horiz_scroll
       else
          ());
-      self#draw_stack ()
+      self#draw_update_stack ()
 
 
    (* handle cyclic rolldown in browsing mode *)
    method private handle_rolldown () =
       calc#rolldown stack_selection;
-      self#draw_stack ()
+      self#draw_update_stack ()
 
 
    (* handle cyclic rollup in browsing mode *)
    method private handle_rollup () =
       calc#rollup stack_selection;
-      self#draw_stack ()
+      self#draw_update_stack ()
 
 
    (* handle moving up a line in browsing mode *)
@@ -1350,7 +1358,7 @@ object(self)
             stack_bottom_row <- stack_selection - scr.sw_lines + 1
          else
             ());
-         self#draw_stack ())
+         self#draw_update_stack ())
       else
          ()
 
@@ -1364,7 +1372,7 @@ object(self)
             stack_bottom_row <- stack_selection
          else
             ());
-         self#draw_stack ())
+         self#draw_update_stack ())
       else
          ()
 
@@ -1373,7 +1381,7 @@ object(self)
    method private handle_browse_echo () =
       calc#echo stack_selection;
       self#handle_prev_line ();
-      self#draw_stack ()
+      self#draw_update_stack ()
       
 
    (* handle fullscreen viewing of a selected stack element *)
@@ -1388,9 +1396,12 @@ object(self)
          in ();
          self#draw_help ();
          self#draw_stack ();
-         self#draw_entry ()
+         self#draw_update_entry ()
       with
-         Sys_error ss -> self#draw_error ss
+         Sys_error ss -> 
+            self#draw_error ss;
+            assert (doupdate ())
+               
       
 
    (* quit the calculator *)
@@ -1411,9 +1422,11 @@ object(self)
          in ();
          self#draw_help ();
          self#draw_stack ();
-         self#draw_entry ()
+         self#draw_update_entry ()
       with
-         Sys_error ss -> self#draw_error ss
+         Sys_error ss -> 
+            self#draw_error ss;
+            assert (doupdate ())
 
 
    (* begin extended entry *)
@@ -1422,7 +1435,7 @@ object(self)
          (interface_mode <- ExtendedEntryMode;
          help_mode <- Extended;
          self#draw_help ();
-         self#draw_entry ())
+         self#draw_update_entry ())
          (* do other cleanup stuff *)
       else
          ()
@@ -1436,7 +1449,7 @@ object(self)
          extended_entry_buffer <- "";
          matched_extended_entry <- "";
          self#draw_help ();
-         self#draw_entry ())
+         self#draw_update_entry ())
       else
          ()
 
@@ -1460,7 +1473,7 @@ object(self)
          extended_entry_buffer <- "";
          matched_extended_entry <- "";
          self#draw_help ();
-         self#draw_entry ())
+         self#draw_update_entry ())
       else
          ()
 
@@ -1519,7 +1532,7 @@ object(self)
          else
             ());
          self#draw_help ();
-         self#draw_entry ())
+         self#draw_update_entry ())
       else
          ()
 
@@ -1534,7 +1547,7 @@ object(self)
          matched_extended_entry_list <- self#match_extended_buffer test_buffer;
          extended_entry_buffer <- test_buffer;
          self#draw_help ();
-         self#draw_entry ()
+         self#draw_update_entry ()
       with
          Not_found -> let err = beep () in ()
       
@@ -1548,20 +1561,23 @@ object(self)
          else
             ());
          calc_function ();
-         self#draw_stack ()
+         self#draw_update_stack ()
       with 
          Invalid_argument error_msg ->
-            self#draw_error error_msg
+            self#draw_error error_msg;
+            assert (doupdate ())
+
 
 
    (* handle a call to the simple commands that require no argument *)
    method private handle_command_call calc_command =
       try
          calc_command ();
-         self#draw_stack ()
+         self#draw_update_stack ()
       with
          Invalid_argument error_msg ->
-            self#draw_error error_msg
+            self#draw_error error_msg;
+            assert (doupdate ())
 
 
 
@@ -1602,7 +1618,7 @@ object(self)
                         else
                            buffer.re_exponent <- exponent_buffer ^
                            (String.make 1 c);
-                        self#draw_entry ())
+                        self#draw_update_entry ())
                      else
                         ()
                   with Invalid_argument "char_of_int" ->
@@ -1625,7 +1641,7 @@ object(self)
                            buffer.re_mantissa <- mantissa_buffer ^
                            (String.make 1 c));
                         has_entry <- true;
-                        self#draw_entry ()
+                        self#draw_update_entry ()
                      end
                   else
                      ()
@@ -1644,7 +1660,7 @@ object(self)
                   let c = char_of_int key in
                   if String.contains base_chars c then
                      (int_base_string <- String.make 1 c;
-                     self#draw_entry ())
+                     self#draw_update_entry ())
                   else
                      ()
                with Invalid_argument "char_of_int" ->
@@ -1656,7 +1672,7 @@ object(self)
                   if String.contains digits c then
                      (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
                      has_entry <- true;
-                     self#draw_entry ())
+                     self#draw_update_entry ())
                   else
                      ()
                with Invalid_argument "char_of_int" ->
