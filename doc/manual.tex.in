@@ -548,6 +548,7 @@ The following functions are available as extended commands:
       \texttt{min} & find the minima of the columns of a real matrix \\
       \texttt{max} & find the maxima of the columns of a real matrix \\
       \texttt{utpn} & compute the upper tail probability of a normal distribution \\
+      \texttt{rand} & generate a random number between 0 and 1 (uniformly distributed) \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -1048,6 +1049,9 @@ to a real number, and as such the arithmetic will no longer be exact.
       Raise element 2 to the power of element 1.
    \item \texttt{function\_purge} \\
       Delete the variable in the last stack position.
+   \item \texttt{function\_rand} \\
+      Generate a random real-valued number between 0 (inclusive) and 1 (exclusive).  The deviates
+      are uniformly distributed.
    \item \texttt{function\_re} \\
       Compute the real part of the last stack element.
    \item \texttt{function\_sin} \\
@@ -1098,6 +1102,16 @@ to a real number, and as such the arithmetic will no longer be exact.
       1xM matrix as a result.
    \item \texttt{function\_transpose} \\
       Compute the matrix transpose of the last stack element.
+   \item \texttt{function\_utpn} \\
+      Compute the upper tail probability of a normal distribution. \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      $utpn(m, v, x) = \int_x^\infty \frac{1}{\sqrt{2 \pi v}} \exp \left(- \frac{(m - y)^2}{2 v} \right) \,dy$
+%END LATEX
+%HEVEA UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)${}^2$/(2 v)], \{y, x, Infinity\}]
+%@% ELSE %@%
+      UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)^2/(2 v)], {y, x, Infinity}]
+%@% END-IF %@%
    \item \texttt{function\_var\_unbiased} \\
       Compute the unbiased sample variance of each of the columns of a real NxM
       matrix, returning a 1xM matrix as a result.  (Compare to HP48's \texttt{var}
@@ -1106,16 +1120,6 @@ to a real number, and as such the arithmetic will no longer be exact.
       Compute the biased (population) sample variance of each of the columns of a
       real NxM matrix, returning a 1xM matrix as a result.  (Compare to HP48's
       \texttt{pvar} function.)
-   \item \texttt{function\_utpn} \\
-      Compute the upper tail probability of a normal distribution. \\
-%@% IF LATEX %@%
-%BEGIN LATEX
-      $utpn(m, v, x) = \int_x^\infty \frac{1}{\sqrt{2 \pi v}} \exp \left(- \frac{(m - y)^2}{2 v} \right) \,dy$ \\
-%END LATEX
-%HEVEA UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)${}^2$/(2 v)], \{y, x, Infinity\}]
-%@% ELSE %@%
-      UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)^2/(2 v)], {y, x, Infinity}]
-%@% END-IF %@%
 
 \end{itemize}
 

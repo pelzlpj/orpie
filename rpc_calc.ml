@@ -1890,6 +1890,11 @@ class rpc_calc =
             end
 
 
+         (* random float between 0 and 1 *)
+         method rand () =
+            stack#push (RpcFloat (Random.float 1.0))
+
+
 
 (*      method print_stack () =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in

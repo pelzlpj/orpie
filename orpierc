@@ -149,6 +149,7 @@ abbrev "stdevbias" function_stdev_biased
 abbrev "min"     function_minimum
 abbrev "max"     function_maximum
 abbrev "utpn"    function_utpn
+abbrev "rand"    function_rand
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap
