@@ -30,7 +30,13 @@
  * line-oriented and fullscreen displays, four different bases, two
  * different angle modes, and two different complex representations.  The
  * string representations are created immediately when needed; if not
- * immediately needed, they will eventually be filled in by a background thread.
+ * immediately needed, they will eventually be precomputed and filled in in by a 
+ * background thread (unless conserve_memory = false).
+ *
+ * Note: arguably, the rendering functions belong with the interface code
+ *       rather than with the stack code.  I may make this change at some
+ *       point, to better abstract the interface away from the underlying
+ *       calculator object.
  *)
 
 

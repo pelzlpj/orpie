@@ -18,6 +18,10 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* rcfile.ml
+ * This file includes everything associated with processing the orpierc file.
+ * In particular, this includes a number of hashtables used to store the
+ * bindings of curses keypresses to calculator operations. *)
 
 open Genlex;;
 open Curses;;

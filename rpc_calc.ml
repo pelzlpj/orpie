@@ -18,6 +18,14 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* rpc_calc.ml
+ * This file defines Orpie's underlying calculator object.  All calculator
+ * functions and commands have a corresponding method in this object.
+ *
+ * Ideally, this object should be completely separated from the curses-based
+ * interface; it should be possible to plug it into a GUI, for example.
+ * I'll fix this eventually. *)
+
 open Rpc_stack;;
 open Gsl_assist;;
 open Big_int;;

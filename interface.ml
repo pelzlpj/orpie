@@ -18,6 +18,12 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* interface.ml
+ * This file defines the data structure (a record) that stores the
+ * interface state.  The state includes information on the curses screen,
+ * the current editing mode, the data stored in entry string buffers, etc. *)
+
+
 open Curses;;
 open Rpc_calc;;
 open Operations;;

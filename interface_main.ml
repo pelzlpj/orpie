@@ -18,6 +18,10 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* interface_main.ml
+ * This file has the bulk of the implementation of the curses-based interface,
+ * including the main program loop that grabs keypresses and processes them.
+ * The screen rendering code is found in interface_draw.ml . *)
 
 open Curses;;
 open Printf;;

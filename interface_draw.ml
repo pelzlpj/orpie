@@ -18,6 +18,10 @@
  *  <pelzlpj@eecs.umich.edu>.
  *)
 
+(* interface_draw.ml
+ * This file has all code concerned with rendering the stack, help panel,
+ * and data entry line. *)
+
 
 open Curses;;
 open Printf;;
