@@ -1006,6 +1006,14 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#re
    |Im ->
       handle_function_call iface iface.calc#im
+   |Gamma ->
+      handle_function_call iface iface.calc#gamma
+   |LnGamma ->
+      handle_function_call iface iface.calc#lngamma
+   |Erf ->
+      handle_function_call iface iface.calc#erf
+   |Erfc ->
+      handle_function_call iface iface.calc#erfc
    end
 
 

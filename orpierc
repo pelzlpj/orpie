@@ -100,6 +100,10 @@ abbrev "acos"    function_acos
 abbrev "atan"    function_atan
 abbrev "re"      function_re
 abbrev "im"      function_im
+abbrev "gamma"   function_gamma
+abbrev "lngamma" function_lngamma
+abbrev "erf"     function_erf
+abbrev "erfc"    function_erfc
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap

@@ -724,6 +724,85 @@ class rpc_calc =
          else
             raise (Invalid_argument "empty stack")
 
+
+      (* Euler gamma function *)
+      method gamma () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_sf.gamma (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_sf.gamma el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      (* log_e of Euler gamma function *)
+      method lngamma () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_sf.lngamma (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_sf.lngamma el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+      (* error function *)
+      method erf () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_sf.erf (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_sf.erf el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+
+      (* complementary error function *)
+      method erfc () =
+         if stack#length > 0 then
+            begin
+               self#backup ();
+               let gen_el = stack#pop () in
+               match gen_el with
+               |RpcInt el ->
+                  stack#push (RpcFloat (Gsl_sf.erfc (float_of_big_int el)))
+               |RpcFloat el ->
+                  stack#push (RpcFloat (Gsl_sf.erfc el))
+               |_ ->
+                  (stack#push gen_el;
+                  raise (Invalid_argument "invalid argument"))
+            end
+         else
+            raise (Invalid_argument "empty stack")
+
+
+
       method enter_pi () =
          stack#push (RpcFloat pi)
 
