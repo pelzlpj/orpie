@@ -129,6 +129,16 @@ let register_abbrev abbr op =
    Hashtbl.add abbrev_command_table abbr op;
    Hashtbl.add command_abbrev_table op abbr;;
    
+(* remove an abbreviation for an extended command. *)
+let unregister_abbrev abbr =
+   let regex = Str.regexp ("^" ^ abbr ^ "$") in
+   extended_commands := Str.replace_first regex "" !extended_commands;
+   try
+      let op = Hashtbl.find abbrev_command_table abbr in
+      Hashtbl.remove abbrev_command_table abbr;
+      Hashtbl.remove command_abbrev_table op
+   with Not_found -> ();;
+
 
 let translate_extended_abbrev abb =
    Hashtbl.find abbrev_command_table abb;;
@@ -587,6 +597,15 @@ let parse_line line_stream =
          | [< >] ->
             config_failwith ("Expected a command name after \"abbrev \"" ^ abbr ^ "\"")
          end
+      | [< >] ->
+         config_failwith ("Expected an abbreviation string after \"abbrev\"")
+      end
+   | [< 'Kwd "unabbrev" >] ->
+      begin match line_stream with parser
+      | [< 'String abbr >] ->
+         unregister_abbrev abbr
+      | [< >] ->
+         config_failwith ("Expected an abbreviation string after \"unabbrev\"")
       end
    | [< 'Kwd "set" >] ->
       begin match line_stream with parser
@@ -759,7 +778,8 @@ let open_rcfile rcfile_op =
 
 let rec process_rcfile rcfile_op =
    let line_lexer line = 
-      make_lexer ["include"; "bind"; "autobind"; "abbrev"; "macro"; "set"; "#"] (Stream.of_string line)
+      make_lexer ["include"; "bind"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; "#"] 
+      (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
    let config_stream, rcfile_filename = open_rcfile rcfile_op in

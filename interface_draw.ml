@@ -329,7 +329,7 @@ let generate_abbrev_help () =
    in
    let get_abbr op =
       try Rcfile.abbrev_of_operation op
-      with Not_found -> (Printf.fprintf stderr "can't find op\n"; "")
+      with Not_found -> ""
    in
    let functions_str =
       (get_abbr (Function Sin))       ^ "  " ^ 
