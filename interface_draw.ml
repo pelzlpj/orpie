@@ -436,38 +436,38 @@ let draw_help_standard iface win mvwaddstr_safe try_find =
       assert (mvwaddstr win 5 0 "Common Operations:");
       wattroff win WA.bold;
       mvwaddstr_safe win 6 2  ("enter    : " ^
-      try_find Rcfile.key_of_edit (Edit Enter));
+      try_find (Edit Enter));
       mvwaddstr_safe win 7 2  ("drop     : " ^
-      try_find Rcfile.key_of_command (Command Drop));
+      try_find (Command Drop));
       mvwaddstr_safe win 8 2  ("swap     : " ^
-      try_find Rcfile.key_of_command (Command Swap));
+      try_find (Command Swap));
       mvwaddstr_safe win 9 2  ("backspace: " ^
-      try_find Rcfile.key_of_edit (Edit Backspace));
+      try_find (Edit Backspace));
       mvwaddstr_safe win 10 2 ("add      : " ^
-      try_find Rcfile.key_of_function (Function Add));
+      try_find (Function Add));
       mvwaddstr_safe win 11 2 ("subtract : " ^
-      try_find Rcfile.key_of_function (Function Sub));
+      try_find (Function Sub));
       mvwaddstr_safe win 12 2 ("multiply : " ^
-      try_find Rcfile.key_of_function (Function Mult));
+      try_find (Function Mult));
       mvwaddstr_safe win 13 2 ("divide   : " ^
-      try_find Rcfile.key_of_function (Function Div));
+      try_find (Function Div));
       mvwaddstr_safe win 14 2 ("x^y      : " ^
-      try_find Rcfile.key_of_function (Function Pow));
+      try_find (Function Pow));
       mvwaddstr_safe win 15 2 ("negation : " ^
-      try_find Rcfile.key_of_function (Function Neg));
+      try_find (Function Neg));
       wattron win WA.bold;
       mvwaddstr_safe win 16 0 "Miscellaneous:";
       wattroff win WA.bold;
       mvwaddstr_safe win 17 2 ("scientific notation     : " ^
-      try_find Rcfile.key_of_edit (Edit SciNotBase));
+      try_find (Edit SciNotBase));
       mvwaddstr_safe win 18 2 ("abbreviation entry mode : " ^
-      try_find Rcfile.key_of_command  (Command BeginAbbrev));
+      try_find (Command BeginAbbrev));
       mvwaddstr_safe win 19 2 ("stack browsing mode     : " ^
-      try_find Rcfile.key_of_command (Command BeginBrowse));
+      try_find (Command BeginBrowse));
       mvwaddstr_safe win 20 2 ("refresh display         : " ^
-      try_find Rcfile.key_of_command (Command Refresh));
+      try_find (Command Refresh));
       mvwaddstr_safe win 21 2 ("quit                    : " ^
-      try_find Rcfile.key_of_command (Command Quit));
+      try_find (Command Quit));
       assert (wnoutrefresh win)
    end else begin
       let adjust_len s len =
@@ -504,11 +504,11 @@ let draw_help_intedit iface win mvwaddstr_safe try_find =
    mvwaddstr_safe win 5 0 "Integer Editing Operations:";
    wattroff win WA.bold;
    mvwaddstr_safe win 6 2 ("enter    : " ^
-   try_find Rcfile.key_of_edit (Edit Enter));
+   try_find (Edit Enter));
    mvwaddstr_safe win 7 2 ("set base : " ^
-   try_find Rcfile.key_of_edit (Edit SciNotBase));
+   try_find (Edit SciNotBase));
    mvwaddstr_safe win 8 2 ("cancel   : " ^
-   try_find Rcfile.key_of_intedit (IntEdit IntEditExit));
+   try_find (IntEdit IntEditExit));
    assert (wnoutrefresh win)
 
 
@@ -538,16 +538,16 @@ let draw_help_abbrev iface win mvwaddstr_safe try_find =
          mvwaddstr_safe win 17 1 "Miscellaneous:";
          print_help_lines abbr_strings.misc 18;
          mvwaddstr_safe win 20 1 ("execute abbreviation : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev AbbrevEnter));
+         try_find (Abbrev AbbrevEnter));
          mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev AbbrevExit));
+         try_find (Abbrev AbbrevExit));
       |IsConst ->
          wattron win WA.bold;
          mvwaddstr_safe win 5 0 "Constants:";
          wattroff win WA.bold;
          print_help_lines const_strings 7;
          mvwaddstr_safe win 12 1 ("enter constant : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev AbbrevEnter));
+         try_find (Abbrev AbbrevEnter));
       end;
       assert (wnoutrefresh win)
    end else begin
@@ -587,11 +587,11 @@ let draw_help_varedit iface win mvwaddstr_safe try_find =
    mvwaddstr_safe win 5 0 "Variable Mode Commands:";
    wattroff win WA.bold;
    mvwaddstr_safe win 6 2 ("enter variable   : " ^
-   try_find Rcfile.key_of_varedit (VarEdit VarEditEnter));
+   try_find (VarEdit VarEditEnter));
    mvwaddstr_safe win 7 2 ("complete variable: " ^
-   try_find Rcfile.key_of_varedit (VarEdit VarEditComplete));
+   try_find (VarEdit VarEditComplete));
    mvwaddstr_safe win 8 2 ("cancel entry     : " ^
-   try_find Rcfile.key_of_varedit (VarEdit VarEditExit));
+   try_find (VarEdit VarEditExit));
    wattron win WA.bold;
    mvwaddstr_safe win 10 0 "Matched variables:";
    wattroff win WA.bold;
@@ -644,33 +644,33 @@ let draw_help_browsing iface win mvwaddstr_safe try_find =
    mvwaddstr_safe win 5 0 "Browsing Operations:";
    wattroff win WA.bold;
    mvwaddstr_safe win 6 2  ("prev        : " ^
-   try_find Rcfile.key_of_browse (Browse PrevLine));
+   try_find (Browse PrevLine));
    mvwaddstr_safe win 7 2  ("next        : " ^
-   try_find Rcfile.key_of_browse (Browse NextLine));
+   try_find (Browse NextLine));
    mvwaddstr_safe win 8 2  ("scroll left : " ^
-   try_find Rcfile.key_of_browse (Browse ScrollLeft));
+   try_find (Browse ScrollLeft));
    mvwaddstr_safe win 9 2  ("scroll right: " ^
-   try_find Rcfile.key_of_browse (Browse ScrollRight));
+   try_find (Browse ScrollRight));
    mvwaddstr_safe win 10 2 ("roll down   : " ^
-   try_find Rcfile.key_of_browse (Browse RollDown));
+   try_find (Browse RollDown));
    mvwaddstr_safe win 11 2 ("roll up     : " ^
-   try_find Rcfile.key_of_browse (Browse RollUp));
+   try_find (Browse RollUp));
    mvwaddstr_safe win 12 2 ("dup         : " ^
-   try_find Rcfile.key_of_command (Command Dup));
+   try_find (Command Dup));
    mvwaddstr_safe win 13 2 ("view        : " ^
-   try_find Rcfile.key_of_browse (Browse ViewEntry));
+   try_find (Browse ViewEntry));
    mvwaddstr_safe win 14 2 ("edit        : " ^
-   try_find Rcfile.key_of_browse (Browse EditEntry));
+   try_find (Browse EditEntry));
    mvwaddstr_safe win 15 2 ("drop        : " ^
-   try_find Rcfile.key_of_browse (Browse Drop1));
+   try_find (Browse Drop1));
    mvwaddstr_safe win 16 2 ("dropn       : " ^
-   try_find Rcfile.key_of_browse (Browse DropN));
+   try_find (Browse DropN));
    mvwaddstr_safe win 17 2 ("keep        : " ^
-   try_find Rcfile.key_of_browse (Browse Keep));
+   try_find (Browse Keep));
    mvwaddstr_safe win 18 2 ("keepn       : " ^
-   try_find Rcfile.key_of_browse (Browse KeepN));
+   try_find (Browse KeepN));
    mvwaddstr_safe win 20 1 ("exit browsing mode: " ^
-   try_find Rcfile.key_of_browse (Browse EndBrowse));
+   try_find (Browse EndBrowse));
    assert (wnoutrefresh win)
 
 
@@ -720,8 +720,8 @@ let draw_help (iface : interface_state_t) =
       |Rect -> "REC"
       |Polar -> "POL" in
       assert (mvwaddstr win 3 34 complex_str);
-      let try_find fn el =
-         try fn el
+      let try_find op =
+         try Rcfile.key_of_operation op
          with Not_found -> "(N/A)"
       in
       begin match iface.interface_mode with

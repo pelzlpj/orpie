@@ -96,13 +96,13 @@ let key_of_varedit edit_op =
 
 let key_of_operation (op : operation_t) =
    match op with
-   |Function _ -> Hashtbl.find table_function_key op
-   |Command _  -> Hashtbl.find table_command_key op
-   |Edit _     -> Hashtbl.find table_edit_key op
-   |Browse _   -> Hashtbl.find table_browse_key op
-   |Abbrev _   -> Hashtbl.find table_abbrev_key op
-   |IntEdit _  -> Hashtbl.find table_intedit_key op
-   |VarEdit _  -> Hashtbl.find table_varedit_key op
+   |Function x -> Hashtbl.find table_function_key x
+   |Command x  -> Hashtbl.find table_command_key x
+   |Edit x     -> Hashtbl.find table_edit_key x
+   |Browse x   -> Hashtbl.find table_browse_key x
+   |Abbrev x   -> Hashtbl.find table_abbrev_key x
+   |IntEdit x  -> Hashtbl.find table_intedit_key x
+   |VarEdit x  -> Hashtbl.find table_varedit_key x
 
 
 (* abbreviations used in abbreviation entry mode *)
@@ -262,27 +262,27 @@ let decode_single_key_string key_string =
  * between curses chtypes and commands (in both directions). *)
 let register_binding_internal k k_string op =
    match op with
-   |Function _ ->
-      Hashtbl.add table_key_function k op;
-      Hashtbl.add table_function_key op k_string
-   |Command _ ->
-      Hashtbl.add table_key_command k op;
-      Hashtbl.add table_command_key op k_string
-   |Edit _ ->
-      Hashtbl.add table_key_edit k op;
-      Hashtbl.add table_edit_key op k_string
-   |Browse _ ->
-      Hashtbl.add table_key_browse k op;
-      Hashtbl.add table_browse_key op k_string
-   |Abbrev _ ->
-      Hashtbl.add table_key_abbrev k op;
-      Hashtbl.add table_abbrev_key op k_string
-   |IntEdit _ ->
-      Hashtbl.add table_key_intedit k op;
-      Hashtbl.add table_intedit_key op k_string
-   |VarEdit _ ->
-      Hashtbl.add table_key_varedit k op;
-      Hashtbl.add table_varedit_key op k_string
+   |Function x ->
+      Hashtbl.add table_key_function k x;
+      Hashtbl.add table_function_key x k_string
+   |Command x ->
+      Hashtbl.add table_key_command k x;
+      Hashtbl.add table_command_key x k_string
+   |Edit x ->
+      Hashtbl.add table_key_edit k x;
+      Hashtbl.add table_edit_key x k_string
+   |Browse x ->
+      Hashtbl.add table_key_browse k x;
+      Hashtbl.add table_browse_key x k_string
+   |Abbrev x ->
+      Hashtbl.add table_key_abbrev k x;
+      Hashtbl.add table_abbrev_key x k_string
+   |IntEdit x ->
+      Hashtbl.add table_key_intedit k x;
+      Hashtbl.add table_intedit_key x k_string
+   |VarEdit x ->
+      Hashtbl.add table_key_varedit k x;
+      Hashtbl.add table_varedit_key x k_string
 
 
 (* convenience routine for previous *)
@@ -356,27 +356,27 @@ let unregister_varedit_binding key_string =
 (* Remove a key binding. *)
 let remove_binding k op =
    match op with
-   |Function _ ->
+   |Function x ->
       Hashtbl.remove table_key_function k;
-      Hashtbl.remove table_function_key op
-   |Command _ ->
+      Hashtbl.remove table_function_key x
+   |Command x ->
       Hashtbl.remove table_key_command k;
-      Hashtbl.remove table_command_key op
-   |Edit _ ->
+      Hashtbl.remove table_command_key x
+   |Edit x ->
       Hashtbl.remove table_key_edit k;
-      Hashtbl.remove table_edit_key op
-   |Browse _ ->
+      Hashtbl.remove table_edit_key x
+   |Browse x ->
       Hashtbl.remove table_key_browse k;
-      Hashtbl.remove table_browse_key op
-   |Abbrev _ ->
+      Hashtbl.remove table_browse_key x
+   |Abbrev x ->
       Hashtbl.remove table_key_abbrev k;
-      Hashtbl.remove table_abbrev_key op
-   |IntEdit _ ->
+      Hashtbl.remove table_abbrev_key x
+   |IntEdit x ->
       Hashtbl.remove table_key_intedit k;
-      Hashtbl.remove table_intedit_key op
-   |VarEdit _ ->
+      Hashtbl.remove table_intedit_key x
+   |VarEdit x ->
       Hashtbl.remove table_key_varedit k;
-      Hashtbl.remove table_varedit_key op
+      Hashtbl.remove table_varedit_key x
 
 
 (* Register a macro.  This parses the macro string and divides it into multiple
