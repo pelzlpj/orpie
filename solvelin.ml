@@ -23,132 +23,126 @@ open Rpc_stack
 
 (* solve a linear system Ax = b, with input nxn matrix A and output nx1
  * matrix b *)
-let solve_linear (stack : rpc_stack) (do_backup : unit -> unit) (evaln : int -> unit) =
-   if stack#length > 1 then
-      begin
-         do_backup ();
-         evaln 2;
-         let gen_el2 = stack#pop () in
-         let gen_el1 = stack#pop () in
-         match gen_el1 with
-         |RpcFloatMatrix el1 ->
-            begin match gen_el2 with
-            |RpcFloatMatrix el2 ->
-               let n1, m1 = Gsl_matrix.dims el1 in
-               if n1 != m1 then
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "multiplier matrix must be square"))
-               else
-                  let n2, m2 = Gsl_matrix.dims el2 in
-                  if m2 != 1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument "resultant matrix must be a column"))
-                  else if n2 != m1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument ("dimensions of multiplier and " ^ 
-                     "resultant matrices do not match")))
-                  else begin
-                     let b = Gsl_matrix.to_array el2 in
-                     let x = Gsl_linalg.solve_LU (`M el1) (`A b) in
-                     let x_mat = Gsl_matrix.of_array x m1 1 in
-                     stack#push (RpcFloatMatrix x_mat)
-                  end
-            |RpcComplexMatrix el2 ->
-               let n1, m1 = Gsl_matrix.dims el1 in
-               if n1 != m1 then
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "multiplier matrix must be square"))
-               else
-                  let n2, m2 = Gsl_matrix_complex.dims el2 in
-                  if m2 != 1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument "resultant matrix must be a column"))
-                  else if n2 != m1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument ("dimensions of multiplier and" ^ 
-                     "resultant matrices do not match")))
-                  else begin
-                     let a_cpx = Gsl_assist.cmat_of_fmat el1 in
-                     let b_arr = Gsl_matrix_complex.to_array el2 in
-                     let b_vec = Gsl_vector_complex.of_array b_arr in
-                     let x = Gsl_assist.solve_complex_LU (`CM a_cpx) b_vec in
-                     let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-                     stack#push (RpcComplexMatrix x_mat)
-                  end
-            |_ ->
+let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
+   evaln 2;
+   let gen_el2 = stack#pop () in
+   let gen_el1 = stack#pop () in
+   match gen_el1 with
+   |RpcFloatMatrix el1 ->
+      begin match gen_el2 with
+      |RpcFloatMatrix el2 ->
+         let n1, m1 = Gsl_matrix.dims el1 in
+         if n1 != m1 then
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "multiplier matrix must be square"))
+         else
+            let n2, m2 = Gsl_matrix.dims el2 in
+            if m2 != 1 then
                (stack#push gen_el1;
                stack#push gen_el2;
-               raise (Invalid_argument "both arguments of solve_linear must be matrices"))
-            end
-         |RpcComplexMatrix el1 ->
-            begin match gen_el2 with
-            |RpcFloatMatrix el2 ->
-               let n1, m1 = Gsl_matrix_complex.dims el1 in
-               if n1 != m1 then
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "multiplier matrix must be square"))
-               else
-                  let n2, m2 = Gsl_matrix.dims el2 in
-                  if m2 != 1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument "resultant matrix must be a column"))
-                  else if n2 != m1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument ("dimensions of multiplier and" ^ 
-                     "resultant matrices do not match")))
-                  else begin
-                     let b_cpx = Gsl_assist.cmat_of_fmat el2 in
-                     let b_arr = Gsl_matrix_complex.to_array b_cpx in
-                     let b_vec = Gsl_vector_complex.of_array b_arr in
-                     let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
-                     let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-                     stack#push (RpcComplexMatrix x_mat)
-                  end
-            |RpcComplexMatrix el2 ->
-               let n1, m1 = Gsl_matrix_complex.dims el1 in
-               if n1 != m1 then
-                  (stack#push gen_el2;
-                  stack#push gen_el1;
-                  raise (Invalid_argument "multiplier matrix must be square"))
-               else
-                  let n2, m2 = Gsl_matrix_complex.dims el2 in
-                  if m2 != 1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument "resultant matrix must be a column"))
-                  else if n2 != m1 then
-                     (stack#push gen_el1;
-                     stack#push gen_el2;
-                     raise (Invalid_argument ("dimensions of multiplier and" ^ 
-                     "resultant matrices do not match")))
-                  else begin
-                     let b_arr = Gsl_matrix_complex.to_array el2 in
-                     let b_vec = Gsl_vector_complex.of_array b_arr in
-                     let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
-                     let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-                     stack#push (RpcComplexMatrix x_mat)
-                  end
-            |_ ->
+               raise (Invalid_argument "resultant matrix must be a column"))
+            else if n2 != m1 then
                (stack#push gen_el1;
                stack#push gen_el2;
-               raise (Invalid_argument "both arguments of solve_linear must be matrices"))
+               raise (Invalid_argument ("dimensions of multiplier and " ^ 
+               "resultant matrices do not match")))
+            else begin
+               let b = Gsl_matrix.to_array el2 in
+               let x = Gsl_linalg.solve_LU (`M el1) (`A b) in
+               let x_mat = Gsl_matrix.of_array x m1 1 in
+               stack#push (RpcFloatMatrix x_mat)
             end
-         |_ ->
-            (stack#push gen_el1;
-            stack#push gen_el2;
-            raise (Invalid_argument "both arguments of solve_linear must be matrices"))
+      |RpcComplexMatrix el2 ->
+         let n1, m1 = Gsl_matrix.dims el1 in
+         if n1 != m1 then
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "multiplier matrix must be square"))
+         else
+            let n2, m2 = Gsl_matrix_complex.dims el2 in
+            if m2 != 1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "resultant matrix must be a column"))
+            else if n2 != m1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument ("dimensions of multiplier and" ^ 
+               "resultant matrices do not match")))
+            else begin
+               let a_cpx = Gsl_assist.cmat_of_fmat el1 in
+               let b_arr = Gsl_matrix_complex.to_array el2 in
+               let b_vec = Gsl_vector_complex.of_array b_arr in
+               let x = Gsl_assist.solve_complex_LU (`CM a_cpx) b_vec in
+               let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
+               stack#push (RpcComplexMatrix x_mat)
+            end
+      |_ ->
+         (stack#push gen_el1;
+         stack#push gen_el2;
+         raise (Invalid_argument "both arguments of solve_linear must be matrices"))
       end
-   else
-      raise (Invalid_argument "empty stack")
+   |RpcComplexMatrix el1 ->
+      begin match gen_el2 with
+      |RpcFloatMatrix el2 ->
+         let n1, m1 = Gsl_matrix_complex.dims el1 in
+         if n1 != m1 then
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "multiplier matrix must be square"))
+         else
+            let n2, m2 = Gsl_matrix.dims el2 in
+            if m2 != 1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "resultant matrix must be a column"))
+            else if n2 != m1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument ("dimensions of multiplier and" ^ 
+               "resultant matrices do not match")))
+            else begin
+               let b_cpx = Gsl_assist.cmat_of_fmat el2 in
+               let b_arr = Gsl_matrix_complex.to_array b_cpx in
+               let b_vec = Gsl_vector_complex.of_array b_arr in
+               let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
+               let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
+               stack#push (RpcComplexMatrix x_mat)
+            end
+      |RpcComplexMatrix el2 ->
+         let n1, m1 = Gsl_matrix_complex.dims el1 in
+         if n1 != m1 then
+            (stack#push gen_el2;
+            stack#push gen_el1;
+            raise (Invalid_argument "multiplier matrix must be square"))
+         else
+            let n2, m2 = Gsl_matrix_complex.dims el2 in
+            if m2 != 1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "resultant matrix must be a column"))
+            else if n2 != m1 then
+               (stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument ("dimensions of multiplier and" ^ 
+               "resultant matrices do not match")))
+            else begin
+               let b_arr = Gsl_matrix_complex.to_array el2 in
+               let b_vec = Gsl_vector_complex.of_array b_arr in
+               let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
+               let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
+               stack#push (RpcComplexMatrix x_mat)
+            end
+      |_ ->
+         (stack#push gen_el1;
+         stack#push gen_el2;
+         raise (Invalid_argument "both arguments of solve_linear must be matrices"))
+      end
+   |_ ->
+      (stack#push gen_el1;
+      stack#push gen_el2;
+      raise (Invalid_argument "both arguments of solve_linear must be matrices"))
 
 
 
