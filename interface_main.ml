@@ -223,6 +223,13 @@ let push_entry (iface : interface_state_t) =
 (* handle an 'enter' keypress *)
 let handle_enter (iface : interface_state_t) =
    iface.interface_mode <- StandardEntryMode;
+   begin match iface.help_mode with
+   |StandardInt ->
+      iface.help_mode <- Standard;
+      draw_help iface
+   |_ ->
+      ()
+   end;
    try
       (if iface.has_entry then
          push_entry iface
@@ -240,6 +247,8 @@ let handle_begin_int (iface : interface_state_t) =
       (iface.entry_type <- IntEntry;
       iface.interface_mode <- IntEditMode;
       iface.int_entry_buffer <- "";
+      iface.help_mode <- StandardInt;
+      draw_help iface;
       draw_update_entry iface)
    else
       () 
@@ -371,6 +380,15 @@ let handle_angle (iface : interface_state_t) =
       ()
 
 
+(* cancel integer entry mode *)
+let handle_exit_int (iface : interface_state_t) =
+   iface.interface_mode <- StandardEntryMode;
+   iface.entry_type <- FloatEntry;
+   iface.help_mode <- Standard;
+   iface.has_entry <- false;
+   draw_help iface;
+   draw_update_entry iface
+
 
 (* handle a 'backspace' keypress *)
 let handle_backspace (iface : interface_state_t) =
@@ -384,8 +402,7 @@ let handle_backspace (iface : interface_state_t) =
          (let len = String.length iface.int_entry_buffer in
          iface.int_entry_buffer <- String.sub iface.int_entry_buffer 0 (len - 1))
       else
-         (iface.entry_type <- FloatEntry;
-         iface.has_entry <- false))
+         handle_exit_int iface)
    |FloatEntry ->
       if iface.is_entering_exponent then
          if String.length buffer.re_exponent > 0 then
@@ -539,13 +556,6 @@ let handle_scientific_notation (iface : interface_state_t) =
          else
             ()
    end;
-   draw_update_entry iface
-
-
-(* cancel integer entry mode *)
-let handle_exit_int (iface : interface_state_t) =
-   iface.interface_mode <- StandardEntryMode;
-   iface.entry_type <- FloatEntry;
    draw_update_entry iface
 
 

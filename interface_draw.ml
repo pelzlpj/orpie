@@ -426,6 +426,17 @@ let draw_help (iface : interface_state_t) =
             mvwaddstr_safe win 21 2 ("quit                : " ^
             Rcfile.key_of_command (Command Quit));
             assert (wnoutrefresh win)
+         |StandardInt ->
+            wattron win WA.bold;
+            assert (mvwaddstr win 5 0 "Integer Editing Operations:");
+            wattroff win WA.bold;
+            mvwaddstr_safe win 6 2 ("enter    : " ^
+            try_find Rcfile.key_of_edit (Edit Enter));
+            mvwaddstr_safe win 7 2 ("set base : " ^
+            try_find Rcfile.key_of_edit (Edit SciNotBase));
+            mvwaddstr_safe win 8 2 ("cancel   : " ^
+            try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
+            assert (wnoutrefresh win)
          |Extended ->
             if String.length iface.extended_entry_buffer = 0 then
                let abbr_strings = generate_abbrev_help () in

@@ -33,7 +33,7 @@ type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
    mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
    mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
 
-type help_mode_t = | Standard | Extended;;
+type help_mode_t = | Standard | StandardInt | Extended;;
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry;;
 
