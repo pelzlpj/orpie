@@ -1165,23 +1165,15 @@ let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
             Txtin_parser.decode_data_deg Txtin_lexer.token lexbuf
          end
       in
-      let rec push_data d =
-         begin match d with
-         |[] -> 
-            ()
-         |hd :: tl -> 
-            if is_browsing then
-               begin
-                  iface.calc#delete iface.stack_selection;
-                  iface.calc#push hd;
-                  iface.calc#rolldown iface.stack_selection
-               end
-            else
-               iface.calc#push hd;
-            push_data tl
-         end
+      let push_data el =
+         if is_browsing then begin
+            iface.calc#delete iface.stack_selection;
+            iface.calc#push el;
+            iface.calc#rolldown iface.stack_selection
+         end else
+            iface.calc#push el;
       in
-      push_data data;
+      List.iter push_data data;
       close_in edited_buf;
       handle_refresh iface
    with
@@ -1747,18 +1739,14 @@ let handle_exit_variable (iface : interface_state_t) =
 (* search through a list of variables and find all that match
  * iface.variable_entry_buffer. *)
 let match_variable_buffer (iface : interface_state_t) buf =
-   let buf_regex = Str.regexp (Str.quote buf) in
-   let rec match_aux var_lst matches_lst =
-      match var_lst with
-      |[] ->
-         matches_lst
-      |vv :: tail ->
-         if Str.string_match buf_regex vv 0 then
-            match_aux tail (vv :: matches_lst)
-         else
-            match_aux tail matches_lst
+   let buf_regex = Str.regexp_string buf in
+   let find_matches prev_result el =
+      if Str.string_match buf_regex el 0 then
+         el :: prev_result
+      else
+         prev_result
    in
-   List.rev (match_aux iface.sorted_variables [])
+   List.fold_left find_matches [] (List.rev iface.sorted_variables)
 
 
 
