@@ -1,6 +1,14 @@
 Orpie ChangeLog
 ------------------------------------------------------------------------
 
+v1.4
+
+   2004-07-19        Implemented automatic key bindings.
+
+                     Changed operation "function_rand" to "command_rand"
+                     because it does not take an argument.
+
+
 v1.3
 
    2004-07-17        Version 1.3.0 release.

@@ -548,7 +548,6 @@ The following functions are available as extended commands:
       \texttt{min} & find the minima of the columns of a real matrix \\
       \texttt{max} & find the maxima of the columns of a real matrix \\
       \texttt{utpn} & compute the upper tail probability of a normal distribution \\
-      \texttt{rand} & generate a random number between 0 and 1 (uniformly distributed) \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -659,6 +658,7 @@ have been implemented using the extended command syntax:
 %@% ELSE %@%
       \texttt{pi} & enter 3.14159265 on the stack \\
 %@% END-IF %@%
+      \texttt{rand} & generate a random number between 0 and 1 (uniformly distributed) \\
       \texttt{refresh} & refresh the display \\
       \texttt{about} & display a nifty ``About Orpie'' screen \\
       \texttt{quit} & quit Orpie \\
@@ -1072,9 +1072,6 @@ to a real number, and as such the arithmetic will no longer be exact.
       Raise element 2 to the power of element 1.
    \item \texttt{function\_purge} \\
       Delete the variable in the last stack position.
-   \item \texttt{function\_rand} \\
-      Generate a random real-valued number between 0 (inclusive) and 1 (exclusive).  The deviates
-      are uniformly distributed.
    \item \texttt{function\_re} \\
       Compute the real part of the last stack element.
    \item \texttt{function\_sin} \\
@@ -1199,6 +1196,9 @@ they do not take an argument.  Many calculator interface settings are implemente
       Set the complex display mode to polar.
    \item \texttt{command\_rad} \\
       Set the angle mode to radians.
+   \item \texttt{command\_rand} \\
+      Generate a random real-valued number between 0 (inclusive) and 1 (exclusive).  The deviates
+      are uniformly distributed.
    \item \texttt{command\_rect} \\
       Set the complex display mode to rectangular (cartesian).
    \item \texttt{command\_refresh} \\
