@@ -1,6 +1,27 @@
 rpc2 to-do list
 --------------------------------------------------------------------------------
-* fullscreen display of matrices should align all the columns
+Definitely before release:
+
+   * make sure all the rpc 0.98 functions are in rpc2 (gamma, pi, ...)
+
+   * fullscreen display of matrices should align all the columns
+   
+   * clean up the help panel; ideally, the hotkeys should be displayed
+     in the main help window
+
+   * improve the build script (link directly with relevant portions of
+     ocamlgsl-0.3.2, so the user will need only GSL and ncurses)
+
+   * set the cursor to always be in the entry window, not jumping around
+     as it is now
+
+   * create an "about" function
+
+   * change the name: "Orpie"?
+
+
+* create a parser that can read data structures entered into an ascii file,
+  so I can use $EDITOR to enter big matrices (for example)
 
 * "'"  -> extended entry of a function (sin, cos, etc.), but
   "\"" -> extended entry of *any* command/operation (sin, cos, rad, rect, etc.)
