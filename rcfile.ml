@@ -80,7 +80,17 @@ let command_abbrev_table = Hashtbl.create 30;;
  * This updates the string used in regexp matching, and
  * updates the hashtable used to find the corresponding operation. *)
 let register_abbrev abbr op =
-   extended_commands := !extended_commands ^ abbr ^ "\n";
+   (* Dummyproofing: if an abbreviation is a prefix of another
+    * abbreviation, then it *must* lie earlier in the search order.
+    * If not, it becomes impossible to execute the prefix command. *)
+   let regex = Str.regexp ("^" ^ abbr ^ ".*$") in
+   (try
+      let match_pos = Str.search_forward regex !extended_commands 0 in
+      let before = Str.string_before !extended_commands match_pos
+      and after  = Str.string_after !extended_commands match_pos in
+      extended_commands := before ^ abbr ^ "\n" ^ after
+   with Not_found ->
+      extended_commands := !extended_commands ^ abbr ^ "\n");
    Hashtbl.add command_abbrev_table abbr op;;
 
 let translate_extended_abbrev abb =
