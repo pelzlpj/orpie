@@ -502,15 +502,15 @@ let draw_help (iface : interface_state_t) =
                mvwaddstr_safe win 16 0 "Miscellaneous:";
                wattroff win WA.bold;
                mvwaddstr_safe win 17 2 ("scientific notation : " ^
-               Rcfile.key_of_edit (Edit SciNotBase));
+               try_find Rcfile.key_of_edit (Edit SciNotBase));
                mvwaddstr_safe win 18 2 ("extended entry mode : " ^
-               Rcfile.key_of_command  (Command BeginExtended));
+               try_find Rcfile.key_of_command  (Command BeginExtended));
                mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
-               Rcfile.key_of_command (Command BeginBrowse));
+               try_find Rcfile.key_of_command (Command BeginBrowse));
                mvwaddstr_safe win 20 2 ("refresh display     : " ^
-               Rcfile.key_of_command (Command Refresh));
+               try_find Rcfile.key_of_command (Command Refresh));
                mvwaddstr_safe win 21 2 ("quit                : " ^
-               Rcfile.key_of_command (Command Quit));
+               try_find Rcfile.key_of_command (Command Quit));
                assert (wnoutrefresh win)
             end else begin
                let adjust_len s len =
@@ -573,9 +573,9 @@ let draw_help (iface : interface_state_t) =
                   mvwaddstr_safe win 17 1 "Miscellaneous:";
                   print_help_lines abbr_strings.misc 18;
                   mvwaddstr_safe win 20 1 ("execute command : " ^
-                  Rcfile.key_of_extended (Extend EnterExtended));
+                  try_find Rcfile.key_of_extended (Extend EnterExtended));
                   mvwaddstr_safe win 21 1 ("cancel command  : " ^
-                  Rcfile.key_of_extended (Extend ExitExtended));
+                  try_find Rcfile.key_of_extended (Extend ExitExtended));
                   assert (wnoutrefresh win)
                end
             else

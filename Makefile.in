@@ -125,7 +125,7 @@ my-static-libs:
 
 
 
-VERSION=1.3.0
+VERSION=1.3.1
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -211,7 +211,7 @@ gsl/%.o : gsl/%.c
 curses-opt: $(CURSES_OOBJS)
 curses-byte: $(CURSES_BOBJS)
 
-CURSES_INCLUDES =
+CURSES_INCLUDES = -I ./curses
 CURSES_BFLAGS = -g $(CURSES_INCLUDES) -thread
 CURSES_OFLAGS = $(CURSES_INCLUDES) -thread
 CURSES_CFLAGS = -Wall -fPIC -DPIC

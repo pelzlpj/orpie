@@ -11,6 +11,16 @@ v1.4
 
 v1.3
 
+   2004-07-22        Ocaml 3.08 support: an include string is provided
+                     to the compiler when building curses bindings.
+
+                     Added a fix for a possible crash when drawing
+                     help panel and using a custom minimalist
+                     orpierc.
+
+   2004-07-18        User variables are now evaluated before being
+                     passed as arguments to var().
+
    2004-07-17        Version 1.3.0 release.
 
                      Added permutation function and random number

@@ -1741,6 +1741,7 @@ class rpc_calc =
 
          (* single-variable statistics: bias-corrected sample variance *)
          method private internal_variance_unbiased () =
+            self#evaln 1;
             let gen_el = stack#peek 1 in
             match gen_el with
             |RpcFloatMatrix mat ->
