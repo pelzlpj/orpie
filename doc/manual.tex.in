@@ -692,6 +692,8 @@ Orpie includes a secondary executable, \texttt{orpie-curses-keys}, that prints o
 the key identifiers associated with keypresses.  You may find it useful when customizing
 \texttt{orpierc}.
 
+Multiple keys may be bound to the same operation, if desired.
+
 %@% IF LATEX %@%
 \subsubsection{Creating Extended Command Abbreviations}
 \label{abbreviations}
@@ -715,6 +717,8 @@ usually just a few letters in order to select the desired command.  The order of
 autocompletion matches will be the same as the order in which the abbreviations are
 registered by the rcfile--so you may wish to place the more commonly used command
 abbreviations earlier in the list.
+
+Multiple command abbreviations may be bound to the same operation, if desired.
 
 %@% IF LATEX %@%
 \subsection{Configuration Variables}
@@ -1113,6 +1117,17 @@ make Orpie possible.
 
       I also believe that Orpie has fewer bugs in the input handler/parser,
       but this remains to be seen.
+
+   \item {\bf When I use \{+, -, *, /\} on the numeric keypad under gnome-terminal,
+      Orpie reads some letters instead of the expected symbols.  Can I do anything about this?}
+
+      I was able to fix the problem by executing
+      \begin{verbatim}
+      $ export TERM=linux
+      \end{verbatim}
+      before launching Orpie.  gnome-terminal sets \texttt{\$TERM} to \texttt{xterm}, but
+      apparently does not behave like a real xterm with respect to the numeric keypad.
+
 \end{enumerate}
 %@% END-IF %@%
 
