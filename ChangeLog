@@ -3,8 +3,18 @@ Orpie ChangeLog
 
 v1.3
 
-   2004-07-07        Replaced integer base conversion algorithm with
-                     a fast (N*log(N)) divide-and-conquer algorithm
+   2004-07-16        Added a configuration option to conserve memory
+                     by turning off string caching
+
+   2004-07-16        Added a background thread that precomputes
+                     string representations of stack elements
+
+   2004-07-13        Implemented memoization of string representations
+                     for stack elements
+
+   2004-07-08        Replaced general integer base conversion algorithm 
+                     with fast (N*log(N) or better) divide-and-
+                     -conquer algorithms
 
    2004-07-04        Added binomial coefficient function.
 
@@ -14,8 +24,6 @@ v1.3
                      computations.
 
                      Added exact factorial and GCD functions.
-
-   2004-06-22        Removed dependence on Ocaml Unix module.
 
 
 v1.2

@@ -54,6 +54,8 @@ let datadir = ref "~/.orpie"
 let editor = ref "vi";;
 (* Whether or not to hide the help panel *)
 let hide_help = ref false;;
+(* Whether or not to conserve memory in favor of faster display *)
+let conserve_memory = ref false;;
 
 
 let function_of_key key =
@@ -492,6 +494,25 @@ let parse_line line_stream =
             end
          | [< >] ->
             config_failwith ("Expected \"=\" after \"set hide_help\"")
+         end
+      | [< 'Ident "conserve_memory" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String setting >] ->
+               if setting = "true" then
+                  conserve_memory := true
+               else if setting = "false" then
+                  conserve_memory := false
+               else
+                  config_failwith ("Expected a boolean argument after " ^
+                  "\"set conserve_memory = \"")
+            | [< >] ->
+               config_failwith ("Expected a boolean argument after " ^
+               "\"set conserve_memory = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set conserve_memory\"")
          end
       | [< >] ->
          config_failwith ("Unmatched variable name after \"set\"")

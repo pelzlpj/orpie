@@ -7,6 +7,8 @@ set datadir="~/.orpie/"
 set editor="vi"
 # whether or not to hide the help panel
 set hide_help="false"
+# whether or not to conserve memory in favor of faster rendering
+set conserve_memory="false"
 
 
 # keys for "edit" operations, which affect the data that

@@ -734,7 +734,7 @@ Syntax: \texttt{set \emph{variable}=\emph{value\_string}} \\ \\
 \subsection{Setting Configuration Variables}
 Syntax: set \emph{variable}=\emph{value\_string} \\ \\
 %@% END-IF %@%
-Several configuration variables can be set using this syntax; see 
+Several configuration variables can be set using this syntax; check
 %@% IF LATEX %@%
 Section \ref{variables}
 %@% ELSE %@%
@@ -883,6 +883,12 @@ CONFIGURATION VARIABLES section.
    \item \texttt{hide\_help} \\
       Set this variable to \texttt{"true"} to hide the left help/status panel, or leave
       it on the default of \texttt{"false"} to display the help panel.
+   \item \texttt{conserve\_memory} \\
+      Set this variable to \texttt{"true"} to minimize memory usage, or leave it on
+      the default of \texttt{"false"} to improve rendering performance.  (By default,
+      Orpie caches multiple string representations of all stack elements.  Very large
+      integers in particular require significant computation for string representation,
+      so caching these strings can make display updates much faster.)
 \end{itemize}
 
 %@% IF LATEX %@%

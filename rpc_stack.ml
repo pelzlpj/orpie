@@ -234,7 +234,8 @@ class rpc_stack =
          let new_el = stack_data_of_orpie_data v in
          stack.(len) <- new_el;
          len <- len + 1;
-         Stack.push new_el render_stack
+         if !Rcfile.conserve_memory then ()
+         else Stack.push new_el render_stack
 
 
       method pop () =
@@ -591,8 +592,10 @@ class rpc_stack =
             let s = string_of_big_int_base ii 2 in
             let line = "# " ^ s ^ " b"
             and fs   = "#" ^ s ^ "_b" in
-            ii_str.i_bin_line <- Some line;
-            ii_str.i_bin_fs   <- Some fs;
+            if !Rcfile.conserve_memory then () else begin
+               ii_str.i_bin_line <- Some line;
+               ii_str.i_bin_fs   <- Some fs
+            end;
             begin match disp_mode with
             |Line       -> line
             |Fullscreen -> fs
@@ -601,8 +604,10 @@ class rpc_stack =
             let s = string_of_big_int_base ii 8 in
             let line = "# " ^ s ^ " o"
             and fs   = "#" ^ s ^ "_o" in
-            ii_str.i_oct_line <- Some line;
-            ii_str.i_oct_fs   <- Some fs;
+            if !Rcfile.conserve_memory then () else begin
+               ii_str.i_oct_line <- Some line;
+               ii_str.i_oct_fs   <- Some fs
+            end;
             begin match disp_mode with
             |Line       -> line
             |Fullscreen -> fs
@@ -611,8 +616,10 @@ class rpc_stack =
             let s = string_of_big_int_base ii 16 in
             let line = "# " ^ s ^ " h"
             and fs   = "#" ^ s ^ "_h" in
-            ii_str.i_hex_line <- Some line;
-            ii_str.i_hex_fs   <- Some fs;
+            if !Rcfile.conserve_memory then () else begin
+               ii_str.i_hex_line <- Some line;
+               ii_str.i_hex_fs   <- Some fs
+            end;
             begin match disp_mode with
             |Line       -> line
             |Fullscreen -> fs
@@ -621,8 +628,10 @@ class rpc_stack =
             let s = string_of_big_int_base_gen ii 10 in
             let line = "# " ^ s ^ " d"
             and fs   = "#" ^ s ^ "_d" in
-            ii_str.i_dec_line <- Some line;
-            ii_str.i_dec_fs   <- Some fs;
+            if !Rcfile.conserve_memory then () else begin
+               ii_str.i_dec_line <- Some line;
+               ii_str.i_dec_fs   <- Some fs
+            end;
             begin match disp_mode with
             |Line       -> line
             |Fullscreen -> fs
@@ -632,7 +641,8 @@ class rpc_stack =
       (* generate a string representation for a floating-point value *)
       method private create_float_string ff ff_str =
          let s = sprintf "%.15g" ff in
-         ff_str.f <- Some s;
+         if !Rcfile.conserve_memory then () 
+         else ff_str.f <- Some s;
          s
 
 
@@ -642,7 +652,8 @@ class rpc_stack =
          match calc_modes.complex with
          |Rect ->
             let s = sprintf "(%.15g, %.15g)" cc.Complex.re cc.Complex.im in
-            cc_str.c_rect <- Some s;
+            if !Rcfile.conserve_memory then () 
+            else cc_str.c_rect <- Some s;
             s
          |Polar ->
             let r = sqrt (cc.Complex.re *. cc.Complex.re +.
@@ -651,11 +662,13 @@ class rpc_stack =
             begin match calc_modes.angle with
             |Rad ->
                let s = sprintf "(%.15g <%.15g)" r theta in
-               cc_str.c_pol_rad <- Some s;
+               if !Rcfile.conserve_memory then () 
+               else cc_str.c_pol_rad <- Some s;
                s
             |Deg ->
                let s = sprintf "(%.15g <%.15g)" r (180.0 /. pi *. theta) in
-               cc_str.c_pol_deg <- Some s;
+               if !Rcfile.conserve_memory then () 
+               else cc_str.c_pol_deg <- Some s;
                s
             end
 
@@ -680,7 +693,8 @@ class rpc_stack =
                line := !line ^ "]";
                !line
             in
-            fm_str.fmat_line <- Some s;
+            if !Rcfile.conserve_memory then () 
+            else fm_str.fmat_line <- Some s;
             s
          |Fullscreen ->
             let s =
@@ -718,7 +732,8 @@ class rpc_stack =
                line := !line ^ "]";
                !line
             in
-            fm_str.fmat_fs <- Some s;
+            if !Rcfile.conserve_memory then () 
+            else fm_str.fmat_fs <- Some s;
             s
 
 
@@ -776,15 +791,18 @@ class rpc_stack =
                line := !line ^ "]";
                !line
             in
-            begin match calc_modes.complex with
-            |Rect ->
-               cm_str.cmat_rect_line <- Some s;
-            |Polar ->
-               begin match calc_modes.angle with
-               |Rad -> cm_str.cmat_pol_rad_line <- Some s
-               |Deg -> cm_str.cmat_pol_deg_line <- Some s
-               end
-            end;
+            if !Rcfile.conserve_memory then 
+               () 
+            else
+               begin match calc_modes.complex with
+               |Rect ->
+                  cm_str.cmat_rect_line <- Some s;
+               |Polar ->
+                  begin match calc_modes.angle with
+                  |Rad -> cm_str.cmat_pol_rad_line <- Some s
+                  |Deg -> cm_str.cmat_pol_deg_line <- Some s
+                  end
+               end;
             s
          |Fullscreen ->
             let s =
@@ -890,15 +908,18 @@ class rpc_stack =
                line := !line ^ "]";
                !line
             in
-            begin match calc_modes.complex with
-            |Rect ->
-               cm_str.cmat_rect_fs <- Some s;
-            |Polar ->
-               begin match calc_modes.angle with
-               |Rad -> cm_str.cmat_pol_rad_fs <- Some s
-               |Deg -> cm_str.cmat_pol_deg_fs <- Some s
-               end
-            end;
+            if !Rcfile.conserve_memory then 
+               () 
+            else
+               begin match calc_modes.complex with
+               |Rect ->
+                  cm_str.cmat_rect_fs <- Some s;
+               |Polar ->
+                  begin match calc_modes.angle with
+                  |Rad -> cm_str.cmat_pol_rad_fs <- Some s
+                  |Deg -> cm_str.cmat_pol_deg_fs <- Some s
+                  end
+               end;
             s
 
 
@@ -908,8 +929,12 @@ class rpc_stack =
       method private create_var_string disp_mode vv vv_str =
          let line = "@ " ^ vv
          and fs   = "@" ^ vv in
-         vv_str.v_line <- Some line;
-         vv_str.v_fs   <- Some fs;
+         if !Rcfile.conserve_memory then 
+            () 
+         else begin
+            vv_str.v_line <- Some line;
+            vv_str.v_fs   <- Some fs
+         end;
          match disp_mode with
          |Line       -> line
          |Fullscreen -> fs

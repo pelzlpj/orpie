@@ -4,9 +4,6 @@ Orpie To-Do List (roughly in order of priority)
 * test linear-time table lookup algorithm for power-of-two base conversions,
   and compare to current algorithm
 
-* after all operations that create new data, launch a background thread that traverses
-  the stack and fills in all unknown (i.e. None) strings, then exits
-
 * try to improve general base conversion algorithm (decimal representation is 
   relatively slow at present)
 
