@@ -160,6 +160,10 @@ install-opt: install-indep
 	install -m 755 -D $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
 	install -m 755 -D $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
 
+install-static: install-indep
+	install -m 755 -D $(NAME).static-opt $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 -D $(NAME2).static-opt $(BINDIR)/$(NAME2)$(EXE)
+
 uninstall:
 	rm -f $(BINDIR)/$(NAME)$(EXE)
 	rm -f $(BINDIR)/$(NAME2)$(EXE)
