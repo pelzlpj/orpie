@@ -78,7 +78,7 @@ type interface_state_t =
 (* create and initialize an interface with default settings *)
 let make (c : rpc_calc) (std : screen_t) =
    let iface =
-      {version = "0.10";
+      {version = "1.0";
       calc = c;
       scr = std;
       run_calc = true;

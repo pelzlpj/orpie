@@ -353,7 +353,7 @@ let draw_help (iface : interface_state_t) =
    |Some win ->
       wclear win;
       wattron win WA.bold;
-      let s = sprintf "Orpie v%s  --  Press '?' for help" iface.version in
+      let s = sprintf "Orpie v%s" iface.version in
       assert (mvwaddstr win 0 0 s);
       wattroff win WA.bold;
       assert (mvwaddstr win 1 0 "--------------------------------------");
