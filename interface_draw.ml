@@ -584,12 +584,14 @@ let draw_help (iface : interface_state_t) =
             wattron win WA.bold;
             mvwaddstr_safe win 5 0 "Variable Mode Commands:";
             wattroff win WA.bold;
-            mvwaddstr_safe win 6 2 ("enter variable: " ^
+            mvwaddstr_safe win 6 2 ("enter variable   : " ^
             try_find Rcfile.key_of_varedit (VarEdit EnterVarEdit));
-            mvwaddstr_safe win 7 2 ("cancel entry  : " ^
+            mvwaddstr_safe win 7 2 ("complete variable: " ^
+            try_find Rcfile.key_of_varedit (VarEdit CompleteVarEdit));
+            mvwaddstr_safe win 8 2 ("cancel entry     : " ^
             try_find Rcfile.key_of_varedit (VarEdit ExitVarEdit));
             wattron win WA.bold;
-            mvwaddstr_safe win 9 0 "Matched variables:";
+            mvwaddstr_safe win 10 0 "Matched variables:";
             wattroff win WA.bold;
             let highlight_len = 
                begin match iface.completion with
@@ -628,9 +630,9 @@ let draw_help (iface : interface_state_t) =
                   ()
             in
             if List.length iface.matched_variables = 0 then
-               mvwaddstr_safe win 10 2 "(none)"
+               mvwaddstr_safe win 11 2 "(none)"
             else
-               draw_matches 10 iface.matched_variables 0;
+               draw_matches 11 iface.matched_variables 0;
             assert (wnoutrefresh win)
          end 
       end
