@@ -1621,7 +1621,7 @@ class rpc_calc =
                   raise (Invalid_argument "mod can only be applied to arguments of type integer"))
                end
             end else
-               raise (Invalid_argument "empty stack")
+               raise (Invalid_argument "insufficient arguments for binom")
          |_ ->
             (* shouldn't hit this point if interface is well-behaved *)
             self#abort_computation ();
