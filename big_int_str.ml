@@ -38,48 +38,70 @@ for i = 0 to pred (String.length digits) do
 done;;
 
 
-(* convert a big_int 'num' to a string, assuming a base 'base' *)
-(* Algorithm: continually divide 'num' by 'base'.  The remainders
- *            are the digits in the string, right-to-left. 
- *            'zero_str' keeps track of the zeros that would be added
- *            to the front of the string; they are only prepended if there
- *            is a nonzero digit. *)
+
+(* Represent an integer in a given base.  This uses ordinary integer
+ * division, so it can be done in constant time (< Sys.word_size divisions).
+ * This is not designed to be used externally; no error checking is performed
+ * in order to keep it fast. *)
+let string_of_positive_int_base (num : int) (base : int) =
+   let rec get_digit quotient zero_str str =
+      if quotient = 0 then
+         str
+      else
+         let quot = quotient / base
+         and rem  = quotient mod base in
+         let digit = digits.[rem] in
+         begin match rem with
+         |0 ->
+            get_digit quot ((String.make 1 digit) ^ zero_str) str
+         |_ ->
+            get_digit quot "" ((String.make 1 digit) ^ zero_str ^ str)
+         end
+   in
+   get_digit num "" ""
+
+
+(* Divide-and-conquer algorithm for string representation of big_ints in
+ * a desired base.  The big_int is split approximately in half using this
+ * divisor:  base^(num_words * log_base(2^word_size) / 2)
+ * Each half is split recursively, and the pieces are concatenated together.
+ * Should run in O(n*log(n)) time, a big improvement on the standard O(n^2)
+ * algorithm that requires one long division for every digit output. *)
+(* Note 1: This runs in logarithmic stack space, so we should be able to handle
+ * some pretty large big_ints before worrying about blowing the stack. *)
+(* Note 2: a faster method for computing a divisor would make this go a
+ * lot quicker yet; gprof indicates that most of the time is spent in
+ * multiplication ==> the power_int_positive_int_base call. *)
 let string_of_big_int_base (num : big_int) (base : int) =
    if base >= 2 && base <= 36 then
-      let big_base = big_int_of_int base in
-      (* get_digit recursively adds one more digit on the left end of the string,
-       * exiting when the quotient becomes zero. *)
-      let rec get_digit quotient zero_str str =
-         let test_zero = (compare_big_int quotient zero_big_int) in
-         match test_zero with
-         |0 ->
-            str
-         |1 ->
-            let quot, rem = quomod_big_int quotient big_base in
-            let irem = int_of_big_int rem in
-            let digit = digits.[irem] in (
-            match irem with 
-            |0 ->
-               get_digit quot ((String.make 1 digit) ^ zero_str) str
-            |_ ->
-               get_digit quot "" ((String.make 1 digit) ^ zero_str ^ str)
-            )
-         |_ ->
-            raise (Big_int_string_failure "negative quotient")
+      let rec str_of_big_int_aux (ival : big_int) =
+         if is_int_big_int ival then
+            string_of_positive_int_base (int_of_big_int ival) base
+         else
+            let big_base    = big_int_of_int base in
+            let num_words   = num_digits_big_int ival in
+            let size_factor = (log (2.0 ** (float_of_int Sys.word_size))) /.
+            (log (float_of_int base)) in
+            let pp             = (num_words * (int_of_float size_factor)) / 2 in
+            let divisor        = power_int_positive_int base pp in
+            let (upper, lower) = quomod_big_int ival divisor in
+            let upper_string   = str_of_big_int_aux upper
+            and lower_string   = str_of_big_int_aux lower in
+            (* pad the lower_string with zeros as necessary *)
+            let zeros = String.make (pp - (String.length lower_string)) '0' in
+            upper_string ^ zeros ^ lower_string
       in
-      let s = get_digit (abs_big_int num) "" "" in
+      let s = str_of_big_int_aux (abs_big_int num) in
       match sign_big_int num with
-      |0 ->
-         "0"
-      |1 ->
-         s
-      |(-1) ->
-         "-" ^ s
-      |x ->
+      |0    -> "0"
+      |1    -> s
+      |(-1) -> "-" ^ s
+      |x    -> 
          raise (Big_int_string_failure ("unmatched sign: " ^ (string_of_int x)))
    else
-      raise (Big_int_string_failure ("unsupported base: " ^ (string_of_int
-             base)));;
+      raise (Big_int_string_failure ("unsupported base: " ^ (string_of_int base)))
+
+
 
 
 

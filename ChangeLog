@@ -3,6 +3,9 @@ Orpie ChangeLog
 
 v1.3
 
+   2004-07-07        Replaced integer base conversion algorithm with
+                     a fast (N*log(N)) divide-and-conquer algorithm
+
    2004-07-04        Added binomial coefficient function.
 
    2004-07-03        Added LCM function.
