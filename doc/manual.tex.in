@@ -317,9 +317,9 @@ Examples of entering dimensioned data:
 %@% END-IF %@%
 
 %@% IF LATEX %@%
-\subsubsection{Entering Integer Constants}
+\subsubsection{Entering Exact Integers}
 %@% ELSE %@%
-\subsection{Entering Integer Constants}
+\subsection{Entering Exact Integers}
 %@% END-IF %@%
 An exact integer may be entered by pressing '\texttt{\#}' followed by the desired
 digits.  The base of the integer will be assumed to be the same as the current
@@ -360,7 +360,7 @@ to match the current base mode.  Examples:
 \end{Table}
 %@% END-IF %@%
 
-Note that integer constants may have unlimited length, and the basic arithmetic
+Note that exact integers may have unlimited length, and the basic arithmetic
 operations (addition, subtraction, multiplication, division) will be performed
 using exact arithmetic when both arguments are integers.
 
@@ -393,8 +393,67 @@ Orpie also supports autocompletion of variable names.  The help panel displays a
 list of pre-existing variables that partially match the name currently being entered.
 You can press '\texttt{<tab>}' to iterate through the list of matching variables.
 
-As a shortcut, keys \texttt{<f1>-<f12>} will enter the variables (``registers'') 
-\texttt{@ r01} through \texttt{@ r12}.
+As a shortcut, keys \texttt{<f1>-<f4>} will enter the variables (``registers'') 
+\texttt{@ r01} through \texttt{@ r04}.
+
+%@% IF LATEX %@%
+\subsubsection{Entering Physical Constants}
+%@% ELSE %@%
+\subsection{Entering Physical Constants}
+%@% END-IF %@%
+Orpie includes definitions for a number of fundamental physical constants.  To
+enter a constant, press '\texttt{C}', followed by the first few letters/digits
+of the constant's symbol, then hit enter.  Orpie offers an autocompletion
+feature for physical constants, so you only need to type enough of the constant
+to identify it uniquely.  A list of matching constants will appear in the left
+panel of the display, to assist you in finding the desired choice.
+
+The following is a list of Orpie's physical constant symbols:
+%@% IF LATEX %@%
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+%@% ELSE %@%
+\begin{Table}{2}
+%@% END-IF %@%
+      \hline 
+      Symbol & Physical Constant \\
+      \hline
+      \texttt{NA}    & Avagadro's number \\
+      \texttt{k}     & Boltzmann constant \\
+      \texttt{Vm}    & molar volume \\
+      \texttt{R}     & universal gas constant \\
+      \texttt{stdT}  & standard temperature \\
+      \texttt{stdP}  & standard pressure \\
+      \texttt{sigma} & Stefan-Boltzmann constant \\
+      \texttt{c}     & speed of light \\
+      \texttt{eps0}  & permittivity of free space \\
+      \texttt{u0}    & permeability of free space \\
+      \texttt{g}     & acceleration of gravity \\
+      \texttt{G}     & Newtonian gravitational constant \\
+      \texttt{h}     & Planck's constant \\
+      \texttt{hbar}  & Dirac's constant \\
+      \texttt{e}     & electron charge \\
+      \texttt{me}    & electron mass \\
+      \texttt{mp}    & proton mass \\
+      \texttt{alpha} & fine structure constant \\
+      \texttt{phi}   & magnetic flux quantum \\
+      \texttt{F}     & Faraday's constant \\
+      \texttt{Rinf}  & ``infinity'' Rydberg constant \\
+      \texttt{a0}    & Bohr radius \\
+      \texttt{uB}    & Bohr magneton \\
+      \texttt{uN}    & nuclear magneton \\
+      \texttt{lam0}  & wavelength of a 1eV photon \\
+      \texttt{f0}    & frequency of a 1eV photon \\
+      \texttt{lamc}  & Compton wavelength \\
+      \texttt{c3}    & Wien's constant \\
+      \hline
+%@% IF LATEX %@%
+   \end{tabular}
+\end{center}
+%@% ELSE %@%
+\end{Table}
+%@% END-IF %@%
+
 
 %@% IF LATEX %@%
 \subsubsection{Entering Data With an External Editor}
@@ -416,10 +475,10 @@ by the examples below:
       Data Type & Sample Input String \\
       \hline
 %@% IF LATEX %@%
-      integer constant & \texttt{\#12345678\`{}d}, where the trailing
+      exact integer & \texttt{\#12345678\`{}d}, where the trailing
                          letter is one of the base characters \{b, o, d, h\} \\
 %@% ELSE %@%
-      integer constant & \texttt{\#12345678`d}, where the trailing
+      exact integer & \texttt{\#12345678`d}, where the trailing
                          letter is one of the base characters \{b, o, d, h\} \\
 %@% END-IF %@%
       real number      & \texttt{-123.45e67} \\
@@ -1301,9 +1360,9 @@ argument from the stack.  Orpie will generally abort the computation and
 provide an informative error message if a function cannot be successfully applied (for
 example, if you try to compute the transpose of something that is not a matrix).
 
-For the integer constant data type, basic arithmetic operations will yield an exact
-integer constant result.  Division of two integer constants will yield the quotient of
-the division.  The more complicated functions will generally promote the integer constant
+For the exact integer data type, basic arithmetic operations will yield an exact
+integer result.  Division of two exact integers will yield the quotient of
+the division.  The more complicated functions will generally promote the integer
 to a real number, and as such the arithmetic will no longer be exact.
 \begin{itemize}
    \item \texttt{function\_10\_x} \\
@@ -1338,7 +1397,7 @@ to a real number, and as such the arithmetic will no longer be exact.
       Compute the binomial coefficient (``n choose k'') formed by the last two
       stack elements.  If these arguments are real, the coefficient is computed
       using a fast approximation to the log of the gamma function, and therefore
-      the result is subject to rounding errors.  For integer constant arguments,
+      the result is subject to rounding errors.  For exact integer arguments,
       the coefficient is computed using exact arithmetic; this has the potential
       to be a slow operation.
    \item \texttt{function\_ceiling} \\
@@ -1369,7 +1428,7 @@ to a real number, and as such the arithmetic will no longer be exact.
       Compute the factorial of the last stack element.  For a real argument,
       this is computed using a fast approximation to the gamma function,
       and therefore the result may be subject to rounding errors (or overflow).  For an 
-      integer constant argument, the factorial is computed using exact arithmetic; 
+      exact integer argument, the factorial is computed using exact arithmetic; 
       this has the potential to be a slow operation.
    \item \texttt{function\_floor} \\
       Compute the floor of the last stack element.
@@ -1414,7 +1473,7 @@ to a real number, and as such the arithmetic will no longer be exact.
       of k elements from a set of n elements.
       If these arguments are real, the coefficient is computed
       using a fast approximation to the log of the gamma function, and therefore
-      the result is subject to rounding errors.  For integer constant arguments,
+      the result is subject to rounding errors.  For exact integer arguments,
       the coefficient is computed using exact arithmetic; this has the potential
       to be a slow operation.
    \item \texttt{function\_pow} \\
@@ -1511,24 +1570,26 @@ they do not take an argument.  Many calculator interface settings are implemente
 \begin{itemize}
    \item \texttt{command\_about} \\
       Display a nifty ``about Orpie'' credits screen.
-   \item \texttt{command\_begin\_browsing} \\
-      Enter stack browsing mode.
    \item \texttt{command\_begin\_abbrev} \\
       Begin entry of an operation abbreviation.
+   \item \texttt{command\_begin\_browsing} \\
+      Enter stack browsing mode.
+   \item \texttt{command\_begin\_constant} \\
+      Begin entry of a physical constant.
    \item \texttt{command\_begin\_variable} \\
       Begin entry of a variable name.
    \item \texttt{command\_bin} \\
-      Set the base of integer constant representation to 2 (binary).
+      Set the base of exact integer representation to 2 (binary).
    \item \texttt{command\_clear} \\
       Clear all elements from the stack.
    \item \texttt{command\_cycle\_base} \\
-      Cycle the base of integer constant representation between 2, 8,
+      Cycle the base of exact integer representation between 2, 8,
       10, and 16 (bin, oct, dec, and hex).
    \item \texttt{command\_cycle\_help} \\
       Cycle through multiple help pages.  The first page displays commonly used
       bindings, and the second page displays the current autobindings.
    \item \texttt{command\_dec} \\
-      Set the base of integer constant representation to 10 (decimal).
+      Set the base of exact integer representation to 10 (decimal).
    \item \texttt{command\_deg} \\
       Set the angle mode to degrees.
    \item \texttt{command\_drop} \\
@@ -1545,9 +1606,9 @@ they do not take an argument.  Many calculator interface settings are implemente
       Enter 3.1415\Dots on the stack.
 %@% END-IF %@%
    \item \texttt{command\_hex} \\
-      Set the base of integer constant representation to 16 (hexadecimal).
+      Set the base of exact integer representation to 16 (hexadecimal).
    \item \texttt{command\_oct} \\
-      Set the base of integer constant representation to 8 (octal).
+      Set the base of exact integer representation to 8 (octal).
    \item \texttt{command\_polar} \\
       Set the complex display mode to polar.
    \item \texttt{command\_rad} \\
@@ -1594,7 +1655,7 @@ be made available as single keypresses using the \texttt{bind} keyword.
    \item \texttt{edit\_backspace} \\
       Delete the last character entered.
    \item \texttt{edit\_begin\_integer} \\
-      Begin entering an integer constant.
+      Begin entering an exact integer.
    \item \texttt{edit\_begin\_units} \\
       Begin appending units to a numeric expression.
    \item \texttt{edit\_complex} \\
@@ -1608,7 +1669,7 @@ be made available as single keypresses using the \texttt{bind} keyword.
       Enter a minus sign in input.
    \item \texttt{edit\_scientific\_notation\_base} \\
       Begin entering the scientific notation exponent of a real number,
-      or the base of an integer constant.
+      or the base of an exact integer.
    \item \texttt{edit\_separator} \\
       Begin editing the next element of a complex number or
       matrix.  (This will insert a comma between elements.)
@@ -1667,7 +1728,8 @@ should be bound to single keypresses using the \texttt{bind} keyword.
 \subsection{Abbreviation Entry Operations}
 %@% END-IF %@%
 The following list of operations is available only while entering a function or
-command abbreviation.  These operations must be bound to single keypresses using 
+command abbreviation, or while entering a physical constant.  These operations must 
+be bound to single keypresses using 
 the \texttt{bind} keyword.
 \begin{itemize}
    \item \texttt{abbrev\_backspace} \\
