@@ -508,7 +508,7 @@ let draw_help_intedit iface win mvwaddstr_safe try_find =
    mvwaddstr_safe win 7 2 ("set base : " ^
    try_find Rcfile.key_of_edit (Edit SciNotBase));
    mvwaddstr_safe win 8 2 ("cancel   : " ^
-   try_find Rcfile.key_of_intedit (IntEdit ExitIntEdit));
+   try_find Rcfile.key_of_intedit (IntEdit IntEditExit));
    assert (wnoutrefresh win)
 
 
@@ -538,16 +538,16 @@ let draw_help_abbrev iface win mvwaddstr_safe try_find =
          mvwaddstr_safe win 17 1 "Miscellaneous:";
          print_help_lines abbr_strings.misc 18;
          mvwaddstr_safe win 20 1 ("execute abbreviation : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+         try_find Rcfile.key_of_abbrev (Abbrev AbbrevEnter));
          mvwaddstr_safe win 21 1 ("cancel abbreviation  : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev ExitAbbrev));
+         try_find Rcfile.key_of_abbrev (Abbrev AbbrevExit));
       |IsConst ->
          wattron win WA.bold;
          mvwaddstr_safe win 5 0 "Constants:";
          wattroff win WA.bold;
          print_help_lines const_strings 7;
          mvwaddstr_safe win 12 1 ("enter constant : " ^
-         try_find Rcfile.key_of_abbrev (Abbrev EnterAbbrev));
+         try_find Rcfile.key_of_abbrev (Abbrev AbbrevEnter));
       end;
       assert (wnoutrefresh win)
    end else begin
@@ -587,11 +587,11 @@ let draw_help_varedit iface win mvwaddstr_safe try_find =
    mvwaddstr_safe win 5 0 "Variable Mode Commands:";
    wattroff win WA.bold;
    mvwaddstr_safe win 6 2 ("enter variable   : " ^
-   try_find Rcfile.key_of_varedit (VarEdit EnterVarEdit));
+   try_find Rcfile.key_of_varedit (VarEdit VarEditEnter));
    mvwaddstr_safe win 7 2 ("complete variable: " ^
-   try_find Rcfile.key_of_varedit (VarEdit CompleteVarEdit));
+   try_find Rcfile.key_of_varedit (VarEdit VarEditComplete));
    mvwaddstr_safe win 8 2 ("cancel entry     : " ^
-   try_find Rcfile.key_of_varedit (VarEdit ExitVarEdit));
+   try_find Rcfile.key_of_varedit (VarEdit VarEditExit));
    wattron win WA.bold;
    mvwaddstr_safe win 10 0 "Matched variables:";
    wattroff win WA.bold;

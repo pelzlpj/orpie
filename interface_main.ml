@@ -1976,7 +1976,7 @@ let handle_keypress_intedit key (iface : interface_state_t) =
          match intedit_op with
          |IntEdit ie ->
             begin match ie with
-            |ExitIntEdit ->
+            |IntEditExit ->
                handle_exit_int iface
             end
          |_ ->
@@ -2015,9 +2015,9 @@ let handle_keypress_abbrev key (iface : interface_state_t) =
       |Abbrev ee ->
          begin
             match ee with
-            |ExitAbbrev ->
+            |AbbrevExit ->
                handle_exit_abbrev iface
-            |EnterAbbrev ->
+            |AbbrevEnter ->
                handle_enter_abbrev iface
             |AbbrevBackspace ->
                handle_abbrev_backspace iface
@@ -2036,13 +2036,13 @@ let handle_keypress_varedit key (iface : interface_state_t) =
       match varedit_op with
       |VarEdit vv ->
          begin match vv with
-         |ExitVarEdit ->
+         |VarEditExit ->
             handle_exit_variable iface
-         |EnterVarEdit ->
+         |VarEditEnter ->
             handle_enter_variable iface
          |VarEditBackspace ->
             handle_variable_backspace iface
-         |CompleteVarEdit ->
+         |VarEditComplete ->
             handle_complete_variable iface
          end
       |_ ->

@@ -512,14 +512,14 @@ let operation_of_string command_str =
    |"browse_keep"                   -> (Browse Keep)
    |"browse_keepn"                  -> (Browse KeepN)
    |"browse_edit"                   -> (Browse EditEntry)
-   |"abbrev_exit"                   -> (Abbrev ExitAbbrev)
-   |"abbrev_enter"                  -> (Abbrev EnterAbbrev)
+   |"abbrev_exit"                   -> (Abbrev AbbrevExit)
+   |"abbrev_enter"                  -> (Abbrev AbbrevEnter)
    |"abbrev_backspace"              -> (Abbrev AbbrevBackspace)
-   |"integer_cancel"                -> (IntEdit ExitIntEdit)
-   |"variable_cancel"               -> (VarEdit ExitVarEdit)
-   |"variable_enter"                -> (VarEdit EnterVarEdit)
+   |"integer_cancel"                -> (IntEdit IntEditExit)
+   |"variable_cancel"               -> (VarEdit VarEditExit)
+   |"variable_enter"                -> (VarEdit VarEditEnter)
    |"variable_backspace"            -> (VarEdit VarEditBackspace)
-   |"variable_complete"             -> (VarEdit CompleteVarEdit)
+   |"variable_complete"             -> (VarEdit VarEditComplete)
    |"function_rand"                 -> config_failwith 
                                        "operation \"function_rand\" is deprecated; please replace with \"command_rand\"."
    |"command_begin_extended"        -> config_failwith

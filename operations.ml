@@ -55,12 +55,12 @@ type browse_operation_t   = | EndBrowse
                             | Drop1 | DropN | Keep | KeepN
                             | EditEntry;;
 
-type abbrev_operation_t = | ExitAbbrev | EnterAbbrev | AbbrevBackspace;;
+type abbrev_operation_t = | AbbrevExit | AbbrevEnter | AbbrevBackspace;;
 
-type integer_edit_operation_t = | ExitIntEdit;;
+type integer_edit_operation_t = | IntEditExit;;
 
-type var_edit_operation_t = | ExitVarEdit | EnterVarEdit | VarEditBackspace
-                            | CompleteVarEdit;;
+type var_edit_operation_t = | VarEditExit | VarEditEnter | VarEditBackspace
+                            | VarEditComplete;;
 
 type operation_t = | Function of function_operation_t 
                    | Command  of command_operation_t
