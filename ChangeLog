@@ -3,7 +3,9 @@ Orpie ChangeLog
 
 v1.3
 
-   2004-07-17        Added permutation function and random number
+   2004-07-17        Version 1.3.0 release.
+
+                     Added permutation function and random number
                      generator.
 
                      Implemented common single-variable statistics
