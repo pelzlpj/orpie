@@ -1843,8 +1843,9 @@ Orpie uses tla's ``configs'' support.  After getting a copy of the source, run \
 extra packages that Orpie depends on.
 
 At the moment, I would really appreciate help writing additional test cases for
-the calculator object.  It's not terribly difficult, just time-consuming.  Have a look
-at \texttt{calc\_test.ml} if you're interested in lending a hand.
+the calculator object.  It's not terribly difficult, just time-consuming.  If you're
+interested in lending a hand, have a look at the source in \texttt{calc\_test.ml} and
+use \texttt{"make test.opt"} to build the testing executable.
 
 Do you feel compelled to compensate me for writing Orpie?  As a \emph{poor, starving} 
 graduate student, I will gratefully accept 

@@ -64,18 +64,56 @@ let test_result_exact (expected : string) (test_stage : string) =
       failwith test_stage
    end else ()
 in
+let test_result_float (expected : float) (tol : float)
+(test_stage : string) (normalized : bool) =
+   print_indent test_stage;
+   let result = get_result () in
+   let ff = float_of_string (num_part result) in
+   let test = 
+      if normalized then (abs_float ((ff -. expected) /. expected)) > tol
+      else               (abs_float  (ff -. expected)) > tol
+   in
+   if test then begin
+      print_endline ("calculator result: " ^ (num_part result));
+      print_endline ("         expected: " ^ (string_of_float expected));
+      failwith test_stage
+   end else ()
+in
+(* test whether the calculator result is a floating-point value
+ * which is within the specified tolerance (normalized) *)
+let test_result_float_tolnorm (expected : float) (tol : float)
+(test_stage : string) =
+   test_result_float expected tol test_stage true
+in
 (* test whether the calculator result is a floating-point value
  * which is within the specified tolerance (normalized) *)
 let test_result_float_tol (expected : float) (tol : float)
 (test_stage : string) =
-   print_indent test_stage;
-   let result = get_result () in
-   let ff = float_of_string (num_part result) in
-   if abs_float (ff -. expected) /. expected > tol then begin
-      print_endline ("calculator result: \"" ^ (num_part result) ^ "\"");
-      print_endline ("         expected: \"" ^ (string_of_float expected) ^ "\"");
-      failwith test_stage
-   end else ()
+   test_result_float expected tol test_stage false
+in
+(* machine precision tolerance *)
+let mprec = 1e-15 in
+(* unit conversion tolerance *)
+let uprec = 1e-8 in
+(* ad-hoc float matrix norm *)
+let float_mat_norm () =
+   calc#total ();
+   calc#dup ();
+   calc#transpose ();
+   calc#mult ();
+   calc#to_float ()
+in
+(* ad-hoc complex matrix norm *)
+let cpx_mat_norm () =
+   load_data "[[1, 1]]";
+   calc#swap ();
+   calc#mult ();
+   calc#dup ();
+   calc#transpose ();
+   calc#conj ();
+   calc#mult ();
+   calc#re ();
+   calc#to_float ()
 in
 
 
@@ -89,13 +127,92 @@ load_data "#10`o #20`h";
 calc#add ();
 test_result_exact "# 40`d" "add-int-int-2";
 
-load_data "10.0 #10`d";
-calc#add ();
-test_result_float_tol 20.0 1e-15 "add-float-int-1";
-
 load_data "#10`d 10.0";
 calc#add ();
-test_result_float_tol 20.0 1e-15 "add-int-float-1";
+test_result_float_tolnorm 20.0 mprec "add-int-float-1";
+
+load_data "(20.0, 20.0) #10`d (10.0, 20.0)";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 mprec "add-int-complex-1";
+
+load_data "10.0 #10`d";
+calc#add ();
+test_result_float_tolnorm 20.0 mprec "add-float-int-1";
+
+load_data "10.0 20.0";
+calc#add ();
+test_result_float_tolnorm 30.0 mprec "add-float-float-1";
+
+load_data "10.0_kg*m/s 20.0_ft*lb/min";
+calc#add ();
+test_result_float_tolnorm 4359.80831073 uprec "add-float-float-2";
+
+load_data "(20.0, 20.0) 10.0 (10.0, 20.0)";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 mprec "add-float-complex-1";
+
+load_data "(76.66666666667, 20.0)_yd^2/min 10.0_ft^2/s (10.0, 20.0)_yd^2/min";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 uprec "add-float-complex-2";
+
+load_data "(20.0, 20.0) (10.0, 20.0) #10`d";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 mprec "add-complex-int-1";
+
+load_data "(20.0, 20.0) (10.0, 20.0) 10.0";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 mprec "add-complex-float-1";
+
+load_data "(40.0, 60.0) (10.0, 20.0) (30.0, 40.0)";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 mprec "add-complex-complex-1";
+
+load_data "(10.254, 20.508)_m (10.0, 20.0)_in (10.0, 20.0)_m";
+calc#add ();
+calc#sub ();
+calc#abs ();
+test_result_float_tol 0.0 uprec "add-complex-complex-2";
+
+load_data "[[6, 8][10, 12]] [[1, 2][3, 4]] [[5, 6][7, 8]]";
+calc#add ();
+calc#sub ();
+float_mat_norm ();
+test_result_float_tol 0.0 mprec "add-fmat-fmat-1";
+
+load_data "[[55.1676516, 106.3352832][157.5029248, 208.6705664]]_m^2/min
+[[1, 2][3, 4]]_yd^2/s [[5, 6][7, 8]]_m^2/min";
+calc#add ();
+calc#sub ();
+float_mat_norm ();
+test_result_float_tol 0.0 uprec "add-fmat-fmat-2";
+
+load_data "[[(6, 6), (9, 8)][(12, 10), (15, 12)]]
+           [[1, 2][3, 4]] [[(5, 6), (7, 8)][(9, 10), (11, 12)]]";
+calc#add ();
+calc#sub ();
+cpx_mat_norm ();
+test_result_float_tol 0.0 mprec "add-fmat-cmat-1";
+
+load_data "[[(55.1676516, 10.0), (106.3352832, 20.0)]
+            [(157.5029248, 30.0), (208.6705664, 40.0)]]_m^2/min
+           [[1, 2][3, 4]]_yd^2/s
+           [[(5, 10.0), (6, 20.0)][(7, 30.0), (8, 40.0)]]_m^2/min";
+calc#add ();
+calc#sub ();
+cpx_mat_norm ();
+test_result_float_tol 0.0 uprec "add_fmat_cmat_2";
 
 
 
