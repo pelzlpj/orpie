@@ -341,6 +341,9 @@ Orpie also supports autocompletion of variable names.  The help panel displays a
 list of pre-existing variables that partially match the name currently being entered.
 You can press '\texttt{<tab>}' to iterate through the list of matching variables.
 
+As a shortcut, keys \texttt{<f1>-<f12>} will enter the variables (``registers'') 
+\texttt{@ r01} through \texttt{@ r12}.
+
 %@% IF LATEX %@%
 \subsubsection{Entering Data With an External Editor}
 \label{editor}
@@ -846,7 +849,8 @@ The macro string should be a list of whitespace-separated keypresses, e.g.
 
 This macro syntax provides a way to create small programs; by way of example,
 the default orpierc file includes macros for the base 2 logarithm and the
-binary entropy function (bound to \texttt{L} and \texttt{H}, respectively).
+binary entropy function (bound to \texttt{L} and \texttt{H}, respectively),
+as well as ``register'' variable shortcuts (\texttt{<f1>} to \texttt{<f12>}).
 
 Macros may call other macros recursively.  However, take care that a macro does
 not call \emph{itself} recursively; Orpie will not trap the infinite loop.

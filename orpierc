@@ -173,5 +173,19 @@ macro "L" "l 2 l /"
 # binary entropy function (makes use of the "L" macro)
 macro "H" "<return> 1 - n <return> L * <pageup> <return> L * + n"
 
+# registers
+macro "<f1>" "@ r 0 1 <return>"
+macro "<f2>" "@ r 0 2 <return>"
+macro "<f3>" "@ r 0 3 <return>"
+macro "<f4>" "@ r 0 4 <return>"
+macro "<f5>" "@ r 0 5 <return>"
+macro "<f6>" "@ r 0 6 <return>"
+macro "<f7>" "@ r 0 7 <return>"
+macro "<f8>" "@ r 0 8 <return>"
+macro "<f9>" "@ r 0 9 <return>"
+macro "<f10>" "@ r 1 0 <return>"
+macro "<f11>" "@ r 1 1 <return>"
+macro "<f12>" "@ r 1 2 <return>"
+
 
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  
