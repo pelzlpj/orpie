@@ -163,7 +163,8 @@ class rpc_stack =
             close_out version_channel;
             let save_file = Utility.join_path !(Rcfile.datadir) "calc_state" in
             let save_channel = Utility.open_or_create_out_bin save_file in
-            Marshal.to_channel save_channel (modes, variables, stack, len) [];
+            Marshal.to_channel save_channel 
+            (modes, variables, !Rcfile.autobind_keys, stack, len) [];
             close_out save_channel
          with
             |Sys_error ss -> raise (Invalid_argument "can't open data file for writing")
@@ -190,13 +191,16 @@ class rpc_stack =
                   if Sys.file_exists (Utility.expand_file datafile) then begin
                      (* if it does exist, try loading it *)
                      let load_channel = Utility.expand_open_in_bin datafile in
-                     let data_modes, data_variables, data_stack, data_len = 
+                     let data_modes, data_variables, data_autobind_keys, data_stack, data_len = 
                         (Marshal.from_channel load_channel : calculator_modes * 
-                        ((string, orpie_data_t) Hashtbl.t) * (stack_data_t array) * int)
+                        ((string, orpie_data_t) Hashtbl.t) * 
+                        (int * string * Operations.function_operation option * int) array *
+                        (stack_data_t array) * int)
                      in
                      close_in load_channel;
                      stack <- data_stack;
                      len <- data_len;
+                     Rcfile.validate_saved_autobindings data_autobind_keys;
                      data_modes, data_variables
                   end else
                      (* if the datafile is missing, do nothing as it will be

@@ -606,6 +606,39 @@ let generate_autobind_array () =
    autobind_keys := Array.sub temp_arr 0 !pointer
 
 
+(* compare a set of autobindings saved to disk to the set loaded from the
+ * orpierc file.  If the autobindings match and the hashtbl abbreviations
+ * are the same, then use the saved version. *)
+let validate_saved_autobindings saved_autobind =
+   if Array.length !autobind_keys = Array.length saved_autobind then
+      let is_valid = ref true in
+      for i = 0 to pred (Array.length saved_autobind) do
+         let (s_key, s_key_str, s_bound_f, s_age) = saved_autobind.(i)
+         and (n_key, n_key_str, n_bound_f, n_age) = !autobind_keys.(i) in
+         if s_key = n_key then begin
+            try
+               begin match s_bound_f with
+               |None -> ()
+               |Some ff ->
+                  let _ = abbrev_of_operation (Function ff) in ()
+               end
+            with Not_found ->
+               (* if the function has no associated abbreviation, then consider
+                * the saved autobindings to be flawed *)
+               is_valid := false
+         end else
+            (* if the autobindings are different from the saved set, then
+             * consider the saved set to be flawed. *)
+            is_valid := false
+      done;
+      if !is_valid then
+         autobind_keys := saved_autobind
+      else
+         ()
+   else
+      ()
+             
+
 
 (* try opening the rc file, first looking at $HOME/.orpierc, 
  * then looking at $PREFIX/etc/orpierc *)
