@@ -92,6 +92,8 @@ let big_int_of_string_base (str : string) (base : int) =
       match str.[i] with
       |'-' -> 
          sum := minus_big_int !sum
+      |'+' ->
+         ()
       |_ ->
          try
             let digit_value = (Hashtbl.find values str.[i]) in
@@ -100,11 +102,11 @@ let big_int_of_string_base (str : string) (base : int) =
                sum        := add_big_int !sum diff;
                multiplier := mult_int_big_int base !multiplier)
             else
-               raise (Big_int_string_failure ("invalid string for base " ^
-               (string_of_int base)))
+               raise (Big_int_string_failure ("invalid digits for base " ^
+               (string_of_int base) ^ " integer data" ))
          with Not_found ->
-            raise (Big_int_string_failure ("invalid string for base " ^
-            (string_of_int base)))
+            raise (Big_int_string_failure ("invalid digits for base " ^
+            (string_of_int base) ^ " integer data" ))
    done;
    !sum;;
       

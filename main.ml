@@ -109,7 +109,12 @@ let initialize_screen () =
 
 
 let iface = new Rpc_interface.rpc_interface calc (initialize_screen ());;
-iface#run ();;
+try
+   iface#run ()
+with error ->
+   endwin ();
+   Printf.fprintf stderr "Caught error at toplevel: %s\n" (Printexc.to_string error);;
+
 
 (* For some reason this call fails if it is moved to rpc_interface... *)
 endwin ();;

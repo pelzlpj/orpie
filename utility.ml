@@ -27,4 +27,50 @@ let cmat_of_fmat fm =
    let c_array = Array.map cmpx_of_float f_array in
    Gsl_matrix_complex.of_array c_array rows cols
 
+
+
+(* Word wrap a string to a width of 'cols'.  Breaks lines on whitespace; if a word is too
+ * long, it will be broken and hyphenated.  Return value is a list of strings.  *)
+let wordwrap s cols =
+   if String.length s <= cols then
+      s :: []
+   else
+      let rec process_words (word_list : string list) (wrapped_list : string list) =
+         match word_list with
+         |word :: word_tail ->
+            begin
+               match wrapped_list with
+               |line :: line_tail ->
+                  let new_line = line ^ " " ^ word in
+                  if String.length new_line <= cols then
+                     process_words word_tail (new_line :: line_tail)
+                  else if String.length word <= cols then
+                     process_words word_tail (word :: wrapped_list)
+                  else
+                     let len = String.length word in
+                     let partial_word = (String.sub word 0 (cols-1)) ^ "-" and
+                     remainder_word = "-" ^ (String.sub word (cols-1)
+                     (len-cols+1)) in
+                     process_words (remainder_word :: word_tail) 
+                     (partial_word :: wrapped_list)
+               |[] ->
+                  if String.length word <= cols then
+                     process_words word_tail (word :: wrapped_list)
+                  else
+                     let len = String.length word in
+                     let partial_word = (String.sub word 0 (cols-1)) ^ "-" and
+                     remainder_word = "-" ^ (String.sub word (cols-1)
+                     (len-cols+1)) in
+                     process_words (remainder_word :: word_tail) 
+                     (partial_word :: wrapped_list)
+            end
+         |[] ->
+            wrapped_list
+      in
+      let words = Str.split (Str.regexp "[ \t]+") s in
+      List.rev (process_words words [])
+
+
+
+
 (* arch-tag: DO_NOT_CHANGE_a87790db-2dd0-496c-9620-ed968f3253fd *)

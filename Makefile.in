@@ -55,7 +55,7 @@ all: $(OCAMLBEST)
 CMO = big_int_str.cmo rpc_stack.cmo utility.cmo add.cmo sub.cmo \
 		mult.cmo div.cmo inv.cmo pow.cmo rpc_calc.cmo rpc_interface.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
-CMA = nums.cma bigarray.cma gsl.cma
+CMA = nums.cma bigarray.cma str.cma gsl.cma
 CMXA = $(CMA:.cma=.cmxa)
 
 CURSES_BOBJS = curses/ml_curses.o curses/curses.cmo

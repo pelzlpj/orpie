@@ -44,7 +44,8 @@ type rpc_bindings = {
    begin_complex       : int;
    begin_matrix        : int;
    enter               : int;
-   scientific_notation : int
+   scientific_notation : int;
+   neg                 : int
 };;
 
 
@@ -53,7 +54,8 @@ let bindings = {
    begin_complex       = int_of_char '(';
    begin_matrix        = int_of_char '[';
    enter               = 10;   (* standard enter key *)
-   scientific_notation = int_of_char ' '
+   scientific_notation = int_of_char ' ';
+   neg                 = int_of_char 'n'
 };;
 
 
@@ -64,11 +66,17 @@ object(self)
    val mutable scr = std                      (* curses screen with two or three subwindows *)
    val mutable stack_bottom_row = 1           (* controls what portion of the stack is viewable *)
    val mutable help_mode = Extended           (* controls the mode of context-sensitive help *)
+
+   val mutable has_entry = false              (* whether or not the entry buffer has anything in it *)
    val mutable is_extended_entry = false      (* is the current entry "extended" or not? *)
    val mutable entry_type = FloatEntry        (* the current type of data being entered *)
    val mutable int_entry_buffer = ""          (* holds characters entered for int data type *)
-   val mutable is_entering_base = false
-   val mutable int_base_string = ""
+   val mutable is_entering_base = false       (* whether or not the user is entering a base *)
+   val mutable int_base_string = ""           (* one-character representation of the base *)
+   val mutable float_mantissa_buffer = ""     (* holds characters entered for float data type *)
+   val mutable float_has_dot = false          (* whether or not float_mantissa_buffer contains a period *)
+   val mutable is_entering_exponent = false   (* whether or not the user is entering a scientific notation exponent *)
+   val mutable float_exponent_buffer = ""     (* holds characters entered for scientific notation exponent *)
 
 
    method run () =
@@ -122,6 +130,8 @@ object(self)
       assert (wmove scr.entry_win 1 0);
       wclrtoeol scr.entry_win;
       let draw_entry_string str =
+         (* safely draw a string into the entry window, with "..." when
+            truncation occurs *)
          let len_str = String.length str in
          begin
             if len_str > scr.ew_cols - 1 then
@@ -140,8 +150,23 @@ object(self)
          else
             let s = "# " ^ int_entry_buffer in
             draw_entry_string s
+      |FloatEntry ->
+         if is_entering_exponent then
+            let sign_space =
+               if String.length float_exponent_buffer > 0 then
+                  match float_exponent_buffer.[0] with
+                  |'-' -> ""
+                  |'+' -> ""
+                  |_ -> " "
+               else
+                  " "
+            in
+            let s = float_mantissa_buffer ^ " x10^" ^ sign_space ^ float_exponent_buffer in
+            draw_entry_string s
+         else
+            draw_entry_string float_mantissa_buffer
       |_ ->
-         draw_entry_string int_entry_buffer
+         draw_entry_string ""
 
 
 
@@ -225,18 +250,40 @@ object(self)
 
    (* write an error message to the stack window *)
    method draw_error msg =
-      (* FIXME: do something better than this *)
-      assert (wmove scr.stack_win 0 0);
-      wclrtoeol scr.stack_win;
-      assert (waddstr scr.stack_win "  Some Error");
+      let error_lines = Utility.wordwrap msg (scr.sw_cols-3) in
+      let trunc_error_lines = 
+         if List.length error_lines > 4 then
+            (List.nth error_lines 0) :: (List.nth error_lines 1) ::
+            (List.nth error_lines 2) :: (List.nth error_lines 3) :: [] 
+         else
+            error_lines 
+      in
+      for i = 0 to pred (List.length trunc_error_lines) do
+         assert (wmove scr.stack_win i 0);
+         wclrtoeol scr.stack_win;
+         assert (mvwaddstr scr.stack_win i 2 (List.nth trunc_error_lines i))
+      done;
       let s = String.make scr.sw_cols '-' in
-      assert (mvwaddstr scr.stack_win 1 0 s);
+      assert (mvwaddstr scr.stack_win (List.length trunc_error_lines) 0 s);
       assert (wrefresh scr.stack_win)
 
 
 
    (* parse the entry buffers to obtain an rpc object, then stack#push it *)
    method push_entry () =
+      (* perform this cleanup routine after every entry, so we are prepared
+         to receive a new object. *)
+      let post_entry_cleanup () =
+         has_entry <- false;
+         entry_type <- FloatEntry;
+         int_entry_buffer <- "";
+         int_base_string <- "";
+         is_entering_base <- false;
+         float_mantissa_buffer <- "";
+         float_exponent_buffer <- "";
+         is_entering_exponent <- false;
+         self#draw_entry ()
+      in
       match entry_type with
       |IntEntry ->
          let base_mode = 
@@ -261,13 +308,26 @@ object(self)
                calc#enter_int ival;
                self#draw_stack ();
             with Big_int_str.Big_int_string_failure error_msg ->
-               self#draw_error error_msg
+               self#draw_error ("Error: " ^ error_msg)
          end;
-         entry_type <- FloatEntry;
-         int_entry_buffer <- "";
-         int_base_string <- "";
-         is_entering_base <- false;
-         self#draw_entry ()
+         post_entry_cleanup ()
+      |FloatEntry ->
+         begin
+            try
+               begin
+                  if is_entering_exponent && String.length float_exponent_buffer > 0 then
+                     let ff = float_of_string (float_mantissa_buffer ^ "e" ^
+                     float_exponent_buffer) in
+                     calc#enter_float ff
+                  else
+                     let ff = float_of_string float_mantissa_buffer in
+                     calc#enter_float ff
+               end;
+               self#draw_stack ();
+            with Failure "float_of_string" ->
+               self#draw_error "Error: improperly formatted floating point data"    
+         end;
+         post_entry_cleanup ()
       |_ ->
          (* handle entry of other data types *)
          ()
@@ -286,7 +346,11 @@ object(self)
 (*               Printf.fprintf stdout "key = %d\n" key;
                flush stdout; *)
                if key = bindings.enter then
-                  self#push_entry ()
+                  if has_entry then
+                     self#push_entry ()
+                  else
+                     (* FIXME: duplicate last stack element *)
+                     ()
                else if key = bindings.begin_int then
                   if entry_type = FloatEntry then
                      (entry_type <- IntEntry;
@@ -297,10 +361,51 @@ object(self)
                else if key = bindings.scientific_notation then
                   match entry_type with 
                   |IntEntry ->
-                     is_entering_base <- true;
-                     self#draw_entry ()
+                     if String.length int_entry_buffer > 0 then
+                        (is_entering_base <- true;
+                        self#draw_entry ())
+                     else
+                        ()
+                  |FloatEntry ->
+                     if String.length float_mantissa_buffer > 0 then
+                        (is_entering_exponent <- true;
+                        self#draw_entry ())
+                     else
+                        ()
                   |_ ->
-                     (* handle scientific notation for types that use float *)
+                     ()
+               else if key = bindings.neg then
+                  if has_entry then
+                     match entry_type with
+                     |IntEntry ->
+                        (begin
+                           match int_entry_buffer.[0] with
+                           |'-' -> int_entry_buffer.[0] <- '+'
+                           |'+' -> int_entry_buffer.[0] <- '-'
+                           |_ -> int_entry_buffer <- "-" ^ int_entry_buffer
+                        end;
+                        self#draw_entry ())
+                     |FloatEntry ->
+                        begin
+                           if is_entering_exponent then
+                              if String.length float_exponent_buffer > 0 then
+                                 match float_exponent_buffer.[0] with
+                                 |'-' -> float_exponent_buffer.[0] <- '+'
+                                 |'+' -> float_exponent_buffer.[0] <- '-'
+                                 |_ -> float_exponent_buffer <- "-" ^ float_exponent_buffer
+                              else
+                                 ()
+                           else
+                              match float_mantissa_buffer.[0] with
+                              |'-' -> float_mantissa_buffer.[0] <- '+'
+                              |'+' -> float_mantissa_buffer.[0] <- '-'
+                              |_ -> float_mantissa_buffer <- "-" ^ float_mantissa_buffer
+                        end;
+                        self#draw_entry ()
+                     |_ ->
+                        ()
+                  else
+                     (* execute calc#neg () *)
                      ()
                else
                   match entry_type with
@@ -323,12 +428,58 @@ object(self)
                               let c = char_of_int key in
                               if String.contains digits c then
                                  (int_entry_buffer <- int_entry_buffer ^ (String.make 1 c);
+                                 has_entry <- true;
                                  self#draw_entry ())
                               else
                                  ()
                            with Invalid_argument "char_of_int" ->
                               ()
-                     end
+                     end (* IntEntry *)
+                  |FloatEntry ->
+                     begin
+                        if is_entering_exponent then
+                           let explen =
+                              if String.length float_exponent_buffer > 0 then
+                                 match float_exponent_buffer.[0] with
+                                 |'-' -> 4
+                                 |'+' -> 4
+                                 |_ -> 3
+                              else
+                                 3
+                           in
+                           if String.length float_exponent_buffer < explen then
+                              let digits = "0123456789" in
+                              try
+                                 let c = char_of_int key in
+                                 if String.contains digits c then
+                                    (float_exponent_buffer <- float_exponent_buffer ^
+                                    (String.make 1 c);
+                                    self#draw_entry ())
+                                 else
+                                    ()
+                              with Invalid_argument "char_of_int" ->
+                                 ()
+                           else
+                              ()
+                        else if String.length float_mantissa_buffer < 17 then
+                           let digits =
+                              if float_has_dot then "0123456789"
+                              else "0123456789."
+                           in
+                           try
+                              let c = char_of_int key in
+                              if String.contains digits c then
+                                 (float_mantissa_buffer <- float_mantissa_buffer ^
+                                 (String.make 1 c);
+                                 has_entry <- true;
+                                 self#draw_entry ())
+                              else
+                                 ()
+                           with Invalid_argument "char_of_int" ->
+                              ()
+                        else
+                           ()
+                     end (* FloatEntry *)
                   |_ ->
                      (* handle other entry types *)
                      ()

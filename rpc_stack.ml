@@ -119,7 +119,7 @@ class rpc_stack =
                               "# " ^ s ^ " d"
                         end
                      |RpcFloat el ->
-                        sprintf "%g" el
+                        sprintf "%.15g" el
                      |RpcComplex el ->
                         sprintf "(%g, %g)" el.Complex.re el.Complex.im
                      |RpcFloatMatrix el ->
