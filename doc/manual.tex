@@ -1,12 +1,13 @@
 % Orpie documentation
 \documentclass[11pt,notitlepage]{article}
 \usepackage{times}
+\usepackage{amsmath}
 \usepackage{fullpage}
 
 % End preamble
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{document}
-\title{Orpie User Manual}
+\title{Orpie v1.0 User Manual}
 \author{Paul J. Pelzl}
 \date{March 4, 2004}
 \maketitle
@@ -16,7 +17,7 @@
 \end{center}
 
 
-\section*{Introduction}
+\section{Introduction}
 Orpie is a console-based RPN desktop calculator.  The interface is similar to
 that of modern Hewlett-Packard${}^{TM}$ calculators, but has been optimized for
 efficiency on a PC keyboard.  The design is also influenced to some degree by 
@@ -25,13 +26,13 @@ editor\footnote{http://vim.sf.net}.
 
 Orpie does not have graphing capability, nor does it offer much in the way of a
 programming interface; other applications such as GNU
-Octave\footnote{http://www.octave.org} can already do this well.  Orpie focuses
-specifically on helping you to crunch numbers quickly.
+Octave\footnote{http://www.octave.org} are already very effective for such
+tasks.  Orpie focuses specifically on helping you to crunch numbers quickly.
 
-Orpie is written in Objective Caml (Ocaml)\footnote{http://caml.inria.fr/}, a
+Orpie is written in Objective Caml (aka Ocaml)\footnote{http://caml.inria.fr/}, a
 high-performance functional programming language.
 
-\section*{Installation}
+\section{Installation}
 This section describes how to install Orpie by compiling from source.
 
 Before installing Orpie, you should have installed the GNU Scientific Library
@@ -59,18 +60,352 @@ Finally, run ``{\tt make install}'' (as root) to install the executables.
 directory\footnote{The default installation directory is {\tt /usr/local}.}.  
 
 
-\section*{Quick Start}
+\section{Quick Start}
+This section describes how to use Orpie in its default configuration.  After
+familiarizing yourself with the basic operations as outlined in this section,
+you may wish to consult Section \ref{advanced} to see how Orpie can be
+configured to better fit your needs.
 
-\section*{Advanced Configuration}
+\subsection{Overview}
+You can start the calculator by executing {\tt orpie}.  The interface has two
+panels.  The left panel combines status information with context-sensitive help;
+the right panel represents the calculator's stack.  (Note that the left panel
+will be hidden if Orpie is run in a terminal with less than 80 columns.)
 
+In general, you perform calculations by first entering data on to the stack,
+then executing functions that operate on the stack data.  As an example, you can
+hit {\tt 1<enter>2<enter>+} in order to add 1 and 2.
 
-\section*{Licensing}
+\subsection{Entering Data}
+\subsubsection{Entering Real Numbers}
+To enter a real number, just type the desired digits and hit enter.  The space
+bar will begin entry of a scientific notation exponent.  The '{\tt n}' key is used
+for negation.  Here are some examples:
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+      \hline Keypresses & Resulting Entry \\
+      \hline
+      {\tt 1.23<enter>} & {\tt 1.23} \\
+      {\tt 1.23<space>23n<enter>} & {\tt 1.23e-23} \\
+      {\tt 1.23n<space>23<enter>} & {\tt -1.23e23} \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsubsection{Entering Complex Numbers}
+Orpie can represent complex numbers using either cartesian (rectangular) or
+polar coordinates.  See Section. \ref{rectpolar} to see how to change the
+complex number display mode.
+
+A complex number is entered by first pressing '{\tt (}', then entering the real
+part, then pressing '{\tt ,}' followed by the imaginary part.  Alternatively, you
+can press '{\tt (}' followed by the magnitude, then '{\tt <}' followed by the
+phase angle.  The angle will be interpreted as degrees or radians, depending on
+the current setting of the angle mode (see Section. \ref{anglemode}).  Examples:
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+      \hline Keypresses & Resulting Entry \\
+      \hline
+      {\tt (1.23, 4.56<enter>} & {\tt (1.23, 4.56)} \\
+      {\tt (0.7072<45<enter>} & {\tt (0.500065915655126, 0.50006591...} \\
+      {\tt (1.23n,4.56<space>10<enter>} & {\tt (-1.23, 45600000000)} \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsubsection{Entering Matrices}
+You can enter matrices by pressing '{\tt [}'.  The elements of the matrix may then be
+entered as described in the previous sections, and should be separated using
+'{\tt ,}'.  To start a new row of the matrix, press '{\tt [}' again.  On the
+stack, each row of the matrix is enclosed in a set of brackets; for example, the
+matrix
+\begin{displaymath}
+   \left[
+   \begin{matrix}
+      1 & 2 \\
+      3 & 4
+   \end{matrix}
+   \right]
+\end{displaymath}
+would appear on the stack as {\tt [[1, 2][3, 4]]}.
+
+Examples of matrix entry:
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+      \hline Keypresses & Resulting Entry \\
+      \hline
+      {\tt [1,2[3,4<enter>} & {\tt [[1, 2][3, 4]]} \\
+      {\tt [1.2<space>10,0[3n,5n<enter>} & {\tt [[ 12000000000, 0 ][ -3, -5 ]]} \\
+      {\tt [(1,2,3,4[5,6,7,8<enter>} & {\tt [[ (1, 2), (3, 4) ][ (5, 6), (...} \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsubsection{Entering Integer Constants}
+An exact integer may be entered by pressing '{\tt \#}' followed by the desired
+digits.  The base of the integer will be assumed to be the same as the current
+calculator base mode (see Section \ref{basemode} to see how to set this mode).
+Alternatively, the desired base may be specified by pressing space and appending
+one of \{{\tt b, o, d, h}\}, to represent binary, octal, decimal, or hexadecimal,
+respectively.  On the stack, the representation of the integer will be changed
+to match the current base mode.  Examples:
+\begin{center}
+   \begin{tabular}[t]{|r|r|}
+      \hline Keypresses & Resulting Entry \\
+      \hline
+      {\tt \#123456<enter>} & {\tt \# 123456 d} \\
+      {\tt \#ffff<space>h<enter>} & {\tt \# 65535 d} \\
+      {\tt \#10101n<space>b<enter>} & {\tt \# -21 d} \\
+      \hline
+   \end{tabular}
+\end{center}
+
+Note that integer constants may have unlimited length.
+
+\subsection{Performing Basic Function Operations}
+\label{functionops}
+Once some data has been entered on the stack, you can apply operations to that
+data.  For example, '{\tt +}' will add the last two elements on the stack.  By
+default, the following keys have been bound to such operations:
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+      \hline Keys & Operations \\
+      \hline
+      {\tt +} & add last two stack elements \\
+      {\tt -} & subtract element 1 from element 2 \\
+      {\tt *} & multiply last two stack elements \\
+      {\tt /} & divide element 2 by element 1 \\
+      {\tt \^{}} & raise element 2 to the power of element 1 \\
+      {\tt n} & negate last element \\
+      {\tt i} & invert last element \\
+      {\tt s} & square root function \\
+      {\tt a} & absolute value function \\
+      {\tt e} & exponential function \\
+      {\tt l} & natural logarithm function \\
+      {\tt c} & complex conjugate function \\
+      {\tt !} & factorial function  \\
+      \hline
+   \end{tabular}
+\end{center}
+
+As a shortcut, function operators will automatically enter any data that you
+were in the process of entering.  So instead of the sequence {\tt
+2<enter>2<enter>+}, you could type simply {\tt 2<enter>2+} and the second number
+would be entered before the addition operation is applied.
+
+\subsection{Performing Extended Function Operations}
+\label{extendedfunctions}
+One could bind nearly all calculator operations to specific keypresses, but this
+would rapidly get confusing since the PC keyboard is not labeled as nicely as a
+calculator keyboard is.  For this reason, Orpie includes an {\em extended
+command} syntax.
+
+To activate an extended command, press '{\tt '}' (quote key), followed by the
+first few letters/digits of the command, then hit enter.  Orpie offers an
+autocompletion feature for extended commands, so you only need to type enough of
+the command to identify it uniquely.  The matching extended commands will appear
+in the left pane of the display, to assist you in finding the appropriate
+command.
+
+To avoid interface conflicts, extended commands may be entered only when the
+entry buffer (at the bottom of the screen) is empty.
+
+The following functions are available as extended commands:
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+      \hline Extended Commands & Functions \\
+      \hline
+      {\tt inv} & inverse function \\
+      {\tt pow} & raise element 2 to the power of element 1 \\
+      {\tt sq}  & square last element \\
+      {\tt sqrt} & square root function \\
+      {\tt abs } & absolute value function \\
+      {\tt exp } & exponential function \\
+      {\tt ln } & natural logarithm function \\
+      {\tt 10\^{} } & base 10 exponential function \\
+      {\tt log10 } & base 10 logarithm function \\
+      {\tt conj } & complex conjugate function \\
+      {\tt sin} & sine function \\
+      {\tt cos} & cosine function \\
+      {\tt tan} & tangent function \\
+      {\tt sinh} & hyperbolic sine function \\
+      {\tt cosh} & hyperbolic cosine function \\
+      {\tt tanh} & hyperbolic tangent function \\
+      {\tt asin} & arcsine function \\
+      {\tt acos} & arccosine function \\
+      {\tt atan} & arctangent function \\
+      {\tt asinh} & inverse hyperbolic sine function \\
+      {\tt acosh} & inverse hyperbolic cosine function \\
+      {\tt atanh} & inverse hyperbolic tangent function \\
+      {\tt re} & real part of complex number \\
+      {\tt im} & imaginary part of complex number \\
+      {\tt gamma} & Euler gamma function \\
+      {\tt lngamma} & natural log of Euler gamma function \\
+      {\tt erf} & error function \\
+      {\tt erfc} & complementary error function \\
+      {\tt fact} & factorial function \\
+      {\tt add} & add last two elements \\
+      {\tt sub} & subtract element 1 from element 2 \\
+      {\tt mult} & multiply last two elements \\
+      {\tt div} & divide element 2 by element 1 \\
+      {\tt neg} & negate last element \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsection{Performing Basic Command Operations}
+\label{rectpolar}
+\label{anglemode}
+\label{basemode}
+In addition to the function operations listed in Section \ref{functionops},
+a number of basic calculator commands have been bound to single keypresses:
+\begin{center}
+   \begin{tabular}[t]{|r|l|}
+      \hline Keys & Operations \\
+      \hline
+      {\tt $\backslash$} & drop last element \\
+      {\tt |} & clear all stack elements \\
+      {\tt <pagedown>} & swap last two elements \\
+      {\tt <enter>} & duplicate last element (when entry buffer is empty) \\
+      {\tt u} & undo last operation \\
+      {\tt r} & toggle angle mode between degrees and radians \\
+      {\tt p} & toggle complex display mode between rectangular and polar \\
+      {\tt b} & cycle base display mode between binary, octal, decimal, hex \\
+      {\tt v} & view last stack element in a fullscreen editor \\
+      {\tt P} & enter $\pi$ on the stack \\
+      {\tt C-L} & refresh the display \\
+      {\tt <up>} & begin stack browsing mode \\
+      {\tt Q} & quit Orpie \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsection{Performing Extended Function Operations}
+In addition to the function operations listed in Section
+\ref{extendedfunctions}, there are a large number of calculator commands that
+have been implemented using the extended command syntax:
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+      \hline Extended Commands & Calculator Operation \\
+      \hline
+      {\tt drop} & drop last element \\
+      {\tt clear} & clear all stack elements \\
+      {\tt swap} & swap last two elements \\
+      {\tt dup} & duplicate last element \\
+      {\tt undo} & undo last operation \\
+      {\tt rad} & set angle mode to radians \\
+      {\tt deg} & set angle mode to degrees \\
+      {\tt rect} & set complex display mode to rectangular \\
+      {\tt polar} & set complex display mode to polar \\
+      {\tt bin} & set base display mode to binary \\
+      {\tt oct} & set base display mode to octal \\
+      {\tt dec} & set base display mode to decimal \\
+      {\tt hex} & set base display mode to hexidecimal \\
+      {\tt view} & view last stack element in a fullscreen editor \\
+      {\tt pi} & enter $\pi$ on the stack \\
+      {\tt refresh} & refresh the display \\
+      {\tt about} & display a nifty ``About Orpie'' screen \\
+      {\tt quit} & quit Orpie \\
+      \hline
+   \end{tabular}
+\end{center}
+
+\subsection{Browsing the Stack}
+Orpie offers a {\em stack browsing mode} to assist in viewing and manipulating
+stack data.  Press {\tt <up>} to enter stack browsing mode; this should
+highlight the last stack element.  You can use the up and down arrow keys to
+select different stack elements.  The following keys are useful in stack
+browsing mode:
+\begin{center}
+   \begin{tabular}[t]{|l|l|}
+      \hline Keys & Operations \\
+      \hline
+      {\tt q} & quit stack browsing mode \\
+      {\tt <left>} & scroll selected entry to the left \\
+      {\tt <right>} & scroll selected entry to the right \\
+      {\tt r} & cyclically ``roll'' stack elements downward, below the 
+               selected element (inclusive) \\
+      {\tt R} & cyclically ``roll'' stack elements upward, below the selected
+               element (inclusive) \\
+      {\tt v} & view the currently selected element in a fullscreen editor \\
+      {\tt <enter>} & duplicate the currently selected element \\
+      \hline
+   \end{tabular}
+\end{center}
+
+The left and right scrolling option may prove useful for viewing very lengthy
+stack entries, such as large matrices.
+
+\section{Advanced Configuration}
+\label{advanced}
+Orpie reads a run-configuration textfile (generally {\tt /etc/orpierc} or
+{\tt /usr/local/etc/orpierc}) to determine key and command bindings.  You can
+create a personalized configuration file in {\tt \$HOME/.orpierc}, and select
+bindings that match your usage patterns.
+
+\subsection{{\tt orpierc} Syntax}
+You may notice that the  {\tt orpierc} syntax is similar to the syntax used in
+the configuration file for the Mutt email client (muttrc).
+
+\subsubsection{Setting Variables}
+Syntax: {\tt set {\em variable} {\em value\_string}}
+
+Several configuration variables can be set using this syntax; see Section \ref{variables}
+to see a list.  The value should be a quoted string.
+
+\subsubsection{Creating Key Bindings}
+Syntax: {\tt bind {\em key\_identifier operation}}
+
+This command will bind a keypress to execute a calculator operation.  The various operations
+may be found in Section \ref{operationslist}. Key identifiers may be specified
+by strings that represent a single keypress, for example {\tt "m"} (quotes
+included).  The key may be prefixed with {\tt "$\backslash\backslash$C"} or
+{\tt "$\backslash\backslash$M"} to represent Control or Meta modifiers,
+respectively.  A number of special keys lack single-character representations,
+so the following strings may be used to represent them:
+\begin{itemize}
+   \item {\tt "<esc>"}
+   \item {\tt "<tab>"}
+   \item {\tt "<enter>"}
+   \item {\tt "<return>"}
+   \item {\tt "<insert>"}
+   \item {\tt "<home>"}
+   \item {\tt "<end>"}
+   \item {\tt "<pageup>"}
+   \item {\tt "<pagedown>"}
+   \item {\tt "<space>"}
+   \item {\tt "<left>"}
+   \item {\tt "<right>"}
+   \item {\tt "<up>"}
+   \item {\tt "<down>"}
+   \item {\tt "<f1>"} to {\tt "<f12>"}
+\end{itemize}
+Due to differences between various terminal emulators, this key identifier syntax may
+not be adequate to describe every keypress.  As a workaround, Orpie will also accept key
+identifiers in octal notation.  As an example, you could use {\tt $\backslash$024} 
+({\em without} quotes) to represent Ctrl-T.
+
+\subsubsection{Creating Extended Command Abbreviations}
+Syntax: {\tt abbrev {\em command\_abbreviation operation}}
+
+You can use this syntax to set the extended command abbreviations used within
+Orpie to represent the various operations.  A list of available operations may be found
+in Section \ref{operationslist}.  The command abbreviations should be quoted strings,
+for example {\tt "sin"} or {\tt "log"}.
+
+Orpie performs autocompletion on these command abbreviations, allowing you to type
+usually just a few letters in order to select the desired command.  The order of the
+autocompletion matches will be the same as the order in which the abbreviations are
+registered by the rcfile--so you may wish to place the more commonly used command
+abbreviations earlier in the list.
+
+\section{Licensing}
 Orpie has been made available under the GNU General Public License (GPL), 
 version 2.  You should have received a copy of the GPL along with this 
 program, in the file ``COPYING''.
 
 
-\section*{Credits}
+\section{Credits}
 Orpie includes portions of the
 ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} bindings supplied by
 Olivier Andrieu, as well as the curses bindings from the Ocaml Text Mode
@@ -78,7 +413,7 @@ Kit\footnote{http://www.nongnu.org/ocaml-tmk/} written by Nicolas George.  I
 would like to thank these authors for helping to make Orpie possible.
 
 
-\section*{Contact info}
+\section{Contact info}
 Orpie author: Paul Pelzl {\tt <pelzlpj@eecs.umich.edu>} \\
 Orpie website: {\tt http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
 
