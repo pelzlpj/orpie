@@ -1467,7 +1467,9 @@ class rpc_calc =
                |RpcInt a ->
                   begin match gen_el2 with
                   |RpcInt b ->
-                     interr_args <- Gcd_args (a, b, gen_el1, gen_el2);
+                     let abs_a = abs_big_int a
+                     and abs_b = abs_big_int b in
+                     interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                      false
                   |_ ->
                      stack#push gen_el1;
