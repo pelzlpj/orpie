@@ -101,7 +101,6 @@ if test "$OCAMLDEP" = no ; then
 	AC_MSG_ERROR(Cannot find ocamldep.)
 fi
 
-
 # platform
 AC_MSG_CHECKING(platform)
 if echo "let _ = Sys.os_type" | ocaml | grep -q Win32; then
@@ -120,6 +119,21 @@ if test ! "$CURSES_LIB"; then
    AC_MSG_ERROR(Cannot find a curses library.  Perhaps you failed to install an ncurses development package?)
 fi
 
+# check for GSL
+AC_MSG_CHECKING(for GNU Scientific Library)
+gsl_save_libs="$LIBS"
+LIBS="$LIBS -lgsl -lgslcblas"
+AC_TRY_LINK([#include <gsl/gsl_complex.h>],
+            [gsl_complex a; GSL_SET_COMPLEX(&a, 1.0, 1.0); gsl_complex_logabs(a);],
+            HAS_GSL_LIB=yes, HAS_GSL_LIB=no)
+if test "$HAS_GSL_LIB" = no; then
+   AC_MSG_ERROR(Cannot find the GNU Scientific Library.  Perhaps you failed to install a libgsl development package?)
+else
+   AC_MSG_RESULT(yes)
+fi
+LIBS="$gsl_save_libs"
+GSL_LIB="-lgsl -lgslcblas"
+
 
 # substitutions to perform
 AC_SUBST(OCAMLC)
@@ -131,6 +145,7 @@ AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(CURSES_LIB)
+AC_SUBST(GSL_LIB)
 AC_SUBST(DEFS)
 
 # Finally create the Makefile from Makefile.in

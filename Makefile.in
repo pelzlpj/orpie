@@ -24,22 +24,23 @@ BINDIR=@bindir@
 MANDIR=@mandir@
 
 # other variables set by ./configure
-OCAMLC   = @OCAMLC@
-OCAMLOPT = @OCAMLOPT@
-OCAMLDEP = @OCAMLDEP@
-OCAMLLIB = @OCAMLLIB@
-OCAMLBEST= @OCAMLBEST@
+OCAMLC       = @OCAMLC@
+OCAMLOPT     = @OCAMLOPT@
+OCAMLDEP     = @OCAMLDEP@
+OCAMLLIB     = @OCAMLLIB@
+OCAMLBEST    = @OCAMLBEST@
 OCAMLVERSION = @OCAMLVERSION@
-OCAMLWIN32 = @OCAMLWIN32@
-EXE = @EXE@
+OCAMLWIN32   = @OCAMLWIN32@
+EXE          = @EXE@
 
 CURSES_LIB = @CURSES_LIB@
+GSL_LIB    = @GSL_LIB@
 
 INCLUDES = -I ./curses -I ./gsl
-BFLAGS = -pp camlp4o -g $(INCLUDES)
-OFLAGS = -pp camlp4o $(INCLUDES)
-BLFLAGS = -custom -cclib '$(CURSES_LIB) -lgsl -lgslcblas'
-OLFLAGS = -cclib '$(CURSES_LIB) -lgsl -lgslcblas'
+BFLAGS   = -pp camlp4o -g $(INCLUDES)
+OFLAGS   = -pp camlp4o $(INCLUDES)
+BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB)'
+OLFLAGS  = -cclib '$(CURSES_LIB) $(GSL_LIB)'
 DEPFLAGS = -pp camlp4o
 
 # main target
