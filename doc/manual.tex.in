@@ -469,6 +469,7 @@ The following functions are available as extended commands:
       \texttt{erfc} & complementary error function \\
       \texttt{fact} & factorial function \\
       \texttt{trans} & matrix transpose \\
+      \texttt{solvelin} & solve a linear system of the form Ax = b \\
       \texttt{mod} & element 2 mod element 1 \\
       \texttt{floor} & floor function \\
       \texttt{ceil} & ceiling function \\
@@ -959,6 +960,14 @@ to a real number, and as such the arithmetic will no longer be exact.
       mode of the calculator.
    \item \texttt{function\_sinh} \\
       Compute the hyperbolic sine of the last stack element.
+   \item \texttt{function\_solve\_linear} \\
+      Solve a linear system of the form Ax = b, where A and b are the last
+      two elements on the stack.  A must be a square matrix and b must
+      be a matrix with one column.  This function does not compute inv(A),
+      but obtains the solution by a more efficient LU decomposition method.
+      This function is recommended over explicitly computing the inverse,
+      especially when solving linear systems with relatively large dimension or
+      with poorly conditioned matrices.
    \item \texttt{function\_sq} \\
       Square the last stack element.
    \item \texttt{function\_sqrt} \\

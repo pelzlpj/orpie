@@ -1013,6 +1013,12 @@ class rpc_calc =
             raise (Invalid_argument "empty stack")
 
 
+      (* solve a linear system Ax = b, with input nxn matrix A and output nx1
+       * matrix b *)
+      method solve_linear () =
+         Solvelin.solve_linear stack self#backup
+
+
       method enter_pi () =
          stack#push (RpcFloat pi)
 

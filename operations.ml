@@ -31,7 +31,7 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | Asinh | Acosh | Atanh | Re | Im 
                           | Gamma | LnGamma | Erf | Erfc | Fact
                           | Transpose | Mod | Floor | Ceiling
-                          | ToInt | ToFloat;;
+                          | ToInt | ToFloat | SolveLin;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | Quit

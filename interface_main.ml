@@ -1178,6 +1178,8 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#to_int
    |ToFloat ->
       handle_function_call iface iface.calc#to_float
+   |SolveLin ->
+      handle_function_call iface iface.calc#solve_linear
    end
 
 

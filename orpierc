@@ -124,6 +124,7 @@ abbrev "floor"   function_floor
 abbrev "ceil"    function_ceiling
 abbrev "toint"   function_to_int
 abbrev "toreal"  function_to_real
+abbrev "solvelin" function_solve_linear
 abbrev "drop"    command_drop
 abbrev "clear"   command_clear
 abbrev "swap"    command_swap
