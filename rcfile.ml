@@ -332,6 +332,7 @@ let operation_of_string command_str =
    |"function_stdev_biased"         -> (Function StdevBias)
    |"function_minimum"              -> (Function Min)
    |"function_maximum"              -> (Function Max)
+   |"function_utpn"                 -> (Function Utpn)
    |"edit_begin_integer"            -> (Edit BeginInteger)
    |"edit_complex"                  -> (Edit BeginComplex)
    |"edit_matrix"                   -> (Edit BeginMatrix)

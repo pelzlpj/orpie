@@ -546,6 +546,7 @@ The following functions are available as extended commands:
       \texttt{stdevbias} & compute the biased (pop.) sample standard deviations of the columns of a matrix \\
       \texttt{min} & find the minima of the columns of a real matrix \\
       \texttt{max} & find the maxima of the columns of a real matrix \\
+      \texttt{utpn} & compute the upper tail probability of a normal distribution \\
       \hline
 %@% IF LATEX %@%
    \end{tabular}
@@ -1095,6 +1096,16 @@ to a real number, and as such the arithmetic will no longer be exact.
       Compute the biased (population) sample variance of each of the columns of a
       real NxM matrix, returning a 1xM matrix as a result.  (Compare to HP48's
       \texttt{pvar} function.)
+   \item \texttt{function\_utpn} \\
+      Compute the upper tail probability of a normal distribution. \\
+%@% IF LATEX %@%
+%BEGIN LATEX
+      $utpn(m, v, x) = \int_x^\infty \frac{1}{\sqrt{2 \pi v}} \exp \left(- \frac{(m - y)^2}{2 v} \right) \,dy$ \\
+%END LATEX
+%HEVEA UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)${}^2$/(2 v)], \{y, x, Infinity\}]
+%@% ELSE %@%
+      UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)^2/(2 v)], {y, x, Infinity}]
+%@% END-IF %@%
 
 \end{itemize}
 

@@ -34,7 +34,8 @@ type function_operation = | Add | Sub | Mult | Div | Neg | Inv
                           | ToInt | ToFloat | SolveLin | Eval
                           | Store | Purge | Gcd | Lcm | Binom
                           | Total | Mean | Sumsq | Var |VarBias
-                          | Stdev | StdevBias | Min | Max;;
+                          | Stdev | StdevBias | Min | Max 
+                          | Utpn;;
 
 type command_operation  = | Drop | Clear | Swap | Dup | Undo
                           | BeginBrowse | BeginExtended | BeginVar | Quit

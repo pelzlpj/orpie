@@ -1398,6 +1398,8 @@ let process_function (iface : interface_state_t) ff =
       handle_function_call iface iface.calc#minimum
    |Max ->
       handle_function_call iface iface.calc#maximum
+   |Utpn ->
+      handle_function_call iface iface.calc#upper_tail_prob_normal
    end
 
 

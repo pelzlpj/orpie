@@ -1762,6 +1762,44 @@ class rpc_calc =
                raise (Invalid_argument "min can only be applied to real matrices")
 
 
+         method upper_tail_prob_normal () = self#check_args 3 "utpn"
+         self#internal_upper_tail_prob_normal
+
+         method private internal_upper_tail_prob_normal () =
+            self#evaln 3;
+            let gen_el3 = stack#pop () in
+            let gen_el2 = stack#pop () in
+            let gen_el1 = stack#pop () in
+            let get_float_args gen_el =
+               match gen_el with
+               |RpcInt i_el ->
+                  float_of_big_int i_el
+               |RpcFloat el ->
+                  el
+               |_ ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  stack#push gen_el3;
+                  raise (Invalid_argument "utpn requires real scalar arguments")
+            in
+            let mean = get_float_args gen_el1
+            and var = get_float_args gen_el2
+            and cutoff = get_float_args gen_el3 in
+            if var <= 0.0 then begin
+               stack#push gen_el1;
+               stack#push gen_el2;
+               stack#push gen_el3;
+               raise (Invalid_argument "variance argument to utpn must be positive")
+            end else begin
+               let arg = (cutoff -. mean) /. (sqrt (2.0 *. var)) in
+               stack#push (RpcFloat arg);
+               self#internal_erfc ();
+               stack#push (RpcFloat 0.5);
+               self#internal_mult ()
+            end
+
+
+
 (*      method print_stack () =
          let print_el line_num el = Printf.printf "%2d:  %s\n" line_num el in
          for i = stack#length downto 1 do

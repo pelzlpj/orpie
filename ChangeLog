@@ -2,9 +2,10 @@ Orpie ChangeLog
 ------------------------------------------------------------------------
 
 v1.3
-   
+
    2004-07-17        Implemented common single-variable statistics
-                     functions.
+                     functions, and an upper tail normal probability
+                     function.
 
    2004-07-16        Included "register" variable shortcut macros in
                      orpierc.
