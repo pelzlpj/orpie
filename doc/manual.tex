@@ -58,7 +58,7 @@ Finally, run ``{\tt make install}'' (as root) to install the executables.
 ``{\tt configure}'' accepts a number of parameters that you can learn about with
 ``{\tt ./configure --help}''.  Perhaps the most common of these is the {\tt
 --prefix} option, which lets you install to a non-standard
-directory\footnote{The default installation directory is {\tt /usr/local}.}.  
+directory\footnote{The default installation prefix is {\tt /usr/local}.}.  
 
 
 \section{Quick Start}
@@ -95,14 +95,14 @@ for negation.  Here are some examples:
 
 \subsubsection{Entering Complex Numbers}
 Orpie can represent complex numbers using either cartesian (rectangular) or
-polar coordinates.  See Section. \ref{rectpolar} to see how to change the
+polar coordinates.  See Section \ref{rectpolar} to see how to change the
 complex number display mode.
 
 A complex number is entered by first pressing '{\tt (}', then entering the real
 part, then pressing '{\tt ,}' followed by the imaginary part.  Alternatively, you
 can press '{\tt (}' followed by the magnitude, then '{\tt <}' followed by the
-phase angle.  The angle will be interpreted as degrees or radians, depending on
-the current setting of the angle mode (see Section. \ref{anglemode}).  Examples:
+phase angle.  The angle will be interpreted in degrees or radians, depending on
+the current setting of the angle mode (see Section \ref{anglemode}).  Examples:
 \begin{center}
    \begin{tabular}[t]{|r|r|}
       \hline Keypresses & Resulting Entry \\
@@ -120,6 +120,7 @@ entered as described in the previous sections, and should be separated using
 '{\tt ,}'.  To start a new row of the matrix, press '{\tt [}' again.  On the
 stack, each row of the matrix is enclosed in a set of brackets; for example, the
 matrix
+%BEGIN LATEX
 \begin{displaymath}
    \left[
    \begin{matrix}
@@ -128,6 +129,8 @@ matrix
    \end{matrix}
    \right]
 \end{displaymath}
+%END LATEX
+%HEVEA \begin{center}\begin{tabular}{|cc|}1 & 2 \\ 3 & 4 \end{tabular}\end{center}
 would appear on the stack as {\tt [[1, 2][3, 4]]}.
 
 Examples of matrix entry:
@@ -161,7 +164,9 @@ to match the current base mode.  Examples:
    \end{tabular}
 \end{center}
 
-Note that integer constants may have unlimited length.
+Note that integer constants may have unlimited length, and the basic arithmetic
+operations (addition, subtraction, multiplication, division) will be performed
+using exact arithmetic when both arguments are integers.
 
 \subsection{Performing Basic Function Operations}
 \label{functionops}
@@ -205,11 +210,11 @@ To activate an extended command, press '{\tt '}' (quote key), followed by the
 first few letters/digits of the command, then hit enter.  Orpie offers an
 autocompletion feature for extended commands, so you only need to type enough of
 the command to identify it uniquely.  The matching extended commands will appear
-in the left pane of the display, to assist you in finding the appropriate
+in the left panel of the display, to assist you in finding the appropriate
 command.
 
 To avoid interface conflicts, extended commands may be entered only when the
-entry buffer (at the bottom of the screen) is empty.
+entry buffer (the bottom line of the screen) is empty.
 
 The following functions are available as extended commands:
 \begin{center}
@@ -342,7 +347,8 @@ stack entries, such as large matrices.
 Orpie reads a run-configuration textfile (generally {\tt /etc/orpierc} or
 {\tt /usr/local/etc/orpierc}) to determine key and command bindings.  You can
 create a personalized configuration file in {\tt \$HOME/.orpierc}, and select
-bindings that match your usage patterns.
+bindings that match your usage patterns.  The recommended procedure is to copy
+the {\tt orpierc} file provided with Orpie, and edit it to your needs.
 
 \subsection{{\tt orpierc} Syntax}
 You may notice that the  {\tt orpierc} syntax is similar to the syntax used in
@@ -350,7 +356,7 @@ the configuration file for the Mutt email client (muttrc).
 
 \subsubsection{Setting Variables}
 \label{setvar}
-Syntax: {\tt set {\em variable} {\em value\_string}} \\ \\
+Syntax: {\tt set {\em variable}={\em value\_string}} \\ \\
 Several configuration variables can be set using this syntax; see Section \ref{variables}
 to see a list.  The variables are unquoted, but the values should be quoted strings.
 
@@ -362,8 +368,9 @@ may be found in Section \ref{operationslist}. Key identifiers may be specified
 by strings that represent a single keypress, for example {\tt "m"} (quotes
 included).  The key may be prefixed with {\tt "$\backslash\backslash$C"} or
 {\tt "$\backslash\backslash$M"} to represent Control or Meta modifiers,
-respectively.  A number of special keys lack single-character representations,
-so the following strings may be used to represent them:
+respectively; note that the backslash must be doubled.  A number of special
+keys lack single-character representations, so the following strings may be
+used to represent them:
 \begin{itemize}
    \item {\tt "<esc>"}
    \item {\tt "<tab>"}
@@ -384,7 +391,7 @@ so the following strings may be used to represent them:
 Due to differences between various terminal emulators, this key identifier syntax may
 not be adequate to describe every keypress.  As a workaround, Orpie will also accept key
 identifiers in octal notation.  As an example, you could use {\tt $\backslash$024} 
-({\em without} quotes) to represent Ctrl-T.
+(do {\em not} enclose it in quotes) to represent Ctrl-T.
 
 \subsubsection{Creating Extended Command Abbreviations}
 \label{abbreviations}
@@ -486,7 +493,8 @@ to a real number, and as such the arithmetic will no longer be exact.
    \item {\tt function\_factorial} \\
       Compute the factorial of the last stack element.  Note: this is not
       exact, even for the integer constant data type.  It is computed using
-      the gamma function and as such is subject to rounding errors.
+      an approximation to the gamma function, and therefore is subject to rounding 
+      errors.
    \item {\tt function\_gamma} \\
       Compute the Euler gamma function of the last stack element.
    \item {\tt function\_im} \\
@@ -589,7 +597,10 @@ they do not take an argument.  Many calculator interface settings are implemente
 
 \subsubsection{Edit Operations}
 \label{edits}
-The following operations are related to editing during data entry:
+The following operations are related to editing during data entry.  These
+commands cannot be made available as extended commands, since extended
+commands are not accessible while entering data.  These operations should
+be made available as single keypresses using the {\tt bind} keyword.
 \begin{itemize}
    \item {\tt edit\_angle} \\
       Begin entering the phase angle of a complex number.  (Orpie will
@@ -617,10 +628,51 @@ The following operations are related to editing during data entry:
 \end{itemize}
 
 
+\subsubsection{Browsing Operations}
+\label{browse}
+The following list of operations is available only in stack browsing mode.
+As extended commands are unavailable while browsing the stack, these operations
+should be bound to single keypresses using the {\tt bind} keyword.
+\begin{itemize}
+   \item {\tt browse\_echo} \\
+      Echo the currently selected element to stack level 1.
+   \item {\tt browse\_end} \\
+      Exit stack browsing mode.
+   \item {\tt browse\_drop} \\
+      Drop the currently selected stack element.
+   \item {\tt browse\_dropn} \\
+      Drop all stack elements below the current selection (inclusive).
+   \item {\tt browse\_keep} \\
+      Drop all stack elements {\em except} the current selection.  (This is
+      complementary to {\tt browse\_drop}.
+   \item {\tt browse\_keepn} \\
+      Drop all stack elements above the current selection (non-inclusive).  (This
+      is complementary to {\tt browse\_dropn}.
+   \item {\tt browse\_next\_line} \\
+      Move the selection cursor down one line.
+   \item {\tt browse\_prev\_line} \\
+      Move the selection cursor up one line.
+   \item {\tt browse\_rolldown} \\
+      Cyclically ``roll'' stack elements downward, below the 
+      selected element (inclusive)
+   \item {\tt browse\_rollup} \\
+      Cyclically ``roll'' stack elements upward, below the selected
+      element (inclusive) 
+   \item {\tt browse\_scroll\_left} \\
+      Scroll the selected element to the left (for viewing very large
+      entries such as matrices)
+   \item {\tt browse\_scroll\_right} \\
+      Scroll the selected element to the right
+   \item {\tt browse\_view} \\
+      View the currently selected stack element in a fullscreen editor
+\end{itemize}
+
+
+
 \section{Licensing}
-Orpie has been made available under the GNU General Public License (GPL), 
-version 2.  You should have received a copy of the GPL along with this 
-program, in the file ``COPYING''.
+Orpie is Free Software; it has been made available under version 2 of the GNU
+General Public License (GPL).  You should have received a copy of the GPL along
+with this program, in the file ``COPYING''.
 
 
 \section{Credits}
@@ -642,13 +694,15 @@ would like to thank these authors for helping to make Orpie possible.
 
    \item {\bf What's wrong with C++?  And what's this Ocaml thing?}
 
+      {\tt <rant>} \\
       C++ has had so many misfeatures bolted on that no one can possibly hold
       the entire syntax in his head at one time.  The syntax itself is horrid,
       especially when dealing with templates.  The ability to use pointers
       presents many opportunities to shoot yourself in the foot.
       Garbage collection and exceptions exist as afterthoughts.  In short, I
       don't think anyone should consider C++ for a project that does not require
-      low-level hardware access.
+      low-level hardware access. \\
+      {\tt </rant>} 
      
       I found Ocaml after searching for a Better Language that offers good
       performance.  Ocaml is a functional programming language with a pretty
@@ -666,7 +720,8 @@ would like to thank these authors for helping to make Orpie possible.
       entered and manipulated with arbitrary precision (thanks to the Nums 
       library that ships with Ocaml).  The error messages provided by
       Orpie are, on average, more informative than those provided by rpc;
-      this is a direct consequence of Ocaml's nice exception handling.
+      this is a direct consequence of Ocaml's excellent exception handling
+      support.
 
       I also believe that Orpie has fewer bugs in the input handler/parser,
       but this remains to be seen.
