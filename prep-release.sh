@@ -5,8 +5,10 @@
 
 echo "Loading source dependencies..."
 tla build-config dist.arch
-echo "Removing {arch}/ ..."
+echo "Removing {arch} directories..."
 rm -rf "{arch}"
+rm -rf "curses/{arch}"
+rm -rf "units/{arch}"
 echo "Generating ./configure ..."
 autoconf && rm -rf autom4te.cache
 echo "Creating documentation..."
