@@ -10,11 +10,6 @@ Definitely before release:
    * improve the build script (link directly with relevant portions of
      ocamlgsl-0.3.2, so the user will need only GSL and ncurses)
 
-   * set the cursor to always be in the entry window, not jumping around
-     as it is now
-
-   * create an "about" function
-
    * change the name: "Orpie"?
 
 
