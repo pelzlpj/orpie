@@ -1458,6 +1458,20 @@ class rpc_calc =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcFloatUnit (funit_of_float (float_of_big_int el)))
+         |RpcFloatMatrixUnit (el, uu) ->
+            let n, m = Gsl_matrix.dims el in
+            if n = 1 && m = 1 then
+               stack#push (RpcFloatUnit {
+                  Units.coeff = {
+                     Complex.re = el.{0, 0};
+                     Complex.im = 0.0;
+                  };
+                  Units.factors = uu.Units.factors
+               })
+            else begin
+               stack#push gen_el;
+               raise_invalid "matrix argument of to_float must be 1x1"
+            end
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
