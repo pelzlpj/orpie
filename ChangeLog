@@ -3,7 +3,11 @@ Orpie ChangeLog
 
 v1.4
 
-   2004-08-30        Implemented matrix trace.
+   2004-08-30        Started work on a testing framework for the
+                     rpc_calc object.  (I'd really appreciate help
+                     writing test cases--see calc_test.ml .)
+   
+                     Implemented matrix trace.
 
    2004-08-29        Integrated unit handling code.  Real and complex 
                      scalars and matrices can are now dimensioned
@@ -34,7 +38,9 @@ v1.4
 
 v1.3
 
-   2004-07-22        Ocaml 3.08 support: an include string is provided
+   2004-07-22        Version 1.3.1 release.
+   
+                     Ocaml 3.08 support: an include string is provided
                      to the compiler when building curses bindings.
 
                      Added a fix for a possible crash when drawing
