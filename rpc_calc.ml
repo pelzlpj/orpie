@@ -47,6 +47,9 @@ class rpc_calc =
       method pow =
          Pow.pow stack
 
+      method get_modes () =
+         modes
+
       method neg =
          if stack#length > 0 then
             let gen_el = stack#pop () in
