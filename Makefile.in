@@ -18,10 +18,10 @@
 # where to install the binaries
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-BINDIR=@bindir@
+BINDIR=$(DESTDIR)/@bindir@
 
 # where to install the man page
-MANDIR=@mandir@
+MANDIR=$(DESTDIR)/@mandir@
 
 # other variables set by ./configure
 OCAMLC       = @OCAMLC@
@@ -143,11 +143,14 @@ version.ml: Makefile
 install-indep: 
 	mkdir -p $(BINDIR)
 	if test "$(prefix)" = "/usr"; then \
-   install -m 644 orpierc /etc; \
-	else install -m 644 orpierc $(prefix)/etc; \
+		mkdir -p $(DESTDIR)/etc; \
+  	install -m 644 orpierc $(DESTDIR)/etc; \
+	else \
+		mkdir -p $(DESTDIR)/$(prefix)/etc; \
+		install -m 644 orpierc $(DESTDIR)/$(prefix)/etc; \
 	fi
-	install -m 644 -D doc/orpie.1 $(prefix)/man/man1/orpie.1
-	install -m 644 -D doc/orpierc.5 $(prefix)/man/man5/orpierc.5
+	install -m 644 -D doc/orpie.1 $(MANDIR)/man1/orpie.1
+	install -m 644 -D doc/orpierc.5 $(MANDIR)/man5/orpierc.5
 
 install: install-indep
 	install -m 755 -D $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
@@ -166,10 +169,10 @@ uninstall:
 	rm -f $(BINDIR)/$(NAME2)$(EXE)
 	if test "$(prefix)" = "/usr"; then\
 	rm -f /etc/orpierc; \
-	else rm -f $(prefix)/etc/orpierc; \
+	else rm -f $(DESTDIR)/$(prefix)/etc/orpierc; \
 	fi
-	rm -f $(prefix)/man/man1/orpie.1
-	rm -f $(prefix)/man/man5/orpierc.5
+	rm -f $(MANDIR)/man1/orpie.1
+	rm -f $(MANDIR)/man5/orpierc.5
 
 
 # generic rules
@@ -239,7 +242,7 @@ clean:: partly-clean
 dist-clean distclean:: clean
 	cd curses && $(MAKE) distclean
 	cd gsl && $(MAKE) distclean
-	rm -f Makefile config.cache config.log config.status install.ml
+	rm -f Makefile .depend config.cache config.log config.status install.ml
 
 # depend
 ########
