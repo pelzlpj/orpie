@@ -918,12 +918,13 @@ let handle_browse_keepn (iface : interface_state_t) =
    draw_update_stack iface
 
 
-let handle_browse_edit (iface : interface_state_t) =
+
+(* call !Rcfile.editor to edit the input textfile buffer, then
+ * parse it to generate one or more stack elements.
+ * If is_browsing = true, then the stack element will be
+ * bumped up to the selected stack level. *)
+let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
    try
-      let fs_string = iface.calc#get_fullscreen_display iface.stack_selection in
-      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreen_input) in
-      output_string buf fs_string;
-      close_out buf;
       let _ = 
          Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreen_input))
       in ();
@@ -944,9 +945,14 @@ let handle_browse_edit (iface : interface_state_t) =
          |[] -> 
             ()
          |hd :: tl -> 
-            iface.calc#delete iface.stack_selection;
-            iface.calc#push hd;
-            iface.calc#rolldown iface.stack_selection;
+            if is_browsing then
+               begin
+                  iface.calc#delete iface.stack_selection;
+                  iface.calc#push hd;
+                  iface.calc#rolldown iface.stack_selection
+               end
+            else
+               iface.calc#push hd;
             push_data tl
          end
       in
@@ -956,11 +962,6 @@ let handle_browse_edit (iface : interface_state_t) =
       draw_stack iface;
       draw_update_entry iface
    with
-      |Sys_error ss -> 
-         (draw_help iface;
-         draw_stack iface;
-         draw_error iface ss;
-         draw_update_entry iface)
       |Parsing.Parse_error ->
          (draw_help iface;
          draw_stack iface;
@@ -980,6 +981,22 @@ let handle_browse_edit (iface : interface_state_t) =
          (draw_help iface;
          draw_stack iface;
          draw_error iface "syntax error in input";
+         draw_update_entry iface)
+
+
+(* edit the selected stack element with an external editor *)
+let handle_browse_edit (iface : interface_state_t) =
+   try
+      let fs_string = iface.calc#get_fullscreen_display iface.stack_selection in
+      let buf = Utility.open_or_create_out_ascii !(Rcfile.fullscreen_input) in
+      output_string buf fs_string;
+      close_out buf;
+      edit_parse_input_textfile iface true
+   with 
+      Sys_error ss -> 
+         (draw_help iface;
+         draw_stack iface;
+         draw_error iface ss;
          draw_update_entry iface)
 
 
@@ -1019,64 +1036,13 @@ let handle_refresh (iface : interface_state_t) =
 (* handle a call to edit a new input buffer *)
 let handle_edit_input (iface : interface_state_t) =
    try
-      let _ = 
-         Unix.system (!(Rcfile.editor) ^ " " ^ !(Rcfile.fullscreen_input))
-      in ();
-      let edited_buf = Utility.expand_open_in_ascii !(Rcfile.fullscreen_input) in
-      let lexbuf = Lexing.from_channel edited_buf in
-      let data = 
-         (* need to call completely different parsers when using degrees
-          * or when using radians *)
-         begin match (iface.calc#get_modes ()).angle with
-         |Rad ->
-            Txtin_parser.decode_data_rad Txtin_lexer.token lexbuf
-         |Deg ->
-            Txtin_parser.decode_data_deg Txtin_lexer.token lexbuf
-         end
-      in
-      let rec push_data d =
-         begin match d with
-         |[] -> 
-            ()
-         |hd :: tl -> 
-            iface.calc#push hd;
-            push_data tl
-         end
-      in
-      push_data data;
-      close_in edited_buf;
-      draw_help iface;
-      draw_stack iface;
-      draw_update_entry iface
+      edit_parse_input_textfile iface false
    with
-      |Sys_error ss -> 
+      Sys_error ss -> 
          (draw_help iface;
          draw_stack iface;
          draw_error iface ss;
          draw_update_entry iface)
-      |Parsing.Parse_error ->
-         (draw_help iface;
-         draw_stack iface;
-         draw_error iface "syntax error in input";
-         draw_update_entry iface)
-      |Utility.Txtin_error ss ->
-         (draw_help iface;
-         draw_stack iface;
-         draw_error iface ss;
-         draw_update_entry iface)
-      |Big_int_str.Big_int_string_failure ss ->
-         (draw_help iface;
-         draw_stack iface;
-         draw_error iface ss;
-         draw_update_entry iface)
-      |Failure ss ->
-         (draw_help iface;
-         draw_stack iface;
-         draw_error iface "syntax error in input";
-         draw_update_entry iface)
-
-
-
 
 
 (* display an "about" screen *)
