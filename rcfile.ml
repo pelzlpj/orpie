@@ -512,7 +512,7 @@ let operation_of_string command_str =
    |"extended_exit"                 -> config_failwith
                                        "operation \"extended_exit\" is deprecated; please replace with \"abbrev_exit\"."
    |"extended_enter"                -> config_failwith
-                                       "operation \"extended_enter\" is deprecated; please replace with \"abbrev_exit\"."
+                                       "operation \"extended_enter\" is deprecated; please replace with \"abbrev_enter\"."
    |"extended_backspace"            -> config_failwith
                                        "operation \"extended_backspace\" is deprecated; please replace with \"abbrev_backspace\"."
    |_                               -> config_failwith ("Unknown command name \"" ^ command_str ^ "\"")
