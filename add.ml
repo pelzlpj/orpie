@@ -70,10 +70,10 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
             (f_el1 +. float_of_big_int el2)))
       |RpcFloatUnit el2 ->
          begin try 
-            let conv = Units.conversion_factor_unitary el2 el1 in
+            let conv = Units.conversion_factor_unitary el1 el2 in
             let new_el = {
-               Units.coeff   = Complex.add el1.Units.coeff conv;
-               Units.factors = el1.Units.factors
+               Units.coeff   = Complex.add el2.Units.coeff conv;
+               Units.factors = el2.Units.factors
             } in
             stack#push (RpcFloatUnit new_el)
          with Units.Units_error s -> 
@@ -83,10 +83,10 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          end
       |RpcComplexUnit el2 ->
          begin try
-            let conv = Units.conversion_factor_unitary el2 el1 in
+            let conv = Units.conversion_factor_unitary el1 el2 in
             let new_el = {
-               Units.coeff   = Complex.add el1.Units.coeff conv;
-               Units.factors = el1.Units.factors
+               Units.coeff   = Complex.add el2.Units.coeff conv;
+               Units.factors = el2.Units.factors
             } in
             stack#push (RpcComplexUnit new_el)
          with Units.Units_error s ->
@@ -114,10 +114,10 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
             (Complex.add el1.Units.coeff c_el2)))
       |RpcFloatUnit el2 | RpcComplexUnit el2 ->
          begin try
-            let conv = Units.conversion_factor_unitary el2 el1 in
+            let conv = Units.conversion_factor_unitary el1 el2 in
             let new_el = {
-               Units.coeff = Complex.add el1.Units.coeff conv;
-               Units.factors = el1.Units.factors
+               Units.coeff = Complex.add el2.Units.coeff conv;
+               Units.factors = el2.Units.factors
             } in
             stack#push (RpcComplexUnit new_el)
          with Units.Units_error s ->
@@ -139,11 +139,11 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u2 u1 in
-               let result = Gsl_matrix.copy el2 in
+               let conv = Units.conversion_factor_unitary u1 u2 in
+               let result = Gsl_matrix.copy el1 in
                Gsl_matrix.scale result conv.Complex.re;
-               Gsl_matrix.add result el1;
-               stack#push (RpcFloatMatrixUnit (result, u1))
+               Gsl_matrix.add result el2;
+               stack#push (RpcFloatMatrixUnit (result, u2))
             with Units.Units_error s -> 
                stack#push gen_el1;
                stack#push gen_el2;
@@ -158,12 +158,11 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u2 u1 in
+               let conv = Units.conversion_factor_unitary u1 u2 in
                let c_el1 = cmat_of_fmat el1 in
-               let result = Gsl_matrix_complex.copy el2 in
-               Gsl_matrix_complex.scale result conv;
-               Gsl_matrix_complex.add result c_el1;
-               stack#push (RpcComplexMatrixUnit (result, u1))
+               Gsl_matrix_complex.scale c_el1 conv;
+               Gsl_matrix_complex.add c_el1 el2;
+               stack#push (RpcComplexMatrixUnit (c_el1, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
                stack#push gen_el2;
@@ -186,12 +185,12 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u2 u1 in
+               let conv = Units.conversion_factor_unitary u1 u2 in
                let c_el2 = cmat_of_fmat el2 in
                let copy = Gsl_matrix_complex.copy el1 in
-               Gsl_matrix_complex.scale c_el2 conv;
+               Gsl_matrix_complex.scale copy conv;
                Gsl_matrix_complex.add copy c_el2;
-               stack#push (RpcComplexMatrixUnit (copy, u1))
+               stack#push (RpcComplexMatrixUnit (copy, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
                stack#push gen_el2;
@@ -205,11 +204,11 @@ let add (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u2 u1 in
-               let copy = Gsl_matrix_complex.copy el2 in
+               let conv = Units.conversion_factor_unitary u1 u2 in
+               let copy = Gsl_matrix_complex.copy el1 in
                Gsl_matrix_complex.scale copy conv;
-               Gsl_matrix_complex.add copy el1;
-               stack#push (RpcComplexMatrixUnit (copy, u1))
+               Gsl_matrix_complex.add copy el2;
+               stack#push (RpcComplexMatrixUnit (copy, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
                stack#push gen_el2;

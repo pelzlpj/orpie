@@ -1,6 +1,8 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
+* put together some kind of testing framework
+
 * add additional statistical functions (multivariate, distributions, ...)
 
 * add finance functions
@@ -9,14 +11,6 @@ Orpie To-Do List (roughly in order of priority)
   relatively slow at present)
 
 * detect ill-conditioned complex matrices when performing inversion
-
-* "'"  -> extended entry of a function (sin, cos, etc.), but
-  "\"" -> extended entry of *any* command/operation (sin, cos, rad, rect, etc.)
-
-* command completion (optionally) matches *only* operations that make sense
-  in context.  e.g. sin() doesn't work on matrices, so it is not included in
-  the extended entry completion list when the toplevel element is a matrix
-
 
 
 
