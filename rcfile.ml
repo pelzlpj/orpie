@@ -202,7 +202,7 @@ let operation_of_string command_str =
    |"function_arg"                  -> (Function Arg)
    |"function_exp"                  -> (Function Exp)
    |"function_ln"                   -> (Function Ln)
-   |"function_10^x"                 -> (Function Ten_x)
+   |"function_10_x"                 -> (Function Ten_x)
    |"function_log10"                -> (Function Log10)
    |"function_conj"                 -> (Function Conj)
    |"function_sin"                  -> (Function Sin)
@@ -246,6 +246,7 @@ let operation_of_string command_str =
    |"command_cycle_base"            -> (Command CycleBase)
    |"command_view"                  -> (Command View)
    |"command_refresh"               -> (Command Refresh)
+   |"command_about"                 -> (Command About)
    |"command_enter_pi"              -> (Command EnterPi)
    |"browse_end"                    -> (Browse EndBrowse)
    |"browse_scroll_left"            -> (Browse ScrollLeft)
@@ -324,7 +325,6 @@ let parse_line line_stream =
          begin match line_stream with parser
          | [< 'Ident command_str >] ->
             let command = operation_of_string command_str in
-            (* register_abbrev abbr command *)
             ()
          | [< >] ->
             config_failwith ("Expected a command name after \"abbrev \"" ^ abbr ^ "\"")

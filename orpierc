@@ -70,4 +70,53 @@ bind "<return>" extended_enter
 bind "<backspace>" extended_backspace
 
 
+# extended command abbreviations
+abbrev "add"     function_add
+abbrev "sub"     function_sub
+abbrev "mult"    function_mult
+abbrev "div"     function_div
+abbrev "neg"     function_neg
+abbrev "inv"     function_inv
+abbrev "pow"     function_pow
+abbrev "sq"      function_sq
+abbrev "sqrt"    function_sqrt
+abbrev "abs"     function_abs
+abbrev "arg"     function_arg
+abbrev "exp"     function_exp
+abbrev "ln"      function_ln
+abbrev "10^"     function_10_x
+abbrev "log10"   function_log10
+abbrev "conj"    function_conj
+abbrev "sin"     function_sin
+abbrev "cos"     function_cos
+abbrev "tan"     function_tan
+abbrev "sinh"    function_sinh
+abbrev "cosh"    function_cosh
+abbrev "tanh"    function_tanh
+abbrev "asin"    function_asin
+abbrev "acos"    function_acos
+abbrev "atan"    function_atan
+abbrev "re"      function_re
+abbrev "im"      function_im
+abbrev "drop"    command_drop
+abbrev "clear"   command_clear
+abbrev "swap"    command_swap
+abbrev "dup"     command_dup
+abbrev "undo"    command_undo
+abbrev "quit"    command_quit
+abbrev "rad"     command_rad
+abbrev "deg"     command_deg
+abbrev "rect"    command_rect
+abbrev "polar"   command_polar
+abbrev "bin"     command_bin
+abbrev "oct"     command_oct
+abbrev "dec"     command_dec
+abbrev "hex"     command_hex
+abbrev "view"    command_view
+abbrev "about"   command_about
+abbrev "refresh" command_refresh
+abbrev "pi"      command_enter_pi
+
+
+
 # arch-tag: DO_NOT_CHANGE_bb2181f2-1288-4d0f-849b-36482daf59c5  
