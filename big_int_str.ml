@@ -39,7 +39,8 @@ done;;
 
 
 
-(* Represent an integer in a given base.  This uses ordinary integer
+(* Represent an integer in a given base.  (Continually divide the integer
+ * by the base until the remainder is zero.)  This uses ordinary integer
  * division, so it can be done in constant time (< Sys.word_size divisions).
  * This is not designed to be used externally; no error checking is performed
  * in order to keep it fast. *)
@@ -77,19 +78,19 @@ let string_of_big_int_base (num : big_int) (base : int) =
       let rec str_of_big_int_aux (ival : big_int) =
          if is_int_big_int ival then
             string_of_positive_int_base (int_of_big_int ival) base
-         else
-            let big_base    = big_int_of_int base in
+         else begin
             let num_words   = num_digits_big_int ival in
             let size_factor = (log (2.0 ** (float_of_int Sys.word_size))) /.
             (log (float_of_int base)) in
-            let pp             = (num_words * (int_of_float size_factor)) / 2 in
-            let divisor        = power_int_positive_int base pp in
+            let log_div        = (num_words * (int_of_float size_factor)) / 2 in
+            let divisor        = power_int_positive_int base log_div in
             let (upper, lower) = quomod_big_int ival divisor in
             let upper_string   = str_of_big_int_aux upper
             and lower_string   = str_of_big_int_aux lower in
             (* pad the lower_string with zeros as necessary *)
-            let zeros = String.make (pp - (String.length lower_string)) '0' in
+            let zeros = String.make (log_div - (String.length lower_string)) '0' in
             upper_string ^ zeros ^ lower_string
+         end
       in
       let s = str_of_big_int_aux (abs_big_int num) in
       match sign_big_int num with
@@ -104,9 +105,8 @@ let string_of_big_int_base (num : big_int) (base : int) =
 
 
 
-
 (* convert a string to a big_int, assuming base 'base' *)
-(* The algorithm is the simple... add up the values of the digits. *)
+(* The algorithm is simple... add up the values of the digits. *)
 let big_int_of_string_base (str : string) (base : int) =
    let multiplier = ref unit_big_int and
    sum = ref zero_big_int in
