@@ -67,7 +67,9 @@ let inv (stack : rpc_stack) (do_backup : unit -> unit) =
                (stack#push gen_el;
                raise (Invalid_argument "cannot invert non-square matrix"))
          |_ ->
-            raise (Invalid_argument "inversion is undefined for this data type")
+            (stack#push gen_el;
+            raise (Invalid_argument "inversion is undefined for this data
+            type"))
       end
    else
       raise (Invalid_argument "empty stack")

@@ -10,8 +10,6 @@ Definitely before release:
 
    * fix the 'install' and 'uninstall' Makefile targets
 
-   * inversion of integer constant should not remove the last stack entry
-
 * create a parser that can read data structures entered into an ascii file,
   so I can use $EDITOR to enter big matrices (for example)
 
