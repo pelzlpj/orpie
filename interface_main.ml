@@ -1288,7 +1288,7 @@ let handle_enter_extended (iface : interface_state_t) =
 let create_windows screen =
    let height, width = get_size () in
    if height >= 24 then 
-      if width >= 80 then
+      if width >= 80 && not !Rcfile.hide_help then
          (* full two-pane window provided *)
          let left_win   = Some (newwin (height - 2) 40 0 0) and
          right_win  = newwin (height - 2) 40 0 40 and
@@ -1317,7 +1317,7 @@ let create_windows screen =
 let resize_subwins scr =
    let height, width = get_size () in
    if height >= 24 then 
-      if width >= 80 then
+      if width >= 80 && not !Rcfile.hide_help then
          (* full two-pane window provided *)
          begin
             scr.lines <- height;
@@ -1550,7 +1550,6 @@ let do_main_loop (iface : interface_state_t) =
 (* initialize the interface and begin the main loop *)
 let run (iface : interface_state_t) =
    iface.calc#backup ();
-   Rcfile.process_rcfile ();
    assert (keypad iface.scr.entry_win true);
 
    (* initialize buffers for matrix entry *)
@@ -1560,29 +1559,21 @@ let run (iface : interface_state_t) =
          im_mantissa = ""; im_exponent = ""; is_polar = false}
    done;
 
-      begin
-         try
-            iface.calc#load_state ();
+   begin
+      try
+         iface.calc#load_state ();
+         draw_stack iface;
+         draw_help iface;
+         draw_update_entry iface;
+      with
+         Invalid_argument err ->
             draw_stack iface;
             draw_help iface;
-            draw_update_entry iface;
-         with
-            Invalid_argument err ->
-               draw_stack iface;
-               draw_help iface;
-               draw_error iface err;
-               draw_update_entry iface
-      end;
-      do_main_loop iface
+            draw_error iface err;
+            draw_update_entry iface
+   end;
+   do_main_loop iface
         
-
-
-
-
-
-
-
-
 
 
 

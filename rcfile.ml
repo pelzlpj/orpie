@@ -51,6 +51,8 @@ let datafile = ref "~/.orpie/calc_state";;
 let fullscreenfile = ref "~/.orpie/fullscreen";;
 (* Default editor for fullscreen viewing *)
 let editor = ref "vi";;
+(* Whether or not to hide the help panel *)
+let hide_help = ref false;;
 
 
 let function_of_key key =
@@ -438,6 +440,25 @@ let parse_line line_stream =
          | [< >] ->
             config_failwith ("Expected \"=\" after \"set editor\"")
          end
+      | [< 'Ident "hide_help" >] ->
+         begin match line_stream with parser
+         | [< 'Ident "=" >] ->
+            begin match line_stream with parser
+            | [< 'String setting >] ->
+               if setting = "true" then
+                  hide_help := true
+               else if setting = "false" then
+                  hide_help := false
+               else
+                  config_failwith ("Expected a boolean argument after " ^
+                  "\"set hide_help = \"")
+            | [< >] ->
+               config_failwith ("Expected a boolean argument after " ^
+               "\"set hide_help = \"")
+            end
+         | [< >] ->
+            config_failwith ("Expected \"=\" after \"set hide_help\"")
+         end
       | [< >] ->
          config_failwith ("Unmatched variable name after \"set\"")
       end
@@ -445,6 +466,7 @@ let parse_line line_stream =
       ()
    | [< >] ->
       config_failwith "Expected a keyword at start of line";;
+
 
 
 (* try opening the rc file, first looking at $HOME/.orpierc, 

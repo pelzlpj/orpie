@@ -22,7 +22,8 @@
 open Interface;;
 open Curses;;
 
-
+(* load orpierc *)
+Rcfile.process_rcfile ();;
 
 let initialize_screen () =
    let std = initscr () in

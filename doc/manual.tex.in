@@ -753,6 +753,9 @@ section.
       horizontal scrolling in place of word wrapping, so that the columns of large 
       matrices can be properly aligned.  (The Vim editor could be used in this fashion
       by setting \texttt{editor} to \texttt{"vim -c 'set nowrap'"}.)
+   \item \texttt{hide\_help} \\
+      Set this variable to \texttt{"true"} to hide the left help/status panel, or leave
+      it on the default of \texttt{"false"} to display the help panel.
 \end{itemize}
 
 %@% IF LATEX %@%
