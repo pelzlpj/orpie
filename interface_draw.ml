@@ -312,35 +312,47 @@ let draw_help (iface : interface_state_t) =
       assert (mvwaddstr win 3 34 complex_str);
       let try_find fn el =
          try fn el
-         with Not_found -> ""
+         with Not_found -> "(N/A)"
       in
       begin
          match iface.help_mode with
          |Standard ->
             wattron win WA.bold;
-            assert (mvwaddstr win 5 0 "Hotkeys:");
+            assert (mvwaddstr win 5 0 "Common Operations:");
             wattroff win WA.bold;
-            mvwaddstr_safe win 6 2 ("enter number on stack: " ^
+            mvwaddstr_safe win 6 2  ("enter    : " ^
             try_find Rcfile.key_of_edit (Edit Enter));
-            mvwaddstr_safe win 7 2 ("drop last stack item:  " ^
+            mvwaddstr_safe win 7 2  ("drop     : " ^
             try_find Rcfile.key_of_command (Command Drop));
-            mvwaddstr_safe win 8 2 ("swap last two items:   " ^
-            try_find Rcfile.key_of_command (Command Swap));
-            mvwaddstr_safe win 9 2 ("clear stack:           " ^
+            mvwaddstr_safe win 8 2  ("clear    : " ^
             try_find Rcfile.key_of_command (Command Clear));
-            assert (mvwaddstr win 10 2 "+ : add               - : subtract");
-            assert (mvwaddstr win 11 2 "* : multiply          / : divide");
-            assert (mvwaddstr win 12 2 "^ : power (x^y)       ! : factorial");
-            assert (mvwaddstr win 13 2 "% : mod");
+            mvwaddstr_safe win 9 2  ("swap     : " ^
+            try_find Rcfile.key_of_command (Command Swap));
+            mvwaddstr_safe win 10 2 ("add      : " ^
+            try_find Rcfile.key_of_function (Function Add));
+            mvwaddstr_safe win 11 2 ("subtract : " ^
+            try_find Rcfile.key_of_function (Function Sub));
+            mvwaddstr_safe win 12 2 ("multiply : " ^
+            try_find Rcfile.key_of_function (Function Mult));
+            mvwaddstr_safe win 13 2 ("divide   : " ^
+            try_find Rcfile.key_of_function (Function Div));
+            mvwaddstr_safe win 14 2 ("x^y      : " ^
+            try_find Rcfile.key_of_function (Function Pow));
+            mvwaddstr_safe win 15 2 ("negation : " ^
+            try_find Rcfile.key_of_function (Function Neg));
             wattron win WA.bold;
-            assert (mvwaddstr win 15 0 "Miscellaneous:");
+            mvwaddstr_safe win 16 0 "Miscellaneous:";
             wattroff win WA.bold;
-            assert (mvwaddstr win 16 2 "<Right> : change sign");
-            assert (mvwaddstr win 17 2 "<Space> : scientific notation");
-            assert (mvwaddstr win 18 2 "      ' : begin extended command");
-            assert (mvwaddstr win 19 2 "   <Up> : enter stack browsing mode");
-            assert (mvwaddstr win 20 2 "     ^L : refresh display");
-            assert (mvwaddstr win 21 2 "      Q : quit");
+            mvwaddstr_safe win 17 2 ("scientific notation : " ^
+            Rcfile.key_of_edit (Edit SciNotBase));
+            mvwaddstr_safe win 18 2 ("extended command    : " ^
+            Rcfile.key_of_extended  (Extend EnterExtended));
+            mvwaddstr_safe win 19 2 ("stack browsing mode : " ^
+            Rcfile.key_of_command (Command BeginBrowse));
+            mvwaddstr_safe win 20 2 ("refresh display     : " ^
+            Rcfile.key_of_command (Command Refresh));
+            mvwaddstr_safe win 21 2 ("quit                : " ^
+            Rcfile.key_of_command (Command Quit));
             assert (wnoutrefresh win)
          |Extended ->
             if String.length iface.extended_entry_buffer = 0 then
