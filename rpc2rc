@@ -18,6 +18,14 @@ bind "-" function_sub
 bind "*" function_mult
 bind "/" function_div
 bind "n" function_neg
+bind "i" function_inv
+bind "p" function_pow
+bind "s" function_sqrt
+bind "a" function_abs
+bind "\\Ca" function_arg
+bind "e" function_exp
+bind "l" function_ln
+bind "c" function_conj
 
 # keys for "command" operations, which do not take an argument
 bind "\\" command_drop

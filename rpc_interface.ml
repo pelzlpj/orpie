@@ -552,17 +552,31 @@ object(self)
                   begin
                      match ff with
                      |Add ->
-                        self#handle_add ()
+                        self#handle_function_call calc#add
                      |Sub ->
-                        self#handle_sub ()
+                        self#handle_function_call calc#sub
                      |Mult ->
-                        self#handle_mult ()
+                        self#handle_function_call calc#mult
                      |Div ->
-                        self#handle_div ()
+                        self#handle_function_call calc#div
                      |Neg ->
-                        self#handle_neg ()
+                        self#handle_function_call calc#neg
                      |Inv ->
-                        ()
+                        self#handle_function_call calc#inv
+                     |Pow ->
+                        self#handle_function_call calc#pow
+                     |Sqrt ->
+                        self#handle_function_call calc#sqrt
+                     |Abs ->
+                        self#handle_function_call calc#abs
+                     |Arg ->
+                        self#handle_function_call calc#arg
+                     |Exp ->
+                        self#handle_function_call calc#exp
+                     |Ln ->
+                        self#handle_function_call calc#ln
+                     |Conj ->
+                        self#handle_function_call calc#conj
                   end
                |_ ->
                   failwith "Non-Function operation found in Function Hashtbl"
@@ -579,13 +593,13 @@ object(self)
                         begin
                            match cc with
                            |Drop ->
-                              self#handle_drop ()
+                              self#handle_command_call calc#drop
                            |Clear ->
-                              self#handle_clear ()
+                              self#handle_command_call calc#clear
                            |Swap ->
-                              self#handle_swap ()
+                              self#handle_command_call calc#swap
                            |Dup ->
-                              self#handle_dup ()
+                              self#handle_command_call calc#dup
                         end
                      |_ ->
                         failwith "Non-Command operation found in Command Hashtbl"
@@ -606,12 +620,6 @@ object(self)
          self#draw_stack ()
       with Invalid_argument error_msg ->
          self#draw_error error_msg
-
-
-   (* handle the 'dup' command *)
-   method private handle_dup () =
-      calc#dup ();
-      self#draw_stack ()
 
 
    (* handle a 'begin_int' keypress *)
@@ -988,95 +996,30 @@ object(self)
          raise Not_handled
 
 
-   (* handle a 'neg' keypress *)
-   method private handle_neg () =
+   (* handle a call to a function (which first pushes the item in the
+    * entry buffer)  *)
+   method private handle_function_call calc_function =
       try 
          (if has_entry then
             self#push_entry ()
          else
             ());
-         calc#neg (); 
+         calc_function ();
          self#draw_stack ()
       with 
          Invalid_argument error_msg ->
             self#draw_error error_msg
 
 
-   (* handle an 'add' keypress *)
-   method private handle_add () =
-      try 
-         (if has_entry then
-            self#push_entry ()
-         else
-            ());
-         calc#add (); 
+   (* handle a call to the simple commands that require no argument *)
+   method private handle_command_call calc_command =
+      try
+         calc_command ();
          self#draw_stack ()
-      with 
+      with
          Invalid_argument error_msg ->
             self#draw_error error_msg
 
-
-   (* handle a 'sub' keypress *)
-   method private handle_sub () =
-      try 
-         (if has_entry then
-            self#push_entry ()
-         else
-            ());
-         calc#sub (); 
-         self#draw_stack ()
-      with 
-         Invalid_argument error_msg ->
-            self#draw_error error_msg
-
-
-   (* handle a 'mult' keypress *)
-   method private handle_mult () =
-      try 
-         (if has_entry then
-            self#push_entry ()
-         else
-            ());
-         calc#mult (); 
-         self#draw_stack ()
-      with 
-         Invalid_argument error_msg ->
-            self#draw_error error_msg
-
-
-   (* handle a 'div' keypress *)
-   method private handle_div () =
-      try 
-         (if has_entry then
-            self#push_entry ()
-         else
-            ());
-         calc#div (); 
-         self#draw_stack ()
-      with 
-         Invalid_argument error_msg ->
-            self#draw_error error_msg
-
-
-   (* handle a 'drop' keypress *)
-   method private handle_drop () =
-      try calc#drop (); self#draw_stack ()
-      with Invalid_argument error_msg ->
-         self#draw_error error_msg
-
-         
-   (* handle a 'swap' keypress *)
-   method private handle_swap () =
-      try calc#swap (); self#draw_stack ()
-      with Invalid_argument error_msg ->
-         self#draw_error error_msg
-
-
-   (* handle a 'clear' keypress *)
-   method private handle_clear () =
-      try calc#clear (); self#draw_stack ()
-      with Invalid_argument error_msg ->
-         self#draw_error error_msg
 
 
    (* handle entry of a digit *)

@@ -3,7 +3,9 @@
  * operation.  A command does not take input, so it is not allowed when data is
  * in the entry buffer.  An edit is an operation that acts on the data in the
  * entry buffer (e.g. backspace). *)
-type function_operation = | Add | Sub | Mult | Div | Neg | Inv;;
+type function_operation = | Add | Sub | Mult | Div | Neg | Inv
+                          | Pow | Sqrt | Abs | Arg | Exp | Ln 
+                          | Conj ;;
 type command_operation  = | Drop | Clear | Swap | Dup;;
 type edit_operation     = | Digit | Enter | Backspace | Minus | SciNotBase 
                           | BeginInteger | BeginComplex | BeginMatrix
