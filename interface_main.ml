@@ -769,6 +769,7 @@ let handle_begin_browse (iface : interface_state_t) =
       flush stderr; *)
       iface.interface_mode <- BrowsingMode;
       iface.calc#backup ();
+      draw_help iface;
       draw_update_stack iface)
    else
       ()
@@ -780,6 +781,7 @@ let handle_end_browse (iface : interface_state_t) =
    iface.stack_selection <- 1;
    iface.stack_bottom_row <- 1;
    iface.interface_mode <- StandardEntryMode;
+   draw_help iface;
    draw_update_stack iface
    
 

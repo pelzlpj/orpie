@@ -6,8 +6,6 @@ Definitely before release:
 
    * don't forget about browse_drop(n), browse_keepn, etc.
 
-   * add a help screen for stack browsing mode
-
    * fix the 'install' and 'uninstall' Makefile targets
 
 * create a parser that can read data structures entered into an ascii file,

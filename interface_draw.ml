@@ -391,8 +391,34 @@ let draw_help (iface : interface_state_t) =
          try fn el
          with Not_found -> "(N/A)"
       in
-      begin
-         match iface.help_mode with
+      (* FIXME: this could be done more cleanly... shouldn't have
+       * to look at two completely different modes *)
+      begin match iface.interface_mode with
+      |BrowsingMode ->
+         wattron win WA.bold;
+         assert (mvwaddstr win 5 0 "Browsing Operations:");
+         wattroff win WA.bold;
+         mvwaddstr_safe win 6 2  ("prev        : " ^
+         try_find Rcfile.key_of_browse (Browse PrevLine));
+         mvwaddstr_safe win 7 2  ("next        : " ^
+         try_find Rcfile.key_of_browse (Browse NextLine));
+         mvwaddstr_safe win 8 2  ("scroll left : " ^
+         try_find Rcfile.key_of_browse (Browse ScrollLeft));
+         mvwaddstr_safe win 9 2  ("scroll right: " ^
+         try_find Rcfile.key_of_browse (Browse ScrollRight));
+         mvwaddstr_safe win 10 2 ("roll down   : " ^
+         try_find Rcfile.key_of_browse (Browse RollDown));
+         mvwaddstr_safe win 11 2 ("roll up     : " ^
+         try_find Rcfile.key_of_browse (Browse RollUp));
+         mvwaddstr_safe win 12 2 ("dup         : " ^
+         try_find Rcfile.key_of_command (Command Dup));
+         mvwaddstr_safe win 13 2 ("view        : " ^
+         try_find Rcfile.key_of_browse (Browse ViewEntry));
+         mvwaddstr_safe win 15 1 ("exit browsing mode: " ^
+         try_find Rcfile.key_of_browse (Browse EndBrowse));
+         assert (wnoutrefresh win)
+      |_ ->
+         begin match iface.help_mode with
          |Standard ->
             wattron win WA.bold;
             assert (mvwaddstr win 5 0 "Common Operations:");
@@ -500,6 +526,7 @@ let draw_help (iface : interface_state_t) =
                   draw_matches 7 iface.matched_extended_entry_list;
                   assert (wnoutrefresh win)
                end 
+         end
       end
    |None ->
       ()
