@@ -110,8 +110,9 @@ let register_binding key_string op =
       else if String.length key_string > 2 then
          if key_string.[0] = '\\' && key_string.[1] = 'C' then
             if String.length key_string = 3 then
-               let control_chtype = ((int_of_char key_string.[2]) - 96) and
-               control_str = "^" ^ (String.make 1 key_string.[2]) in
+               let uc_key_string = String.uppercase key_string in
+               let control_chtype = ((int_of_char uc_key_string.[2]) - 64) and
+               control_str = "^" ^ (String.make 1 uc_key_string.[2]) in
                make_entries control_chtype control_str
             else
                config_failwith ("Illegal control key \"" ^ key_string ^ "\"")
@@ -253,7 +254,6 @@ let process_rcfile () =
       make_lexer ["bind"; "macro"; "#"] (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in
-   let backslash_regexp = try Str.regexp "[\\]" with Failure q -> failwith "failed backslash" in
    let config_stream = 
       try
          open_in "rpc2rc"
@@ -264,16 +264,9 @@ let process_rcfile () =
    try
       while true do
          line_num := succ !line_num;
-         let initial_string = input_line config_stream in
-         Printf.fprintf stderr "initial_string = %s\n" initial_string;
+         let line_string = input_line config_stream in
+         Printf.fprintf stderr "read line %2d: %s\n" !line_num line_string;
          flush stderr;
-         (* replace backslashes with doubled backslashes FIXME: not working *)
-         let line_string = 
-            try
-               Str.global_replace backslash_regexp "\\\\" initial_string
-            with Failure ff ->
-               failwith "failed global_replace"
-         in
          if Str.string_match empty_regexp line_string 0 then
             (* do nothing on an empty line *)
             ()

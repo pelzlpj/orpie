@@ -11,7 +11,7 @@ begin
    assert (refresh ())
 end;
 let string_of_chtype ch =
-   let str = keyname ch in
+   let str = unctrl ch in
    match str with
    |"KEY_LEFT" -> "<left>"
    |"KEY_RIGHT" -> "<right>"
@@ -42,15 +42,15 @@ let string_of_chtype ch =
    |"^I" -> "<tab>"
    |"^[" -> "<esc>"
    |_ ->  
-      if str.[0] = '^' then
-         "\\C" ^ (String.sub str 1 ((String.length str) - 1))
+      if String.length str > 1 && str.[0] = '^' then
+         "\\\\C" ^ (String.sub str 1 ((String.length str) - 1))
       else
          str
 in
 while true do
    let k = getch () in
    let s1 = Printf.sprintf " octal: \\%.3o" k and
-   s2 = Printf.sprintf     "string: %s" (string_of_chtype k) in
+   s2 = Printf.sprintf     "string: \"%s\"" (string_of_chtype k) in
    (assert (move 2 0);
    clrtoeol ();
    assert (addstr s1);
