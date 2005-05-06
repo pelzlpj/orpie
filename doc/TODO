@@ -30,6 +30,7 @@ Orpie To-Do List (roughly in order of priority)
   (unfortunately GSL lacks a condition number estimator for complex 
   matrices)
 
+* integrate Dylan Simon's FreeBSD compatibility patch
 
 
 # arch-tag: DO_NOT_CHANGE_6545e902-84e9-4893-9111-d01704eed3f0 
