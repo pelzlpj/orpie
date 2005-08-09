@@ -34,5 +34,11 @@ Orpie To-Do List (roughly in order of priority)
 
 * correct help screen so that power function reads y^x rather than x^y
 
+* on help screen, include keybindings for "cancel abbrev" and 
+  "enter abbrev" along with matched abbreviations list
+
+* make units module configurable (user-defined units, etc.)
+
+
 
 # arch-tag: DO_NOT_CHANGE_6545e902-84e9-4893-9111-d01704eed3f0 
