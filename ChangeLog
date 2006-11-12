@@ -22,6 +22,29 @@ v1.5
 
 v1.4
 
+   2005-10-29        Version 1.4.3 release.
+
+                     Backported a bugfix for crash when executing
+                     uconvert() with only one element on the stack.
+
+   2005-09-21        Version 1.4.2 release.
+
+   2005-09-20        Updated build script for better support on
+                     FreeBSD and OS X.
+
+   2004-09-17        Version 1.4.1 release.
+
+   2004-09-15        Updated the build dependency tree, so parallel
+                     make should work properly again.
+
+   2004-09-09        Made a minor Makefile change to correct linking
+                     errors under Gentoo (maybe others).
+
+   2004-09-01        Made some minor documentation fixes.
+
+   2004-08-31        Fixed incorrect error message regarding deprecated
+                     extended_enter command.
+
    2004-08-30        Version 1.4.0 release.
    
                      Started work on a testing framework for the

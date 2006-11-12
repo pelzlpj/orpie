@@ -40,8 +40,8 @@ GSL_LIB    = @GSL_LIB@
 INCLUDES = -I ./curses -I ./gsl -I ./units
 BFLAGS   = -pp camlp4o -g $(INCLUDES) -thread
 OFLAGS   = -pp camlp4o $(INCLUDES) -thread
-BLFLAGS  = -custom -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
-OLFLAGS  = -cclib '$(CURSES_LIB) $(GSL_LIB) -lm'
+BLFLAGS  = -custom -cclib '@LDFLAGS@ $(CURSES_LIB) $(GSL_LIB) -lm'
+OLFLAGS  = -cclib '@LDFLAGS@ $(CURSES_LIB) $(GSL_LIB) -lm'
 DEPFLAGS = -pp camlp4o
 
 # main target
@@ -121,9 +121,9 @@ $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-l
 	curses.cmx $(GSL_CMX) $(UNITS_CMX) $(CMX)
 	strip $(NAME).static-opt
 
-$(NAME2).static-opt: $(CURSES_OOBJS) utility.cmx curses-keys.cmx my-static-libs
+$(NAME2).static-opt: $(CURSES_OOBJS) curses_assist.cmx curses-keys.cmx my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
-	utility.cmx curses-keys.cmx
+	curses_assist.cmx curses-keys.cmx
 	strip $(NAME2).static-opt
 
 my-static-libs:
@@ -135,7 +135,7 @@ test.opt: $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX) -cclib '$(GSL_LIB) -lm'
 
 
-VERSION=1.4.0
+VERSION=1.5.0
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
@@ -148,22 +148,24 @@ version.ml: Makefile
 install-indep: 
 	mkdir -p $(BINDIR)
 	mkdir -p $(DESTDIR)/$(sysconfdir)
+	mkdir -p $(MANDIR)/man1
+	mkdir -p $(MANDIR)/man5
 	install -m 644 orpierc $(DESTDIR)/$(sysconfdir)
-	install -m 644 -D doc/orpie.1 $(MANDIR)/man1/orpie.1
-	install -m 644 -D doc/orpie-curses-keys.1 $(MANDIR)/man1/orpie-curses-keys.1
-	install -m 644 -D doc/orpierc.5 $(MANDIR)/man5/orpierc.5
+	install -m 644 doc/orpie.1 $(MANDIR)/man1/orpie.1
+	install -m 644 doc/orpie-curses-keys.1 $(MANDIR)/man1/orpie-curses-keys.1
+	install -m 644 doc/orpierc.5 $(MANDIR)/man5/orpierc.5
 
 install: install-indep
-	install -m 755 -D $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
-	install -m 755 -D $(NAME2).$(OCAMLBEST) $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 $(NAME).$(OCAMLBEST) $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 $(NAME2).$(OCAMLBEST) $(BINDIR)/$(NAME2)$(EXE)
 
 install-byte: install-indep
-	install -m 755 -D $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
-	install -m 755 -D $(NAME2).byte $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 $(NAME).byte $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 $(NAME2).byte $(BINDIR)/$(NAME2)$(EXE)
 
 install-opt: install-indep
-	install -m 755 -D $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
-	install -m 755 -D $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
+	install -m 755 $(NAME).opt $(BINDIR)/$(NAME)$(EXE)
+	install -m 755 $(NAME2).opt $(BINDIR)/$(NAME2)$(EXE)
 
 install-static: install-indep
 	install -m 755 -D $(NAME).static-opt $(BINDIR)/$(NAME)$(EXE)
@@ -191,7 +193,7 @@ gsl-byte: $(GSL_BOBJS)
 GSL_INCLUDES = -I ./gsl
 GSL_BFLAGS = -g $(GSL_INCLUDES) -thread
 GSL_OFLAGS = $(GSL_INCLUDES) -thread
-GSL_CFLAGS = -Wall -fPIC -DPIC
+GSL_CFLAGS = -Wall -fPIC -DPIC @CPPFLAGS@
 
 gsl/%.cmi : gsl/%.mli
 	$(OCAMLC) -c $(GSL_BFLAGS) $<
@@ -213,22 +215,28 @@ gsl/%.o : gsl/%.c
 curses-opt: $(CURSES_OOBJS)
 curses-byte: $(CURSES_BOBJS)
 
+curses/curses.ml:	curses/curses.ml.in curses/functions.c
+	$(MAKE) -C curses
+
+curses/functions.c:	curses/functions.c.in
+	$(MAKE) -C curses
+
 CURSES_INCLUDES = -I ./curses
 CURSES_BFLAGS = -g $(CURSES_INCLUDES) -thread
 CURSES_OFLAGS = $(CURSES_INCLUDES) -thread
-CURSES_CFLAGS = -Wall -fPIC -DPIC
+CURSES_CFLAGS = -Wall -fPIC -DPIC @CPPFLAGS@
 
 curses/%.cmi : curses/%.mli
-	$(OCAMLC) -pp cpp -c $(CURSES_BFLAGS) $<
+	$(OCAMLC) -c $(CURSES_BFLAGS) $<
 
 curses/%.cmo : curses/%.ml
-	$(OCAMLC) -pp cpp -c $(CURSES_BFLAGS) $<
+	$(OCAMLC) -c $(CURSES_BFLAGS) $<
 
 curses/%.o : curses/%.ml
-	$(OCAMLOPT) -pp cpp -c $(CURSES_OFLAGS) $<
+	$(OCAMLOPT) -c $(CURSES_OFLAGS) $<
 
 curses/%.cmx : curses/%.ml
-	$(OCAMLOPT) -pp cpp -c $(CURSES_OFLAGS) $<
+	$(OCAMLOPT) -c $(CURSES_OFLAGS) $<
 
 curses/%.o : curses/%.c
 	cd curses && $(OCAMLC) -ccopt "$(CURSES_CFLAGS)" -c $*.c

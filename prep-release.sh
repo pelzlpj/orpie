@@ -4,7 +4,9 @@
 # in a release tarball
 
 echo "Loading source dependencies..."
-tla build-config dist.arch
+baz build-config dist.arch
+echo "Preprocessing curses bindings..."
+make -C curses
 echo "Removing {arch} directories..."
 rm -rf "{arch}"
 rm -rf "curses/{arch}"

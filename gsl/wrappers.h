@@ -70,7 +70,7 @@ static inline value copy_two_double_arr(double a, double b)
 #define CONCAT3(a,b,c) CONCAT3x(a,b,c)
 
 #ifndef DONT_USE_ALLOCA
-#include <malloc.h>
+#include <stdlib.h>
 #define LOCALARRAY(type, x, len)  type * x = ( type *) alloca(sizeof( type ) * (len))
 #else
 #define LOCALARRAY(type, x, len)  type x [(len)] 
