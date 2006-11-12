@@ -1659,17 +1659,17 @@ let handle_abbrev_backspace (iface : interface_state_t) =
 
 (* handle entry of an arbitrary character in abbrev mode *)
 let handle_abbrev_character (iface : interface_state_t) key =
-   let ch = char_of_int key in
-   let test_buffer = iface.abbrev_entry_buffer ^ (String.make 1 ch) in
-   (* search through the list of commands for the first one that matches
-    * iface.abbrev_entry_buffer *)
    try
+      let ch = char_of_int key in
+      let test_buffer = iface.abbrev_entry_buffer ^ (String.make 1 ch) in
+      (* search through the list of commands for the first one that matches
+       * iface.abbrev_entry_buffer *)
       iface.matched_abbrev_list <- match_abbrev_buffer iface test_buffer;
       iface.abbrev_entry_buffer <- test_buffer;
       draw_help iface;
       draw_update_entry iface
    with
-      Not_found -> let err = beep () in ()
+      Not_found | Invalid_argument "char_of_int" -> let err = beep () in ()
 
 
 (* enter an abbrev entry *)
