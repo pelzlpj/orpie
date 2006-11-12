@@ -1516,7 +1516,7 @@ class rpc_calc conserve_memory =
       method drop () = self#check_args 1 "drop" self#internal_drop 
 
       method private internal_drop () =
-         let dummy = stack#pop () in 
+         let _ = stack#pop () in 
          ()
 
 
@@ -1528,7 +1528,7 @@ class rpc_calc conserve_memory =
       method clear () =
          self#backup ();
          for i = 1 to stack#length do
-            let dummy = stack#pop () in ()
+            let _ = stack#pop () in ()
          done
 
       method push (v : orpie_data_t) =
@@ -1700,15 +1700,57 @@ class rpc_calc conserve_memory =
                      and abs_b = abs_big_int b in
                      interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                      false
+                  |RpcFloatUnit b ->
+                     let ff = b.Units.coeff.Complex.re in
+                     if (abs_float ff) < 1e9 then begin
+                        let abs_a = abs_big_int a
+                        and abs_b = abs_big_int (big_int_of_int (int_of_float ff)) in
+                        interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
+                        false
+                     end else begin
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "real argument is too large to convert to integer")
+                     end
                   |_ ->
                      stack#push gen_el1;
                      stack#push gen_el2;
-                     raise (Invalid_argument "gcd requires integer arguments")
+                     raise (Invalid_argument "gcd requires integer or real arguments")
+                  end
+               |RpcFloatUnit a ->
+                  let ff = a.Units.coeff.Complex.re in
+                  if (abs_float ff) < 1e9 then begin
+                     let abs_a = abs_big_int (big_int_of_int (int_of_float ff)) in
+                     begin match gen_el2 with
+                     |RpcInt b ->
+                        let abs_b = abs_big_int b in
+                        interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
+                        false
+                     |RpcFloatUnit b ->
+                        let ff2 = b.Units.coeff.Complex.re in
+                        if (abs_float ff2) < 1e9 then begin
+                           let abs_b = abs_big_int (big_int_of_int (int_of_float ff2)) in
+                           interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
+                           false
+                        end else begin
+                           stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "real argument is too large to convert to integer")
+                        end
+                     |_ ->
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "gcd requires integer or real arguments")
+                     end
+                  end else begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "real argument is too large to convert to integer")
                   end
                |_ ->
                   stack#push gen_el1;
                   stack#push gen_el2;
-                  raise (Invalid_argument "gcd requires integer arguments")
+                  raise (Invalid_argument "gcd requires integer or real arguments")
                end
             end else
                raise (Invalid_argument "insufficient arguments for gcd")
