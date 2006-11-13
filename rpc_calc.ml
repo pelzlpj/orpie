@@ -1793,15 +1793,63 @@ class rpc_calc conserve_memory =
                      and abs_b = abs_big_int b in
                      interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
                      false
+                  |RpcFloatUnit b ->
+                     let ff = b.Units.coeff.Complex.re in
+                     if (abs_float ff) < 1e9 then begin
+                        let bi_b  = big_int_of_int (int_of_float ff) in
+                        let abs_a = abs_big_int a
+                        and abs_b = abs_big_int bi_b in
+                        let coeff = mult_big_int a bi_b in
+                        interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
+                        false
+                     end else begin
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "real argument is too large to convert to integer")
+                     end
                   |_ ->
                      stack#push gen_el1;
                      stack#push gen_el2;
-                     raise (Invalid_argument "lcm requires integer arguments")
+                     raise (Invalid_argument "lcm requires integer or real arguments")
+                  end
+               |RpcFloatUnit a ->
+                  let ff = a.Units.coeff.Complex.re in
+                  if (abs_float ff) < 1e9 then begin
+                     let bi_a  = big_int_of_int (int_of_float ff) in
+                     let abs_a = abs_big_int bi_a in
+                     begin match gen_el2 with
+                     |RpcInt b ->
+                        let coeff = mult_big_int bi_a b
+                        and abs_b = abs_big_int b in
+                        interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
+                        false
+                     |RpcFloatUnit b ->
+                        let ff2 = b.Units.coeff.Complex.re in
+                        if (abs_float ff2) < 1e9 then begin
+                           let bi_b = big_int_of_int (int_of_float ff2) in
+                           let abs_b = abs_big_int bi_b in
+                           let coeff = mult_big_int bi_a bi_b in
+                           interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
+                           false
+                        end else begin
+                           stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "real argument is too large to convert to integer")
+                        end
+                     |_ ->
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "lcm requires integer or real arguments")
+                     end
+                  end else begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "real argument is too large to convert to integer")
                   end
                |_ ->
                   stack#push gen_el1;
                   stack#push gen_el2;
-                  raise (Invalid_argument "lcm requires integer arguments")
+                  raise (Invalid_argument "lcm requires integer or real arguments")
                end
             end else
                raise (Invalid_argument "insufficient arguments for lcm")
