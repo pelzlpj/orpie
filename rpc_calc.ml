@@ -1712,6 +1712,13 @@ class rpc_calc conserve_memory =
                         stack#push gen_el2;
                         raise (Invalid_argument "real argument is too large to convert to integer")
                      end
+                  |RpcVariable s ->
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     let err_msg = 
+                        Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                     in
+                     raise (Invalid_argument err_msg)
                   |_ ->
                      stack#push gen_el1;
                      stack#push gen_el2;
@@ -1737,6 +1744,13 @@ class rpc_calc conserve_memory =
                            stack#push gen_el2;
                            raise (Invalid_argument "real argument is too large to convert to integer")
                         end
+                     |RpcVariable s ->
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        let err_msg = 
+                           Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                        in
+                        raise (Invalid_argument err_msg)
                      |_ ->
                         stack#push gen_el1;
                         stack#push gen_el2;
@@ -1747,6 +1761,13 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "real argument is too large to convert to integer")
                   end
+               |RpcVariable s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
                |_ ->
                   stack#push gen_el1;
                   stack#push gen_el2;
@@ -1807,6 +1828,13 @@ class rpc_calc conserve_memory =
                         stack#push gen_el2;
                         raise (Invalid_argument "real argument is too large to convert to integer")
                      end
+                  |RpcVariable s ->
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     let err_msg = 
+                        Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                     in
+                     raise (Invalid_argument err_msg)
                   |_ ->
                      stack#push gen_el1;
                      stack#push gen_el2;
@@ -1836,6 +1864,13 @@ class rpc_calc conserve_memory =
                            stack#push gen_el2;
                            raise (Invalid_argument "real argument is too large to convert to integer")
                         end
+                     |RpcVariable s ->
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        let err_msg = 
+                           Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                        in
+                        raise (Invalid_argument err_msg)
                      |_ ->
                         stack#push gen_el1;
                         stack#push gen_el2;
@@ -1846,6 +1881,13 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "real argument is too large to convert to integer")
                   end
+               |RpcVariable s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
                |_ ->
                   stack#push gen_el1;
                   stack#push gen_el2;
