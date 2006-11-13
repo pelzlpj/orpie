@@ -280,7 +280,10 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatUnit el ->
-            stack#push (RpcFloatUnit (Units.pow el 0.5))
+            if el.Units.coeff.Complex.re < 0. then
+               stack#push (RpcComplexUnit (Units.pow el 0.5))
+            else
+               stack#push (RpcFloatUnit (Units.pow el 0.5))
          |RpcComplexUnit el ->
             stack#push (RpcComplexUnit (Units.pow el 0.5))
          |RpcVariable s ->
