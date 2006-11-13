@@ -121,10 +121,11 @@ let draw_stack (iface : interface_state_t) =
                print_numbered_line line (sub_s ^ "...")
          in
          assert (waddstr iface.scr.stack_win line_string)
-      end else
+      end else begin
          let spacer = String.make (iface.scr.sw_cols - 7 - len) ' ' in
          let line_string = print_numbered_line line (spacer ^ s) in 
-         assert (waddstr iface.scr.stack_win line_string);
+         assert (waddstr iface.scr.stack_win line_string)
+      end;
       if line = iface.stack_selection && 
       iface.interface_mode = BrowsingMode then
          wattroff iface.scr.stack_win WA.reverse
