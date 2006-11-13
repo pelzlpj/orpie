@@ -1356,10 +1356,73 @@ class rpc_calc conserve_memory =
             begin match gen_el2 with
             |RpcInt el2 ->
                stack#push (RpcInt (mod_big_int el1 el2))
+            |RpcFloatUnit el2 ->
+               let ff2 = el2.Units.coeff.Complex.re in
+               if has_units el2 then begin
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "cannot compute mod of dimensioned values")
+               end else if (abs_float ff2) < 1e9 then begin
+                  let bi_el2 = big_int_of_int (int_of_float ff2) in
+                  stack#push (RpcInt (mod_big_int el1 bi_el2))
+               end else begin
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "real argument is too large to convert to integer")
+               end
+            |RpcVariable s ->
+               stack#push gen_el1;
+               stack#push gen_el2;
+               let err_msg = 
+                  Printf.sprintf "variable \"%s\" has not been evaluated" s 
+               in
+               raise (Invalid_argument err_msg)
             |_ ->
                (stack#push gen_el1;
                stack#push gen_el2;
-               raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+               raise (Invalid_argument "mod can only be applied to arguments of type integer or real"))
+            end
+         |RpcFloatUnit el1 ->
+            let ff1 = el1.Units.coeff.Complex.re in
+            if has_units el1 then begin
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "cannot compute mod of dimensioned values")
+            end else if (abs_float ff1) < 1e9 then begin
+               let bi_el1 = big_int_of_int (int_of_float ff1) in
+               begin match gen_el2 with
+               |RpcInt el2 ->
+                  stack#push (RpcInt (mod_big_int bi_el1 el2))
+               |RpcFloatUnit el2 ->
+                  let ff2 = el2.Units.coeff.Complex.re in
+                  if has_units el2 then begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "cannot compute mod of dimensioned values")
+                  end else if (abs_float ff2) < 1e9 then begin
+                     let bi_el2 = big_int_of_int (int_of_float ff2) in
+                     stack#push (RpcInt (mod_big_int bi_el1 bi_el2))
+                  end else begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "real argument is too large to convert to integer")
+                  end
+               |RpcVariable s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  let err_msg = 
+                     Printf.sprintf "variable \"%s\" has not been evaluated" s 
+                  in
+                  raise (Invalid_argument err_msg)
+               |_ ->
+                  (stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise (Invalid_argument "mod can only be applied to arguments of type integer or real"))
+               end
+            end else begin
+               stack#push gen_el1;
+               stack#push gen_el2;
+               raise (Invalid_argument "real argument is too large to convert to integer")
             end
          |RpcVariable s ->
             stack#push gen_el1;
@@ -1371,7 +1434,7 @@ class rpc_calc conserve_memory =
          |_ ->
             (stack#push gen_el1;
             stack#push gen_el2;
-            raise (Invalid_argument "mod can only be applied to arguments of type integer"))
+            raise (Invalid_argument "mod can only be applied to arguments of type integer or real"))
 
 
       method floor () = self#check_args 1 "floor" self#internal_floor
@@ -1702,7 +1765,11 @@ class rpc_calc conserve_memory =
                      false
                   |RpcFloatUnit b ->
                      let ff = b.Units.coeff.Complex.re in
-                     if (abs_float ff) < 1e9 then begin
+                     if has_units b then begin
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "cannot compute gcd of dimensioned values")
+                     end else if (abs_float ff) < 1e9 then begin
                         let abs_a = abs_big_int a
                         and abs_b = abs_big_int (big_int_of_int (int_of_float ff)) in
                         interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
@@ -1726,7 +1793,11 @@ class rpc_calc conserve_memory =
                   end
                |RpcFloatUnit a ->
                   let ff = a.Units.coeff.Complex.re in
-                  if (abs_float ff) < 1e9 then begin
+                  if has_units a then begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "cannot compute gcd of dimensioned values")
+                  end else if (abs_float ff) < 1e9 then begin
                      let abs_a = abs_big_int (big_int_of_int (int_of_float ff)) in
                      begin match gen_el2 with
                      |RpcInt b ->
@@ -1735,7 +1806,11 @@ class rpc_calc conserve_memory =
                         false
                      |RpcFloatUnit b ->
                         let ff2 = b.Units.coeff.Complex.re in
-                        if (abs_float ff2) < 1e9 then begin
+                        if has_units b then begin
+                           stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "cannot compute gcd of dimensioned values")
+                        end else if (abs_float ff2) < 1e9 then begin
                            let abs_b = abs_big_int (big_int_of_int (int_of_float ff2)) in
                            interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                            false
@@ -1816,7 +1891,11 @@ class rpc_calc conserve_memory =
                      false
                   |RpcFloatUnit b ->
                      let ff = b.Units.coeff.Complex.re in
-                     if (abs_float ff) < 1e9 then begin
+                     if has_units b then begin
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "cannot compute lcm of dimensioned values")
+                     end else if (abs_float ff) < 1e9 then begin
                         let bi_b  = big_int_of_int (int_of_float ff) in
                         let abs_a = abs_big_int a
                         and abs_b = abs_big_int bi_b in
@@ -1842,7 +1921,11 @@ class rpc_calc conserve_memory =
                   end
                |RpcFloatUnit a ->
                   let ff = a.Units.coeff.Complex.re in
-                  if (abs_float ff) < 1e9 then begin
+                  if has_units a then begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "cannot compute lcm of dimensioned values")
+                  end else if (abs_float ff) < 1e9 then begin
                      let bi_a  = big_int_of_int (int_of_float ff) in
                      let abs_a = abs_big_int bi_a in
                      begin match gen_el2 with
@@ -1853,7 +1936,11 @@ class rpc_calc conserve_memory =
                         false
                      |RpcFloatUnit b ->
                         let ff2 = b.Units.coeff.Complex.re in
-                        if (abs_float ff2) < 1e9 then begin
+                        if has_units b then begin
+                           stack#push gen_el1;
+                           stack#push gen_el2;
+                           raise (Invalid_argument "cannot compute lcm of dimensioned values")
+                        end else if (abs_float ff2) < 1e9 then begin
                            let bi_b = big_int_of_int (int_of_float ff2) in
                            let abs_b = abs_big_int bi_b in
                            let coeff = mult_big_int bi_a bi_b in
