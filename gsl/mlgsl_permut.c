@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 
@@ -7,17 +7,16 @@
 #include <gsl/gsl_permute.h>
 
 #include "wrappers.h"
-#include "mlgsl_error.h"
 #include "mlgsl_permut.h"
 
-value ml_gsl_permutation_init(value p)
+CAMLprim value ml_gsl_permutation_init(value p)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permutation_init(&perm_p);
   return Val_unit;
 }
 
-value ml_gsl_permutation_valid(value p)
+CAMLprim value ml_gsl_permutation_valid(value p)
 {
   int r;
   GSL_PERMUT_OF_BIGARRAY(p);
@@ -25,14 +24,14 @@ value ml_gsl_permutation_valid(value p)
   return Val_negbool(r);
 }
 
-value ml_gsl_permutation_reverse(value p)
+CAMLprim value ml_gsl_permutation_reverse(value p)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permutation_reverse(&perm_p);
   return Val_unit;
 }
 
-value ml_gsl_permutation_inverse(value src, value dst)
+CAMLprim value ml_gsl_permutation_inverse(value src, value dst)
 {
   GSL_PERMUT_OF_BIGARRAY(src);
   GSL_PERMUT_OF_BIGARRAY(dst);
@@ -40,21 +39,21 @@ value ml_gsl_permutation_inverse(value src, value dst)
   return Val_unit;
 }
 
-value ml_gsl_permutation_next(value p)
+CAMLprim value ml_gsl_permutation_next(value p)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permutation_next(&perm_p);
   return Val_unit;
 }
 
-value ml_gsl_permutation_prev(value p)
+CAMLprim value ml_gsl_permutation_prev(value p)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permutation_prev(&perm_p);
   return Val_unit;
 }
 
-value ml_gsl_permute(value p, value arr)
+CAMLprim value ml_gsl_permute(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   if(Tag_val(arr) == Double_array_tag)
@@ -65,7 +64,7 @@ value ml_gsl_permute(value p, value arr)
   return Val_unit;
 }
 
-value ml_gsl_permute_barr(value p, value arr)
+CAMLprim value ml_gsl_permute_barr(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   struct caml_bigarray *barr = Bigarray_val(arr);
@@ -96,12 +95,12 @@ value ml_gsl_permute_barr(value p, value arr)
   case BIGARRAY_COMPLEX64:
     gsl_permute_complex(perm_p.data, barr->data, 1, barr->dim[0]); break;
   default: 
-    MLGSLexn("data type not supported", GSL_EUNIMPL);
+    GSL_ERROR("data type not supported", GSL_EUNIMPL);
   }
   return Val_unit;
 }
 
-value ml_gsl_permute_complex(value p, value arr)
+CAMLprim value ml_gsl_permute_complex(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permute_complex(perm_p.data, Double_array_val(arr), 1, 
@@ -109,7 +108,7 @@ value ml_gsl_permute_complex(value p, value arr)
   return Val_unit;
 }
 
-value ml_gsl_permute_inverse(value p, value arr)
+CAMLprim value ml_gsl_permute_inverse(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   if(Tag_val(arr) == Double_array_tag)
@@ -120,7 +119,7 @@ value ml_gsl_permute_inverse(value p, value arr)
   return Val_unit;
 }
 
-value ml_gsl_permute_inverse_barr(value p, value arr)
+CAMLprim value ml_gsl_permute_inverse_barr(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   struct caml_bigarray *barr = Bigarray_val(arr);
@@ -151,12 +150,12 @@ value ml_gsl_permute_inverse_barr(value p, value arr)
   case BIGARRAY_COMPLEX64:
     gsl_permute_complex_inverse(perm_p.data, barr->data, 1, barr->dim[0]); break;
   default:
-    MLGSLexn("data type not supported", GSL_EUNIMPL);
+    GSL_ERROR("data type not supported", GSL_EUNIMPL);
   }
   return Val_unit;
 }
 
-value ml_gsl_permute_inverse_complex(value p, value arr)
+CAMLprim value ml_gsl_permute_inverse_complex(value p, value arr)
 {
   GSL_PERMUT_OF_BIGARRAY(p);
   gsl_permute_complex_inverse(perm_p.data, Double_array_val(arr), 1, 

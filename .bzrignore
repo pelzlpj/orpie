@@ -11,3 +11,7 @@ configure
 Makefile
 version.ml
 install.ml
+txtin_parser.ml
+txtin_parser.output
+*.opt
+*.byte

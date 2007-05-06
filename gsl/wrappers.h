@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 #ifndef _MLGSL_WRAPPERS_
@@ -8,6 +8,10 @@
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
 #include <caml/memory.h>
+
+#ifdef ARCH_ALIGN_DOUBLE
+#error "Architectures with double-word alignment for doubles are not supported"
+#endif
 
 #define IS_CUSTOM(v) (Tag_val(v) == Custom_tag)
 
@@ -26,10 +30,12 @@
 static inline value copy_two_double(double a, double b)
 {
   CAMLparam0();
-  CAMLlocal1(r);
-  r=alloc(2, 0);
-  Store_field(r, 0, copy_double(a));
-  Store_field(r, 1, copy_double(b));
+  CAMLlocal3(r, va, vb);
+  va = copy_double(a);
+  vb = copy_double(b);
+  r = alloc_small(2, 0);
+  Field(r, 0) = va;
+  Field(r, 1) = vb;
   CAMLreturn(r);
 }
 
@@ -46,34 +52,41 @@ static inline value copy_two_double_arr(double a, double b)
   ( v=alloc_small(1, Abstract_tag), Field(v, 0)=Val_bp(p) )
 
 #define ML1(name, conv1, convr) \
-  value ml_##name(value arg1) \
-  { return convr(name(conv1(arg1))) ; }
+  CAMLprim value ml_##name(value arg1) \
+  { CAMLparam1(arg1); \
+    CAMLreturn(convr(name(conv1(arg1)))) ; }
 #define ML1_alloc(name, conv1, convr) \
-  value ml_##name(value arg1) \
-  { value res; convr(res, name(conv1(arg1))); return res; }
+  CAMLprim value ml_##name(value arg1) \
+  { CAMLparam1(arg1); CAMLlocal1(res); \
+    convr(res, name(conv1(arg1))); \
+    CAMLreturn(res); }
 #define ML2(name, conv1, conv2, convr) \
-  value ml_##name(value arg1, value arg2) \
-  { return convr(name(conv1(arg1), conv2(arg2))) ; }
+  CAMLprim value ml_##name(value arg1, value arg2) \
+  { CAMLparam2(arg1, arg2); \
+    CAMLreturn(convr(name(conv1(arg1), conv2(arg2)))) ; }
 #define ML3(name, conv1, conv2, conv3, convr) \
-  value ml_##name(value arg1, value arg2, value arg3) \
-  { return convr(name(conv1(arg1), conv2(arg2), conv3(arg3))) ; }
+  CAMLprim value ml_##name(value arg1, value arg2, value arg3) \
+  { CAMLparam3(arg1, arg2, arg3); \
+    CAMLreturn(convr(name(conv1(arg1), conv2(arg2), conv3(arg3)))) ; }
 #define ML4(name, conv1, conv2, conv3, conv4, convr) \
-  value ml_##name(value arg1, value arg2, value arg3, value arg4) \
-  { return convr(name(conv1(arg1), conv2(arg2), conv3(arg3), conv4(arg4))) ; }
+  CAMLprim value ml_##name(value arg1, value arg2, value arg3, value arg4) \
+  { CAMLparam4(arg1, arg2, arg3, arg4); \
+    CAMLreturn(convr(name(conv1(arg1), conv2(arg2), conv3(arg3), conv4(arg4)))) ; }
 #define ML5(name, conv1, conv2, conv3, conv4, conv5, convr) \
-  value ml_##name(value arg1, value arg2, value arg3, value arg4, value arg5) \
-  { return convr(name(conv1(arg1), conv2(arg2), conv3(arg3), conv4(arg4), conv5(arg5))) ; }
+  CAMLprim value ml_##name(value arg1, value arg2, value arg3, value arg4, value arg5) \
+  { CAMLparam5(arg1, arg2, arg3, arg4, arg5);				\
+    CAMLreturn(convr(name(conv1(arg1), conv2(arg2), conv3(arg3), conv4(arg4), conv5(arg5)))) ; }
 
 #define CONCAT2x(a,b) a ## _ ## b
 #define CONCAT2(a,b) CONCAT2x(a,b)
 #define CONCAT3x(a,b,c) a ## _ ## b ## _ ## c
 #define CONCAT3(a,b,c) CONCAT3x(a,b,c)
 
-#ifndef DONT_USE_ALLOCA
-#include <stdlib.h>
-#define LOCALARRAY(type, x, len)  type * x = ( type *) alloca(sizeof( type ) * (len))
+#if defined (__GNUC__) || defined (DONT_USE_ALLOCA)
+#define LOCALARRAY(type, x, len)  type x [(len)]
 #else
-#define LOCALARRAY(type, x, len)  type x [(len)] 
+#include <malloc.h>
+#define LOCALARRAY(type, x, len)  type * x = ( type *) alloca(sizeof( type ) * (len))
 #endif 
 
 #endif /* _MLGSL_WRAPPERS_ */

@@ -34,6 +34,11 @@
 # ADAPT THE FOLLOWING LINE TO YOUR SOURCES!
 AC_INIT(rpc_calc.ml)
 
+AC_ARG_WITH(gsl-config-dir, 
+            [  --gsl-config-dir=DIR    location of 'gsl-config' from GNU Scientific Library],
+            [GSLCONFIGPATH=$PATH:$with_gsl_config_dir],
+            [GSLCONFIGPATH=$PATH])
+
 # Check for Ocaml compilers
 
 # we first look for ocamlc in the path; if not present, we fail
@@ -136,19 +141,28 @@ if test ! "$CURSES_LIB"; then
 fi
 
 # check for GSL
-AC_MSG_CHECKING(for GNU Scientific Library)
-gsl_save_libs="$LIBS"
-LIBS="$LIBS -lgsl -lgslcblas"
-AC_TRY_LINK([#include <gsl/gsl_complex.h>],
-            [gsl_complex a; GSL_SET_COMPLEX(&a, 1.0, 1.0); gsl_complex_logabs(a);],
-            HAS_GSL_LIB=yes, HAS_GSL_LIB=no)
-if test "$HAS_GSL_LIB" = no; then
-   AC_MSG_ERROR(Cannot find the GNU Scientific Library.  Perhaps you failed to install a libgsl development package?)
+AC_PATH_PROG(GSLCONFIG, gsl-config, not found, $GSLCONFIGPATH)
+if test x"$GSLCONFIG" != x"not found"; then
+   GSL_CFLAGS=`$GSLCONFIG --cflags`
+   GSL_LIB=`$GSLCONFIG --libs`
+   AC_MSG_CHECKING(for GNU Scientific Library)
+   gsl_save_libs="$LIBS"
+   gsl_save_cflags="$CFLAGS"
+   LIBS="$LIBS $GSL_LIB"
+   CFLAGS="$CFLAGS $GSL_CFLAGS"
+   AC_TRY_LINK([#include <gsl/gsl_complex.h>],
+               [gsl_complex a; GSL_SET_COMPLEX(&a, 1.0, 1.0); gsl_complex_logabs(a);],
+               HAS_GSL_LIB=yes, HAS_GSL_LIB=no)
+   if test "$HAS_GSL_LIB" = no; then
+      AC_MSG_ERROR(Cannot find the GNU Scientific Library.  Perhaps you failed to install a libgsl development package?)
+   else
+      AC_MSG_RESULT(yes)
+   fi
+   LIBS="$gsl_save_libs"
+   CFLAGS="$gsl_save_cflags"
 else
-   AC_MSG_RESULT(yes)
+   AC_MSG_ERROR(Could not find gsl-config.  Perhaps you failed to install a libgsl development package?)
 fi
-LIBS="$gsl_save_libs"
-GSL_LIB="-lgsl -lgslcblas"
 
 # substitutions to perform
 AC_SUBST(OCAMLC)
@@ -162,6 +176,7 @@ AC_SUBST(OCAMLLIB)
 AC_SUBST(OCAMLWIN32)
 AC_SUBST(EXE)
 AC_SUBST(CURSES_LIB)
+AC_SUBST(GSL_CFLAGS)
 AC_SUBST(GSL_LIB)
 AC_SUBST(DEFS)
 

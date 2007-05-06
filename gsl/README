@@ -1,6 +1,6 @@
 Orpie makes use of a portion of the GSL bindings provided by Olivier Andrieu's
-OcamlGSL project.  This code is released under the GNU GPL; for details, see
-COPYING in the 'gsl' subdirectory.
+OcamlGSL project (v 0.6.0).  This code is released under the GNU GPL; for
+details, see COPYING in the 'gsl' subdirectory.
 
 The OcamlGSL project may be found at http://oandrieu.nerim.net/ocaml/gsl/ .
 

@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 type complex_vector_flat = 
@@ -63,16 +63,18 @@ let to_complex_array arr =
   carr
 
 let real carr =
-  { Gsl_vector_flat.data   = carr.data ;
-    Gsl_vector_flat.len    = carr.len ;
-    Gsl_vector_flat.off    = 2 * carr.off ;
-    Gsl_vector_flat.stride = 2 * carr.stride ; }
+  Gsl_vector_flat.view_array
+    ~stride:(2 * carr.stride)
+    ~off:(2 * carr.off)
+    ~len:carr.len
+    carr.data
 
 let imag carr =
-  { Gsl_vector_flat.data   = carr.data ;
-    Gsl_vector_flat.len    = carr.len ;
-    Gsl_vector_flat.off    = 2 * carr.off + 1 ;
-    Gsl_vector_flat.stride = 2 * carr.stride ; }
+  Gsl_vector_flat.view_array
+    ~stride:(2 * carr.stride)
+    ~off:(2 * carr.off + 1)
+    ~len:carr.len
+    carr.data
 
 let subvector ?(stride=1) v ~off ~len =
   { v with 

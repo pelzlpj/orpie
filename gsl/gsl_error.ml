@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 external gsl_version : unit -> string
@@ -47,8 +47,10 @@ exception Gsl_exn of (errno * string)
 
 external raise_caml_exn : bool -> unit = "ml_gsl_error_init"
 
+let _ = 
+  Callback.register_exception "mlgsl_exn" (Gsl_exn (CONTINUE, ""))
+
 let init () = 
-  Callback.register_exception "mlgsl_exn" (Gsl_exn (CONTINUE, "")) ;
   raise_caml_exn true
 
 let uninit () = 

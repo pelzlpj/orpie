@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 type double_mat_flat = 
@@ -98,34 +98,38 @@ let submatrix m ~k1 ~k2 ~n1 ~n2 =
     tda = m.tda ; }
       
 let row m i =
-  { Gsl_vector_flat.data   = m.data ;
-    Gsl_vector_flat.off    = m.off + i * m.tda ;
-    Gsl_vector_flat.len    = m.dim2 ;
-    Gsl_vector_flat.stride = 1 ; }
+  Gsl_vector_flat.view_array
+    ~off:(m.off + i * m.tda)
+    ~len:m.dim2
+    m.data
 
 let column m j =
-  { Gsl_vector_flat.data   = m.data ;
-    Gsl_vector_flat.off    = m.off + j ;
-    Gsl_vector_flat.len    = m.dim1 ;
-    Gsl_vector_flat.stride = m.tda ; }
+  Gsl_vector_flat.view_array
+    ~stride:m.tda
+    ~off:(m.off + j)
+    ~len:m.dim1
+    m.data
 
 let diagonal m =
-  { Gsl_vector_flat.data   = m.data ;
-    Gsl_vector_flat.off    = m.off ;
-    Gsl_vector_flat.len    = min m.dim1 m.dim2 ;
-    Gsl_vector_flat.stride = m.tda + 1 ; }
+  Gsl_vector_flat.view_array
+    ~stride:(m.tda + 1)
+    ~off:m.off
+    ~len:(min m.dim1 m.dim2)
+    m.data
 
 let subdiagonal m k =
-  { Gsl_vector_flat.data   = m.data ;
-    Gsl_vector_flat.off    = m.off + k * m.tda;
-    Gsl_vector_flat.len    = min (m.dim1 - k) m.dim2 ;
-    Gsl_vector_flat.stride = m.tda + 1 ; }
+  Gsl_vector_flat.view_array
+    ~stride:(m.tda + 1)
+    ~off:(m.off + k * m.tda)
+    ~len:(min (m.dim1 - k) m.dim2)
+    m.data
 
 let superdiagonal m k =
-  { Gsl_vector_flat.data   = m.data ;
-    Gsl_vector_flat.off    = m.off + k;
-    Gsl_vector_flat.len    = min m.dim1 (m.dim2 - k) ;
-    Gsl_vector_flat.stride = m.tda + 1 ; }
+  Gsl_vector_flat.view_array
+    ~stride:(m.tda + 1)
+    ~off:(m.off + k)
+    ~len:(min m.dim1 (m.dim2 - k))
+    m.data
 
 let view_array arr ?(off=0) dim1 ?tda dim2 =
   let tda = match tda with

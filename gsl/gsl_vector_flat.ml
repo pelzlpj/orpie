@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 type double_vector_flat = 
@@ -9,6 +9,13 @@ type double_vector_flat =
       stride : int ; }
 
 type vector = double_vector_flat
+
+let check v =
+  let size = Array.length v.data in
+  if v.off < 0 || v.len < 0 || v.stride < 1 ||
+     v.off + (v.len - 1) * v.stride >= size
+  then failwith "Gsl_vector_flat.check" ;
+  v
 
 let create ?(init=0.) len = 
   { data = Array.create len init; 
@@ -45,17 +52,19 @@ let to_array v =
   Array.init v.len (get v)
 
 let subvector ?(stride=1) v ~off ~len =
-  { v with 
-    off = off * v.stride + v.off ;
-    len = len ;
-    stride = stride * v.stride ; }
+  check
+    { v with 
+      off = off * v.stride + v.off ;
+      len = len ;
+      stride = stride * v.stride ; }
       
 let view_array ?(stride=1) ?(off=0) ?len arr =
   let len = match len with
   | None -> Array.length arr
   | Some l -> l in
-  { data = arr ; off = off ;
-    stride = stride ; len = len }
+  check
+    { data = arr ; off = off ;
+      stride = stride ; len = len }
 
 let memcpy ~src:v ~dst:w = 
   if v.len <> w.len

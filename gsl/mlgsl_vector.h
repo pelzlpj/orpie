@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 
@@ -59,12 +59,3 @@ static inline void TYPE(mlgsl_vec_of_value)(TYPE(gsl_vector) *cvec,
 #define _CONVERT_VECTOR3(a,b,c) _CONVERT_VECTOR2(a,b); _CONVERT_VECTOR(c)
 #define _CONVERT_VECTOR4(a,b,c,d) _CONVERT_VECTOR2(a,b); _CONVERT_VECTOR2(c,d)
 #define _CONVERT_VECTOR5(a,b,c,d,e) _CONVERT_VECTOR4(a,b,c,d); _CONVERT_VECTOR(e)
-
-
-#if __GNUC__ >= 3
-#define DECLARE_VECTOR(a) _DECLARE_VECTOR(a); _CONVERT_VECTOR(a)
-#define DECLARE_VECTOR2(a,b) DECLARE_VECTOR(a); DECLARE_VECTOR(b)
-#define DECLARE_VECTOR3(a,b,c) DECLARE_VECTOR2(a,b); DECLARE_VECTOR(c)
-#define DECLARE_VECTOR4(a,b,c,d) DECLARE_VECTOR2(a,b); DECLARE_VECTOR2(c,d)
-#define DECLARE_VECTOR5(a,b,c,d,e) DECLARE_VECTOR4(a,b,c,d); DECLARE_VECTOR(e)
-#endif /* __GNUC__ */

@@ -1,6 +1,8 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
+
+(** Special functions *)
 
 open Gsl_fun
 
@@ -466,6 +468,20 @@ external debye_4_e : float -> result
     = "ml_gsl_sf_debye_4_e"
 
 
+external debye_5 : float -> float
+    = "ml_gsl_sf_debye_5" "gsl_sf_debye_5" "float"
+
+external debye_5_e : float -> result
+    = "ml_gsl_sf_debye_5_e"
+
+
+external debye_6 : float -> float
+    = "ml_gsl_sf_debye_6" "gsl_sf_debye_6" "float"
+
+external debye_6_e : float -> result
+    = "ml_gsl_sf_debye_6_e"
+
+
 
 (* DILOGARITHM *)
 external dilog : float -> float
@@ -475,8 +491,16 @@ external dilog_e : float -> result
     = "ml_gsl_sf_dilog_e"
 
 
+external  complex_dilog_xy_e : float -> float -> result * result 
+    = "ml_gsl_sf_complex_dilog_xy_e"
+
+
 external  complex_dilog_e : float -> float -> result * result 
     = "ml_gsl_sf_complex_dilog_e"
+
+
+external  complex_spence_xy_e : float -> float -> result * result 
+    = "ml_gsl_sf_complex_spence_xy_e"
 
 
 
@@ -503,6 +527,20 @@ external ellint_Ecomp : float -> mode -> float
 
 external ellint_Ecomp_e : float -> mode -> result
     = "ml_gsl_sf_ellint_Ecomp_e"
+
+
+external ellint_Pcomp : float -> float -> mode -> float
+    = "ml_gsl_sf_ellint_Pcomp"
+
+external ellint_Pcomp_e : float -> float -> mode -> result
+    = "ml_gsl_sf_ellint_Pcomp_e"
+
+
+external ellint_Dcomp : float -> mode -> float
+    = "ml_gsl_sf_ellint_Dcomp"
+
+external ellint_Dcomp_e : float -> mode -> result
+    = "ml_gsl_sf_ellint_Dcomp_e"
 
 
 external ellint_F : float -> float -> mode -> float
@@ -933,6 +971,13 @@ external gamma_inc_P_e : float -> float -> result
     = "ml_gsl_sf_gamma_inc_P_e"
 
 
+external gamma_inc : float -> float -> float
+    = "ml_gsl_sf_gamma_inc" "gsl_sf_gamma_inc" "float"
+
+external gamma_inc_e : float -> float -> result
+    = "ml_gsl_sf_gamma_inc_e"
+
+
 external beta : float -> float -> float
     = "ml_gsl_sf_beta" "gsl_sf_beta" "float"
 
@@ -945,6 +990,10 @@ external lnbeta : float -> float -> float
 
 external lnbeta_e : float -> float -> result
     = "ml_gsl_sf_lnbeta_e"
+
+
+external  lnbeta_sgn_e : float -> float -> result * float 
+    = "ml_gsl_sf_lnbeta_sgn_e"
 
 
 external beta_inc : float -> float -> float -> float
@@ -1093,6 +1142,34 @@ external legendre_Ql_e : int -> float -> result
 
 
 
+(* Associated LEGENDRE functions *)
+external legendre_Plm : int -> int -> float -> float
+    = "ml_gsl_sf_legendre_Plm"
+
+external legendre_Plm_e : int -> int -> float -> result
+    = "ml_gsl_sf_legendre_Plm_e"
+
+
+external  legendre_Plm_array : int -> int -> float -> float array -> unit 
+    = "ml_gsl_sf_legendre_Plm_array"
+
+
+external legendre_sphPlm : int -> int -> float -> float
+    = "ml_gsl_sf_legendre_sphPlm"
+
+external legendre_sphPlm_e : int -> int -> float -> result
+    = "ml_gsl_sf_legendre_sphPlm_e"
+
+
+external  legendre_sphPlm_array : int -> int -> float -> float array -> unit 
+    = "ml_gsl_sf_legendre_sphPlm_array"
+
+
+external  legendre_array_size : int -> int -> int 
+    = "ml_gsl_sf_legendre_array_size"
+
+
+
 (* LOGARITHM and related functions *)
 external log : float -> float
     = "ml_gsl_sf_log" "gsl_sf_log" "float"
@@ -1158,11 +1235,22 @@ external psi_1piy_e : float -> result
     = "ml_gsl_sf_psi_1piy_e"
 
 
+external  psi_complex_e : float -> float -> result * result 
+    = "ml_gsl_sf_complex_psi_e"
+
+
 external psi_1_int : int -> float
     = "ml_gsl_sf_psi_1_int"
 
 external psi_1_int_e : int -> result
     = "ml_gsl_sf_psi_1_int_e"
+
+
+external psi_1 : float -> float
+    = "ml_gsl_sf_psi_1" "gsl_sf_psi_1" "float"
+
+external psi_1_e : float -> result
+    = "ml_gsl_sf_psi_1_e"
 
 
 external psi_n : int -> float -> float
@@ -1333,7 +1421,5 @@ external eta : float -> float
 
 external eta_e : float -> result
     = "ml_gsl_sf_eta_e"
-
-
 
 

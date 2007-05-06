@@ -1,7 +1,8 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
+(** Matrices of floats implemented with [Bigarray] *)
 
 type double_mat_bigarr = 
     (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array2.t

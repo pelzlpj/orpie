@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2003 - Paul Pelzl                          */
+/* Copyright (Â©) 2003 - Paul Pelzl                          */
 /* distributed under the terms of the GPL version 2         */
 
 #include <caml/alloc.h>

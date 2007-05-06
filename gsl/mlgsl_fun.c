@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 #include <string.h>
@@ -123,7 +123,7 @@ int gsl_multiroot_callback(const gsl_vector *x, void *params, gsl_vector *F)
   f_barr = alloc_bigarray_dims(barr_flags, 1, f_arr, len);
   res=callback2_exn(p->closure, x_barr, f_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_vector_memcpy(F, &f_v.vector);
   return GSL_SUCCESS;
 }
@@ -146,7 +146,7 @@ int gsl_multiroot_callback_f(const gsl_vector *x, void *params, gsl_vector *F)
   f_barr = alloc_bigarray_dims(barr_flags, 1, f_arr, len);
   res=callback2_exn(Field(p->closure, 0), x_barr, f_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_vector_memcpy(F, &f_v.vector);
   return GSL_SUCCESS;
 }
@@ -170,7 +170,7 @@ int gsl_multiroot_callback_df(const gsl_vector *x, void *params, gsl_matrix *J)
   j_barr = alloc_bigarray_dims(barr_flags, 2, j_arr, len, len);
   res=callback2_exn(Field(p->closure, 1), x_barr, j_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_matrix_memcpy(J, &j_v.matrix);
   return GSL_SUCCESS;
 }
@@ -198,7 +198,7 @@ int gsl_multiroot_callback_fdf(const gsl_vector *x, void *params,
   j_barr = alloc_bigarray_dims(barr_flags, 2, j_arr, len, len);
   res=callback3_exn(Field(p->closure, 2), x_barr, f_barr, j_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_vector_memcpy(F, &f_v.vector);
   gsl_matrix_memcpy(J, &j_v.matrix);
   return GSL_SUCCESS;
@@ -263,9 +263,11 @@ void gsl_multimin_callback_df(const gsl_vector *x, void *params, gsl_vector *G)
   g_barr = alloc_bigarray_dims(barr_flags, 1, g_arr, len);
   res=callback2_exn(Field(p->closure, 1), x_barr, g_barr);
   if(Is_exception_result(res)){
-    fprintf(stderr, "MLGSL: OCaml callback raised an exception\n");
-    fflush(stderr);
-    abort();
+    /* the caml functions raised an exception but there's no way we can
+       indicate this to GSL since the return type is void.
+       So we set the out param G to NaN. */
+    gsl_vector_set_all(G, GSL_NAN);
+    return;
   }
   gsl_vector_memcpy(G, &g_v.vector);
 }
@@ -318,7 +320,7 @@ int gsl_multifit_callback_f(const gsl_vector *X, void *params, gsl_vector *F)
   f_barr = alloc_bigarray_dims(barr_flags, 1, f_arr, n);
   res=callback2_exn(Field(parms->closure, 0), x_barr, f_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_vector_memcpy(F, &f_v.vector);
   return GSL_SUCCESS;
 }
@@ -343,7 +345,7 @@ int gsl_multifit_callback_df(const gsl_vector *X, void *params, gsl_matrix *J)
   j_barr = alloc_bigarray_dims(barr_flags, 2, j_arr, n, p);
   res=callback2_exn(Field(parms->closure, 1), x_barr, j_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_matrix_memcpy(J, &j_v.matrix);
   return GSL_SUCCESS;
 }
@@ -372,7 +374,7 @@ int gsl_multifit_callback_fdf(const gsl_vector *X, void *params,
   j_barr = alloc_bigarray_dims(barr_flags, 2, j_arr, n, p);
   res=callback3_exn(Field(parms->closure, 2), x_barr, f_barr, j_barr);
   if(Is_exception_result(res))
-    return GSL_EFAILED;
+    return GSL_FAILURE;
   gsl_vector_memcpy(F, &f_v.vector);
   gsl_matrix_memcpy(J, &j_v.matrix);
   return GSL_SUCCESS;

@@ -193,7 +193,7 @@ gsl-byte: $(GSL_BOBJS)
 GSL_INCLUDES = -I ./gsl
 GSL_BFLAGS = -g $(GSL_INCLUDES) -thread
 GSL_OFLAGS = $(GSL_INCLUDES) -thread
-GSL_CFLAGS = -Wall -fPIC -DPIC @CPPFLAGS@
+GSL_CFLAGS = @GSL_CFLAGS@ @CPPFLAGS@ -DHAVE_INLINE -DHAVE_FENV -g -O2
 
 gsl/%.cmi : gsl/%.mli
 	$(OCAMLC) -c $(GSL_BFLAGS) $<

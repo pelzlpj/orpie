@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 
@@ -57,9 +57,3 @@ static inline void TYPE(mlgsl_mat_of_value)(TYPE(gsl_matrix) *cmat,
 #define _CONVERT_MATRIX(a) TYPE(mlgsl_mat_of_value)(&m_##a, a)
 #define _CONVERT_MATRIX2(a,b) _CONVERT_MATRIX(a); _CONVERT_MATRIX(b)
 #define _CONVERT_MATRIX3(a,b,c) _CONVERT_MATRIX2(a,b); _CONVERT_MATRIX(c)
-
-#if __GNUC__ >= 3
-#define DECLARE_MATRIX(a) _DECLARE_MATRIX(a); _CONVERT_MATRIX(a)
-#define DECLARE_MATRIX2(a,b) DECLARE_MATRIX(a); DECLARE_MATRIX(b)
-#define DECLARE_MATRIX3(a,b,c) DECLARE_MATRIX2(a,b); DECLARE_MATRIX(c)
-#endif /* __GNUC__ */

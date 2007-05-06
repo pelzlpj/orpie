@@ -8,9 +8,6 @@
 #define TYPE(t) CONCAT2(t,BASE_TYPE)
 #define _DECLARE_BASE_TYPE(v) gsl_complex conv_##v
 #define _CONVERT_BASE_TYPE(v) GSL_SET_COMPLEX(&conv_##v,Double_field(v, 0), Double_field(v,1))
-#if __GNUC__ >= 3
-#define DECLARE_BASE_TYPE(v) _DECLARE_BASE_TYPE(v); _CONVERT_BASE_TYPE(v)
-#endif /* __GNUC__ */
 #define FUNCTION(a,b) CONCAT3(a,BASE_TYPE,b)
 
 #include "mlgsl_matrix.h"
@@ -20,8 +17,3 @@
 
 #define _CONVERT_COMPLEX_MATRIX(a) mlgsl_mat_of_value_complex(&m_##a, a)
 #define _CONVERT_COMPLEX_MATRIX2(a,b) _CONVERT_COMPLEX_MATRIX(a); _CONVERT_COMPLEX_MATRIX(b)
-
-#if __GNUC__ >= 3
-#define DECLARE_COMPLEX_MATRIX(a) _DECLARE_COMPLEX_MATRIX(a); _CONVERT_COMPLEX_MATRIX(a)
-#define DECLARE_COMPLEX_MATRIX2(a,b) DECLARE_COMPLEX_MATRIX(a); DECLARE_COMPLEX_MATRIX(b)
-#endif /* __GNUC__ */

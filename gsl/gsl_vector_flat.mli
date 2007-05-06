@@ -1,10 +1,10 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 (** Vector of floats implemented with a [float array] *)
 
-type double_vector_flat = {
+type double_vector_flat = private {
     data : float array;
     off : int;
     len : int;
@@ -12,6 +12,10 @@ type double_vector_flat = {
   } 
 
 type vector = double_vector_flat
+
+val check : vector -> vector
+  (** @raise Failure if [off], [len] or [stride] designate an invalid
+      subvector of [data] *)
 
 (** {3 Operations} *)
 

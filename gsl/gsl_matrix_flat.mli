@@ -1,9 +1,11 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 
-type double_mat_flat = { 
+(** Matrices of floats implemented with [float array] *)
+
+type double_mat_flat = private {
     data : float array ;
     off  : int ;
     dim1 : int ;

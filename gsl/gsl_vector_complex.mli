@@ -1,6 +1,8 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
+
+(** Vector of complex numbers implemented with a [Bigarray] *)
 
 open Bigarray
 open Gsl_complex

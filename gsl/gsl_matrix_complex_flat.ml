@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 type complex_mat_flat = 
@@ -85,9 +85,8 @@ let to_array mat =
 
 let of_complex_array arr dim1 dim2 =
   let len = Array.length arr in
-  if dim1 * dim2 <> 2 * len
+  if 2 * dim1 * dim2 <> len
   then invalid_arg "of_array" ;
-  let tab = Array.make (2 * dim1 * dim2) 0. in
   { data = Array.copy arr ; off = 0 ; 
     dim1 = dim1 ; dim2 = dim2 ; tda = dim2 }
 
@@ -165,34 +164,38 @@ external transpose : matrix -> matrix -> unit = "ml_gsl_matrix_complex_transpose
 external transpose_in_place : matrix -> unit = "ml_gsl_matrix_complex_transpose"
 
 let row m i =
-  { Gsl_vector_complex_flat.data   = m.data ;
-    Gsl_vector_complex_flat.off    = m.off + i * m.tda ;
-    Gsl_vector_complex_flat.len    = m.dim2 ;
-    Gsl_vector_complex_flat.stride = 1 ; }
+  Gsl_vector_complex_flat.view_complex_array
+    ~off:(m.off + i * m.tda)
+    ~len:m.dim2
+    m.data
 
 let column m j =
-  { Gsl_vector_complex_flat.data   = m.data ;
-    Gsl_vector_complex_flat.off    = m.off + j ;
-    Gsl_vector_complex_flat.len    = m.dim1 ;
-    Gsl_vector_complex_flat.stride = m.tda ; }
+  Gsl_vector_complex_flat.view_complex_array
+    ~stride:m.tda
+    ~off:(m.off + j)
+    ~len:m.dim1
+    m.data
 
 let diagonal m =
-  { Gsl_vector_complex_flat.data   = m.data ;
-    Gsl_vector_complex_flat.off    = m.off ;
-    Gsl_vector_complex_flat.len    = min m.dim1 m.dim2 ;
-    Gsl_vector_complex_flat.stride = m.tda + 1 ; }
+  Gsl_vector_complex_flat.view_complex_array
+    ~stride:(m.tda + 1)
+    ~off:m.off
+    ~len:(min m.dim1 m.dim2)
+    m.data
 
 let subdiagonal m k =
-  { Gsl_vector_complex_flat.data   = m.data ;
-    Gsl_vector_complex_flat.off    = m.off + k * m.tda ;
-    Gsl_vector_complex_flat.len    = min (m.dim1 - k) m.dim2 ;
-    Gsl_vector_complex_flat.stride = m.tda + 1 ; }
+  Gsl_vector_complex_flat.view_complex_array
+    ~stride:(m.tda + 1)
+    ~off:(m.off + k * m.tda)
+    ~len:(min (m.dim1 - k) m.dim2)
+    m.data
 
 let superdiagonal m k =
-  { Gsl_vector_complex_flat.data   = m.data ;
-    Gsl_vector_complex_flat.off    = m.off + k;
-    Gsl_vector_complex_flat.len    = min m.dim1 (m.dim2 - k) ;
-    Gsl_vector_complex_flat.stride = m.tda + 1 ; }
+  Gsl_vector_complex_flat.view_complex_array
+    ~stride:(m.tda + 1)
+    ~off:(m.off + k)
+    ~len:(min m.dim1 (m.dim2 - k))
+    m.data
 
 let view_vector v ?(off=0) dim1 ?tda dim2 =
   let tda = match tda with

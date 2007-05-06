@@ -1,8 +1,10 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
-type complex_mat_flat = {
+(** Matrices of complex number simplemented with [float array] *)
+
+type complex_mat_flat = private {
   data : float array;
   off : int;
   dim1 : int;

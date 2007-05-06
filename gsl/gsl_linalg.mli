@@ -1,5 +1,5 @@
 (* ocamlgsl - OCaml interface to GSL                        *)
-(* Copyright (©) 2002 - Olivier Andrieu                     *)
+(* Copyright (Â©) 2002-2005 - Olivier Andrieu                *)
 (* distributed under the terms of the GPL version 2         *)
 
 (** Simple linear algebra operations *)
@@ -200,6 +200,36 @@ external _SV_solve : u:mat -> v:mat -> s:vec -> b:vec -> x:vec -> unit
 
 
 
+(** {3 LQ decomposition} *)
+
+external _LQ_decomp : a:mat -> tau:vec -> unit = "ml_gsl_linalg_LQ_decomp"
+external _LQ_solve_T : lq:mat -> tau:vec -> b:vec -> x:vec -> unit = "ml_gsl_linalg_LQ_solve_T"
+external _LQ_svx_T : lq:mat -> tau:vec -> x:vec -> unit = "ml_gsl_linalg_LQ_svx_T"
+external _LQ_lssolve_T : lq:mat -> tau:vec -> b:vec -> x:vec -> res:vec -> unit = "ml_gsl_linalg_LQ_lssolve_T"
+external _LQ_Lsolve_T : lq:mat -> b:vec -> x:vec -> unit = "ml_gsl_linalg_LQ_Lsolve_T"
+external _LQ_Lsvx_T : lq:mat -> x:vec -> unit = "ml_gsl_linalg_LQ_Lsvx_T"
+external _L_solve_T : l:mat -> b:vec -> x:vec -> unit = "ml_gsl_linalg_L_solve_T"
+external _LQ_vecQ : lq:mat -> tau:vec -> v:vec -> unit = "ml_gsl_linalg_LQ_vecQ"
+external _LQ_vecQT : lq:mat -> tau:vec -> v:vec -> unit = "ml_gsl_linalg_LQ_vecQT"
+external _LQ_unpack : lq:mat -> tau:vec -> q:mat -> l:mat -> unit = "ml_gsl_linalg_LQ_unpack"
+external _LQ_update : q:mat -> r:mat -> v:vec -> w:vec -> unit  = "ml_gsl_linalg_LQ_update"
+external _LQ_LQsolve : q:mat -> l:mat -> b:vec -> x:vec -> unit = "ml_gsl_linalg_LQ_LQsolve"
+
+
+
+(** {3 P^T L Q decomposition} *)
+
+external _PTLQ_decomp : a:mat -> tau:vec -> Gsl_permut.permut -> norm:vec -> int = "ml_gsl_linalg_PTLQ_decomp"
+external _PTLQ_decomp2 : a:mat -> q:mat -> r:mat -> tau:vec -> Gsl_permut.permut -> norm:vec -> int = "ml_gsl_linalg_PTLQ_decomp2_bc" "ml_gsl_linalg_PTLQ_decomp2"
+external _PTLQ_solve_T : qr:mat -> tau:vec -> Gsl_permut.permut -> b:vec -> x:vec -> unit = "ml_gsl_linalg_PTLQ_solve_T"
+external _PTLQ_svx_T : lq:mat -> tau:vec -> Gsl_permut.permut -> x:vec -> unit = "ml_gsl_linalg_PTLQ_svx_T"
+external _PTLQ_LQsolve_T : q:mat -> l:mat -> Gsl_permut.permut -> b:vec -> x:vec -> unit = "ml_gsl_linalg_PTLQ_LQsolve_T"
+external _PTLQ_Lsolve_T : lq:mat -> Gsl_permut.permut -> b:vec -> x:vec -> unit = "ml_gsl_linalg_PTLQ_Lsolve_T"
+external _PTLQ_Lsvx_T : lq:mat -> Gsl_permut.permut -> x:vec -> unit = "ml_gsl_linalg_PTLQ_Lsvx_T"
+external _PTLQ_update : q:mat -> l:mat -> Gsl_permut.permut -> v:vec -> w:vec -> unit  = "ml_gsl_linalg_PTLQ_update"
+
+
+
 (** {3 Cholesky decomposition} *)
 
 external cho_decomp : mat -> unit
@@ -211,6 +241,8 @@ external cho_solve : mat -> b:vec -> x:vec -> unit
 external cho_svx : mat -> vec -> unit
     = "ml_gsl_linalg_cholesky_svx"
 
+external cho_decomp_unit : mat -> vec -> unit
+    = "ml_gsl_linalg_cholesky_decomp_unit"
 
 
 (** {3 Tridiagonal Decomposition of Real Symmetric Matrices} *)

@@ -1,5 +1,5 @@
 /* ocamlgsl - OCaml interface to GSL                        */
-/* Copyright (©) 2002 - Olivier Andrieu                     */
+/* Copyright (Â©) 2002-2005 - Olivier Andrieu                */
 /* distributed under the terms of the GPL version 2         */
 
 #include <gsl/gsl_blas.h>
@@ -13,7 +13,7 @@
 
 /* LEVEL1 complex */
 
-value ml_gsl_blas_zdotu(value X, value Y)
+CAMLprim value ml_gsl_blas_zdotu(value X, value Y)
 {
   gsl_complex r;
   _DECLARE_VECTOR2(X, Y);
@@ -22,7 +22,7 @@ value ml_gsl_blas_zdotu(value X, value Y)
   return copy_complex(&r);
 }
 
-value ml_gsl_blas_zdotc(value X, value Y)
+CAMLprim value ml_gsl_blas_zdotc(value X, value Y)
 {
   gsl_complex r;
   _DECLARE_VECTOR2(X, Y);
@@ -31,28 +31,28 @@ value ml_gsl_blas_zdotc(value X, value Y)
   return copy_complex(&r);
 }
 
-value ml_gsl_blas_znrm2(value X)
+CAMLprim value ml_gsl_blas_znrm2(value X)
 {
   _DECLARE_VECTOR(X);
   _CONVERT_VECTOR(X);
   return copy_double(gsl_blas_dznrm2(&v_X));
 }
 
-value ml_gsl_blas_zasum(value X)
+CAMLprim value ml_gsl_blas_zasum(value X)
 {
   _DECLARE_VECTOR(X);
   _CONVERT_VECTOR(X);
   return copy_double(gsl_blas_dzasum(&v_X));
 }
 
-value ml_gsl_blas_izamax(value X)
+CAMLprim value ml_gsl_blas_izamax(value X)
 {
   _DECLARE_VECTOR(X);
   _CONVERT_VECTOR(X);
   return Val_int(gsl_blas_izamax(&v_X));
 }
 
-value ml_gsl_blas_zswap(value X, value Y)
+CAMLprim value ml_gsl_blas_zswap(value X, value Y)
 {
   _DECLARE_VECTOR2(X, Y);
   _CONVERT_VECTOR2(X, Y);
@@ -60,7 +60,7 @@ value ml_gsl_blas_zswap(value X, value Y)
   return Val_unit;
 }
 
-value ml_gsl_blas_zcopy(value X, value Y)
+CAMLprim value ml_gsl_blas_zcopy(value X, value Y)
 {
   _DECLARE_VECTOR2(X, Y);
   _CONVERT_VECTOR2(X, Y);
@@ -68,7 +68,7 @@ value ml_gsl_blas_zcopy(value X, value Y)
   return Val_unit;
 }
 
-value ml_gsl_blas_zaxpy(value alpha, value X, value Y)
+CAMLprim value ml_gsl_blas_zaxpy(value alpha, value X, value Y)
 {
   _DECLARE_VECTOR2(X, Y);
   _DECLARE_COMPLEX(alpha);
@@ -78,7 +78,7 @@ value ml_gsl_blas_zaxpy(value alpha, value X, value Y)
   return Val_unit;
 }
 
-value ml_gsl_blas_zscal(value alpha, value X)
+CAMLprim value ml_gsl_blas_zscal(value alpha, value X)
 {
   _DECLARE_VECTOR(X);
   _DECLARE_COMPLEX(alpha);
@@ -88,7 +88,7 @@ value ml_gsl_blas_zscal(value alpha, value X)
   return Val_unit;
 }
 
-value ml_gsl_blas_zdscal(value alpha, value X)
+CAMLprim value ml_gsl_blas_zdscal(value alpha, value X)
 {
   _DECLARE_VECTOR(X);
   _CONVERT_VECTOR(X);
@@ -100,8 +100,8 @@ value ml_gsl_blas_zdscal(value alpha, value X)
 
 /* LEVEL2 complex */
 
-value ml_gsl_blas_zgemv(value transa, value alpha, value A, 
-			value X, value beta, value Y)
+CAMLprim value ml_gsl_blas_zgemv(value transa, value alpha, value A, 
+				 value X, value beta, value Y)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -114,14 +114,14 @@ value ml_gsl_blas_zgemv(value transa, value alpha, value A,
   return Val_unit;
 }
 
-value ml_gsl_blas_zgemv_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zgemv_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zgemv(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5]);
 }
 
-value ml_gsl_blas_ztrmv(value uplo, value transa, value diag,
-			value A, value X)
+CAMLprim value ml_gsl_blas_ztrmv(value uplo, value transa, value diag,
+				 value A, value X)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR(X);
@@ -132,8 +132,8 @@ value ml_gsl_blas_ztrmv(value uplo, value transa, value diag,
   return Val_unit;
 }
 
-value ml_gsl_blas_ztrsv(value uplo, value transa, value diag,
-			value A, value X)
+CAMLprim value ml_gsl_blas_ztrsv(value uplo, value transa, value diag,
+				 value A, value X)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR(X);
@@ -144,8 +144,8 @@ value ml_gsl_blas_ztrsv(value uplo, value transa, value diag,
   return Val_unit;
 }
 
-value ml_gsl_blas_zhemv(value uplo, value alpha, value A,
-			value X, value beta, value Y)
+CAMLprim value ml_gsl_blas_zhemv(value uplo, value alpha, value A,
+				 value X, value beta, value Y)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -158,13 +158,13 @@ value ml_gsl_blas_zhemv(value uplo, value alpha, value A,
   return Val_unit;
 }
 
-value ml_gsl_blas_zhemv_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zhemv_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zhemv(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5]);
 }
 
-value ml_gsl_blas_zgeru(value alpha, value X, value Y, value A)
+CAMLprim value ml_gsl_blas_zgeru(value alpha, value X, value Y, value A)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR2(X,Y);
@@ -176,7 +176,7 @@ value ml_gsl_blas_zgeru(value alpha, value X, value Y, value A)
   return Val_unit;
 }
 
-value ml_gsl_blas_zgerc(value alpha, value X, value Y, value A)
+CAMLprim value ml_gsl_blas_zgerc(value alpha, value X, value Y, value A)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR2(X,Y);
@@ -188,7 +188,7 @@ value ml_gsl_blas_zgerc(value alpha, value X, value Y, value A)
   return Val_unit;
 }
 
-value ml_gsl_blas_zher(value uplo, value alpha, value X, value A)
+CAMLprim value ml_gsl_blas_zher(value uplo, value alpha, value X, value A)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR(X);
@@ -198,8 +198,8 @@ value ml_gsl_blas_zher(value uplo, value alpha, value X, value A)
   return Val_unit;
 }
 
-value ml_gsl_blas_zher2(value uplo, value alpha, 
-			value X, value Y, value A)
+CAMLprim value ml_gsl_blas_zher2(value uplo, value alpha, 
+				 value X, value Y, value A)
 {
   _DECLARE_MATRIX(A);
   _DECLARE_VECTOR2(X,Y);
@@ -216,9 +216,9 @@ value ml_gsl_blas_zher2(value uplo, value alpha,
 
 /* LEVEL3 complex */
 
-value ml_gsl_blas_zgemm(value transa, value transb, 
-			value alpha, value A, value B, 
-			value beta, value C)
+CAMLprim value ml_gsl_blas_zgemm(value transa, value transb, 
+				 value alpha, value A, value B, 
+				 value beta, value C)
 {
   _DECLARE_MATRIX3(A, B, C);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -229,16 +229,16 @@ value ml_gsl_blas_zgemm(value transa, value transb,
   return Val_unit;
 }
 
-value ml_gsl_blas_zgemm_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zgemm_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zgemm(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5], argv[6]);
 }
 
 
-value ml_gsl_blas_zsymm(value side, value uplo,
-			value alpha, value A, value B, 
-			value beta, value C)
+CAMLprim value ml_gsl_blas_zsymm(value side, value uplo,
+				 value alpha, value A, value B, 
+				 value beta, value C)
 {
   _DECLARE_MATRIX3(A, B, C);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -249,14 +249,14 @@ value ml_gsl_blas_zsymm(value side, value uplo,
   return Val_unit;
 }
 
-value ml_gsl_blas_zsymm_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zsymm_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zsymm(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5], argv[6]);
 }
 
-value ml_gsl_blas_zsyrk(value uplo, value trans, value alpha, 
-			value A, value beta, value C)
+CAMLprim value ml_gsl_blas_zsyrk(value uplo, value trans, value alpha, 
+				 value A, value beta, value C)
 {
   _DECLARE_MATRIX2(A, C);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -268,15 +268,15 @@ value ml_gsl_blas_zsyrk(value uplo, value trans, value alpha,
   return Val_unit;
 }
 
-value ml_gsl_blas_zsyrk_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zsyrk_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zsyrk(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5]);
 }
 
 
-value ml_gsl_blas_zsyr2k(value uplo, value trans, value alpha, 
-			 value A, value B, value beta, value C)
+CAMLprim value ml_gsl_blas_zsyr2k(value uplo, value trans, value alpha, 
+				  value A, value B, value beta, value C)
 {
   _DECLARE_MATRIX3(A, B, C);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -288,15 +288,15 @@ value ml_gsl_blas_zsyr2k(value uplo, value trans, value alpha,
   return Val_unit;
 }
 
-value ml_gsl_blas_zsyr2k_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zsyr2k_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zsyr2k(argv[0], argv[1], argv[2],
 			    argv[3], argv[4], argv[5], argv[6]);
 }
 
-value ml_gsl_blas_ztrmm(value side, value uplo,
-			value transa, value diag,
-			value alpha, value A, value B)
+CAMLprim value ml_gsl_blas_ztrmm(value side, value uplo,
+				 value transa, value diag,
+				 value alpha, value A, value B)
 {
   _DECLARE_MATRIX2(A, B);
   _DECLARE_COMPLEX(alpha);
@@ -308,15 +308,15 @@ value ml_gsl_blas_ztrmm(value side, value uplo,
   return Val_unit;
 }
 
-value ml_gsl_blas_ztrmm_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_ztrmm_bc(value *argv, int argc)
 {
   return ml_gsl_blas_ztrmm(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5], argv[6]);
 }
 
-value ml_gsl_blas_ztrsm(value side, value uplo,
-			value transa, value diag,
-			value alpha, value A, value B)
+CAMLprim value ml_gsl_blas_ztrsm(value side, value uplo,
+				 value transa, value diag,
+				 value alpha, value A, value B)
 {
   _DECLARE_MATRIX2(A, B);
   _DECLARE_COMPLEX(alpha);
@@ -328,15 +328,15 @@ value ml_gsl_blas_ztrsm(value side, value uplo,
   return Val_unit;
 }
 
-value ml_gsl_blas_ztrsm_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_ztrsm_bc(value *argv, int argc)
 {
   return ml_gsl_blas_ztrsm(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5], argv[6]);
 }
 
-value ml_gsl_blas_zhemm(value side, value uplo,
-			value alpha, value A, value B,
-			value beta, value C)
+CAMLprim value ml_gsl_blas_zhemm(value side, value uplo,
+				 value alpha, value A, value B,
+				 value beta, value C)
 {
   _DECLARE_MATRIX3(A, B, C);
   _DECLARE_COMPLEX2(alpha, beta);
@@ -347,15 +347,15 @@ value ml_gsl_blas_zhemm(value side, value uplo,
   return Val_unit;
 }
 
-value ml_gsl_blas_zhemm_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zhemm_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zhemm(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5], argv[6]);
 }
 
-value ml_gsl_blas_zherk(value uplo, value trans,
-			value alpha, value A,
-			value beta, value C)
+CAMLprim value ml_gsl_blas_zherk(value uplo, value trans,
+				 value alpha, value A,
+				 value beta, value C)
 {
   _DECLARE_MATRIX2(A, C);
   _CONVERT_MATRIX2(A, C);
@@ -364,15 +364,15 @@ value ml_gsl_blas_zherk(value uplo, value trans,
   return Val_unit;
 }
 
-value ml_gsl_blas_zherk_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zherk_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zherk(argv[0], argv[1], argv[2],
 			   argv[3], argv[4], argv[5]);
 }
 
-value ml_gsl_blas_zher2k(value uplo, value trans,
-			 value alpha, value A, value B,
-			 value beta, value C)
+CAMLprim value ml_gsl_blas_zher2k(value uplo, value trans,
+				  value alpha, value A, value B,
+				  value beta, value C)
 {
   _DECLARE_MATRIX3(A, B, C);
   _DECLARE_COMPLEX(alpha);
@@ -383,8 +383,8 @@ value ml_gsl_blas_zher2k(value uplo, value trans,
   return Val_unit;
 }
 
-value ml_gsl_blas_zher2k_bc(value *argv, int argc)
+CAMLprim value ml_gsl_blas_zher2k_bc(value *argv, int argc)
 {
   return ml_gsl_blas_zher2k(argv[0], argv[1], argv[2],
-			   argv[3], argv[4], argv[5], argv[6]);
+			    argv[3], argv[4], argv[5], argv[6]);
 }
