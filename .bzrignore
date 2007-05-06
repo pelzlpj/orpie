@@ -1,0 +1,13 @@
+curses
+units
+*.cmi
+*.cmo
+*.o
+*.cmx
+*.cma
+autom4te.cache
+config.*
+configure
+Makefile
+version.ml
+install.ml
