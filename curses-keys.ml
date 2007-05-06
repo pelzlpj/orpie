@@ -26,7 +26,6 @@ begin
    assert (keypad std true);
    assert (cbreak ());
    assert (noecho ());
-   assert (curs_set 0);
    assert (mvaddstr 1 0 "Type some keys to see the corresponding octal and string representations:");
    assert (refresh ())
 end;
