@@ -252,7 +252,7 @@ let decode_single_key_string key_string =
       else 
          let octal_regex = Str.regexp "^0o" in
          try
-            let pos = Str.search_forward octal_regex key_string 0 in
+            let _ = Str.search_forward octal_regex key_string 0 in
             ((int_of_string key_string), ("\\" ^ Str.string_after key_string
             2))
          with

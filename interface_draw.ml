@@ -569,7 +569,6 @@ let draw_help_abbrev iface win mvwaddstr_safe try_find =
                begin
                   (* highlight the first 'highlight_len' characters *)
                   wattron win WA.bold;
-                  let len_str = String.length m in
                   mvwaddstr_safe win v_pos 2
                      (Str.string_before m (highlight_len));
                   wattroff win WA.bold;
@@ -616,7 +615,6 @@ let draw_help_varedit iface win mvwaddstr_safe try_find =
             |None ->
                (* highlight the first 'highlight_len' characters *)
                wattron win WA.bold;
-               let len_str = String.length m in
                mvwaddstr_safe win v_pos 2
                   (Str.string_before m (highlight_len));
                wattroff win WA.bold;

@@ -150,7 +150,6 @@ let handle_resize (iface : interface_state_t) =
    (* reset ncurses *)
    endwin ();
    assert (refresh ());
-   let rows, cols = get_size () in
    resize_subwins iface.scr;
    handle_refresh iface;;
 
@@ -1154,7 +1153,6 @@ let edit_parse_input_textfile (iface : interface_state_t) (is_browsing) =
       in ();
       (* wake up curses again, and check for resize *)
       assert (refresh ());
-      let rows, cols = get_size () in
       resize_subwins iface.scr;
       handle_refresh iface;
       let edited_buf = Utility.expand_open_in_ascii input_file in
@@ -1261,7 +1259,7 @@ let handle_edit_input (iface : interface_state_t) =
 (* display an "about" screen *)
 let handle_about (iface : interface_state_t) =
    draw_about iface;
-   let a = getch () in ();
+   let _ = getch () in ();
    erase ();
    assert (refresh ());
    handle_refresh iface
@@ -1669,7 +1667,7 @@ let handle_abbrev_character (iface : interface_state_t) key =
       draw_help iface;
       draw_update_entry iface
    with
-      Not_found | Invalid_argument "char_of_int" -> let err = beep () in ()
+      Not_found | Invalid_argument "char_of_int" -> let _ = beep () in ()
 
 
 (* enter an abbrev entry *)

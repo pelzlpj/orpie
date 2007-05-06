@@ -61,7 +61,7 @@ let inv (stack : rpc_stack) (evaln : int -> unit) =
                (stack#push gen_el;
                raise (Invalid_argument "cannot invert ill-conditioned matrix"))
             else
-               let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
+               let _ = Gsl_linalg._LU_decomp (`M copy_el2) perm in
                (Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
                stack#push (RpcFloatMatrixUnit (inv, new_unit)))
          end
@@ -76,7 +76,7 @@ let inv (stack : rpc_stack) (evaln : int -> unit) =
          perm = Gsl_permut.create m and
          inv = Gsl_matrix_complex.create m m in
          try
-            let sign = Gsl_linalg.complex_LU_decomp copy_el perm in
+            let _ = Gsl_linalg.complex_LU_decomp copy_el perm in
             Gsl_linalg.complex_LU_invert copy_el perm (`CM inv);
             stack#push (RpcComplexMatrixUnit (inv, new_unit))
          with Gsl_exn _ ->

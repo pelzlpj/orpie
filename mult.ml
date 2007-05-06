@@ -67,7 +67,6 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
          stack#push (RpcFloatMatrixUnit (result, unorm uprod))
       |RpcComplexMatrixUnit (el2, uu) ->
          let uprod = Units.mult el1 uu in
-         let c_el1 = cmpx_of_float el1.Units.coeff.Complex.re in
          let result = Gsl_matrix_complex.copy el2 in
          Gsl_matrix_complex.scale result uprod.Units.coeff;
          stack#push (RpcComplexMatrixUnit (result, unorm uprod))

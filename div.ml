@@ -97,7 +97,7 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix.create m1 m1 in
                try
-                  let sign = Gsl_linalg._LU_decomp copy_el2 perm in
+                  let _ = Gsl_linalg._LU_decomp copy_el2 perm in
                   Gsl_linalg._LU_invert copy_el2 perm (`M inv);
                   let result = Gsl_matrix.create n1 m2 in
                   Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
@@ -125,7 +125,7 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix_complex.create m1 m1 in
                try
-                  let sign = Gsl_linalg.complex_LU_decomp (`CM
+                  let _ = Gsl_linalg.complex_LU_decomp (`CM
                   copy_el2) perm in
                   Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
                   (`CM inv);
@@ -173,7 +173,7 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix.create m1 m1 in
                try
-                  let sign = Gsl_linalg._LU_decomp (`M copy_el2) perm in
+                  let _ = Gsl_linalg._LU_decomp (`M copy_el2) perm in
                   Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
                   let result = Gsl_matrix_complex.create n1 m2 in
                   Gsl_blas.Complex.gemm Gsl_blas.NoTrans
@@ -203,7 +203,7 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
                perm = Gsl_permut.create m1 and
                inv = Gsl_matrix_complex.create m1 m1 in
                try
-                  let sign = Gsl_linalg.complex_LU_decomp (`CM
+                  let _ = Gsl_linalg.complex_LU_decomp (`CM
                   copy_el2) perm in
                   Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
                   (`CM inv);
