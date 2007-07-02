@@ -207,8 +207,8 @@ let get_entry_from_buffer (iface : interface_state_t) =
          let buffer = iface.gen_buffer.(0) in
          try
             let ff = get_float_el buffer.re_mantissa buffer.re_exponent in
-            let fu = Units.unit_of_float_string ff iface.units_entry_buffer in
-            RpcFloatUnit fu
+            let uu = Units.units_of_string iface.units_entry_buffer !Rcfile.unit_table in
+            RpcFloatUnit (ff, uu)
          with 
             |Failure "float_of_string" ->
                raise (Invalid_argument "improperly formatted floating-point data")
@@ -222,12 +222,15 @@ let get_entry_from_buffer (iface : interface_state_t) =
             begin match buffer.is_polar with
             |false ->
                let real_part = get_float_el buffer.re_mantissa 
-               buffer.re_exponent
+                  buffer.re_exponent
                and imag_part = get_float_el buffer.im_mantissa
-               buffer.im_exponent in
-               let cu = Units.unit_of_cpx_string 
-               {re = real_part; im = imag_part} iface.units_entry_buffer in
-               RpcComplexUnit cu
+                  buffer.im_exponent 
+               in
+               let cc = {re = real_part; im = imag_part}
+               and uu = Units.units_of_string iface.units_entry_buffer 
+                  !Rcfile.unit_table
+               in
+               RpcComplexUnit (cc, uu)
             (* if is_polar==true, then the data in the buffer represents
              * polar data... so convert it to rect notation before storing
              * it as a complex number. *)
@@ -242,10 +245,11 @@ let get_entry_from_buffer (iface : interface_state_t) =
                      (pi /. 180.0 *. (get_float_el buffer.im_mantissa
                      buffer.im_exponent))
                in
-               let cu = Units.unit_of_cpx_string 
-               {re = r *. (cos theta); im = r *. (sin theta)}
-               iface.units_entry_buffer in
-               RpcComplexUnit cu
+               let cc = {re = r *. (cos theta); im = r *. (sin theta)}
+               and uu = Units.units_of_string iface.units_entry_buffer
+                  !Rcfile.unit_table
+               in
+               RpcComplexUnit (cc, uu)
             end
          with 
             |Failure "float_of_string" ->
@@ -267,7 +271,9 @@ let get_entry_from_buffer (iface : interface_state_t) =
                temp_arr.(i) <- (get_float_el iface.gen_buffer.(i).re_mantissa
                   iface.gen_buffer.(i).re_exponent)
             done;
-            let uu = Units.unit_of_string iface.units_entry_buffer in
+            let uu = Units.units_of_string iface.units_entry_buffer
+               !Rcfile.unit_table
+            in
             RpcFloatMatrixUnit (Gsl_matrix.of_array temp_arr matrix_rows
             iface.matrix_cols, uu)
          with Failure "float_of_string" ->
@@ -312,7 +318,9 @@ let get_entry_from_buffer (iface : interface_state_t) =
                   im = r *. (sin theta)}
                end
             done;
-            let uu = Units.unit_of_string iface.units_entry_buffer in
+            let uu = Units.units_of_string iface.units_entry_buffer
+               !Rcfile.unit_table 
+            in
             RpcComplexMatrixUnit (Gsl_matrix_complex.of_array temp_arr
             matrix_rows iface.matrix_cols, uu)
          with Failure "float_of_string" ->
@@ -1701,7 +1709,10 @@ let handle_enter_abbrev (iface : interface_state_t) =
             end
          |IsConst ->
             let con = Const.translate_symbol first_abbrev_match in
+            ()
+            (*
             iface.calc#enter_const con;
+            *)
          end
       with
          Not_found -> ()

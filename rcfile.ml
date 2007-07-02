@@ -64,6 +64,8 @@ let autobind_keys_list : (int * string * operation_t option * int) list ref = re
 let autobind_keys = ref (Array.make 1 (0, "", None, 0));;
 (* List of included rc files *)
 let included_rcfiles : (string list) ref = ref [];;
+(* Unit definition table *)
+let unit_table = ref Units.empty_unit_table;;
 
 
 let function_of_key key =
@@ -759,6 +761,35 @@ let parse_line line_stream =
       | [< >] ->
          config_failwith ("Unmatched variable name after \"set\"")
       end
+   | [< 'Kwd "base_unit" >] ->
+      Printf.fprintf stderr "base unit\n";
+      begin match line_stream with parser
+      | [< 'String base_u; 'String prefix_s >] ->
+         begin try
+            let prefix = Units.prefix_of_string prefix_s in
+            unit_table := Units.add_base_unit base_u prefix !unit_table
+         with Not_found ->
+            config_failwith 
+            ("Expected an SI prefix string (or null string) after: base_unit \"" ^
+            base_u ^ "\"")
+         end
+      | [< >] ->
+         config_failwith ("Expected a unit string and prefix string after \"base_unit\"")
+      end
+   | [< 'Kwd "unit" >] ->
+      Printf.fprintf stderr "unit\n";
+      begin match line_stream with parser
+      | [< 'String unit_str; 'String unit_def_str >] ->
+         begin try
+            let unit_def = Units.unit_def_of_string unit_def_str !unit_table in
+            unit_table := Units.add_unit unit_str unit_def !unit_table
+         with Units.Units_error s ->
+            config_failwith ("Illegal unit definition: unit \"" ^
+            unit_str ^ "\" \"" ^ unit_def_str ^ "\"; " ^ s)
+         end
+      | [< >] ->
+         config_failwith ("Expected a unit string and definition after \"unit\"")
+      end
    | [< 'Kwd "#" >] ->
       ()
    | [< >] ->
@@ -866,7 +897,7 @@ let rec process_rcfile rcfile_op =
          ["include"; "bind"; "unbind_function"; "unbind_command";
          "unbind_edit"; "unbind_browse"; "unbind_abbrev"; "unbind_integer";
          "unbind_variable"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; 
-         "#"] 
+         "base_unit"; "unit"; "#"] 
       (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in

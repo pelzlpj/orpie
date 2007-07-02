@@ -38,6 +38,11 @@ type interruptable_args_t =
 
 let pi = 3.14159265358979323846;;
 
+let c_of_f ff = {
+   Complex.re = ff;
+   Complex.im = 0.0
+}
+
 class rpc_calc conserve_memory =
    object(self)
       val mutable stack = new rpc_stack conserve_memory
@@ -204,18 +209,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcInt (minus_big_int el))
-         |RpcFloatUnit el ->
-            let new_el = {
-               Units.coeff   = Complex.neg el.Units.coeff;
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
-         |RpcComplexUnit el ->
-            let new_unit = {
-               Units.coeff   = Gsl_complex.negative el.Units.coeff;
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcComplexUnit new_unit)
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (~-. el, uu))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcComplexUnit (Complex.neg el, uu))
          |RpcFloatMatrixUnit (el, uu) ->
             let copy = Gsl_matrix.copy el in
             (Gsl_matrix.scale copy (-1.0);
@@ -240,17 +237,16 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcInt (mult_big_int el el))
-         |RpcFloatUnit el ->
-            let new_el = Units.mult el el in
-            stack#push (RpcFloatUnit new_el)
-         |RpcComplexUnit el ->
-            stack#push (RpcComplexUnit (Units.mult el el))
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (el *. el, Units.pow uu 2.))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcComplexUnit (Complex.mul el el, Units.pow uu 2.))
          |RpcFloatMatrixUnit (el, uu) ->
             let n, m = (Gsl_matrix.dims el) in
             if n = m then
                let result = Gsl_matrix.create n m in
                (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el el 0.0 result;
-               stack#push (RpcFloatMatrixUnit (result, Units.mult uu uu)))
+               stack#push (RpcFloatMatrixUnit (result, Units.pow uu 2.)))
             else
                (stack#push gen_el;
                raise (Invalid_argument "matrix is non-square"))
@@ -260,7 +256,7 @@ class rpc_calc conserve_memory =
                let result = Gsl_matrix_complex.create n m in
                Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
                Complex.one el el Complex.zero result;
-               stack#push (RpcComplexMatrixUnit (result, Units.mult uu uu))
+               stack#push (RpcComplexMatrixUnit (result, Units.pow uu 2.))
             else
                (stack#push gen_el;
                raise (Invalid_argument "matrix is non-square"))
@@ -279,13 +275,14 @@ class rpc_calc conserve_memory =
          self#evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
-         |RpcFloatUnit el ->
-            if el.Units.coeff.Complex.re < 0. then
-               stack#push (RpcComplexUnit (Units.pow el 0.5))
+         |RpcFloatUnit (el, uu) ->
+            if el < 0.0 then
+               let cc = c_of_f el in
+               stack#push (RpcComplexUnit (Complex.sqrt cc, Units.pow uu 0.5))
             else
-               stack#push (RpcFloatUnit (Units.pow el 0.5))
-         |RpcComplexUnit el ->
-            stack#push (RpcComplexUnit (Units.pow el 0.5))
+               stack#push (RpcFloatUnit (sqrt el, Units.pow uu 0.5))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcComplexUnit (Complex.sqrt el, Units.pow uu 0.5))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -305,24 +302,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcInt (abs_big_int el))
-         |RpcFloatUnit el ->
-            let new_el = {
-               Units.coeff   = {
-                  Complex.re = abs_float (el.Units.coeff.Complex.re);
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
-         |RpcComplexUnit el ->
-            let new_el = {
-               Units.coeff   = {
-                  Complex.re = Gsl_complex.abs el.Units.coeff;
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (abs_float el, uu))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcFloatUnit (Gsl_complex.abs el, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -340,14 +323,14 @@ class rpc_calc conserve_memory =
          self#evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
-         |RpcComplexUnit el ->
-            let c_el = el.Units.coeff in
+         |RpcComplexUnit (el, uu) ->
             begin match modes.angle with
             |Rad ->
-               stack#push (RpcFloatUnit (funit_of_float (Gsl_complex.arg c_el)))
+               let (f, u) = funit_of_float (Gsl_complex.arg el) in
+               stack#push (RpcFloatUnit (f, u))
             |Deg ->
-               stack#push (RpcFloatUnit (funit_of_float 
-               (180.0 /. pi *.  (Gsl_complex.arg c_el))))
+               let (f, u) = funit_of_float (180.0 /. pi *.  (Gsl_complex.arg el)) in
+               stack#push (RpcFloatUnit (f, u))
             end
          |RpcVariable s ->
             stack#push gen_el;
@@ -367,21 +350,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float (exp (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (exp (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot exponentiate dimensioned value"
             end else
-               stack#push (RpcFloatUnit (funit_of_float 
-               (exp el.Units.coeff.Complex.re)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (exp el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot exponentiate dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.exp el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.exp el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -400,22 +384,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (log (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (log (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               stack#push (RpcFloatUnit (funit_of_float 
-               (log el.Units.coeff.Complex.re)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (log el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.log el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.log el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -434,22 +418,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (10.0 ** (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (10.0 ** (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot exponentiate dimensioned value"
             end else
-               stack#push (RpcFloatUnit (funit_of_float 
-               (10.0 ** el.Units.coeff.Complex.re)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (10.0 ** el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot exponentiate dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Complex.pow (cmpx_of_float 10.0) el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Complex.pow (cmpx_of_float 10.0) el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -468,22 +452,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float (log10 
-            (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (log10 (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               stack#push (RpcFloatUnit (funit_of_float 
-               (log10 el.Units.coeff.Complex.re)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (log10 el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.log10 el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.log10 el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -503,14 +487,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcInt el)
-         |RpcFloatUnit el ->
-            stack#push (RpcFloatUnit el)
-         |RpcComplexUnit el ->
-            let new_el = {
-               Units.coeff   = Gsl_complex.conjugate el.Units.coeff;
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcComplexUnit new_el)
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (el, uu))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcComplexUnit (Gsl_complex.conjugate el, uu))
          |RpcFloatMatrixUnit (el, uu) ->
             stack#push (RpcFloatMatrixUnit (el, uu))
          |RpcComplexMatrixUnit (el, uu) ->
@@ -535,35 +515,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
-            begin
-               match modes.angle with
-               |Rad ->
-                  sin (float_of_big_int el)
-               |Deg ->
-                  sin (pi /. 180.0 *. (float_of_big_int el))
-            end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
-               stack#push gen_el;
-               raise_invalid "cannot compute sine of dimensioned value"
-            end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     sin f_el
-                  |Deg ->
-                     sin (pi /. 180.0 *. f_el)
-               end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                  |Rad -> sin (float_of_big_int el)
+                  |Deg -> sin (pi /. 180.0 *. (float_of_big_int el))
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute sine of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.sin el.Units.coeff)))
+               let (f, u) = funit_of_float
+                  begin
+                     match modes.angle with
+                     |Rad -> sin el
+                     |Deg -> sin (pi /. 180.0 *. el)
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
+               stack#push gen_el;
+               raise_invalid "cannot compute sine of dimensioned value"
+            end else
+               let (c, u) = cunit_of_cpx (Gsl_complex.sin el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -582,35 +561,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
-            begin
-               match modes.angle with
-               |Rad ->
-                  cos (float_of_big_int el)
-               |Deg ->
-                  cos (pi /. 180.0 *. (float_of_big_int el))
-            end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
-               stack#push gen_el;
-               raise_invalid "cannot compute cosine of dimensioned value"
-            end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     cos f_el
-                  |Deg ->
-                     cos (pi /. 180.0 *. f_el)
-               end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                  |Rad -> cos (float_of_big_int el)
+                  |Deg -> cos (pi /. 180.0 *. (float_of_big_int el))
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute cosine of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.cos el.Units.coeff)))
+               let (f, u) = funit_of_float
+                  begin
+                     match modes.angle with
+                     |Rad -> cos el
+                     |Deg -> cos (pi /. 180.0 *. el)
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
+               stack#push gen_el;
+               raise_invalid "cannot compute cosine of dimensioned value"
+            end else
+               let (c, u) = cunit_of_cpx (Gsl_complex.cos el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -629,35 +607,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
-            begin
-               match modes.angle with
-               |Rad ->
-                  tan (float_of_big_int el)
-               |Deg ->
-                  tan (pi /. 180.0 *. (float_of_big_int el))
-            end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
-               stack#push gen_el;
-               raise_invalid "cannot compute tangent of dimensioned value"
-            end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     tan f_el
-                  |Deg ->
-                     tan (pi /. 180.0 *. f_el)
-               end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                  |Rad -> tan (float_of_big_int el)
+                  |Deg -> tan (pi /. 180.0 *. (float_of_big_int el))
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute tangent of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.tan el.Units.coeff)))
+               let (f, u) = funit_of_float
+                  begin
+                     match modes.angle with
+                     |Rad -> tan el
+                     |Deg -> tan (pi /. 180.0 *. el)
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
+               stack#push gen_el;
+               raise_invalid "cannot compute tangent of dimensioned value"
+            end else
+               let (c, u) = cunit_of_cpx (Gsl_complex.tan el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -676,35 +653,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     asin (float_of_big_int el)
-                  |Deg ->
-                     180.0 /. pi *. asin (float_of_big_int el)
-               end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+                  |Rad -> asin (float_of_big_int el)
+                  |Deg -> 180.0 /. pi *. asin (float_of_big_int el)
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arcsine of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+               let (f, u) = funit_of_float
                   begin
                      match modes.angle with
-                     |Rad ->
-                        asin f_el
-                     |Deg ->
-                        180.0 /. pi *. asin f_el
-                  end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                     |Rad -> asin el
+                     |Deg -> 180.0 /. pi *. asin el
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arcsine of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.arcsin el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arcsin el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -723,35 +699,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     acos (float_of_big_int el)
-                  |Deg ->
-                     180.0 /. pi *. acos (float_of_big_int el)
-               end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+                  |Rad -> acos (float_of_big_int el)
+                  |Deg -> 180.0 /. pi *. acos (float_of_big_int el)
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arccos of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+               let (f, u) = funit_of_float
                   begin
                      match modes.angle with
-                     |Rad ->
-                        acos f_el
-                     |Deg ->
-                        180.0 /. pi *. acos f_el
-                  end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                     |Rad -> acos el
+                     |Deg -> 180.0 /. pi *. acos el
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arccos of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.arccos el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arccos el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -770,35 +745,34 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
+            let (f, u) = funit_of_float
                begin
                   match modes.angle with
-                  |Rad ->
-                     atan (float_of_big_int el)
-                  |Deg ->
-                     180.0 /. pi *. atan (float_of_big_int el)
-               end))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+                  |Rad -> atan (float_of_big_int el)
+                  |Deg -> 180.0 /. pi *. atan (float_of_big_int el)
+               end
+            in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arctan of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float
+               let (f, u) = funit_of_float
                   begin
                      match modes.angle with
-                     |Rad ->
-                        atan f_el
-                     |Deg ->
-                        180.0 /. pi *. atan f_el
-                  end))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+                     |Rad -> atan el
+                     |Deg -> 180.0 /. pi *. atan el
+                  end
+               in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute arctan of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.arctan el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arctan el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -817,22 +791,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float
-            (sinh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (sinh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute sinh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (sinh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (sinh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute sinh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.sinh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.sinh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -851,22 +825,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (cosh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (cosh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute cosh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (cosh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (cosh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute cosh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.cosh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.cosh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -885,22 +859,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (tanh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (tanh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute tanh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (tanh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (tanh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute tanh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.tanh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.tanh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -919,22 +893,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (Gsl_math.asinh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (Gsl_math.asinh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute asinh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (Gsl_math.asinh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (Gsl_math.asinh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute asinh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.arcsinh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arcsinh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -953,22 +927,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (Gsl_math.acosh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (Gsl_math.acosh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute acosh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (Gsl_math.acosh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (Gsl_math.acosh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute acosh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx
-               (Gsl_complex.arccosh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arccosh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -987,22 +961,22 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float 
-            (Gsl_math.atanh (float_of_big_int el))))
-         |RpcFloatUnit el ->
-            if has_units el then begin
+            let (f, u) = funit_of_float (Gsl_math.atanh (float_of_big_int el)) in
+            stack#push (RpcFloatUnit (f, u))
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute atanh of dimensioned value"
             end else
-               let f_el = el.Units.coeff.Complex.re in
-               stack#push (RpcFloatUnit (funit_of_float (Gsl_math.atanh f_el)))
-         |RpcComplexUnit el ->
-            if has_units el then begin
+               let (f, u) = funit_of_float (Gsl_math.atanh el) in
+               stack#push (RpcFloatUnit (f, u))
+         |RpcComplexUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute atanh of dimensioned value"
             end else
-               stack#push (RpcComplexUnit (cunit_of_cpx 
-               (Gsl_complex.arctanh el.Units.coeff)))
+               let (c, u) = cunit_of_cpx (Gsl_complex.arctanh el) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -1023,17 +997,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push gen_el
-         |RpcFloatUnit el ->
+         |RpcFloatUnit (el, uu) ->
             stack#push gen_el
-         |RpcComplexUnit el ->
-            let new_el = {
-               Units.coeff = {
-                  Complex.re = el.Units.coeff.Complex.re;
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcFloatUnit (el.Complex.re, uu))
          |RpcFloatMatrixUnit (el, uu) ->
             stack#push gen_el
          |RpcComplexMatrixUnit (el, uu) ->
@@ -1061,17 +1028,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push (RpcInt zero_big_int)
-         |RpcFloatUnit el ->
-            stack#push (RpcFloatUnit (funit_of_float 0.0))
-         |RpcComplexUnit el ->
-            let new_el = {
-               Units.coeff = {
-                  Complex.re = el.Units.coeff.Complex.im;
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (0.0, uu))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcFloatUnit (el.Complex.im, uu))
          |RpcFloatMatrixUnit (el, uu) ->
             let n, m = Gsl_matrix.dims el in
             let farr = Array.make (n * m) 0.0 in
@@ -1101,21 +1061,21 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               stack#push (RpcFloatUnit (funit_of_float 
-               (Gsl_sf.gamma (float_of_big_int el))))
+               let (f, u) = funit_of_float (Gsl_sf.gamma (float_of_big_int el)) in
+               stack#push (RpcFloatUnit (f, u))
             with
                Gsl_error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
-         |RpcFloatUnit el ->
-            if has_units el then begin
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute gamma of dimensioned value"
             end else
                begin try
-                  let f_el = el.Units.coeff.Complex.re in
-                  stack#push (RpcFloatUnit (funit_of_float (Gsl_sf.gamma f_el)))
+                  let (f, u) = funit_of_float (Gsl_sf.gamma el) in
+                  stack#push (RpcFloatUnit (f, u))
                with
                   Gsl_error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
@@ -1141,21 +1101,21 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               stack#push (RpcFloatUnit (funit_of_float 
-               (Gsl_sf.lngamma (float_of_big_int el))))
+               let (f, u) = funit_of_float (Gsl_sf.lngamma (float_of_big_int el)) in
+               stack#push (RpcFloatUnit (f, u))
             with
                Gsl_error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
-         |RpcFloatUnit el ->
-            if has_units el then begin
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute lngamma of dimensioned value"
             end else
                begin try
-                  let f_el = el.Units.coeff.Complex.re in
-                  stack#push (RpcFloatUnit (funit_of_float (Gsl_sf.lngamma f_el)))
+                  let (f, u) = funit_of_float (Gsl_sf.lngamma el) in
+                  stack#push (RpcFloatUnit (f, u))
                with
                   Gsl_error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
@@ -1181,21 +1141,21 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               stack#push (RpcFloatUnit (funit_of_float 
-               (Gsl_sf.erf (float_of_big_int el))))
+               let (f, u) = funit_of_float (Gsl_sf.erf (float_of_big_int el)) in
+               stack#push (RpcFloatUnit (f, u))
             with
                Gsl_error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
-         |RpcFloatUnit el ->
-            if has_units el then begin
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute error function of dimensioned value"
             end else
                begin try
-                  let f_el = el.Units.coeff.Complex.re in
-                  stack#push (RpcFloatUnit (funit_of_float (Gsl_sf.erf f_el)))
+                  let (f, u) = funit_of_float (Gsl_sf.erf el) in
+                  stack#push (RpcFloatUnit (f, u))
                with
                   Gsl_error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
@@ -1221,21 +1181,21 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               stack#push (RpcFloatUnit (funit_of_float
-               (Gsl_sf.erfc (float_of_big_int el))))
+               let (f, u) = funit_of_float (Gsl_sf.erfc (float_of_big_int el)) in
+               stack#push (RpcFloatUnit (f, u))
             with
                Gsl_error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
-         |RpcFloatUnit el ->
-            if has_units el then begin
+         |RpcFloatUnit (el, uu) ->
+            if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute erfc of dimensioned value"
             end else
                begin try
-                  let f_el = el.Units.coeff.Complex.re in
-                  stack#push (RpcFloatUnit (funit_of_float (Gsl_sf.erfc f_el)))
+                  let (f, u) = funit_of_float (Gsl_sf.erfc el) in
+                  stack#push (RpcFloatUnit (f, u))
                with
                   Gsl_error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
@@ -1286,15 +1246,14 @@ class rpc_calc conserve_memory =
                      stack#push gen_el;
                      raise (Invalid_argument "integer factorial requires non-negative argument")
                   end
-               |RpcFloatUnit el ->
-                  if has_units el then begin
+               |RpcFloatUnit (el, uu) ->
+                  if uu <> Units.empty_unit then begin
                      stack#push gen_el;
                      raise_invalid "cannot compute factorial of dimensioned value"
                   end else
                      begin try
-                        let f_el = el.Units.coeff.Complex.re in
-                        stack#push (RpcFloatUnit (funit_of_float 
-                        (Gsl_sf.gamma (f_el +. 1.0)))); 
+                        let (f, u) = funit_of_float (Gsl_sf.gamma (el +. 1.0)) in
+                        stack#push (RpcFloatUnit (f, u));
                         true
                      with
                         Gsl_error.Gsl_exn (err, errstr) ->
@@ -1359,9 +1318,8 @@ class rpc_calc conserve_memory =
             begin match gen_el2 with
             |RpcInt el2 ->
                stack#push (RpcInt (mod_big_int el1 el2))
-            |RpcFloatUnit el2 ->
-               let ff2 = el2.Units.coeff.Complex.re in
-               if has_units el2 then begin
+            |RpcFloatUnit (ff2, uu2) ->
+               if uu2 <> Units.empty_unit then begin
                   stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "cannot compute mod of dimensioned values")
@@ -1385,9 +1343,8 @@ class rpc_calc conserve_memory =
                stack#push gen_el2;
                raise (Invalid_argument "mod can only be applied to arguments of type integer or real"))
             end
-         |RpcFloatUnit el1 ->
-            let ff1 = el1.Units.coeff.Complex.re in
-            if has_units el1 then begin
+         |RpcFloatUnit (ff1, uu1) ->
+            if uu1 <> Units.empty_unit then begin
                stack#push gen_el1;
                stack#push gen_el2;
                raise (Invalid_argument "cannot compute mod of dimensioned values")
@@ -1396,9 +1353,8 @@ class rpc_calc conserve_memory =
                begin match gen_el2 with
                |RpcInt el2 ->
                   stack#push (RpcInt (mod_big_int bi_el1 el2))
-               |RpcFloatUnit el2 ->
-                  let ff2 = el2.Units.coeff.Complex.re in
-                  if has_units el2 then begin
+               |RpcFloatUnit (ff2, uu2) ->
+                  if uu2 <> Units.empty_unit then begin
                      stack#push gen_el1;
                      stack#push gen_el2;
                      raise (Invalid_argument "cannot compute mod of dimensioned values")
@@ -1447,15 +1403,8 @@ class rpc_calc conserve_memory =
          self#evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
-         |RpcFloatUnit el ->
-            let new_el = {
-               Units.coeff   = {
-                  Complex.re = floor el.Units.coeff.Complex.re;
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+         |RpcFloatUnit (el, uu) -> 
+            stack#push (RpcFloatUnit (floor el, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -1474,15 +1423,8 @@ class rpc_calc conserve_memory =
          self#evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
-         |RpcFloatUnit el ->
-            let new_el = {
-               Units.coeff   = {
-                  Complex.re = ceil el.Units.coeff.Complex.re;
-                  Complex.im = 0.0
-               };
-               Units.factors = el.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (ceil el, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -1503,8 +1445,7 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             stack#push gen_el
-         |RpcFloatUnit el ->
-            let ff = el.Units.coeff.Complex.re in
+         |RpcFloatUnit (ff, uu) ->
             if (abs_float ff) < 1e9 then
                stack#push (RpcInt (big_int_of_int (int_of_float ff)))
             else
@@ -1529,17 +1470,12 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            stack#push (RpcFloatUnit (funit_of_float (float_of_big_int el)))
+            let (f, u) = funit_of_float (float_of_big_int el) in
+            stack#push (RpcFloatUnit (f, u))
          |RpcFloatMatrixUnit (el, uu) ->
             let n, m = Gsl_matrix.dims el in
             if n = 1 && m = 1 then
-               stack#push (RpcFloatUnit {
-                  Units.coeff = {
-                     Complex.re = el.{0, 0};
-                     Complex.im = 0.0;
-                  };
-                  Units.factors = uu.Units.factors
-               })
+               stack#push (RpcFloatUnit (el.{0, 0}, uu))
             else begin
                stack#push gen_el;
                raise_invalid "matrix argument of to_float must be 1x1"
@@ -1566,7 +1502,8 @@ class rpc_calc conserve_memory =
 
       method enter_pi () =
          self#backup ();
-         stack#push (RpcFloatUnit (funit_of_float pi))
+         let (f, u) = funit_of_float pi in
+         stack#push (RpcFloatUnit (f, u))
 
       method get_display_line line_num =
          stack#get_display_string line_num modes
@@ -1629,10 +1566,10 @@ class rpc_calc conserve_memory =
          stack#push (RpcInt i)
 
       method enter_float f =
-         stack#push (RpcFloatUnit (funit_of_float f))
+         stack#push (RpcFloatUnit (f, Units.empty_unit))
 
-      method enter_cmpx f =
-         stack#push (RpcComplexUnit f)
+      method enter_cmpx c =
+         stack#push (RpcComplexUnit (c, Units.empty_unit))
 
       method enter_fmat fm uu =
          stack#push (RpcFloatMatrixUnit (fm, uu))
@@ -1640,8 +1577,8 @@ class rpc_calc conserve_memory =
       method enter_cmat cm uu =
          stack#push (RpcComplexMatrixUnit (cm, uu))
 
-      method enter_const cc =
-         stack#push (RpcFloatUnit cc)
+      method enter_const cc uu =
+         stack#push (RpcFloatUnit (cc, uu))
 
       (* evaluate last n variables of the stack (internal use only) *)
       method private evaln (num : int) =
@@ -1766,15 +1703,14 @@ class rpc_calc conserve_memory =
                      and abs_b = abs_big_int b in
                      interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                      false
-                  |RpcFloatUnit b ->
-                     let ff = b.Units.coeff.Complex.re in
-                     if has_units b then begin
+                  |RpcFloatUnit (ff2, uu2) ->
+                     if uu2 <> Units.empty_unit then begin
                         stack#push gen_el1;
                         stack#push gen_el2;
                         raise (Invalid_argument "cannot compute gcd of dimensioned values")
-                     end else if (abs_float ff) < 1e9 then begin
+                     end else if (abs_float ff2) < 1e9 then begin
                         let abs_a = abs_big_int a
-                        and abs_b = abs_big_int (big_int_of_int (int_of_float ff)) in
+                        and abs_b = abs_big_int (big_int_of_int (int_of_float ff2)) in
                         interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                         false
                      end else begin
@@ -1794,22 +1730,20 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "gcd requires integer or real arguments")
                   end
-               |RpcFloatUnit a ->
-                  let ff = a.Units.coeff.Complex.re in
-                  if has_units a then begin
+               |RpcFloatUnit (ff1, uu1) ->
+                  if uu1 <> Units.empty_unit then begin
                      stack#push gen_el1;
                      stack#push gen_el2;
                      raise (Invalid_argument "cannot compute gcd of dimensioned values")
-                  end else if (abs_float ff) < 1e9 then begin
-                     let abs_a = abs_big_int (big_int_of_int (int_of_float ff)) in
+                  end else if (abs_float ff1) < 1e9 then begin
+                     let abs_a = abs_big_int (big_int_of_int (int_of_float ff1)) in
                      begin match gen_el2 with
                      |RpcInt b ->
                         let abs_b = abs_big_int b in
                         interr_args <- Gcd_args (abs_a, abs_b, gen_el1, gen_el2);
                         false
-                     |RpcFloatUnit b ->
-                        let ff2 = b.Units.coeff.Complex.re in
-                        if has_units b then begin
+                     |RpcFloatUnit (ff2, uu2) ->
+                        if uu2 <> Units.empty_unit then begin
                            stack#push gen_el1;
                            stack#push gen_el2;
                            raise (Invalid_argument "cannot compute gcd of dimensioned values")
@@ -1892,14 +1826,13 @@ class rpc_calc conserve_memory =
                      and abs_b = abs_big_int b in
                      interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
                      false
-                  |RpcFloatUnit b ->
-                     let ff = b.Units.coeff.Complex.re in
-                     if has_units b then begin
+                  |RpcFloatUnit (ff2, uu2) ->
+                     if uu2 <> Units.empty_unit then begin
                         stack#push gen_el1;
                         stack#push gen_el2;
                         raise (Invalid_argument "cannot compute lcm of dimensioned values")
-                     end else if (abs_float ff) < 1e9 then begin
-                        let bi_b  = big_int_of_int (int_of_float ff) in
+                     end else if (abs_float ff2) < 1e9 then begin
+                        let bi_b  = big_int_of_int (int_of_float ff2) in
                         let abs_a = abs_big_int a
                         and abs_b = abs_big_int bi_b in
                         let coeff = mult_big_int a bi_b in
@@ -1922,14 +1855,13 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "lcm requires integer or real arguments")
                   end
-               |RpcFloatUnit a ->
-                  let ff = a.Units.coeff.Complex.re in
-                  if has_units a then begin
+               |RpcFloatUnit (ff1, uu1) ->
+                  if uu1 <> Units.empty_unit then begin
                      stack#push gen_el1;
                      stack#push gen_el2;
                      raise (Invalid_argument "cannot compute lcm of dimensioned values")
-                  end else if (abs_float ff) < 1e9 then begin
-                     let bi_a  = big_int_of_int (int_of_float ff) in
+                  end else if (abs_float ff1) < 1e9 then begin
+                     let bi_a  = big_int_of_int (int_of_float ff1) in
                      let abs_a = abs_big_int bi_a in
                      begin match gen_el2 with
                      |RpcInt b ->
@@ -1937,9 +1869,8 @@ class rpc_calc conserve_memory =
                         and abs_b = abs_big_int b in
                         interr_args <- Lcm_args (coeff, abs_a, abs_b, gen_el1, gen_el2);
                         false
-                     |RpcFloatUnit b ->
-                        let ff2 = b.Units.coeff.Complex.re in
-                        if has_units b then begin
+                     |RpcFloatUnit (ff2, uu2) ->
+                        if uu2 <> Units.empty_unit then begin
                            stack#push gen_el1;
                            stack#push gen_el2;
                            raise (Invalid_argument "cannot compute lcm of dimensioned values")
@@ -2047,21 +1978,20 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "binom requires either two integer or two real arguments"))
                   end
-               |RpcFloatUnit el1 ->
+               |RpcFloatUnit (el1, uu1) ->
                   begin match gen_el2 with
-                  |RpcFloatUnit el2 ->
-                     if has_units el1 || has_units el2 then begin
+                  |RpcFloatUnit (el2, uu2) ->
+                     if uu1 <> Units.empty_unit || uu2 <> Units.empty_unit then begin
                         stack#push gen_el1;
                         stack#push gen_el2;
                         raise_invalid "cannot compute binom of dimensioned values"
                      end else
                         begin try
-                           let f_el1 = el1.Units.coeff.Complex.re
-                           and f_el2 = el2.Units.coeff.Complex.re in
-                           let log_coeff = (Gsl_sf.lngamma (f_el1 +. 1.0)) -.
-                           (Gsl_sf.lngamma (f_el2 +. 1.0)) -. 
-                           (Gsl_sf.lngamma (f_el1 -. f_el2 +. 1.0)) in
-                           stack#push (RpcFloatUnit (funit_of_float (exp log_coeff)));
+                           let log_coeff = (Gsl_sf.lngamma (el1 +. 1.0)) -.
+                           (Gsl_sf.lngamma (el2 +. 1.0)) -. 
+                           (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                           let (f, u) = funit_of_float (exp log_coeff) in
+                           stack#push (RpcFloatUnit (f, u));
                            true
                         with
                            Gsl_error.Gsl_exn (err, errstr) ->
@@ -2140,20 +2070,19 @@ class rpc_calc conserve_memory =
                      stack#push gen_el2;
                      raise (Invalid_argument "perm requires either two integer or two real arguments"))
                   end
-               |RpcFloatUnit el1 ->
+               |RpcFloatUnit (el1, uu1) ->
                   begin match gen_el2 with
-                  |RpcFloatUnit el2 ->
-                     if has_units el1 || has_units el2 then begin
+                  |RpcFloatUnit (el2, uu2) ->
+                     if uu1 <> Units.empty_unit || uu2 <> Units.empty_unit then begin
                         stack#push gen_el1;
                         stack#push gen_el2;
                         raise_invalid "cannot compute permutations of dimensioned values"
                      end else
                         begin try
-                           let f_el1 = el1.Units.coeff.Complex.re
-                           and f_el2 = el2.Units.coeff.Complex.re in
-                           let log_perm = (Gsl_sf.lngamma (f_el1 +. 1.0)) -.
-                           (Gsl_sf.lngamma (f_el1 -. f_el2 +. 1.0)) in
-                           stack#push (RpcFloatUnit (funit_of_float (exp log_perm)));
+                           let log_perm = (Gsl_sf.lngamma (el1 +. 1.0)) -.
+                           (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                           let (f, u) = funit_of_float (exp log_perm) in
+                           stack#push (RpcFloatUnit (f, u));
                            true
                         with
                            Gsl_error.Gsl_exn (err, errstr) ->
@@ -2265,7 +2194,8 @@ class rpc_calc conserve_memory =
             if n >= 2 then begin
                self#internal_variance_biased ();
                let n_over_nm1 = (float_of_int n) /. (float_of_int (pred n)) in
-               stack#push (RpcFloatUnit (funit_of_float n_over_nm1));
+               let (f, u) = funit_of_float n_over_nm1 in
+               stack#push (RpcFloatUnit (f, u));
                self#internal_mult ()
             end else
                raise (Invalid_argument "insufficient matrix rows for unbiased sample variance")
@@ -2287,7 +2217,8 @@ class rpc_calc conserve_memory =
             (* computes variance as E[X^2] - E[X]^2 *)
             self#internal_dup ();
             self#internal_sum_squares ();
-            stack#push (RpcFloatUnit (funit_of_float float_n));
+            let (f, u) = funit_of_float float_n in
+            stack#push (RpcFloatUnit (f, u));
             self#internal_div ();
             self#internal_swap ();
             self#internal_mean ();
@@ -2383,25 +2314,27 @@ class rpc_calc conserve_memory =
             match gen_el with
             |RpcInt i_el ->
                funit_of_float (float_of_big_int i_el)
-            |RpcFloatUnit el ->
-               el
+            |RpcFloatUnit (el, uu) ->
+               (el, uu)
             |_ ->
                stack#push gen_el1;
                stack#push gen_el2;
                stack#push gen_el3;
                raise (Invalid_argument "utpn requires real scalar arguments")
          in
-         let mean_units   = get_float_args gen_el1
-         and var_units    = get_float_args gen_el2
-         and cutoff_units = get_float_args gen_el3 in
+         let (mean_orig, mean_units) = get_float_args gen_el1
+         and (var_orig, var_units)   = get_float_args gen_el2
+         and (cutoff, cutoff_units)  = get_float_args gen_el3 in
          try
             (* check that units are consistent *)
-            let cutoff   = cutoff_units.Units.coeff.Complex.re in
-            let mean_cpx = Units.conversion_factor_unitary mean_units cutoff_units in
-            let mean     = mean_cpx.Complex.re in
-            let var_cpx  = Units.conversion_factor_unitary var_units
-            (Units.mult cutoff_units cutoff_units) in
-            let var = var_cpx.Complex.re in
+            let mean = mean_orig *. 
+               (Units.conversion_factor mean_units cutoff_units
+               !Rcfile.unit_table)
+            in
+            let var = var_orig *.
+               (Units.conversion_factor var_units cutoff_units
+               !Rcfile.unit_table)
+            in
             if var <= 0.0 then begin
                stack#push gen_el1;
                stack#push gen_el2;
@@ -2409,15 +2342,10 @@ class rpc_calc conserve_memory =
                raise (Invalid_argument "variance argument to utpn must be positive")
             end else begin
                let arg = (cutoff -. mean) /. (sqrt (2.0 *. var)) in
-               stack#push (RpcFloatUnit (funit_of_float arg));
+               let (f, u) = funit_of_float arg in
+               stack#push (RpcFloatUnit (f, u));
                self#internal_erfc ();
-               stack#push (RpcFloatUnit {
-                  Units.coeff = {
-                     Complex.re = 0.5;
-                     Complex.im = 0.0
-                  };
-                  Units.factors = cutoff_units.Units.factors
-               });
+               stack#push (RpcFloatUnit (0.5, cutoff_units));
                self#internal_mult ()
             end
          with Units.Units_error s ->
@@ -2431,7 +2359,8 @@ class rpc_calc conserve_memory =
       (* random float between 0 and 1 *)
       method rand () =
          self#backup ();           
-         stack#push (RpcFloatUnit (funit_of_float (Random.float 1.0)))
+         let (f, u) = funit_of_float (Random.float 1.0) in
+         stack#push (RpcFloatUnit (f, u))
 
 
       (* standardize units *)
@@ -2441,15 +2370,29 @@ class rpc_calc conserve_memory =
       method private internal_standardize_units () =
          self#evaln 1;
          let gen_el = stack#pop () in
+         let get_std u = Units.standardize_units u !Rcfile.unit_table in
          match gen_el with
-         |RpcFloatUnit el ->
-            stack#push (RpcFloatUnit (Units.standardize_units el))
-         |RpcComplexUnit el ->
-            stack#push (RpcComplexUnit (Units.standardize_units el))
+         |RpcFloatUnit (el, uu) ->
+            let std = get_std uu in
+            stack#push (RpcFloatUnit (el *. std.Units.coeff, std.Units.comp_units))
+         |RpcComplexUnit (el, uu) ->
+            let std = get_std uu in
+            let c_coeff = c_of_f std.Units.coeff in
+            stack#push (RpcComplexUnit 
+               (Complex.mul el c_coeff, std.Units.comp_units))
          |RpcFloatMatrixUnit (el, uu) ->
-            stack#push (RpcFloatMatrixUnit (el, Units.standardize_units uu))
+            let std = get_std uu in
+            let result = Gsl_matrix.copy el in
+            Gsl_matrix.scale result std.Units.coeff;
+            stack#push (RpcFloatMatrixUnit 
+            (result, std.Units.comp_units))
          |RpcComplexMatrixUnit (el, uu) ->
-            stack#push (RpcComplexMatrixUnit (el, Units.standardize_units uu))
+            let std = get_std uu in
+            let c_coeff = c_of_f std.Units.coeff in
+            let result = Gsl_matrix_complex.copy el in
+            Gsl_matrix_complex.scale result c_coeff;
+            stack#push (RpcComplexMatrixUnit 
+            (result, std.Units.comp_units))
          |_ ->
             stack#push gen_el
 
@@ -2462,15 +2405,14 @@ class rpc_calc conserve_memory =
          self#evaln 1;
          let gen_el = stack#pop () in
          match gen_el with
-         |RpcFloatUnit el ->
-            stack#push (RpcFloatUnit (funit_of_float
-            el.Units.coeff.Complex.re))
-         |RpcComplexUnit el ->
-            stack#push (RpcComplexUnit (cunit_of_cpx el.Units.coeff))
+         |RpcFloatUnit (el, uu) ->
+            stack#push (RpcFloatUnit (el, Units.empty_unit))
+         |RpcComplexUnit (el, uu) ->
+            stack#push (RpcComplexUnit (el, Units.empty_unit))
          |RpcFloatMatrixUnit (el, uu) ->
-            stack#push (RpcFloatMatrixUnit (el, funit_of_float 1.0))
+            stack#push (RpcFloatMatrixUnit (el, Units.empty_unit))
          |RpcComplexMatrixUnit (el, uu) ->
-            stack#push (RpcComplexMatrixUnit (el, cunit_of_cpx Complex.one))
+            stack#push (RpcComplexMatrixUnit (el, Units.empty_unit))
          |_ ->
             stack#push gen_el
 
@@ -2484,44 +2426,49 @@ class rpc_calc conserve_memory =
          let gen_el2 = stack#pop () in
          let gen_el1 = stack#pop () in
          match gen_el2 with
-         |RpcFloatUnit el2 ->
+         |RpcFloatUnit (el2, uu2) ->
             begin match gen_el1 with
-            |RpcFloatUnit el1 | RpcComplexUnit el1 ->
+            |RpcFloatUnit (el1, uu1) ->
                begin try
-                  let conv = Units.conversion_factor_unitary el1 el2 in
-                  let new_unit = {
-                     Units.coeff   = conv;
-                     Units.factors = el2.Units.factors
+                  let conv = Units.conversion_factor uu1 uu2 !Rcfile.unit_table in
+                  stack#push (RpcFloatUnit (el1 *. conv, uu2))
+               with Units.Units_error s ->
+                  stack#push gen_el1;
+                  stack#push gen_el2;
+                  raise_invalid s
+               end
+            |RpcComplexUnit (el1, uu1) ->
+               begin try
+                  let c_conv = {
+                     Complex.re = Units.conversion_factor uu1 uu2 !Rcfile.unit_table;
+                     Complex.im = 0.0
                   } in
-                  begin match gen_el1 with
-                  |RpcFloatUnit el1 ->
-                     stack#push (RpcFloatUnit new_unit)
-                  |RpcComplexUnit el1 ->
-                     stack#push (RpcComplexUnit new_unit)
-                  |_ -> ()
-                  end
+                  stack#push (RpcComplexUnit (Complex.mul el1 c_conv, uu2))
                with Units.Units_error s ->
                   stack#push gen_el1;
                   stack#push gen_el2;
                   raise_invalid s
                end
-            |RpcFloatMatrixUnit (el1, uu) ->
+            |RpcFloatMatrixUnit (el1, uu1) ->
                begin try
-                  let conv = Units.conversion_factor_unitary uu el2 in
+                  let conv = Units.conversion_factor uu1 uu2 !Rcfile.unit_table in
                   let result = Gsl_matrix.copy el1 in
-                  Gsl_matrix.scale result conv.Complex.re;
-                  stack#push (RpcFloatMatrixUnit (result, unorm el2))
+                  Gsl_matrix.scale result conv;
+                  stack#push (RpcFloatMatrixUnit (result, uu2))
                with Units.Units_error s ->
                   stack#push gen_el1;
                   stack#push gen_el2;
                   raise_invalid s
                end
-            |RpcComplexMatrixUnit (el1, uu) ->
+            |RpcComplexMatrixUnit (el1, uu1) ->
                begin try
-                  let conv = Units.conversion_factor_unitary uu el2 in
+                  let conv = {
+                     Complex.re = Units.conversion_factor uu1 uu2 !Rcfile.unit_table;
+                     Complex.im = 0.0
+                  } in
                   let result = Gsl_matrix_complex.copy el1 in
                   Gsl_matrix_complex.scale result conv;
-                  stack#push (RpcComplexMatrixUnit (result, unorm el2))
+                  stack#push (RpcComplexMatrixUnit (result, uu2))
                with Units.Units_error s ->
                   stack#push gen_el1;
                   stack#push gen_el2;
@@ -2553,14 +2500,7 @@ class rpc_calc conserve_memory =
                for i = 0 to pred n do
                   result := !result +. el.{i, i}
                done;
-               let new_el = {
-                  Units.coeff = {
-                     Complex.re = !result;
-                     Complex.im = 0.0
-                  };
-                  Units.factors = uu.Units.factors
-               } in
-               stack#push (RpcFloatUnit new_el)
+               stack#push (RpcFloatUnit (!result, uu))
             end else begin
                stack#push gen_el;
                raise_invalid "argument of trace must be a square matrix"
@@ -2572,11 +2512,7 @@ class rpc_calc conserve_memory =
                for i = 0 to pred n do
                   result := Complex.add !result el.{i, i}
                done;
-               let new_el = {
-                  Units.coeff   = !result;
-                  Units.factors = uu.Units.factors
-               } in
-               stack#push (RpcComplexUnit new_el)
+               stack#push (RpcComplexUnit (!result, uu))
             end else begin
                stack#push gen_el;
                raise_invalid "argument of trace must be a square matrix"

@@ -49,11 +49,11 @@ exception Stack_error of string
 (* orpie_data_t values are returned by pop(), but the values
  * on the stack are in stack_data_t format *)
 type orpie_data_t = | RpcInt of Big_int.big_int
-                    | RpcFloatUnit of Units.unit_t
-                    | RpcComplexUnit of Units.unit_t
-                    | RpcFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_t
+                    | RpcFloatUnit of float * Units.unit_set_t
+                    | RpcComplexUnit of Complex.t * Units.unit_set_t
+                    | RpcFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_set_t
                     | RpcComplexMatrixUnit of Gsl_matrix_complex.matrix *
-                                              Units.unit_t
+                                              Units.unit_set_t
                     | RpcVariable of string
 
 type stack_int_string_t   = {mutable i_bin_line : string option; 
@@ -81,12 +81,12 @@ type stack_var_string_t   = {mutable v_line : string option;
 
 (* internal storage format of stack elements *)
 type stack_data_t = | StackInt of Big_int.big_int * stack_int_string_t
-                    | StackFloatUnit of Units.unit_t * stack_float_unit_string_t
-                    | StackComplexUnit of Units.unit_t * stack_cmpx_unit_string_t
-                    | StackFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_t *
+                    | StackFloatUnit of float * Units.unit_set_t * stack_float_unit_string_t
+                    | StackComplexUnit of Complex.t * Units.unit_set_t * stack_cmpx_unit_string_t
+                    | StackFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_set_t *
                                               stack_fmat_unit_string_t
                     | StackComplexMatrixUnit of Gsl_matrix_complex.matrix *
-                                                Units.unit_t * stack_cmat_string_t
+                                                Units.unit_set_t * stack_cmat_string_t
                     | StackVariable of string * stack_var_string_t
 
 let raise_invalid s = raise (Invalid_argument s)
@@ -94,8 +94,8 @@ let raise_invalid s = raise (Invalid_argument s)
 let orpie_data_of_stack_data (sd : stack_data_t) =
    match sd with
    |StackInt (ii, _)                   -> RpcInt ii
-   |StackFloatUnit (fu, _)             -> RpcFloatUnit fu
-   |StackComplexUnit (cc, _)           -> RpcComplexUnit cc
+   |StackFloatUnit (ff, uu, _)         -> RpcFloatUnit (ff, uu)
+   |StackComplexUnit (cc, uu, _)       -> RpcComplexUnit (cc, uu)
    |StackFloatMatrixUnit (fm, uu, _)   -> RpcFloatMatrixUnit (fm, uu)
    |StackComplexMatrixUnit (cm, uu, _) -> RpcComplexMatrixUnit (cm, uu)
    |StackVariable (vv, _)              -> RpcVariable vv
@@ -112,11 +112,11 @@ let stack_data_of_orpie_data (od : orpie_data_t) =
           i_oct_fs   = None;
           i_dec_fs   = None;
           i_hex_fs   = None})
-   |RpcFloatUnit fu ->
-      StackFloatUnit (fu,
+   |RpcFloatUnit (ff, uu) ->
+      StackFloatUnit (ff, uu,
          {fu = None})
-   |RpcComplexUnit cc ->
-      StackComplexUnit (cc, 
+   |RpcComplexUnit (cc, uu) ->
+      StackComplexUnit (cc, uu,
          {c_rect    = None;
           c_pol_rad = None;
           c_pol_deg = None})
@@ -138,26 +138,15 @@ let stack_data_of_orpie_data (od : orpie_data_t) =
           v_fs   = None})
 
 
-let funit_of_float ff = {
-   Units.coeff = {
-      Complex.re = ff;
-      Complex.im = 0.0
-   };
-   Units.factors = []
-}
+let funit_of_float (ff : float) : float * Units.unit_set_t = (ff, Units.empty_unit)
 
-let cunit_of_cpx cc = {
-   Units.coeff   = cc;
-   Units.factors = []
-}
+let cunit_of_cpx cc = (cc, Units.empty_unit)
 
-let unorm uu = {
-   Units.coeff   = Complex.one;
-   Units.factors = uu.Units.factors
-}
+let unorm uu = (1.0, uu)
 
-let has_units fu =
-   fu.Units.factors <> []
+let c_of_f ff = {Complex.re = ff; Complex.im = 0.0}
+
+let has_units uu = uu <> Units.empty_unit
 
 type display_mode_t = | Line | Fullscreen
 
@@ -174,8 +163,10 @@ let pi = 3.14159265358979323846
 class rpc_stack conserve_memory_in =
    object(self)
       val mutable len = 0
-      val mutable stack = Array.make size_inc (stack_data_of_orpie_data
-      (RpcFloatUnit (funit_of_float 0.0)))
+      val mutable stack = 
+         let (f0, u0) = funit_of_float 0.0 in
+         Array.make size_inc (stack_data_of_orpie_data
+         (RpcFloatUnit (f0, u0)))
       val conserve_memory = conserve_memory_in
       val render_stack = Stack.create ()
 
@@ -200,7 +191,7 @@ class rpc_stack conserve_memory_in =
          if len >= Array.length stack then begin
             let new_stack = Array.make ((Array.length stack) + size_inc)
             (stack_data_of_orpie_data (RpcFloatUnit 
-            (Units.unit_of_float_string 0.0 ""))) in
+            (0.0, Units.empty_unit))) in
             Array.blit stack 0 new_stack 0 (Array.length stack);
             stack <- new_stack
          end else
@@ -408,18 +399,18 @@ class rpc_stack conserve_memory_in =
                   |Hex -> lookup_int_str ii_str.i_hex_fs
                   end
                end
-            |StackFloatUnit (fu, fu_str) ->
+            |StackFloatUnit (ff, uu, fu_str) ->
                begin match fu_str.fu with
                |None ->
-                  self#create_float_unit_string fu fu_str
+                  self#create_float_unit_string ff uu fu_str
                |Some ss ->
                   ss
                end
-            |StackComplexUnit (cc, cc_str) ->
+            |StackComplexUnit (cc, uu, cc_str) ->
                let lookup_cmpx_str record =
                   begin match record with
                   |None ->
-                     self#create_cmpx_unit_string calc_modes cc cc_str
+                     self#create_cmpx_unit_string calc_modes cc uu cc_str
                   |Some ss ->
                      ss
                   end
@@ -525,18 +516,18 @@ class rpc_stack conserve_memory_in =
                ii_str.i_hex_line
             (* the remaining integer strings will get filled in as
              * side-effects of the previous *)
-         |StackFloatUnit (fu, fu_str) ->
+         |StackFloatUnit (ff, uu, fu_str) ->
             begin match fu_str.fu with
             |None ->
-               let _ = self#create_float_unit_string fu fu_str in ()
+               let _ = self#create_float_unit_string ff uu fu_str in ()
             |Some ss ->
                ()
             end
-         |StackComplexUnit (cc, cc_str) ->
+         |StackComplexUnit (cc, uu, cc_str) ->
             let lookup_cmpx_str c_mode record =
                begin match record with
                |None ->
-                  let _ = self#create_cmpx_unit_string c_mode cc cc_str in ()
+                  let _ = self#create_cmpx_unit_string c_mode cc uu cc_str in ()
                |Some ss ->
                   ()
                end
@@ -649,13 +640,13 @@ class rpc_stack conserve_memory_in =
 
 
       (* generate a string representation for a floating-point value with a unit *)
-      method private create_float_unit_string fu fu_str =
+      method private create_float_unit_string ff uu fu_str =
          let s = 
-            if fu.Units.factors <> [] then
-               sprintf "%.15g_%s" fu.Units.coeff.Complex.re 
-               (Units.string_of_unit fu.Units.factors)
+            if uu <> Units.empty_unit then
+               sprintf "%.15g_%s" ff
+               (Units.string_of_units uu)
             else
-               sprintf "%.15g" fu.Units.coeff.Complex.re 
+               sprintf "%.15g" ff
          in
          if conserve_memory then () 
          else fu_str.fu <- Some s;
@@ -664,26 +655,24 @@ class rpc_stack conserve_memory_in =
 
       (* generate a string representation for a complex value, taking
        * into account the representation mode and angle mode of the calc *)
-      method private create_cmpx_unit_string calc_modes cc cc_str =
+      method private create_cmpx_unit_string calc_modes cc uu cc_str =
          let append_units ss =
-            if cc.Units.factors <> [] then
-               ss ^ "_" ^ (Units.string_of_unit cc.Units.factors)
+            if uu <> Units.empty_unit then
+               ss ^ "_" ^ (Units.string_of_units uu)
             else
                ss
          in
          match calc_modes.complex with
          |Rect ->
             let s = append_units 
-            (sprintf "(%.15g, %.15g)" cc.Units.coeff.Complex.re 
-            cc.Units.coeff.Complex.im) in
+            (sprintf "(%.15g, %.15g)" cc.Complex.re cc.Complex.im) in
             if conserve_memory then () 
             else cc_str.c_rect <- Some s;
             s
          |Polar ->
-            let r = sqrt (cc.Units.coeff.Complex.re *. cc.Units.coeff.Complex.re +.
-            cc.Units.coeff.Complex.im *. cc.Units.coeff.Complex.im)
-            and theta = atan2 cc.Units.coeff.Complex.im 
-            cc.Units.coeff.Complex.re in
+            let r = sqrt (cc.Complex.re *. cc.Complex.re +.
+               cc.Complex.im *. cc.Complex.im)
+            and theta = atan2 cc.Complex.im cc.Complex.re in
             begin match calc_modes.angle with
             |Rad ->
                let s = append_units (sprintf "(%.15g <%.15g)" r theta) in
@@ -704,7 +693,7 @@ class rpc_stack conserve_memory_in =
       method private create_fmat_unit_string disp_mode fm uu fm_str =
          let append_units ss = 
             if has_units uu then
-               ss ^ "_" ^ Units.string_of_unit uu.Units.factors
+               ss ^ "_" ^ Units.string_of_units uu
             else
                ss
          in
@@ -776,8 +765,8 @@ class rpc_stack conserve_memory_in =
        * taking into account the display mode. *)
       method private create_cmat_unit_string disp_mode calc_modes cm uu cm_str =
          let append_units ss = 
-            if has_units uu then
-               ss ^ "_" ^ Units.string_of_unit uu.Units.factors
+            if uu <> Units.empty_unit then
+               ss ^ "_" ^ Units.string_of_units uu
             else
                ss
          in

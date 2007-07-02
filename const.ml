@@ -25,6 +25,8 @@ open Constants
 
 
 let translate_symbol sym =
+   raise (Invalid_argument ("unknown constant \"" ^ sym ^ "\""))
+   (*
    if sym      = "NA"    then avagadro_number
    else if sym = "k"     then boltzmann
    else if sym = "Vm"    then molar_volume
@@ -54,7 +56,7 @@ let translate_symbol sym =
    else if sym = "lamc"  then compton_wavelength
    else if sym = "c3"    then wien
    else raise (Invalid_argument ("unknown constant \"" ^ sym ^ "\""))
-
+*)
 
 (* Note: list is reversed so that matching elements can be computed
  * in the correct order efficiently *)

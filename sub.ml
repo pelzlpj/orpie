@@ -31,23 +31,23 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with 
       |RpcInt el2 ->
          stack#push (RpcInt (sub_big_int el1 el2))
-      |RpcFloatUnit el2 ->
-         if has_units el2 then begin
+      |RpcFloatUnit (el2, uu2) ->
+         if uu2 <> Units.empty_unit then begin
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid "inconsistent units"
          end else
-            stack#push (RpcFloatUnit (funit_of_float 
-            ((float_of_big_int el1) -. el2.Units.coeff.Complex.re)))
-      |RpcComplexUnit el2 ->
-         if has_units el2 then begin
+            let (f, u) = funit_of_float ((float_of_big_int el1) -. el2) in
+            stack#push (RpcFloatUnit (f, u))
+      |RpcComplexUnit (el2, uu2) ->
+         if uu2 <> Units.empty_unit then begin
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid "inconsistent units"
          end else
             let c_el1 = cmpx_of_int el1 in
-            stack#push (RpcComplexUnit (cunit_of_cpx
-            (Complex.sub c_el1 el2.Units.coeff)))
+            let (c, u) = cunit_of_cpx (Complex.sub c_el1 el2) in
+            stack#push (RpcComplexUnit (c, u))
       |_ ->
          (* if the elements are incompatible, we have to
             put them back on the stack *)
@@ -55,37 +55,31 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for subtraction"))
       )
-   |RpcFloatUnit el1 -> (
+   |RpcFloatUnit (el1, uu1) -> (
       match gen_el2 with
       |RpcInt el2 ->
-         if has_units el1 then begin
+         if uu1 <> Units.empty_unit then begin
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid "inconsistent units"
          end else
-            stack#push (RpcFloatUnit (funit_of_float
-            (el1.Units.coeff.Complex.re -. float_of_big_int el2)))
-      |RpcFloatUnit el2 ->
+            let (f, u) = funit_of_float (el1 -. float_of_big_int el2) in
+            stack#push (RpcFloatUnit (f, u))
+      |RpcFloatUnit (el2, uu2) ->
          begin try
-            let conv = Units.conversion_factor_unitary el1 el2 in
-            let new_el = {
-               Units.coeff   = Complex.sub conv el2.Units.coeff;
-               Units.factors = el2.Units.factors
-            } in
-            stack#push (RpcFloatUnit new_el)
+            let conv = Units.conversion_factor uu1 uu2 !Rcfile.unit_table in
+            stack#push (RpcFloatUnit (conv *. el1 -. el2, uu2))
          with Units.Units_error s -> 
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid s
          end
-      |RpcComplexUnit el2 ->
+      |RpcComplexUnit (el2, uu2) ->
          begin try
-            let conv = Units.conversion_factor_unitary el1 el2 in
-            let new_el = {
-               Units.coeff = Complex.sub conv el2.Units.coeff;
-               Units.factors = el2.Units.factors
-            } in
-            stack#push (RpcComplexUnit new_el)
+            let c_el1 = c_of_f 
+               (el1 *. (Units.conversion_factor uu1 uu2 !Rcfile.unit_table))
+            in
+            stack#push (RpcComplexUnit (Complex.sub c_el1 el2, uu2))
          with Units.Units_error s -> 
             stack#push gen_el1;
             stack#push gen_el2;
@@ -98,25 +92,33 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          stack#push gen_el2;
          raise (Invalid_argument "incompatible types for subtraction"))
       )
-   |RpcComplexUnit el1 -> (
+   |RpcComplexUnit (el1, uu1) -> (
       match gen_el2 with
       |RpcInt el2 ->
-         if has_units el1 then begin
+         if uu1 <> Units.empty_unit then begin
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid "inconsistent units"
          end else
             let c_el2 = cmpx_of_int el2 in
-            stack#push (RpcComplexUnit (cunit_of_cpx
-            (Complex.sub el1.Units.coeff c_el2)))
-      |RpcFloatUnit el2 | RpcComplexUnit el2 ->
+            let (c, u) = cunit_of_cpx (Complex.sub el1 c_el2) in
+            stack#push (RpcComplexUnit (c, u))
+      |RpcFloatUnit (el2, uu2) ->
          begin try
-            let conv = Units.conversion_factor_unitary el1 el2 in
-            let new_el = {
-               Units.coeff   = Complex.sub conv el2.Units.coeff;
-               Units.factors = el2.Units.factors
-            } in
-            stack#push (RpcComplexUnit new_el)
+            let conv = c_of_f (Units.conversion_factor uu1 uu2 !Rcfile.unit_table) in
+            let c_el1 = Complex.mul el1 conv in
+            let c_el2 = c_of_f el2 in
+            stack#push (RpcComplexUnit (Complex.sub c_el1 c_el2, uu2))
+         with Units.Units_error s ->
+            stack#push gen_el1;
+            stack#push gen_el2;
+            raise_invalid s
+         end
+      |RpcComplexUnit (el2, uu2) ->
+         begin try
+            let conv = c_of_f (Units.conversion_factor uu1 uu2 !Rcfile.unit_table) in
+            let c_el1 = Complex.mul el1 conv in
+            stack#push (RpcComplexUnit (Complex.sub c_el1 el2, uu2))
          with Units.Units_error s ->
             stack#push gen_el1;
             stack#push gen_el2;
@@ -136,9 +138,9 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u1 u2 in
+               let conv = Units.conversion_factor u1 u2 !Rcfile.unit_table in
                let result = Gsl_matrix.copy el1 in
-               Gsl_matrix.scale result conv.Complex.re;
+               Gsl_matrix.scale result conv;
                Gsl_matrix.sub result el2;
                stack#push (RpcFloatMatrixUnit (result, u2))
             with Units.Units_error s -> 
@@ -154,7 +156,7 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u1 u2 in
+               let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
                let c_el1 = cmat_of_fmat el1 in
                Gsl_matrix_complex.scale c_el1 conv;
                Gsl_matrix_complex.sub c_el1 el2;
@@ -181,7 +183,7 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u1 u2 in
+               let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
                let c_el2 = cmat_of_fmat el2 in
                let result = Gsl_matrix_complex.copy el1 in
                Gsl_matrix_complex.scale result conv;
@@ -200,7 +202,7 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
          dim2     = (Gsl_matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
-               let conv = Units.conversion_factor_unitary u1 u2 in
+               let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
                let result = Gsl_matrix_complex.copy el1 in
                Gsl_matrix_complex.scale result conv;
                Gsl_matrix_complex.sub result el2;

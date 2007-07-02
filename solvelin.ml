@@ -47,12 +47,10 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
                raise (Invalid_argument ("dimensions of multiplier and " ^ 
                "resultant matrices do not match"))
             end else begin
-               let uquot = Units.div u2 u1 in
                let b = Gsl_matrix.to_array el2 in
                let x = Gsl_linalg.solve_LU (`M el1) (`A b) in
                let x_mat = Gsl_matrix.of_array x m1 1 in
-               Gsl_matrix.scale x_mat uquot.Units.coeff.Complex.re;
-               stack#push (RpcFloatMatrixUnit (x_mat, unorm uquot))
+               stack#push (RpcFloatMatrixUnit (x_mat, Units.div u2 u1))
             end
       |RpcComplexMatrixUnit (el2, u2) ->
          let n1, m1 = Gsl_matrix.dims el1 in
@@ -72,14 +70,12 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
                raise (Invalid_argument ("dimensions of multiplier and" ^ 
                "resultant matrices do not match"))
             end else begin
-               let uquot = Units.div u2 u1 in
                let a_cpx = Gsl_assist.cmat_of_fmat el1 in
                let b_arr = Gsl_matrix_complex.to_array el2 in
                let b_vec = Gsl_vector_complex.of_array b_arr in
                let x = Gsl_assist.solve_complex_LU (`CM a_cpx) b_vec in
                let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-               Gsl_matrix_complex.scale x_mat uquot.Units.coeff;
-               stack#push (RpcComplexMatrixUnit (x_mat, unorm uquot))
+               stack#push (RpcComplexMatrixUnit (x_mat, Units.div u2 u1))
             end
       |_ ->
          (stack#push gen_el1;
@@ -106,14 +102,12 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
                raise (Invalid_argument ("dimensions of multiplier and" ^ 
                "resultant matrices do not match"))
             end else begin
-               let uquot = Units.div u2 u1 in
                let b_cpx = Gsl_assist.cmat_of_fmat el2 in
                let b_arr = Gsl_matrix_complex.to_array b_cpx in
                let b_vec = Gsl_vector_complex.of_array b_arr in
                let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
                let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-               Gsl_matrix_complex.scale x_mat uquot.Units.coeff;
-               stack#push (RpcComplexMatrixUnit (x_mat, unorm uquot))
+               stack#push (RpcComplexMatrixUnit (x_mat, Units.div u2 u1))
             end
       |RpcComplexMatrixUnit (el2, u2) ->
          let n1, m1 = Gsl_matrix_complex.dims el1 in
@@ -133,13 +127,11 @@ let solve_linear (stack : rpc_stack) (evaln : int -> unit) =
                raise (Invalid_argument ("dimensions of multiplier and" ^ 
                "resultant matrices do not match"))
             end else begin
-               let uquot = Units.div u2 u1 in
                let b_arr = Gsl_matrix_complex.to_array el2 in
                let b_vec = Gsl_vector_complex.of_array b_arr in
                let x = Gsl_assist.solve_complex_LU (`CM el1) b_vec in
                let x_mat = Gsl_matrix_complex.of_complex_array x m1 1 in
-               Gsl_matrix_complex.scale x_mat uquot.Units.coeff;
-               stack#push (RpcComplexMatrixUnit (x_mat, unorm uquot))
+               stack#push (RpcComplexMatrixUnit (x_mat, Units.div u2 u1))
             end
       |_ ->
          (stack#push gen_el1;

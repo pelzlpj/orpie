@@ -60,10 +60,10 @@ let decode_float_complex_matrix mat u_str =
    done;
    if !has_complex then
       Rpc_stack.RpcComplexMatrixUnit (Gsl_matrix_complex.of_arrays cpx_array,
-      Units.unit_of_string (Str.string_after u_str 1))
+      Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
    else
       Rpc_stack.RpcFloatMatrixUnit (Gsl_matrix.of_arrays flt_array,
-      Units.unit_of_string (Str.string_after u_str 1))
+      Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
 
 
 let rect_of_polar_rad r theta = 
@@ -100,16 +100,16 @@ let decode_integer i_str =
 
 (* convert a floating point string and a unit string to an RpcFloatUnit *)
 let decode_float_units f_str u_str =
-   Rpc_stack.RpcFloatUnit (Units.unit_of_float_string
-   (float_of_string f_str) (Str.string_after u_str 1))
+   Rpc_stack.RpcFloatUnit ((float_of_string f_str),
+      Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
 
 (* convert a cartesian complex number string and a unit string to an 
  * RpcComplexUnit *)
 let decode_complex_rect_units re_str im_str u_str =
    let f1 = float_of_string re_str
    and f2 = float_of_string im_str in
-   Rpc_stack.RpcComplexUnit (Units.unit_of_cpx_string
-   {Complex.re = f1; Complex.im = f2} (Str.string_after u_str 1))
+   Rpc_stack.RpcComplexUnit ({Complex.re = f1; Complex.im = f2},
+   Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
 
 (* convert a polar representation complex number string to an
  * RpcComplex.  The rect_of_polar argument should take care of
@@ -117,9 +117,8 @@ let decode_complex_rect_units re_str im_str u_str =
 let decode_complex_polar_units rect_of_polar mag_str ang_str u_str = 
    let mag = float_of_string mag_str
    and ang = float_of_string ang_str in
-   Rpc_stack.RpcComplexUnit (Units.unit_of_cpx_string
-   (rect_of_polar mag ang) (Str.string_after u_str 1))
-
+   Rpc_stack.RpcComplexUnit ((rect_of_polar mag ang),
+   Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
 
 (* convert a polar representation complex number string to an
  * RpcComplex.  Assumes radian representation of the angle. *)

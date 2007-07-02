@@ -58,8 +58,8 @@ all: $(OCAMLBEST)
 ######################################
 
 CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo \
-	   version.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo pow.cmo \
-		solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo const.cmo rcfile.cmo \
+	   version.cmo rcfile.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo \
+		pow.cmo solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo const.cmo \
 		statefile.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma threads.cma

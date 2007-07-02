@@ -194,6 +194,101 @@ abbrev "neg"               function_neg
 abbrev "about"             command_about
 
 
+# fundamental SI units
+base_unit   "m"   ""
+base_unit   "g"   "k"
+base_unit   "s"   ""
+base_unit   "A"   ""
+base_unit   "K"   ""
+base_unit   "mol" ""
+base_unit   "cd"  ""
+
+# derived distance units
+unit  "in"        "2.54_cm"
+unit  "ft"        "12_in"
+unit  "yd"        "3_ft"
+unit  "mi"        "1760_yd"
+unit  "pc"        "3.085678e16_m"
+unit  "AU"        "1.49598e11_m"
+unit  "Ang"       "1e-10_m"
+unit  "furlong"   "660_ft"
+unit  "point"     "0.0138888888888888_in"
+unit  "pica"      "12_point"
+unit  "nmi"       "1852_m"
+unit  "lyr"       "63239.7139591_AU"
+
+# derived mass units
+unit  "gr"        "0.06479891_g"
+unit  "oz"        "437.5_gr"
+unit  "lb"        "16_oz"
+unit  "slug"      "14593.9029_g"
+unit  "lbt"       "5760_gr"
+unit  "ton"       "2000_lb"
+unit  "tonl"      "2240_lb"
+unit  "tonm"      "1e6_g"
+unit  "ct"        "0.2_g"
+
+# derived time units
+unit  "min"       "60_s"
+unit  "hr"        "60_min"
+unit  "day"       "24_hr"
+unit  "yr"        "365.242199_day"
+
+# derived temperature units
+unit  "R"         "0.555555555555556_K"
+
+# derived force units
+unit  "N"         "1_kg*m/s^2"
+unit  "lbf"       "4.44822162_N"
+unit  "dyne"      "1e-5_N"
+unit  "kip"       "1000_lbf"
+
+# derived energy units
+unit  "J"         "1_N*m"
+unit  "erg"       "1e-7_J"
+unit  "cal"       "4.1868_J"
+unit  "BTU"       "1055.05585252_J"
+unit  "eV"        "1.602176487e-19_J"
+
+# derived frequency units
+unit  "Hz"        "1_s^-1"
+
+# derived power units
+unit  "W"         "1_J/s"
+unit  "hp"        "33000_lbf*ft/min"
+
+# derived pressure units
+unit  "Pa"        "1_N/m^2"
+unit  "bar"       "1e5_Pa"
+unit  "inHg"      "3386_Pa"
+unit  "mmHg"      "133.307086614173_Pa"
+unit  "atm"       "760_mmHg"
+
+# various derived electrical units
+unit  "C"         "1_A*s"
+unit  "V"         "1_W/A"
+unit  "Ohm"       "1_V/A"
+unit  "F"         "1_C/V"
+unit  "Wb"        "1_V*s"
+unit  "H"         "1_Wb/A"
+unit  "T"         "1_Wb/m^2"
+unit  "G"         "1e-4_T"
+unit  "Mw"        "1e-8_Wb"
+
+# derived units of luminous flux and illuminance
+# (steridian is dropped because it is dimensionless)
+unit  "lm"        "1_cd"
+unit  "lx"        "1_lm/m^2"
+
+# derived units of (fluid) volume
+unit  "L"         "0.001_m^3"
+unit  "ozfl"      "29.573529562_mL"
+unit  "cup"       "8_ozfl"
+unit  "pt"        "2_cup"
+unit  "qt"        "2_pt"
+unit  "gal"       "4_qt"
+
+
 # base 2 logarithm
 macro "L" "l 2 l /"
 # or alternatively, using abbrev command syntax:
