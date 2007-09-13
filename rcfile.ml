@@ -144,6 +144,39 @@ let register_abbrev abbr op =
    Hashtbl.add command_abbrev_table op abbr;;
    
 
+
+(* tables used in for constant entry *)
+let constant_symbols = ref [];;
+let constants_table = Hashtbl.create 50;;
+
+
+(* Register a constant string.
+ * This updates the string used in regexp matching, and
+ * adds the constant definition to a lookup table.
+ * Note: this list is generated in reverse order, so that
+ * the list of matches can be generated rapidly in the opposite
+ * order. *)
+let register_constant (const : string) (unit_def : Units.unit_def_t) =
+   (* Dummyproofing: if a constant is a prefix of another
+    * constant, then it *must* lie earlier in the search order.
+    * If not, it becomes impossible to execute the prefix command. *)
+   let regex = Str.regexp_string const in
+   let check_match (prev_result : bool) el =
+      if prev_result then
+         true
+      else
+         Str.string_match regex el 0
+   in
+   if List.fold_left check_match false !constant_symbols then
+      (* if const is a prefix of some element, then it must
+       * go at the end of the list *)
+      constant_symbols := !constant_symbols @ [const]
+   else
+      (* if it has no prefix, then prepend it *)
+      constant_symbols := const :: !constant_symbols;
+   Hashtbl.add constants_table const unit_def;;
+
+
 (* remove an abbreviation for a command. *)
 let unregister_abbrev abbr =
    let remove_matching out_list el =
@@ -166,6 +199,8 @@ let translate_abbrev abb =
 let abbrev_of_operation op =
    Hashtbl.find command_abbrev_table op;;
 
+let translate_constant const =
+   Hashtbl.find constants_table const;;
 
 
 let decode_single_key_string key_string =
@@ -762,7 +797,6 @@ let parse_line line_stream =
          config_failwith ("Unmatched variable name after \"set\"")
       end
    | [< 'Kwd "base_unit" >] ->
-      Printf.fprintf stderr "base unit\n";
       begin match line_stream with parser
       | [< 'String base_u; 'String prefix_s >] ->
          begin try
@@ -777,7 +811,6 @@ let parse_line line_stream =
          config_failwith ("Expected a unit string and prefix string after \"base_unit\"")
       end
    | [< 'Kwd "unit" >] ->
-      Printf.fprintf stderr "unit\n";
       begin match line_stream with parser
       | [< 'String unit_str; 'String unit_def_str >] ->
          begin try
@@ -789,6 +822,19 @@ let parse_line line_stream =
          end
       | [< >] ->
          config_failwith ("Expected a unit string and definition after \"unit\"")
+      end
+   | [< 'Kwd "constant" >] ->
+      begin match line_stream with parser
+      | [< 'String const_str; 'String unit_def_str >] ->
+         begin try
+            let unit_def = Units.unit_def_of_string unit_def_str !unit_table in
+            register_constant const_str unit_def
+         with Units.Units_error s ->
+            config_failwith ("Illegal constant definition: constant \"" ^
+            const_str ^ "\" \"" ^ unit_def_str ^ "\"; " ^ s)
+         end
+      | [< >] ->
+         config_failwith ("Expected a constant name and definition after \"constant\"")
       end
    | [< 'Kwd "#" >] ->
       ()
@@ -897,7 +943,7 @@ let rec process_rcfile rcfile_op =
          ["include"; "bind"; "unbind_function"; "unbind_command";
          "unbind_edit"; "unbind_browse"; "unbind_abbrev"; "unbind_integer";
          "unbind_variable"; "autobind"; "abbrev"; "unabbrev"; "macro"; "set"; 
-         "base_unit"; "unit"; "#"] 
+         "base_unit"; "unit"; "constant"; "#"] 
       (Stream.of_string line)
    in
    let empty_regexp = Str.regexp "^[\t ]*$" in

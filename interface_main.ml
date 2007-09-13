@@ -1637,7 +1637,7 @@ let match_abbrev_buffer (iface : interface_state_t) buf =
          |IsAbbrev ->
             List.fold_left find_matches [] !Rcfile.abbrev_commands
          |IsConst ->
-            List.fold_left find_matches [] Const.constant_symbols
+            List.fold_left find_matches [] !Rcfile.constant_symbols
       in
       if List.length match_list = 0 then raise Not_found
       else match_list 
@@ -1708,11 +1708,9 @@ let handle_enter_abbrev (iface : interface_state_t) =
                register_autobinding operation
             end
          |IsConst ->
-            let con = Const.translate_symbol first_abbrev_match in
-            ()
-            (*
-            iface.calc#enter_const con;
-            *)
+            let const = Rcfile.translate_constant first_abbrev_match in
+            iface.calc#enter_const const.Units.coeff const.Units.comp_units;
+            draw_update_stack iface
          end
       with
          Not_found -> ()

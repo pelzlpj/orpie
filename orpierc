@@ -289,6 +289,66 @@ unit  "qt"        "2_pt"
 unit  "gal"       "4_qt"
 
 
+# various physical constants
+
+# Avagadro's number
+constant "NA"     "6.0221367e23_mol^-1"
+# Boltzmann's constant
+constant "k"      "1.380658e-23_J/K"
+# molar volume
+constant "Vm"     "0.0224141_m^3/mol"
+# universal gas constant
+constant "R"      "8.31451_J/mol/K"
+# standard temperature
+constant "stdT"   "273.15_K"
+# standard pressure
+constant "stdP"   "101.325_kPa"
+# Stephan-Boltzmann constant
+constant "sigma"  "1_W/m^2/K^4"
+# speed of light
+constant "c"      "299792458.0_m/s"
+# permittivity of free space
+constant "eps0"   "8.85418781761e-12_F/m"
+# permeability of free space
+constant "u0"     "1.25663706144e-6_H/m"
+# acceleration of gravity
+constant "g"      "9.80665_m/s^2"
+# gravitational constant
+constant "G"      "6.67259e-11_m^3/s^2/kg"
+# Planck's constant
+constant "h"      "6.6260755e-34_J*s"
+# Dirac's constant
+constant "hbar"   "1.05457266e-34_J*s"
+# electronic charge
+constant "e"      "1.60217733e-19_C"
+# electronic mass
+constant "me"     "9.1093897e-31_kg"
+# proton mass
+constant "mp"     "1.6726231e-17_kg"
+# fine structure constant
+constant "alpha"  "0.00729735308"
+# magnetic flux quantum
+constant "phi"    "2.06783461e-15_Wb"
+# Faraday's constant
+constant "F"      "96485.309_C/mol"
+# "infinity" Rydberg constant
+constant "Rinf"   "10973731.534_m^-1"
+# Bohr radius
+constant "a0"     "0.0529177249_nm"
+# Bohr magneton
+constant "uB"     "9.2740154e-24_J/T"
+# nuclear magneton
+constant "uN"     "5.0507866e-27_J/T"
+# photon wavelength
+constant "lam0"   "1239.8425_nm"
+# photon frequency
+constant "f0"     "2.4179883e14_Hz"
+# Compton wavelength
+constant "lamc"   "0.00242631058_nm"
+# Wien's constant
+constant "c3"     "0.002897756_m*K"
+
+
 # base 2 logarithm
 macro "L" "l 2 l /"
 # or alternatively, using abbrev command syntax:

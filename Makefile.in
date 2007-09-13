@@ -59,7 +59,7 @@ all: $(OCAMLBEST)
 
 CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo \
 	   version.cmo rcfile.cmo rpc_stack.cmo add.cmo sub.cmo mult.cmo div.cmo inv.cmo \
-		pow.cmo solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo const.cmo \
+		pow.cmo solvelin.cmo rpc_calc.cmo txtin_parser.cmo txtin_lexer.cmo \
 		statefile.cmo interface.cmo interface_draw.cmo interface_main.cmo main.cmo
 CMX = $(CMO:.cmo=.cmx)
 CMA = nums.cma bigarray.cma str.cma unix.cma threads.cma
@@ -82,7 +82,7 @@ GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgs
 GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
 GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
-UNITS_CMO = units/units.cmo units/constants.cmo
+UNITS_CMO = units/units.cmo
 UNITS_CMX = $(UNITS_CMO:.cmo=.cmx)
 
 TEST_CMO = big_int_str.cmo gsl_assist.cmo install.cmo operations.cmo utility.cmo \

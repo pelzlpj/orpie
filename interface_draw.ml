@@ -426,10 +426,14 @@ let generate_const_help () =
          |head :: tail ->
             head :: (trunc_list tail (pred n))
    in
-   let symbols = 
-      "NA   Vm  R  stdT  stdP  sigma  c  eps0  u0  g  G  h  hbar  " ^
-      "e  me  mp  alpha  phi  F  Rinf  a0  uB  uN  lam0  f0  lamc  c3"
+   let rec make_symbols_string symbols_list symbols_str =
+      match symbols_list with
+      | [] ->
+         symbols_str
+      | head :: tail ->
+         make_symbols_string tail (head ^ "  " ^ symbols_str)
    in
+   let symbols = make_symbols_string !Rcfile.constant_symbols "" in
    trunc_list (Utility.wordwrap_nspace symbols 34 2) 5
 
 
