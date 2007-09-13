@@ -15,3 +15,7 @@ txtin_parser.ml
 txtin_parser.output
 *.opt
 *.byte
+*.html
+*.pdf
+*.1
+*.5

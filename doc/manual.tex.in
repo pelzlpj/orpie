@@ -25,9 +25,9 @@
 
 \begin{document}
 %@% IF LATEX %@%
-\title{Orpie v1.4 User Manual}
+\title{Orpie v1.5 User Manual}
 \author{Paul J. Pelzl}
-\date{August 30, 2004}
+\date{September 13, 2007}
 \maketitle
 
 \begin{center}
@@ -460,6 +460,14 @@ The following is a list of Orpie's physical constant symbols:
 %@% ELSE %@%
 \end{Table}
 %@% END-IF %@%
+
+All physical constants are defined in the Orpie run-configuration file; consult
+%@% IF LATEX %@%
+Section \ref{advanced} 
+%@% ELSE %@%
+the \Cmd{orpierc}{5} manpage
+%@% END-IF %@%
+if you wish to define your own constants or change the existing definitions.
 
 
 %@% IF LATEX %@%
@@ -1134,6 +1142,13 @@ a dimensionless unit and therefore is of questionable use to a calculator.
 \end{Table}
 %@% END-IF %@%
 
+All units are defined in the Orpie run-configuration file; consult
+%@% IF LATEX %@%
+Section \ref{advanced} 
+%@% ELSE %@%
+the \Cmd{orpierc}{5} manpage
+%@% END-IF %@%
+if you wish to define your own units or change the existing definitions.
 
 
 %@% END-IF %@%
@@ -1374,6 +1389,50 @@ not call \emph{itself} recursively; Orpie will not trap the infinite loop.
 Note that operation abbreviations may be accessed within macros.  For example,
 \texttt{macro "A" "' a b o u t <return>"} would bind \texttt{A} to display
 the ``about Orpie'' screen.
+
+%@% IF LATEX %@%
+\subsubsection{Creating Units}
+\label{units}
+%@% ELSE %@%
+\subsection{Creating Units}
+%@% END-IF %@%
+Syntax: \\
+\texttt{base\_unit \emph{unit\_symbol preferred\_prefix}} \\
+\texttt{unit \emph{unit\_symbol unit\_definition}} \\ \\
+Units are defined in a two-step process:  
+\begin{enumerate}
+   \item Define a set of orthogonal ``base units.''  All other units must be expressible 
+      in terms of these base units.  The base units can be given a preferred SI prefix,
+      which will be used whenever the units are standardized (e.g. via \texttt{ustand}).
+      The unit symbols and preferred prefixes should all be quoted strings; to prefer
+      \emph{no} prefix, use the empty string (\texttt{""}).
+
+      It is expected that most users will use the fundamental SI units for base units.
+   \item Define all other units in terms of either base units or previously-defined units.
+      Again, the unit symbol and unit definition should be quoted strings.  The definition
+      should take the form of a numeric value followed by a units string, e.g.
+      \texttt{"2.5\_kN*m/s"}.  See
+      %@% IF LATEX %@%
+      Section \ref{unitsformat}
+      %@% ELSE %@%
+      the UNITS FORMATTING section
+      %@% END-IF %@%
+      for more details on the unit string format.
+\end{enumerate}
+
+
+%@% IF LATEX %@%
+\subsubsection{Creating Constants}
+\label{constants}
+%@% ELSE %@%
+\subsection{Creating Constants}
+%@% END-IF %@%
+Syntax: \texttt{constant \emph{constant\_symbol constant\_definition}} \\ \\
+This syntax can be used to define a physical constant.  Both the constant symbol
+and definition must be quoted strings.  The constant definition should be a
+numeric constant followed by a units string e.g. \texttt{"1.60217733e-19\_C"}.
+All units used in the constant definition must already have been defined.
+
 
 %@% IF LATEX %@%
 \subsection{Configuration Variables}
@@ -1885,77 +1944,6 @@ written by Nicolas George.  I would like to thank these authors for helping to
 make Orpie possible.
 
 
-%@% IF LATEX %@%
-\section{(Not So) Frequently Asked Questions}
-\begin{enumerate}
-   \item {\bf Whatever happened to \texttt{rpc}?}
-
-      rpc, of course, would be the predecessor to Orpie.  It was written
-      in C++.
-
-      Over the years I have grown increasingly disenchanted with C++, and
-      as a result I lost interest in maintaining rpc.  When I settled on OCaml
-      as a replacement language, I began working on Orpie as a way to improve
-      my OCaml abilities.
-
-   \item {\bf What's wrong with C++?  And what's this OCaml thing?}
-
-      \texttt{<rant>} \\
-      C++ has had so many misfeatures bolted on that no one can possibly hold
-      the entire syntax in his head at one time.  The syntax is not only
-      prohibitively vast, but also horribly ugly--especially when dealing 
-      with templates.  The ability to use pointers presents many opportunities 
-      to shoot oneself in the foot.  Garbage collection and exceptions exist 
-      as afterthoughts.  In short, there are few compelling reasons to consider 
-      C++ for any project that does not require low-level hardware access. \\
-      \texttt{</rant>} 
-     
-      I found OCaml after searching for a Better Language that offers good
-      performance.  OCaml is a functional programming language with a pretty
-      syntax, clean design, and all sorts of nice features that one really
-      should expect from a modern programming language.  It supports
-      functional, imperative, and object-oriented programming paradigms,
-      so it is well-suited to a broad class of programming tasks.
-      The type-checking compiler is exceedingly strict, and I find that this
-      improves my overall productivity by catching a lot of bugs prior to
-      runtime.  OCaml also interfaces with C quite easily, and there are
-      bindings available for many commonly used libraries.
-
-   \item {\bf Does Orpie include any enhancements over the old \texttt{rpc}?}
-
-      The biggest usability enhancement would be the rcfile for keybindings.
-      The context-sensitive help panel is new, as is user-defined variable
-      support, units handling, and autobindings.  Integer data may be
-      entered and manipulated with arbitrary precision (thanks to the Nums 
-      library that ships with OCaml).  The error messages provided by
-      Orpie are, on average, more informative than those provided by rpc;
-      this is a direct consequence of OCaml's excellent exception handling
-      support.
-
-      I also believe that Orpie has fewer bugs in the input handler/parser,
-      but this remains to be seen.
-
-   \item {\bf When I use \{+, -, *, /\} on the numeric keypad under gnome-terminal,
-      Orpie reads some letters instead of the expected symbols.  Can I do anything about this?}
-
-      I was able to fix the problem by executing
-      \begin{verbatim}
-      $ export TERM=linux
-      \end{verbatim}
-      before launching Orpie.  gnome-terminal sets \texttt{\$TERM} to \texttt{xterm}, but
-      apparently does not behave like a real xterm with respect to the numeric keypad.
-
-   \item {\bf Orpie crashes with a segmentation fault on startup.  What can I do?}
-
-      Try deleting the calculator state file (probably \texttt{\~{}/.orpie/calc\_state} ,
-      unless you changed the \texttt{data\_dir} configuration variable).  Orpie makes use of 
-      OCaml's marshalling feature, which is very convenient but doesn't respond well to corrupt
-      data files.
-      
-
-\end{enumerate}
-%@% END-IF %@%
-
 \section{Contact info}
 Orpie author: Paul Pelzl \texttt{<pelzlpj@eecs.umich.edu>} \\
 %@% IF LATEX %@%
@@ -1967,45 +1955,6 @@ Orpie website: \URL{http://www.eecs.umich.edu/\Tilde pelzlpj/orpie} \\
 \noindent
 Feel free to contact me if you have bugs, feature requests, patches, etc.  I 
 would also welcome volunteers interested in packaging Orpie for various platforms.
-
-Orpie is developed with the aid of the excellent 
-%@% IF LATEX %@%
-%BEGIN LATEX
-GNU Arch RCS\footnote{http://www.gnu.org/software/gnu-arch/}.
-%END LATEX  
-%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/gnu-arch/">GNU Arch RCS</a>. \end{rawhtml}
-%@% ELSE %@%
-GNU Arch RCS [3].
-%@% END-IF %@%
-Interested developers are advised to track Orpie development via my public
-archive: \\
-%@% IF LATEX %@%
-\hspace*{2cm}\texttt{pelzlpj@eecs.umich.edu--2004 $\backslash$ \\
-\hspace*{4cm} http://www-personal.engin.umich.edu/\~{}pelzlpj/tla/2004} \\
-%@% ELSE %@%
-pelzlpj@eecs.umich.edu--2004 http://www-personal.engin.umich.edu/\Tilde pelzlpj/tla/2004 \\
-%@% END-IF %@%
-Orpie uses tla's ``configs'' support.  After getting a copy of the source, run \\
-\texttt{"tla build-config dist.arch"} in the project tree root to grab the 
-extra packages that Orpie depends on.
-
-At the moment, I would really appreciate help writing additional test cases for
-the calculator object.  It's not terribly difficult, just time-consuming.  If you're
-interested in lending a hand, have a look at the source in \texttt{calc\_test.ml} and
-use \texttt{"make test.opt"} to build the testing executable.
-
-Do you feel compelled to compensate me for writing Orpie?  As a \emph{poor, starving} 
-graduate student, I will gratefully accept 
-%BEGIN LATEX
-donations.  Please see \\
-%@% IF LATEX %@%
-\texttt{http://www.eecs.umich.edu/\~{}pelzlpj/orpie/donate.html} for more information.
-%END LATEX
-%HEVEA \begin{rawhtml} <a href="http://www.eecs.umich.edu/~pelzlpj/orpie/donate.html">donations</a>. \end{rawhtml}
-%@% ELSE %@%
-\URL{http://www.eecs.umich.edu/\Tilde pelzlpj/orpie/donate.html} for more information.
-%@% END-IF %@%
-
 
 %@% IF !LATEX && !ORPIERC %@%
 \section{References}

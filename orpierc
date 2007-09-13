@@ -339,9 +339,9 @@ constant "a0"     "0.0529177249_nm"
 constant "uB"     "9.2740154e-24_J/T"
 # nuclear magneton
 constant "uN"     "5.0507866e-27_J/T"
-# photon wavelength
+# 1eV photon wavelength
 constant "lam0"   "1239.8425_nm"
-# photon frequency
+# 1eV photon frequency
 constant "f0"     "2.4179883e14_Hz"
 # Compton wavelength
 constant "lamc"   "0.00242631058_nm"

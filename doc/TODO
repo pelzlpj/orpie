@@ -1,44 +1,7 @@
 Orpie To-Do List (roughly in order of priority)
 --------------------------------------------------------------------------------
 
-* gamma function needs to provide an overflow error
+Orpie is pretty much in maintenance mode at the moment.  Please report bugs
+to <pelzlpj@eecs.umich.edu>.  New features are unlikely to be implemented by
+the Orpie maintaner, but reasonable patches will certainly be accepted.
 
-* add additional test cases for the rpc_calc object.  I could really use
-  help with this; it's not difficult, just time-consuming.  Have a look
-  at calc_test.ml if you're interested in lending a hand.  (Please grab
-  the latest source from my Arch archive, as the test script may be changing
-  rapidly in the near future.)
-
-* add additional units
-
-* add additional statistical functions (multivariate, distributions, ...)
-
-* add finance functions
-
-* Rpc_stack.get_display_string() and related routines (arguably)
-  should be provided as an interface module.  Rpc_stack could either
-  pass data to the interface and let the interface worry about
-  rendering, or (probably simpler) a rendering function could be
-  passed to Rpc_stack at initialization time.
-
-* i18n (maybe via http://saucecode.org/localcaml/ ?)
-
-* try to improve general base conversion algorithm (decimal representation is 
-  relatively slow at present)
-
-* detect ill-conditioned complex matrices when performing inversion 
-  (unfortunately GSL lacks a condition number estimator for complex 
-  matrices)
-
-* integrate Dylan Simon's FreeBSD compatibility patch
-
-* correct help screen so that power function reads y^x rather than x^y
-
-* on help screen, include keybindings for "cancel abbrev" and 
-  "enter abbrev" along with matched abbreviations list
-
-* make units module configurable (user-defined units, etc.)
-
-
-
-# arch-tag: DO_NOT_CHANGE_6545e902-84e9-4893-9111-d01704eed3f0 

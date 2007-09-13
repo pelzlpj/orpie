@@ -460,7 +460,7 @@ let draw_help_standard iface win mvwaddstr_safe try_find =
       try_find (Function Mult));
       mvwaddstr_safe win 13 2 ("divide   : " ^
       try_find (Function Div));
-      mvwaddstr_safe win 14 2 ("x^y      : " ^
+      mvwaddstr_safe win 14 2 ("y^x      : " ^
       try_find (Function Pow));
       mvwaddstr_safe win 15 2 ("negation : " ^
       try_find (Function Neg));
