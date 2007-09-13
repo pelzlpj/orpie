@@ -19,6 +19,7 @@
 prefix      = @prefix@
 exec_prefix = @exec_prefix@
 sysconfdir  = @sysconfdir@
+dataroortdir= @datarootdir@
 BINDIR      = $(DESTDIR)/@bindir@
 MANDIR      = $(DESTDIR)/@mandir@
 
