@@ -3,6 +3,21 @@ Orpie ChangeLog
 
 v1.5
 
+   2007-09-13        Version 1.5.0 release.
+
+   2007-07-01        Complete rewrite of units implementation, allowing
+                     user-defined units and physical constants.
+
+   2007-05-06        Updated included ocamlgsl bindings to 0.6.0.
+
+   2006-11-13        Square root of a negative value now returns a
+                     complex result.
+
+   2006-11-12        gcd(), lcd(), and mod() now accept real-valued 
+                     arguments.
+   
+                     Fix for crash in abbrev mode.
+
    2004-09-09        Made a minor Makefile change to correct linking
                      errors under Gentoo (maybe others).
 

@@ -19,3 +19,5 @@ txtin_parser.output
 *.pdf
 *.1
 *.5
+txtin_parser.mli
+txtin_lexer.ml
