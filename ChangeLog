@@ -3,7 +3,9 @@ Orpie ChangeLog
 
 v1.5
 
-   2007-09-13        pow() now avoids using complex arithmetic in
+   2007-09-13        Version 1.5.1 release.
+   
+                     pow() now avoids using complex arithmetic in
                      some cases, leading to more pleasant results
                      for expressions like 2^3 - 7.
                      
