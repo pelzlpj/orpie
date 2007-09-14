@@ -181,9 +181,8 @@ class rpc_stack conserve_memory_in =
          len   <- l
 
       method backup () =
-         let b_stack = Array.copy stack 
-         and b_len = len in
-         {< len = b_len; stack = b_stack >}
+         let b_stack = Array.copy stack in
+         {< stack = b_stack >}
 
 
       method private expand_size () =
