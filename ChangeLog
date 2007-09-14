@@ -3,7 +3,11 @@ Orpie ChangeLog
 
 v1.5
 
-   2007-09-13        Fixed "invalid argument" crash bug when typing
+   2007-09-13        pow() now avoids using complex arithmetic in
+                     some cases, leading to more pleasant results
+                     for expressions like 2^3 - 7.
+                     
+                     Fixed "invalid argument" crash bug when typing
                      an unprintable character during entry of units.
                      
                      Made a minor sytactical change for compatibility

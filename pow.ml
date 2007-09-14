@@ -78,6 +78,8 @@ let pow (stack : rpc_stack) (evaln : int -> unit) =
             stack#push gen_el1;
             stack#push gen_el2;
             raise_invalid "cannot raise to a dimensioned power"
+         end else if el2 > 0.0 then begin
+            stack#push (RpcFloatUnit (el1 ** el2, Units.pow uu1 el2))
          end else
             let c_el1 = c_of_f el1
             and c_el2 = c_of_f el2 in
