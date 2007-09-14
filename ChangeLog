@@ -12,7 +12,7 @@ v1.5
                      Fixed "invalid argument" crash bug when typing
                      an unprintable character during entry of units.
                      
-                     Made a minor sytactical change for compatibility
+                     Made a minor syntactical change for compatibility
                      with OCaml 3.10.0.
 
    2007-09-13        Version 1.5.0 release.
