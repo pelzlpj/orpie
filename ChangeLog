@@ -3,6 +3,12 @@ Orpie ChangeLog
 
 v1.5
 
+   2007-09-13        Fixed "invalid argument" crash bug when typing
+                     an unprintable character during entry of units.
+                     
+                     Made a minor sytactical change for compatibility
+                     with OCaml 3.10.0.
+
    2007-09-13        Version 1.5.0 release.
 
    2007-07-01        Complete rewrite of units implementation, allowing

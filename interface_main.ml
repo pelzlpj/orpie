@@ -1872,14 +1872,17 @@ let handle_units_backspace (iface : interface_state_t) =
 
 (* handle entry of an arbitrary character in units entry mode *)
 let handle_units_character (iface : interface_state_t) key =
-   let allowable_regex = Str.regexp "[a-zA-Z0-9\\.\\^\\*/-]" in
-   let ch = char_of_int key in
-   let ss = String.make 1 ch in
-   if Str.string_match allowable_regex ss 0 then begin
-      iface.units_entry_buffer <- iface.units_entry_buffer ^ ss;
-      draw_update_entry iface
-   end else
-      let _ = beep () in ()
+   try
+      let allowable_regex = Str.regexp "[a-zA-Z0-9\\.\\^\\*/-]" in
+      let ch = char_of_int key in
+      let ss = String.make 1 ch in
+      if Str.string_match allowable_regex ss 0 then begin
+         iface.units_entry_buffer <- iface.units_entry_buffer ^ ss;
+         draw_update_entry iface
+      end else
+         let _ = beep () in ()
+   with
+      Invalid_argument "char_of_int" -> let _ = beep () in ()
 
 
 

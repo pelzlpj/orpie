@@ -136,7 +136,7 @@ test.opt: $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(TEST_CMX) -cclib '$(GSL_LIB) -lm'
 
 
-VERSION=1.5.0
+VERSION=1.5.1
 
 version.ml: Makefile
 	echo "let version = \""$(VERSION)"\"" > version.ml
