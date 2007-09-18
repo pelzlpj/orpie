@@ -390,9 +390,13 @@ class rpc_calc conserve_memory =
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
-            end else
+            end else if el >= 0.0 then begin
                let (f, u) = funit_of_float (log el) in
                stack#push (RpcFloatUnit (f, u))
+            end else
+               let c_arg = c_of_f el in
+               let (c, u) = cunit_of_cpx (Gsl_complex.log c_arg) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
@@ -458,9 +462,13 @@ class rpc_calc conserve_memory =
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
-            end else
+            end else if el >= 0.0 then begin
                let (f, u) = funit_of_float (log10 el) in
                stack#push (RpcFloatUnit (f, u))
+            end else
+               let c_arg = c_of_f el in
+               let (c, u) = cunit_of_cpx (Gsl_complex.log10 c_arg) in
+               stack#push (RpcComplexUnit (c, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;

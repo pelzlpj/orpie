@@ -3,6 +3,9 @@ Orpie ChangeLog
 
 v1.5
 
+   2007-09-17        ln() and log10() now return complex values for
+                     negative real arguments.
+
    2007-09-13        Version 1.5.1 release.
    
                      pow() now avoids using complex arithmetic in
