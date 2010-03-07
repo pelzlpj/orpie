@@ -77,9 +77,10 @@ GSL_CMO = gsl/gsl_error.cmo gsl/gsl_blas.cmo gsl/gsl_complex.cmo gsl/gsl_matrix.
 		gsl/gsl_vector_complex_flat.cmo gsl/gsl_matrix_complex_flat.cmo gsl/gsl_vectmat.cmo \
 		gsl/gsl_permut.cmo gsl/gsl_linalg.cmo gsl/gsl_fun.cmo
 GSL_CMX = $(GSL_CMO:.cmo=.cmx)
-GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o \
-		 gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_vector_double.o gsl/mlgsl_permut.o \
-		 gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o gsl/mlgsl_math.o gsl/mlgsl_sf.o
+GSL_COBJS = gsl/mlgsl_error.o gsl/mlgsl_blas.o gsl/mlgsl_blas_complex.o gsl/mlgsl_complex.o gsl/mlgsl_blas_float.o \
+		 gsl/mlgsl_blas_complex_float.o gsl/mlgsl_matrix_complex.o gsl/mlgsl_matrix_double.o gsl/mlgsl_matrix_float.o \
+		 gsl/mlgsl_matrix_complex_float.o gsl/mlgsl_vector_double.o gsl/mlgsl_vector_float.o \
+		 gsl/mlgsl_permut.o gsl/mlgsl_linalg.o gsl/mlgsl_linalg_complex.o gsl/mlgsl_fun.o gsl/mlgsl_math.o gsl/mlgsl_sf.o
 GSL_BOBJS = $(GSL_COBJS) $(GSL_CMO)
 GSL_OOBJS = $(GSL_COBJS) $(GSL_CMX)
 
