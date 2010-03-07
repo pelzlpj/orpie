@@ -1,5 +1,5 @@
 (*  Orpie -- a fullscreen RPN calculator for the console
- *  Copyright (C) 2003-2004, 2005, 2006-2007 Paul Pelzl
+ *  Copyright (C) 2003-2004, 2005, 2006-2007, 2010 Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License, Version 2,
@@ -15,7 +15,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  Please send bug reports, patches, etc. to Paul Pelzl at 
- *  <pelzlpj@eecs.umich.edu>.
+ *  <pelzlpj@gmail.com>.
  *)
 
 (* curses_assist.ml

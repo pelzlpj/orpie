@@ -1,5 +1,5 @@
 (*  Orpie -- a fullscreen RPN calculator for the console
- *  Copyright (C) 2003-2004, 2005, 2006-2007 Paul Pelzl
+ *  Copyright (C) 2003-2004, 2005, 2006-2007, 2010 Paul Pelzl
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License, Version 2,
@@ -15,7 +15,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *  Please send bug reports, patches, etc. to Paul Pelzl at 
- *  <pelzlpj@eecs.umich.edu>.
+ *  <pelzlpj@gmail.com>.
  *)
 
 (* calc_test.ml
@@ -44,13 +44,6 @@
  *    3) since the calculator object handles most of the dirty work,
  *       relatively little OCaml knowledge is necessary
  *
- * If you're interested in lending a hand, please check out a copy
- * of the latest development sources using GNU Arch (tla).  My archive is
- *    pelzlpj@eecs.umich.edu--2004 \
- *       http://www-personal.engin.umich.edu/~pelzlpj/tla/2004
- * and you should tag off of branch orpie--main .  If you're uncomfortable
- * using Arch, just drop me an email and I'll be happy to tar up a snapshot 
- * of recent sources.
  *)
 
 
