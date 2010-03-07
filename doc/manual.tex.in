@@ -1945,11 +1945,11 @@ make Orpie possible.
 
 
 \section{Contact info}
-Orpie author: Paul Pelzl \texttt{<pelzlpj@eecs.umich.edu>} \\
+Orpie author: Paul Pelzl \texttt{<pelzlpj@gmail.com>} \\
 %@% IF LATEX %@%
-Orpie website: \texttt{http://www.eecs.umich.edu/\~{}pelzlpj/orpie} \\
+Orpie website: \texttt{http://pessimization.com/software/orpie} \\
 %@% ELSE %@%
-Orpie website: \URL{http://www.eecs.umich.edu/\Tilde pelzlpj/orpie} \\
+Orpie website: \URL{http://pessimization.com/software/orpie} \\
 %@% END-IF %@%
 
 \noindent
@@ -1977,7 +1977,7 @@ would also welcome volunteers interested in packaging Orpie for various platform
 \Cmd{orpie}{1}, \Cmd{orpie-curses-keys}{1}
 
 \section{Author}
-This manpage is written by Paul J. Pelzl <pelzlpj@eecs.umich.edu>.
+This manpage is written by Paul J. Pelzl <pelzlpj@gmail.com>.
    %@% END-IF %@%
 \LatexManEnd
 %@% END-IF %@%

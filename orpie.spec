@@ -5,7 +5,7 @@ Summary:        A fullscreen console-based RPN calculator application.
 
 Group:          Utilities/Math
 License:        GPL
-URL:            http://www.eecs.umich.edu/~pelzlpj/orpie/
+URL:            http://pessimization.com/software/orpie/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
