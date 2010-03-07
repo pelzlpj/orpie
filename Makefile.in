@@ -108,14 +108,14 @@ static: $(NAME).static-opt $(NAME2).static-opt
 $(NAME).byte: $(CURSES_BOBJS) $(GSL_BOBJS) $(UNITS_CMO) $(CMO)
 	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) $(GSL_BOBJS) $(UNITS_CMO) $(CMO) 
 
-$(NAME2).byte: $(CURSES_BOBJS) curses_assist.cmo curses-keys.cmo
-	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses_assist.cmo curses-keys.cmo
+$(NAME2).byte: $(CURSES_BOBJS) curses_assist.cmo curses_keys.cmo
+	$(OCAMLC) $(BFLAGS) $(BLFLAGS) -o $@ $(CURSES_BOBJS) $(CMA) curses_assist.cmo curses_keys.cmo
 
 $(NAME).opt: $(CURSES_OOBJS) $(GSL_OOBJS) $(UNITS_CMX) $(CMX)
 	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) $(GSL_OOBJS) $(UNITS_CMX) $(CMX) $(OLFLAGS)
 
-$(NAME2).opt: $(CURSES_OOBJS) curses_assist.cmx curses-keys.cmx
-	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses_assist.cmx curses-keys.cmx $(OLFLAGS)
+$(NAME2).opt: $(CURSES_OOBJS) curses_assist.cmx curses_keys.cmx
+	$(OCAMLOPT) $(OFLAGS) -o $@ $(CURSES_OOBJS) $(CMXA) curses_assist.cmx curses_keys.cmx $(OLFLAGS)
 
 # static build seems to require mashing all the C objects into a library
 $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
@@ -123,9 +123,9 @@ $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-l
 	curses.cmx $(GSL_CMX) $(UNITS_CMX) $(CMX)
 	strip $(NAME).static-opt
 
-$(NAME2).static-opt: $(CURSES_OOBJS) curses_assist.cmx curses-keys.cmx my-static-libs
+$(NAME2).static-opt: $(CURSES_OOBJS) curses_assist.cmx curses_keys.cmx my-static-libs
 	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
-	curses_assist.cmx curses-keys.cmx
+	curses_assist.cmx curses_keys.cmx
 	strip $(NAME2).static-opt
 
 my-static-libs:
