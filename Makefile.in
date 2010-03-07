@@ -34,6 +34,12 @@ OCAMLYACC    = @OCAMLYACC@
 OCAMLVERSION = @OCAMLVERSION@
 OCAMLWIN32   = @OCAMLWIN32@
 EXE          = @EXE@
+DEFS         = @DEFS@
+CC           = @CC@
+CFLAGS       = @CFLAGS@
+CPPFLAGS     = @CPPFLAGS@
+LDFLAGS      = @LDFLAGS@
+
 
 CURSES_LIB = @CURSES_LIB@
 GSL_LIB    = @GSL_LIB@
@@ -41,8 +47,8 @@ GSL_LIB    = @GSL_LIB@
 INCLUDES = -I ./curses -I ./gsl -I ./units
 BFLAGS   = -pp camlp4o -g $(INCLUDES) -thread
 OFLAGS   = -pp camlp4o $(INCLUDES) -thread
-BLFLAGS  = -custom -cclib '@LDFLAGS@ $(CURSES_LIB) $(GSL_LIB) -lm'
-OLFLAGS  = -cclib '@LDFLAGS@ $(CURSES_LIB) $(GSL_LIB) -lm'
+BLFLAGS  = -custom -cclib '$(LDFLAGS) $(CURSES_LIB) $(GSL_LIB) -lm'
+OLFLAGS  = -cclib '$(LDFLAGS) $(CURSES_LIB) $(GSL_LIB) -lm'
 DEPFLAGS = -pp camlp4o
 
 # main target
@@ -119,12 +125,12 @@ $(NAME2).opt: $(CURSES_OOBJS) curses_assist.cmx curses_keys.cmx
 
 # static build seems to require mashing all the C objects into a library
 $(NAME).static-opt: $(UNITS_CMX) $(CMX) $(CURSES_OOBJS) $(GSL_OOBJS) my-static-libs
-	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '$(LDFLAGS) -lmycurses -lmygsl $(CURSES_LIB) $(GSL_LIB) -lm' -o $@ $(CMXA) \
 	curses.cmx $(GSL_CMX) $(UNITS_CMX) $(CMX)
 	strip $(NAME).static-opt
 
 $(NAME2).static-opt: $(CURSES_OOBJS) curses_assist.cmx curses_keys.cmx my-static-libs
-	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '-lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
+	$(OCAMLOPT) $(OFLAGS) -I . -ccopt -static -cclib '$(LDFLAGS) -lmycurses $(CURSES_LIB) -lm' -o $@ $(CMXA) curses.cmx \
 	curses_assist.cmx curses_keys.cmx
 	strip $(NAME2).static-opt
 
@@ -195,7 +201,7 @@ gsl-byte: $(GSL_BOBJS)
 GSL_INCLUDES = -I ./gsl
 GSL_BFLAGS = -g $(GSL_INCLUDES) -thread
 GSL_OFLAGS = $(GSL_INCLUDES) -thread
-GSL_CFLAGS = @GSL_CFLAGS@ @CPPFLAGS@ -DHAVE_INLINE -DHAVE_FENV -g -O2
+GSL_CFLAGS = @GSL_CFLAGS@ $(CPPFLAGS) $(CFLAGS) -DHAVE_INLINE -DHAVE_FENV -g -O2
 
 gsl/%.cmi : gsl/%.mli
 	$(OCAMLC) -c $(GSL_BFLAGS) $<
@@ -226,7 +232,7 @@ curses/functions.c:	curses/functions.c.in
 CURSES_INCLUDES = -I ./curses
 CURSES_BFLAGS = -g $(CURSES_INCLUDES) -thread
 CURSES_OFLAGS = $(CURSES_INCLUDES) -thread
-CURSES_CFLAGS = -Wall -fPIC -DPIC @CPPFLAGS@
+CURSES_CFLAGS = -Wall -fPIC -DPIC $(CPPFLAGS) $(CFLAGS)
 
 curses/%.cmi : curses/%.mli
 	$(OCAMLC) -c $(CURSES_BFLAGS) $<
