@@ -1325,16 +1325,26 @@ class rpc_calc conserve_memory =
          |RpcInt el1 ->
             begin match gen_el2 with
             |RpcInt el2 ->
-               stack#push (RpcInt (mod_big_int el1 el2))
+                if eq_big_int el2 zero_big_int then begin
+                   stack#push gen_el1;
+                   stack#push gen_el2;
+                   raise (Invalid_argument "division by zero")
+                end else
+                   stack#push (RpcInt (mod_big_int el1 el2))
             |RpcFloatUnit (ff2, uu2) ->
                if uu2 <> Units.empty_unit then begin
                   stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "cannot compute mod of dimensioned values")
-               end else if (abs_float ff2) < 1e9 then begin
+               end else if (abs_float ff2) < 1e9 then
                   let bi_el2 = big_int_of_int (int_of_float ff2) in
-                  stack#push (RpcInt (mod_big_int el1 bi_el2))
-               end else begin
+                  if eq_big_int bi_el2 zero_big_int then begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "division by zero")
+                  end else
+                     stack#push (RpcInt (mod_big_int el1 bi_el2))
+               else begin
                   stack#push gen_el1;
                   stack#push gen_el2;
                   raise (Invalid_argument "real argument is too large to convert to integer")
@@ -1360,16 +1370,26 @@ class rpc_calc conserve_memory =
                let bi_el1 = big_int_of_int (int_of_float ff1) in
                begin match gen_el2 with
                |RpcInt el2 ->
-                  stack#push (RpcInt (mod_big_int bi_el1 el2))
+                  if eq_big_int el2 zero_big_int then begin
+                     stack#push gen_el1;
+                     stack#push gen_el2;
+                     raise (Invalid_argument "division by zero")
+                  end else
+                     stack#push (RpcInt (mod_big_int bi_el1 el2))
                |RpcFloatUnit (ff2, uu2) ->
                   if uu2 <> Units.empty_unit then begin
                      stack#push gen_el1;
                      stack#push gen_el2;
                      raise (Invalid_argument "cannot compute mod of dimensioned values")
-                  end else if (abs_float ff2) < 1e9 then begin
+                  end else if (abs_float ff2) < 1e9 then
                      let bi_el2 = big_int_of_int (int_of_float ff2) in
-                     stack#push (RpcInt (mod_big_int bi_el1 bi_el2))
-                  end else begin
+                     if eq_big_int bi_el2 zero_big_int then begin
+                        stack#push gen_el1;
+                        stack#push gen_el2;
+                        raise (Invalid_argument "division by zero")
+                     end else
+                        stack#push (RpcInt (mod_big_int bi_el1 bi_el2))
+                  else begin
                      stack#push gen_el1;
                      stack#push gen_el2;
                      raise (Invalid_argument "real argument is too large to convert to integer")
