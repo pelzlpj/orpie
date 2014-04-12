@@ -3,6 +3,17 @@ Orpie ChangeLog
 
 v1.5
 
+   2014-04-11        Version 1.5.2 release.
+
+                     Catch division by zero when invoking the modulo
+                     operator.
+
+   2010-03-06        Minor changes for compatibility with OCaml
+                     3.11.
+
+                     Honor custom CFLAGS and LDFLAGS settings more
+                     carefully.
+
    2007-09-17        ln() and log10() now return complex values for
                      negative real arguments.
 
