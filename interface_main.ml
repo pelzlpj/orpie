@@ -533,9 +533,9 @@ let handle_exit_int (iface : interface_state_t) =
    iface.entry_type <- FloatEntry;
    iface.is_entering_base <- false;
    iface.int_base_string <- "";
-   if (String.length iface.gen_buffer.(0).re_mantissa > 0) or
-      (String.length iface.gen_buffer.(0).re_exponent > 0) or
-      (String.length iface.gen_buffer.(0).im_mantissa > 0) or
+   if (String.length iface.gen_buffer.(0).re_mantissa > 0) ||
+      (String.length iface.gen_buffer.(0).re_exponent > 0) ||
+      (String.length iface.gen_buffer.(0).im_mantissa > 0) ||
       (String.length iface.gen_buffer.(0).im_exponent > 0) then
       iface.has_entry <- true
    else
