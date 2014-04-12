@@ -7,14 +7,14 @@ v1.5
                      negative real arguments.
 
    2007-09-13        Version 1.5.1 release.
-   
+
                      pow() now avoids using complex arithmetic in
                      some cases, leading to more pleasant results
                      for expressions like 2^3 - 7.
-                     
+
                      Fixed "invalid argument" crash bug when typing
                      an unprintable character during entry of units.
-                     
+
                      Made a minor syntactical change for compatibility
                      with OCaml 3.10.0.
 
@@ -28,9 +28,9 @@ v1.5
    2006-11-13        Square root of a negative value now returns a
                      complex result.
 
-   2006-11-12        gcd(), lcd(), and mod() now accept real-valued 
+   2006-11-12        gcd(), lcd(), and mod() now accept real-valued
                      arguments.
-   
+
                      Fix for crash in abbrev mode.
 
    2004-09-09        Made a minor Makefile change to correct linking
@@ -44,7 +44,7 @@ v1.5
                      will now need to use something like "./configure
                      --prefix=/usr --sysconfdir=/etc".)
 
-   2004-09-03        Implemented entry of most fundamental physical 
+   2004-09-03        Implemented entry of most fundamental physical
                      constants.
 
    2004-08-31        Fixed incorrect error message regarding deprecated
@@ -76,19 +76,19 @@ v1.4
                      extended_enter command.
 
    2004-08-30        Version 1.4.0 release.
-   
+
                      Started work on a testing framework for the
                      rpc_calc object.  (I'd really appreciate help
                      writing test cases--see calc_test.ml .)
-   
+
                      Implemented matrix trace.
 
-   2004-08-29        Integrated unit handling code.  Real and complex 
+   2004-08-29        Integrated unit handling code.  Real and complex
                      scalars and matrices can are now dimensioned
                      quantities.  Unit conversion and base
                      standardization operators were added.
 
-                     When entering external data, the integer base 
+                     When entering external data, the integer base
                      separator character was changed from '_' to '`'.
 
    2004-08-27        Raising a negative real number to a noninteger
@@ -96,7 +96,7 @@ v1.4
                      real-valued 'nan'.
 
    2004-08-23        Deprecated "extended_" operation identifiers in
-                     favor of somewhat more clear "abbrev_" 
+                     favor of somewhat more clear "abbrev_"
                      identifiers.
 
                      Added methods to include (i.e. source) rcfiles
@@ -113,7 +113,7 @@ v1.4
 v1.3
 
    2004-07-22        Version 1.3.1 release.
-   
+
                      Ocaml 3.08 support: an include string is provided
                      to the compiler when building curses bindings.
 
@@ -135,7 +135,7 @@ v1.3
 
    2004-07-16        Included "register" variable shortcut macros in
                      orpierc.
-                     
+
                      Added a configuration option to conserve memory
                      by turning off string caching.
 
@@ -145,7 +145,7 @@ v1.3
    2004-07-13        Implemented memoization of string representations
                      for stack elements.
 
-   2004-07-08        Replaced general integer base conversion algorithm 
+   2004-07-08        Replaced general integer base conversion algorithm
                      with fast (N*log(N) or better) divide-and-
                      -conquer algorithms.
 
@@ -164,10 +164,10 @@ v1.2
    2004-06-16        Version 1.2.0 release.
 
    2004-06-15        Fixed the build script to support parallel make.
-   
+
                      Replaced 'datafile', 'buffer', and 'input_buffer'
                      orpierc variables with the 'datadir' variable.
-                     
+
                      Fixed crash due to displaying 'about' screen in
                      a very small terminal window.
 
@@ -216,5 +216,3 @@ v1.0
    2004-04-01        Version 1.0 release.
 
 
-
-# arch-tag: DO_NOT_CHANGE_ca34c7fb-62b9-4953-ad3b-d846de94ac1f 
