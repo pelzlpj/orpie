@@ -6,11 +6,13 @@
 # Usage: prep-release.sh DESTDIR
 #
 
+set -e
+
 echo "Exporting revision..."
-bzr export $1
+mkdir -p $1 && git archive HEAD | tar -C $1 --extract
 echo "Exporting dependencies..."
-bzr export $1/curses $HOME/src/bzr-repo/libcurses-ocaml-dev
-bzr export $1/units $HOME/src/bzr-repo/ocaml-units-dev
+mkdir -p $1/curses && git archive --remote="$HOME/src/ocaml-curses-legacy" HEAD | tar -C $1/curses --extract
+mkdir -p $1/units && git archive --remote="$HOME/src/ocaml-units" HEAD | tar -C $1/units --extract
 
 cd $1
 echo "Generating ./configure ..."
