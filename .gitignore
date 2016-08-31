@@ -21,3 +21,11 @@ txtin_parser.output
 *.5
 txtin_parser.mli
 txtin_lexer.ml
+doc/*.aux
+doc/*.dvi
+doc/*.haux
+doc/*.htoc
+doc/*.log
+doc/*.ps
+doc/manual.tex
+doc/*.toc
