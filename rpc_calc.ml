@@ -214,12 +214,12 @@ class rpc_calc conserve_memory =
          |RpcComplexUnit (el, uu) ->
             stack#push (RpcComplexUnit (Complex.neg el, uu))
          |RpcFloatMatrixUnit (el, uu) ->
-            let copy = Gsl_matrix.copy el in
-            (Gsl_matrix.scale copy (-1.0);
+            let copy = Gsl.Matrix.copy el in
+            (Gsl.Matrix.scale copy (-1.0);
             stack#push (RpcFloatMatrixUnit (copy, uu)))
          |RpcComplexMatrixUnit (el, uu) ->
-            let copy = Gsl_matrix_complex.copy el in
-            (Gsl_matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
+            let copy = Gsl.Matrix_complex.copy el in
+            (Gsl.Matrix_complex.scale copy {Complex.re=(-1.0); Complex.im=0.0};
             stack#push (RpcComplexMatrixUnit (copy, uu)))
          |RpcVariable s ->
             stack#push gen_el;
@@ -242,20 +242,21 @@ class rpc_calc conserve_memory =
          |RpcComplexUnit (el, uu) ->
             stack#push (RpcComplexUnit (Complex.mul el el, Units.pow uu 2.))
          |RpcFloatMatrixUnit (el, uu) ->
-            let n, m = (Gsl_matrix.dims el) in
+            let n, m = (Gsl.Matrix.dims el) in
             if n = m then
-               let result = Gsl_matrix.create n m in
-               (Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 el el 0.0 result;
+               let result = Gsl.Matrix.create n m in
+               (Gsl.Blas.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+                ~alpha:1.0 ~a:el ~b:el ~beta:0.0 ~c:result;
                stack#push (RpcFloatMatrixUnit (result, Units.pow uu 2.)))
             else
                (stack#push gen_el;
                raise (Invalid_argument "matrix is non-square"))
          |RpcComplexMatrixUnit (el, uu) ->
-            let n, m = (Gsl_matrix_complex.dims el) in
+            let n, m = (Gsl.Matrix_complex.dims el) in
             if m = n then
-               let result = Gsl_matrix_complex.create n m in
-               Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-               Complex.one el el Complex.zero result;
+               let result = Gsl.Matrix_complex.create n m in
+               Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+                 ~alpha:Complex.one ~a:el ~b:el ~beta:Complex.zero ~c:result;
                stack#push (RpcComplexMatrixUnit (result, Units.pow uu 2.))
             else
                (stack#push gen_el;
@@ -305,7 +306,7 @@ class rpc_calc conserve_memory =
          |RpcFloatUnit (el, uu) ->
             stack#push (RpcFloatUnit (abs_float el, uu))
          |RpcComplexUnit (el, uu) ->
-            stack#push (RpcFloatUnit (Gsl_complex.abs el, uu))
+            stack#push (RpcFloatUnit (Gsl.Gsl_complex.abs el, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -326,10 +327,10 @@ class rpc_calc conserve_memory =
          |RpcComplexUnit (el, uu) ->
             begin match modes.angle with
             |Rad ->
-               let (f, u) = funit_of_float (Gsl_complex.arg el) in
+               let (f, u) = funit_of_float (Gsl.Gsl_complex.arg el) in
                stack#push (RpcFloatUnit (f, u))
             |Deg ->
-               let (f, u) = funit_of_float (180.0 /. pi *.  (Gsl_complex.arg el)) in
+               let (f, u) = funit_of_float (180.0 /. pi *.  (Gsl.Gsl_complex.arg el)) in
                stack#push (RpcFloatUnit (f, u))
             end
          |RpcVariable s ->
@@ -364,7 +365,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot exponentiate dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.exp el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.exp el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -395,14 +396,14 @@ class rpc_calc conserve_memory =
                stack#push (RpcFloatUnit (f, u))
             end else
                let c_arg = c_of_f el in
-               let (c, u) = cunit_of_cpx (Gsl_complex.log c_arg) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.log c_arg) in
                stack#push (RpcComplexUnit (c, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.log el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.log el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -467,14 +468,14 @@ class rpc_calc conserve_memory =
                stack#push (RpcFloatUnit (f, u))
             end else
                let c_arg = c_of_f el in
-               let (c, u) = cunit_of_cpx (Gsl_complex.log10 c_arg) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.log10 c_arg) in
                stack#push (RpcComplexUnit (c, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute logarithm of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.log10 el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.log10 el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -498,15 +499,15 @@ class rpc_calc conserve_memory =
          |RpcFloatUnit (el, uu) ->
             stack#push (RpcFloatUnit (el, uu))
          |RpcComplexUnit (el, uu) ->
-            stack#push (RpcComplexUnit (Gsl_complex.conjugate el, uu))
+            stack#push (RpcComplexUnit (Gsl.Gsl_complex.conjugate el, uu))
          |RpcFloatMatrixUnit (el, uu) ->
             stack#push (RpcFloatMatrixUnit (el, uu))
          |RpcComplexMatrixUnit (el, uu) ->
             (* element-by-element conjugation *)
-            let rows, cols = Gsl_matrix_complex.dims el and
-            arr = Gsl_matrix_complex.to_array el in
-            let conj_arr = Array.map Gsl_complex.conjugate arr in
-            let conj_mat = Gsl_matrix_complex.of_array conj_arr rows cols in
+            let rows, cols = Gsl.Matrix_complex.dims el and
+            arr = Gsl.Matrix_complex.to_array el in
+            let conj_arr = Array.map Gsl.Gsl_complex.conjugate arr in
+            let conj_mat = Gsl.Matrix_complex.of_array conj_arr rows cols in
             stack#push (RpcComplexMatrixUnit (conj_mat, uu))
          |RpcVariable s ->
             stack#push gen_el;
@@ -549,7 +550,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute sine of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.sin el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.sin el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -595,7 +596,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute cosine of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.cos el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.cos el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -641,7 +642,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute tangent of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.tan el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.tan el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -687,7 +688,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute arcsine of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arcsin el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arcsin el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -733,7 +734,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute arccos of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arccos el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arccos el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -779,7 +780,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute arctan of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arctan el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arctan el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -813,7 +814,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute sinh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.sinh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.sinh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -847,7 +848,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute cosh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.cosh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.cosh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -881,7 +882,7 @@ class rpc_calc conserve_memory =
                stack#push gen_el;
                raise_invalid "cannot compute tanh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.tanh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.tanh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -901,21 +902,21 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            let (f, u) = funit_of_float (Gsl_math.asinh (float_of_big_int el)) in
+            let (f, u) = funit_of_float (Gsl.Math.asinh (float_of_big_int el)) in
             stack#push (RpcFloatUnit (f, u))
          |RpcFloatUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute asinh of dimensioned value"
             end else
-               let (f, u) = funit_of_float (Gsl_math.asinh el) in
+               let (f, u) = funit_of_float (Gsl.Math.asinh el) in
                stack#push (RpcFloatUnit (f, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute asinh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arcsinh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arcsinh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -935,21 +936,21 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            let (f, u) = funit_of_float (Gsl_math.acosh (float_of_big_int el)) in
+            let (f, u) = funit_of_float (Gsl.Math.acosh (float_of_big_int el)) in
             stack#push (RpcFloatUnit (f, u))
          |RpcFloatUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute acosh of dimensioned value"
             end else
-               let (f, u) = funit_of_float (Gsl_math.acosh el) in
+               let (f, u) = funit_of_float (Gsl.Math.acosh el) in
                stack#push (RpcFloatUnit (f, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute acosh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arccosh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arccosh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -969,21 +970,21 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcInt el ->
-            let (f, u) = funit_of_float (Gsl_math.atanh (float_of_big_int el)) in
+            let (f, u) = funit_of_float (Gsl.Math.atanh (float_of_big_int el)) in
             stack#push (RpcFloatUnit (f, u))
          |RpcFloatUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute atanh of dimensioned value"
             end else
-               let (f, u) = funit_of_float (Gsl_math.atanh el) in
+               let (f, u) = funit_of_float (Gsl.Math.atanh el) in
                stack#push (RpcFloatUnit (f, u))
          |RpcComplexUnit (el, uu) ->
             if uu <> Units.empty_unit then begin
                stack#push gen_el;
                raise_invalid "cannot compute atanh of dimensioned value"
             end else
-               let (c, u) = cunit_of_cpx (Gsl_complex.arctanh el) in
+               let (c, u) = cunit_of_cpx (Gsl.Gsl_complex.arctanh el) in
                stack#push (RpcComplexUnit (c, u))
          |RpcVariable s ->
             stack#push gen_el;
@@ -1012,13 +1013,13 @@ class rpc_calc conserve_memory =
          |RpcFloatMatrixUnit (el, uu) ->
             stack#push gen_el
          |RpcComplexMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix_complex.dims el
-            and carr = Gsl_matrix_complex.to_array el in
+            let n, m = Gsl.Matrix_complex.dims el
+            and carr = Gsl.Matrix_complex.to_array el in
             let farr = Array.make (n * m) 0.0 in
             for i = 0 to pred (n * m) do
                farr.(i) <- carr.(i).Complex.re
             done;
-            stack#push (RpcFloatMatrixUnit (Gsl_matrix.of_array farr n m, uu))
+            stack#push (RpcFloatMatrixUnit (Gsl.Matrix.of_array farr n m, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -1041,17 +1042,17 @@ class rpc_calc conserve_memory =
          |RpcComplexUnit (el, uu) ->
             stack#push (RpcFloatUnit (el.Complex.im, uu))
          |RpcFloatMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix.dims el in
+            let n, m = Gsl.Matrix.dims el in
             let farr = Array.make (n * m) 0.0 in
-            stack#push (RpcFloatMatrixUnit (Gsl_matrix.of_array farr n m, uu))
+            stack#push (RpcFloatMatrixUnit (Gsl.Matrix.of_array farr n m, uu))
          |RpcComplexMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix_complex.dims el
-            and carr = Gsl_matrix_complex.to_array el in
+            let n, m = Gsl.Matrix_complex.dims el
+            and carr = Gsl.Matrix_complex.to_array el in
             let farr = Array.make (n * m) 0.0 in
             for i = 0 to pred (n * m) do
                farr.(i) <- carr.(i).Complex.im
             done;
-            stack#push (RpcFloatMatrixUnit (Gsl_matrix.of_array farr n m, uu))
+            stack#push (RpcFloatMatrixUnit (Gsl.Matrix.of_array farr n m, uu))
          |RpcVariable s ->
             stack#push gen_el;
             let err_msg = 
@@ -1069,10 +1070,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               let (f, u) = funit_of_float (Gsl_sf.gamma (float_of_big_int el)) in
+               let (f, u) = funit_of_float (Gsl.Sf.gamma (float_of_big_int el)) in
                stack#push (RpcFloatUnit (f, u))
             with
-               Gsl_error.Gsl_exn (err, errstr) ->
+               Gsl.Error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
@@ -1082,10 +1083,10 @@ class rpc_calc conserve_memory =
                raise_invalid "cannot compute gamma of dimensioned value"
             end else
                begin try
-                  let (f, u) = funit_of_float (Gsl_sf.gamma el) in
+                  let (f, u) = funit_of_float (Gsl.Sf.gamma el) in
                   stack#push (RpcFloatUnit (f, u))
                with
-                  Gsl_error.Gsl_exn (err, errstr) ->
+                  Gsl.Error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
                      raise (Invalid_argument errstr))
                end
@@ -1109,10 +1110,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               let (f, u) = funit_of_float (Gsl_sf.lngamma (float_of_big_int el)) in
+               let (f, u) = funit_of_float (Gsl.Sf.lngamma (float_of_big_int el)) in
                stack#push (RpcFloatUnit (f, u))
             with
-               Gsl_error.Gsl_exn (err, errstr) ->
+               Gsl.Error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
@@ -1122,10 +1123,10 @@ class rpc_calc conserve_memory =
                raise_invalid "cannot compute lngamma of dimensioned value"
             end else
                begin try
-                  let (f, u) = funit_of_float (Gsl_sf.lngamma el) in
+                  let (f, u) = funit_of_float (Gsl.Sf.lngamma el) in
                   stack#push (RpcFloatUnit (f, u))
                with
-                  Gsl_error.Gsl_exn (err, errstr) ->
+                  Gsl.Error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
                      raise (Invalid_argument errstr))
                end
@@ -1149,10 +1150,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               let (f, u) = funit_of_float (Gsl_sf.erf (float_of_big_int el)) in
+               let (f, u) = funit_of_float (Gsl.Sf.erf (float_of_big_int el)) in
                stack#push (RpcFloatUnit (f, u))
             with
-               Gsl_error.Gsl_exn (err, errstr) ->
+               Gsl.Error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
@@ -1162,10 +1163,10 @@ class rpc_calc conserve_memory =
                raise_invalid "cannot compute error function of dimensioned value"
             end else
                begin try
-                  let (f, u) = funit_of_float (Gsl_sf.erf el) in
+                  let (f, u) = funit_of_float (Gsl.Sf.erf el) in
                   stack#push (RpcFloatUnit (f, u))
                with
-                  Gsl_error.Gsl_exn (err, errstr) ->
+                  Gsl.Error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
                      raise (Invalid_argument errstr))
                end
@@ -1189,10 +1190,10 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcInt el ->
             begin try
-               let (f, u) = funit_of_float (Gsl_sf.erfc (float_of_big_int el)) in
+               let (f, u) = funit_of_float (Gsl.Sf.erfc (float_of_big_int el)) in
                stack#push (RpcFloatUnit (f, u))
             with
-               Gsl_error.Gsl_exn (err, errstr) ->
+               Gsl.Error.Gsl_exn (err, errstr) ->
                   (stack#push gen_el;
                   raise (Invalid_argument errstr))
             end
@@ -1202,10 +1203,10 @@ class rpc_calc conserve_memory =
                raise_invalid "cannot compute erfc of dimensioned value"
             end else
                begin try
-                  let (f, u) = funit_of_float (Gsl_sf.erfc el) in
+                  let (f, u) = funit_of_float (Gsl.Sf.erfc el) in
                   stack#push (RpcFloatUnit (f, u))
                with
-                  Gsl_error.Gsl_exn (err, errstr) ->
+                  Gsl.Error.Gsl_exn (err, errstr) ->
                      (stack#push gen_el;
                      raise (Invalid_argument errstr))
                end
@@ -1260,11 +1261,11 @@ class rpc_calc conserve_memory =
                      raise_invalid "cannot compute factorial of dimensioned value"
                   end else
                      begin try
-                        let (f, u) = funit_of_float (Gsl_sf.gamma (el +. 1.0)) in
+                        let (f, u) = funit_of_float (Gsl.Sf.gamma (el +. 1.0)) in
                         stack#push (RpcFloatUnit (f, u));
                         true
                      with
-                        Gsl_error.Gsl_exn (err, errstr) ->
+                        Gsl.Error.Gsl_exn (err, errstr) ->
                            (stack#push gen_el;
                            raise (Invalid_argument errstr))
                      end
@@ -1294,14 +1295,14 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (el, uu) ->
-            let n, m = (Gsl_matrix.dims el) in
-            let trans_mat = Gsl_matrix.create m n in
-            Gsl_matrix.transpose trans_mat el;
+            let n, m = (Gsl.Matrix.dims el) in
+            let trans_mat = Gsl.Matrix.create m n in
+            Gsl.Matrix.transpose trans_mat el;
             stack#push (RpcFloatMatrixUnit (trans_mat, uu))
          |RpcComplexMatrixUnit (el, uu) ->
-            let n, m = (Gsl_matrix_complex.dims el) in
-            let trans_mat = Gsl_matrix_complex.create m n in
-            Gsl_matrix_complex.transpose trans_mat el;
+            let n, m = (Gsl.Matrix_complex.dims el) in
+            let trans_mat = Gsl.Matrix_complex.create m n in
+            Gsl.Matrix_complex.transpose trans_mat el;
             stack#push (RpcComplexMatrixUnit (trans_mat, uu))
          |RpcVariable s ->
             stack#push gen_el;
@@ -1501,7 +1502,7 @@ class rpc_calc conserve_memory =
             let (f, u) = funit_of_float (float_of_big_int el) in
             stack#push (RpcFloatUnit (f, u))
          |RpcFloatMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix.dims el in
+            let n, m = Gsl.Matrix.dims el in
             if n = 1 && m = 1 then
                stack#push (RpcFloatUnit (el.{0, 0}, uu))
             else begin
@@ -2015,14 +2016,14 @@ class rpc_calc conserve_memory =
                         raise_invalid "cannot compute binom of dimensioned values"
                      end else
                         begin try
-                           let log_coeff = (Gsl_sf.lngamma (el1 +. 1.0)) -.
-                           (Gsl_sf.lngamma (el2 +. 1.0)) -. 
-                           (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                           let log_coeff = (Gsl.Sf.lngamma (el1 +. 1.0)) -.
+                           (Gsl.Sf.lngamma (el2 +. 1.0)) -. 
+                           (Gsl.Sf.lngamma (el1 -. el2 +. 1.0)) in
                            let (f, u) = funit_of_float (exp log_coeff) in
                            stack#push (RpcFloatUnit (f, u));
                            true
                         with
-                           Gsl_error.Gsl_exn (err, errstr) ->
+                           Gsl.Error.Gsl_exn (err, errstr) ->
                               (stack#push gen_el1;
                                stack#push gen_el2;
                               raise (Invalid_argument errstr))
@@ -2107,13 +2108,13 @@ class rpc_calc conserve_memory =
                         raise_invalid "cannot compute permutations of dimensioned values"
                      end else
                         begin try
-                           let log_perm = (Gsl_sf.lngamma (el1 +. 1.0)) -.
-                           (Gsl_sf.lngamma (el1 -. el2 +. 1.0)) in
+                           let log_perm = (Gsl.Sf.lngamma (el1 +. 1.0)) -.
+                           (Gsl.Sf.lngamma (el1 -. el2 +. 1.0)) in
                            let (f, u) = funit_of_float (exp log_perm) in
                            stack#push (RpcFloatUnit (f, u));
                            true
                         with
-                           Gsl_error.Gsl_exn (err, errstr) ->
+                           Gsl.Error.Gsl_exn (err, errstr) ->
                               (stack#push gen_el1;
                                stack#push gen_el2;
                               raise (Invalid_argument errstr))
@@ -2152,12 +2153,12 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
             (* multiply on the left by a row of ones *)
-            let n, m = Gsl_matrix.dims mat in
+            let n, m = Gsl.Matrix.dims mat in
             let ones_arr = Array.make n 1.0 in
-            let ones = Gsl_matrix.of_array ones_arr 1 n in
-            let result = Gsl_matrix.create 1 m in
-            Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 ones mat
-            0.0 result;
+            let ones = Gsl.Matrix.of_array ones_arr 1 n in
+            let result = Gsl.Matrix.create 1 m in
+            Gsl.Blas.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:1.0 ~a:ones ~b:mat ~beta:0.0 ~c:result;
             stack#push (RpcFloatMatrixUnit (result, uu))
          |_ ->
             stack#push gen_el;
@@ -2173,12 +2174,12 @@ class rpc_calc conserve_memory =
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
             (* multiply on the left by a row of ones, divided by n *)
-            let n, m = Gsl_matrix.dims mat in
+            let n, m = Gsl.Matrix.dims mat in
             let ones_arr = Array.make n (1.0 /. (float_of_int n)) in
-            let ones = Gsl_matrix.of_array ones_arr 1 n in
-            let result = Gsl_matrix.create 1 m in
-            Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 1.0 ones mat
-            0.0 result;
+            let ones = Gsl.Matrix.of_array ones_arr 1 n in
+            let result = Gsl.Matrix.create 1 m in
+            Gsl.Blas.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:1.0 ~a:ones ~b:mat ~beta:0.0 ~c:result;
             stack#push (RpcFloatMatrixUnit (result, uu))
          |_ ->
             stack#push gen_el;
@@ -2194,8 +2195,8 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
-            let result = Gsl_matrix.create 1 m in
+            let n, m = Gsl.Matrix.dims mat in
+            let result = Gsl.Matrix.create 1 m in
             for col = 0 to pred m do
                result.{0, col} <- 0.0;
                for row = 0 to pred n do
@@ -2218,7 +2219,7 @@ class rpc_calc conserve_memory =
          let gen_el = stack#peek 1 in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
+            let n, m = Gsl.Matrix.dims mat in
             if n >= 2 then begin
                self#internal_variance_biased ();
                let n_over_nm1 = (float_of_int n) /. (float_of_int (pred n)) in
@@ -2240,7 +2241,7 @@ class rpc_calc conserve_memory =
          let gen_el = stack#peek 1 in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
+            let n, m = Gsl.Matrix.dims mat in
             let float_n = float_of_int n in
             (* computes variance as E[X^2] - E[X]^2 *)
             self#internal_dup ();
@@ -2265,8 +2266,8 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
-            let result = Gsl_matrix.create 1 m in
+            let n, m = Gsl.Matrix.dims mat in
+            let result = Gsl.Matrix.create 1 m in
             for col = 0 to pred m do
                result.{0, col} <- sqrt mat.{0, col}
             done;
@@ -2283,8 +2284,8 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
-            let result = Gsl_matrix.create 1 m in
+            let n, m = Gsl.Matrix.dims mat in
+            let result = Gsl.Matrix.create 1 m in
             for col = 0 to pred m do
                result.{0, col} <- sqrt mat.{0, col}
             done;
@@ -2307,8 +2308,8 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (mat, uu) ->
-            let n, m = Gsl_matrix.dims mat in
-            let result = Gsl_matrix.create 1 m in
+            let n, m = Gsl.Matrix.dims mat in
+            let result = Gsl.Matrix.create 1 m in
             for col = 0 to pred m do
                result.{0, col} <- mat.{0, col};
                for row = 1 to pred n do
@@ -2410,15 +2411,15 @@ class rpc_calc conserve_memory =
                (Complex.mul el c_coeff, std.Units.comp_units))
          |RpcFloatMatrixUnit (el, uu) ->
             let std = get_std uu in
-            let result = Gsl_matrix.copy el in
-            Gsl_matrix.scale result std.Units.coeff;
+            let result = Gsl.Matrix.copy el in
+            Gsl.Matrix.scale result std.Units.coeff;
             stack#push (RpcFloatMatrixUnit 
             (result, std.Units.comp_units))
          |RpcComplexMatrixUnit (el, uu) ->
             let std = get_std uu in
             let c_coeff = c_of_f std.Units.coeff in
-            let result = Gsl_matrix_complex.copy el in
-            Gsl_matrix_complex.scale result c_coeff;
+            let result = Gsl.Matrix_complex.copy el in
+            Gsl.Matrix_complex.scale result c_coeff;
             stack#push (RpcComplexMatrixUnit 
             (result, std.Units.comp_units))
          |_ ->
@@ -2480,8 +2481,8 @@ class rpc_calc conserve_memory =
             |RpcFloatMatrixUnit (el1, uu1) ->
                begin try
                   let conv = Units.conversion_factor uu1 uu2 !Rcfile.unit_table in
-                  let result = Gsl_matrix.copy el1 in
-                  Gsl_matrix.scale result conv;
+                  let result = Gsl.Matrix.copy el1 in
+                  Gsl.Matrix.scale result conv;
                   stack#push (RpcFloatMatrixUnit (result, uu2))
                with Units.Units_error s ->
                   stack#push gen_el1;
@@ -2494,8 +2495,8 @@ class rpc_calc conserve_memory =
                      Complex.re = Units.conversion_factor uu1 uu2 !Rcfile.unit_table;
                      Complex.im = 0.0
                   } in
-                  let result = Gsl_matrix_complex.copy el1 in
-                  Gsl_matrix_complex.scale result conv;
+                  let result = Gsl.Matrix_complex.copy el1 in
+                  Gsl.Matrix_complex.scale result conv;
                   stack#push (RpcComplexMatrixUnit (result, uu2))
                with Units.Units_error s ->
                   stack#push gen_el1;
@@ -2522,7 +2523,7 @@ class rpc_calc conserve_memory =
          let gen_el = stack#pop () in
          match gen_el with
          |RpcFloatMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix.dims el in
+            let n, m = Gsl.Matrix.dims el in
             if n = m then begin
                let result = ref 0.0 in
                for i = 0 to pred n do
@@ -2534,7 +2535,7 @@ class rpc_calc conserve_memory =
                raise_invalid "argument of trace must be a square matrix"
             end
          |RpcComplexMatrixUnit (el, uu) ->
-            let n, m = Gsl_matrix_complex.dims el in
+            let n, m = Gsl.Matrix_complex.dims el in
             if n = m then begin
                let result = ref Complex.zero in
                for i = 0 to pred n do

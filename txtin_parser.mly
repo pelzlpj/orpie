@@ -59,10 +59,10 @@ let decode_float_complex_matrix mat u_str =
          end
    done;
    if !has_complex then
-      Rpc_stack.RpcComplexMatrixUnit (Gsl_matrix_complex.of_arrays cpx_array,
+      Rpc_stack.RpcComplexMatrixUnit (Gsl.Matrix_complex.of_arrays cpx_array,
       Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
    else
-      Rpc_stack.RpcFloatMatrixUnit (Gsl_matrix.of_arrays flt_array,
+      Rpc_stack.RpcFloatMatrixUnit (Gsl.Matrix.of_arrays flt_array,
       Units.units_of_string (Str.string_after u_str 1) !Rcfile.unit_table)
 
 

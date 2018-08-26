@@ -41,13 +41,13 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
          } in
          stack#push (RpcComplexUnit (Complex.mul c_el1 el2, uu2))
       |RpcFloatMatrixUnit (el2, uu) ->
-         let result = Gsl_matrix.copy el2 in
-         Gsl_matrix.scale result (float_of_big_int el1);
+         let result = Gsl.Matrix.copy el2 in
+         Gsl.Matrix.scale result (float_of_big_int el1);
          stack#push (RpcFloatMatrixUnit (result, uu))
       |RpcComplexMatrixUnit (el2, uu) ->
          let c_el1 = cmpx_of_int el1 in
-         let result = Gsl_matrix_complex.copy el2 in
-         Gsl_matrix_complex.scale result c_el1;
+         let result = Gsl.Matrix_complex.copy el2 in
+         Gsl.Matrix_complex.scale result c_el1;
          stack#push (RpcComplexMatrixUnit (result, uu))
       |_ ->
          (stack#push gen_el1;
@@ -66,13 +66,13 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
          stack#push (RpcComplexUnit (Complex.mul c_el1 el2, Units.mult uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
          let uprod = Units.mult uu1 uu2 in
-         let result = Gsl_matrix.copy el2 in
-         Gsl_matrix.scale result el1;
+         let result = Gsl.Matrix.copy el2 in
+         Gsl.Matrix.scale result el1;
          stack#push (RpcFloatMatrixUnit (result, uprod))
       |RpcComplexMatrixUnit (el2, uu2) ->
          let uprod = Units.mult uu1 uu2 in
-         let result = Gsl_matrix_complex.copy el2 in
-         Gsl_matrix_complex.scale result (c_of_f el1);
+         let result = Gsl.Matrix_complex.copy el2 in
+         Gsl.Matrix_complex.scale result (c_of_f el1);
          stack#push (RpcComplexMatrixUnit (result, uprod))
       |_ ->
          (stack#push gen_el1;
@@ -91,11 +91,11 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
          stack#push (RpcComplexUnit (Complex.mul el1 el2, Units.mult uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
          let c_el2 = cmat_of_fmat el2 in
-         Gsl_matrix_complex.scale c_el2 el1;
+         Gsl.Matrix_complex.scale c_el2 el1;
          stack#push (RpcComplexMatrixUnit (c_el2, Units.mult uu1 uu2))
       |RpcComplexMatrixUnit (el2, uu2) ->
-         let result = Gsl_matrix_complex.copy el2 in
-         Gsl_matrix_complex.scale result el1;
+         let result = Gsl.Matrix_complex.copy el2 in
+         Gsl.Matrix_complex.scale result el1;
          stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
       |_ ->
          (stack#push gen_el1;
@@ -105,37 +105,37 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
    |RpcFloatMatrixUnit (el1, uu1) -> (
       match gen_el2 with
       |RpcInt el2 ->
-         let result = Gsl_matrix.copy el1 in
-         Gsl_matrix.scale result (float_of_big_int el2);
+         let result = Gsl.Matrix.copy el1 in
+         Gsl.Matrix.scale result (float_of_big_int el2);
          stack#push (RpcFloatMatrixUnit (result, uu1))
       |RpcFloatUnit (el2, uu2) ->
-         let result = Gsl_matrix.copy el1 in
-         Gsl_matrix.scale result el2;
+         let result = Gsl.Matrix.copy el1 in
+         Gsl.Matrix.scale result el2;
          stack#push (RpcFloatMatrixUnit (result, Units.mult uu1 uu2))
       |RpcComplexUnit (el2, uu2) ->
          let c_el1 = cmat_of_fmat el1 in
-         Gsl_matrix_complex.scale c_el1 el2;
+         Gsl.Matrix_complex.scale c_el1 el2;
          stack#push (RpcComplexMatrixUnit (c_el1, Units.mult uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix.dims el1)
-         and n2, m2 = (Gsl_matrix.dims el2) in
+         let n1, m1 = (Gsl.Matrix.dims el1)
+         and n2, m2 = (Gsl.Matrix.dims el2) in
          if m1 = n2 then
-            let result = Gsl_matrix.create n1 m2 in
-            Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-            1.0 el1 el2 0.0 result;
+            let result = Gsl.Matrix.create n1 m2 in
+            Gsl.Blas.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:1.0 ~a:el1 ~b:el2 ~beta:0.0 ~c:result;
             stack#push (RpcFloatMatrixUnit (result, Units.mult uu1 uu2))
          else
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
       |RpcComplexMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix.dims el1)
-         and n2, m2 = (Gsl_matrix_complex.dims el2) in
+         let n1, m1 = (Gsl.Matrix.dims el1)
+         and n2, m2 = (Gsl.Matrix_complex.dims el2) in
          if m1 = n2 then
             let c_el1 = cmat_of_fmat el1
-            and result = Gsl_matrix_complex.create n1 m2 in
-            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-            Complex.one c_el1 el2 Complex.zero result;
+            and result = Gsl.Matrix_complex.create n1 m2 in
+            Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:Complex.one ~a:c_el1 ~b:el2 ~beta:Complex.zero ~c:result;
             stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
          else
             (stack#push gen_el1; 
@@ -150,37 +150,37 @@ let mult (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with
       |RpcInt el2 ->
          let c_el2 = cmpx_of_int el2 in
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result c_el2;
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result c_el2;
          stack#push (RpcComplexMatrixUnit (result, uu1))
       |RpcFloatUnit (el2, uu2) ->
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result Complex.one;
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result Complex.one;
          stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
       |RpcComplexUnit (el2, uu2) ->
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result Complex.one;
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result Complex.one;
          stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1)
-         and n2, m2 = (Gsl_matrix.dims el2) in
+         let n1, m1 = (Gsl.Matrix_complex.dims el1)
+         and n2, m2 = (Gsl.Matrix.dims el2) in
          if m1 = n2 then
             let c_el2 = cmat_of_fmat el2
-            and result = Gsl_matrix_complex.create n1 m2 in
-            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-            Complex.one el1 c_el2 Complex.zero result;
+            and result = Gsl.Matrix_complex.create n1 m2 in
+            Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:Complex.one ~a:el1 ~b:c_el2 ~beta:Complex.zero ~c:result;
             stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
          else
             (stack#push gen_el1;
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for multiplication"))
       |RpcComplexMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1)
-         and n2, m2 = (Gsl_matrix_complex.dims el2) in
+         let n1, m1 = (Gsl.Matrix_complex.dims el1)
+         and n2, m2 = (Gsl.Matrix_complex.dims el2) in
          if m1 = n2 then
-            let result = Gsl_matrix_complex.create n1 m2 in
-            Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-            Complex.one el1 el2 Complex.zero result;
+            let result = Gsl.Matrix_complex.create n1 m2 in
+            Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+              ~alpha:Complex.one ~a:el1 ~b:el2 ~beta:Complex.zero ~c:result;
             stack#push (RpcComplexMatrixUnit (result, Units.mult uu1 uu2))
          else
             (stack#push gen_el1;

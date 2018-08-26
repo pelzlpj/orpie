@@ -51,8 +51,8 @@ exception Stack_error of string
 type orpie_data_t = | RpcInt of Big_int.big_int
                     | RpcFloatUnit of float * Units.unit_set_t
                     | RpcComplexUnit of Complex.t * Units.unit_set_t
-                    | RpcFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_set_t
-                    | RpcComplexMatrixUnit of Gsl_matrix_complex.matrix *
+                    | RpcFloatMatrixUnit of Gsl.Matrix.matrix * Units.unit_set_t
+                    | RpcComplexMatrixUnit of Gsl.Matrix_complex.matrix *
                                               Units.unit_set_t
                     | RpcVariable of string
 
@@ -83,9 +83,9 @@ type stack_var_string_t   = {mutable v_line : string option;
 type stack_data_t = | StackInt of Big_int.big_int * stack_int_string_t
                     | StackFloatUnit of float * Units.unit_set_t * stack_float_unit_string_t
                     | StackComplexUnit of Complex.t * Units.unit_set_t * stack_cmpx_unit_string_t
-                    | StackFloatMatrixUnit of Gsl_matrix.matrix * Units.unit_set_t *
+                    | StackFloatMatrixUnit of Gsl.Matrix.matrix * Units.unit_set_t *
                                               stack_fmat_unit_string_t
-                    | StackComplexMatrixUnit of Gsl_matrix_complex.matrix *
+                    | StackComplexMatrixUnit of Gsl.Matrix_complex.matrix *
                                                 Units.unit_set_t * stack_cmat_string_t
                     | StackVariable of string * stack_var_string_t
 
@@ -700,7 +700,7 @@ class rpc_stack conserve_memory_in =
          |Line ->
             let s = 
                (* looks like [[ a11, a12 ][ a21, a22 ]] *)
-               let rows, cols = (Gsl_matrix.dims fm) in
+               let rows, cols = (Gsl.Matrix.dims fm) in
                let initial_string = "[" in
                let line = ref initial_string in
                for n = 0 to rows - 1 do
@@ -722,7 +722,7 @@ class rpc_stack conserve_memory_in =
                (* looks like [[ a11, a12 ]
                 *             [ a21, a22 ]] 
                 * and the columns are aligned. *)
-               let rows, cols = (Gsl_matrix.dims fm) in
+               let rows, cols = (Gsl.Matrix.dims fm) in
                (* first get the maximum field width for each column *)
                let max_width = Array.make cols 0 in
                for m = 0 to pred cols do
@@ -774,7 +774,7 @@ class rpc_stack conserve_memory_in =
             let s = 
                (* looks like [[ (a11re, a11im), (a12re, a12im) ][ (a21re,
                   a21im), (a22re, a22im) ] *)
-               let rows, cols = (Gsl_matrix_complex.dims cm) in
+               let rows, cols = (Gsl.Matrix_complex.dims cm) in
                let initial_string = "[" in
                let line = ref initial_string in
                for n = 0 to rows - 1 do
@@ -838,7 +838,7 @@ class rpc_stack conserve_memory_in =
                (* looks like [[ (a11re, a11im), (a12re, a12im) ]
                 *             [ (a21re, a21im), (a22re, a22im) ] 
                 * with properly aligned columns *)
-               let rows, cols = (Gsl_matrix_complex.dims cm) in
+               let rows, cols = (Gsl.Matrix_complex.dims cm) in
                (* first get the maximum field width for each column *)
                let max_width = Array.make_matrix cols 2 0 in
                for m = 0 to pred cols do

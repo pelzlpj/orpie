@@ -19,7 +19,7 @@
  *)
 
 open Rpc_stack
-open Gsl_error
+open Gsl.Error
 open Gsl_assist
 open Big_int
 
@@ -78,31 +78,31 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with
       |RpcInt el2 ->
          let f_el2 = float_of_big_int el2 in
-         let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result (1.0 /. f_el2));
+         let result = Gsl.Matrix.copy el1 in
+         (Gsl.Matrix.scale result (1.0 /. f_el2));
          stack#push (RpcFloatMatrixUnit (result, uu1))
       |RpcFloatUnit (el2, uu2) ->
-         let result = Gsl_matrix.copy el1 in
-         (Gsl_matrix.scale result (1.0 /. el2));
+         let result = Gsl.Matrix.copy el1 in
+         (Gsl.Matrix.scale result (1.0 /. el2));
          stack#push (RpcFloatMatrixUnit (result, Units.div uu1 uu2))
       |RpcComplexUnit (el2, uu2) ->
          let c_el1 = cmat_of_fmat el1 in
-         Gsl_matrix_complex.scale c_el1 (Complex.inv el2);
+         Gsl.Matrix_complex.scale c_el1 (Complex.inv el2);
          stack#push (RpcComplexMatrixUnit (c_el1, Units.div uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix.dims el1)
-         and n2, m2 = (Gsl_matrix.dims el2) in
+         let n1, m1 = (Gsl.Matrix.dims el1)
+         and n2, m2 = (Gsl.Matrix.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
-               let copy_el2 = Gsl_vectmat.mat_convert ~protect:true (`M el2)
-               and perm = Gsl_permut.create m1
-               and inv = Gsl_matrix.create m1 m1 in
+               let copy_el2 = Gsl.Vectmat.mat_convert ~protect:true (`M el2)
+               and perm = Gsl.Permut.create m1
+               and inv = Gsl.Matrix.create m1 m1 in
                try
-                  let _ = Gsl_linalg._LU_decomp copy_el2 perm in
-                  Gsl_linalg._LU_invert copy_el2 perm (`M inv);
-                  let result = Gsl_matrix.create n1 m2 in
-                  Gsl_blas.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans
-                  1.0 el1 inv 0.0 result;
+                  let _ = Gsl.Linalg._LU_decomp copy_el2 perm in
+                  Gsl.Linalg._LU_invert copy_el2 perm (`M inv);
+                  let result = Gsl.Matrix.create n1 m2 in
+                  Gsl.Blas.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+                    ~alpha:1.0 ~a:el1 ~b:inv ~beta:0.0 ~c:result;
                   stack#push (RpcFloatMatrixUnit (result, Units.div uu1 uu2))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
@@ -117,21 +117,20 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
             stack#push gen_el2;
             raise (Invalid_argument "divisor matrix is non-square"))
       |RpcComplexMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix.dims el1)
-         and n2, m2 = (Gsl_matrix_complex.dims el2) in
+         let n1, m1 = (Gsl.Matrix.dims el1)
+         and n2, m2 = (Gsl.Matrix_complex.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
-               let copy_el2 = Gsl_matrix_complex.copy el2
-               and perm = Gsl_permut.create m1
-               and inv = Gsl_matrix_complex.create m1 m1 in
+               let copy_el2 = Gsl.Matrix_complex.copy el2
+               and perm = Gsl.Permut.create m1
+               and inv = Gsl.Matrix_complex.create m1 m1 in
                try
-                  let _ = Gsl_linalg.complex_LU_decomp (`CM copy_el2) perm in
-                  Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                  let _ = Gsl.Linalg.complex_LU_decomp (`CM copy_el2) perm in
+                  Gsl.Linalg.complex_LU_invert (`CM copy_el2) perm
                   (`CM inv);
-                  let result = Gsl_matrix_complex.create n1 m2 in
-                  Gsl_blas.Complex.gemm Gsl_blas.NoTrans
-                  Gsl_blas.NoTrans Complex.one (cmat_of_fmat el1) inv
-                  Complex.zero result;
+                  let result = Gsl.Matrix_complex.create n1 m2 in
+                  Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+                    ~alpha:Complex.one ~a:(cmat_of_fmat el1) ~b:inv ~beta:Complex.zero ~c:result;
                   stack#push (RpcComplexMatrixUnit (result, Units.div uu1 uu2))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
@@ -154,32 +153,31 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
       match gen_el2 with
       |RpcInt el2 ->
          let c_el2 = cmpx_of_int el2 in
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result (Complex.inv c_el2);
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result (Complex.inv c_el2);
          stack#push (RpcComplexMatrixUnit (result, uu1))
       |RpcFloatUnit (el2, uu2) ->
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result (Complex.inv (c_of_f el2));
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result (Complex.inv (c_of_f el2));
          stack#push (RpcComplexMatrixUnit (result, Units.div uu1 uu2))
       |RpcComplexUnit (el2, uu2) ->
-         let result = Gsl_matrix_complex.copy el1 in
-         Gsl_matrix_complex.scale result (Complex.inv el2);
+         let result = Gsl.Matrix_complex.copy el1 in
+         Gsl.Matrix_complex.scale result (Complex.inv el2);
          stack#push (RpcComplexMatrixUnit (result, Units.div uu1 uu2))
       |RpcFloatMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1)
-         and n2, m2 = (Gsl_matrix.dims el2) in
+         let n1, m1 = (Gsl.Matrix_complex.dims el1)
+         and n2, m2 = (Gsl.Matrix.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
-               let copy_el2 = Gsl_matrix.copy el2
-               and perm = Gsl_permut.create m1
-               and inv = Gsl_matrix.create m1 m1 in
+               let copy_el2 = Gsl.Matrix.copy el2
+               and perm = Gsl.Permut.create m1
+               and inv = Gsl.Matrix.create m1 m1 in
                try
-                  let _ = Gsl_linalg._LU_decomp (`M copy_el2) perm in
-                  Gsl_linalg._LU_invert (`M copy_el2) perm (`M inv);
-                  let result = Gsl_matrix_complex.create n1 m2 in
-                  Gsl_blas.Complex.gemm Gsl_blas.NoTrans
-                  Gsl_blas.NoTrans Complex.one el1 (cmat_of_fmat inv)
-                  Complex.zero result;
+                  let _ = Gsl.Linalg._LU_decomp (`M copy_el2) perm in
+                  Gsl.Linalg._LU_invert (`M copy_el2) perm (`M inv);
+                  let result = Gsl.Matrix_complex.create n1 m2 in
+                  Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans
+                    ~alpha:Complex.one ~a:el1 ~b:(cmat_of_fmat inv) ~beta:Complex.zero ~c:result;
                   stack#push (RpcComplexMatrixUnit (result, Units.div uu1 uu2))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;
@@ -194,22 +192,22 @@ let div (stack : rpc_stack) (evaln : int -> unit) =
             stack#push gen_el2;
             raise (Invalid_argument "divisor matrix is non-square"))
       |RpcComplexMatrixUnit (el2, uu2) ->
-         let n1, m1 = (Gsl_matrix_complex.dims el1)
-         and n2, m2 = (Gsl_matrix_complex.dims el2) in
+         let n1, m1 = (Gsl.Matrix_complex.dims el1)
+         and n2, m2 = (Gsl.Matrix_complex.dims el2) in
          if n2 = m2 then
             if m1 = n2 then
-               (* FIXME: do we need to use Gsl_vectmat.cmat_convert here? *)
-               let copy_el2 = Gsl_matrix_complex.copy el2
-               and perm = Gsl_permut.create m1
-               and inv = Gsl_matrix_complex.create m1 m1 in
+               (* FIXME: do we need to use Gsl.Vectmat.cmat_convert here? *)
+               let copy_el2 = Gsl.Matrix_complex.copy el2
+               and perm = Gsl.Permut.create m1
+               and inv = Gsl.Matrix_complex.create m1 m1 in
                try
-                  let _ = Gsl_linalg.complex_LU_decomp (`CM
+                  let _ = Gsl.Linalg.complex_LU_decomp (`CM
                   copy_el2) perm in
-                  Gsl_linalg.complex_LU_invert (`CM copy_el2) perm
+                  Gsl.Linalg.complex_LU_invert (`CM copy_el2) perm
                   (`CM inv);
-                  let result = Gsl_matrix_complex.create n1 m2 in
-                  Gsl_blas.Complex.gemm Gsl_blas.NoTrans Gsl_blas.NoTrans 
-                  Complex.one el1 inv Complex.zero result;
+                  let result = Gsl.Matrix_complex.create n1 m2 in
+                  Gsl.Blas.Complex.gemm ~ta:Gsl.Blas.NoTrans ~tb:Gsl.Blas.NoTrans 
+                    ~alpha:Complex.one ~a:el1 ~b:inv ~beta:Complex.zero ~c:result;
                   stack#push (RpcComplexMatrixUnit (result, Units.div uu1 uu2))
                with Gsl_exn _ -> 
                   (stack#push gen_el1;

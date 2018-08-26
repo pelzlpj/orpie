@@ -274,7 +274,7 @@ let get_entry_from_buffer (iface : interface_state_t) =
             let uu = Units.units_of_string iface.units_entry_buffer
                !Rcfile.unit_table
             in
-            RpcFloatMatrixUnit (Gsl_matrix.of_array temp_arr matrix_rows
+            RpcFloatMatrixUnit (Gsl.Matrix.of_array temp_arr matrix_rows
             iface.matrix_cols, uu)
          with Failure "float_of_string" ->
             raise (Invalid_argument "improperly formatted floating-point matrix data")
@@ -321,7 +321,7 @@ let get_entry_from_buffer (iface : interface_state_t) =
             let uu = Units.units_of_string iface.units_entry_buffer
                !Rcfile.unit_table 
             in
-            RpcComplexMatrixUnit (Gsl_matrix_complex.of_array temp_arr
+            RpcComplexMatrixUnit (Gsl.Matrix_complex.of_array temp_arr
             matrix_rows iface.matrix_cols, uu)
          with Failure "float_of_string" ->
             raise (Invalid_argument "improperly formatted complex

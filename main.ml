@@ -37,7 +37,7 @@ let calc = new Rpc_calc.rpc_calc !Rcfile.conserve_memory;;
 let iface = Interface.make calc (initialize_screen ());;
 
 (* initialize the error handler *)
-Gsl_error.init ();;
+Gsl.Error.init ();;
 
 try
    Interface_main.run iface

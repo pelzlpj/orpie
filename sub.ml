@@ -134,14 +134,14 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
    |RpcFloatMatrixUnit (el1, u1) -> (
       match gen_el2 with
       |RpcFloatMatrixUnit (el2, u2) ->
-         let dim1 = (Gsl_matrix.dims el1) and
-         dim2     = (Gsl_matrix.dims el2) in
+         let dim1 = (Gsl.Matrix.dims el1) and
+         dim2     = (Gsl.Matrix.dims el2) in
          if dim1 = dim2 then
             try
                let conv = Units.conversion_factor u1 u2 !Rcfile.unit_table in
-               let result = Gsl_matrix.copy el1 in
-               Gsl_matrix.scale result conv;
-               Gsl_matrix.sub result el2;
+               let result = Gsl.Matrix.copy el1 in
+               Gsl.Matrix.scale result conv;
+               Gsl.Matrix.sub result el2;
                stack#push (RpcFloatMatrixUnit (result, u2))
             with Units.Units_error s -> 
                stack#push gen_el1;
@@ -152,14 +152,14 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
       |RpcComplexMatrixUnit (el2, u2) ->
-         let dim1 = (Gsl_matrix.dims el1) and
-         dim2     = (Gsl_matrix_complex.dims el2) in
+         let dim1 = (Gsl.Matrix.dims el1) and
+         dim2     = (Gsl.Matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
                let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
                let c_el1 = cmat_of_fmat el1 in
-               Gsl_matrix_complex.scale c_el1 conv;
-               Gsl_matrix_complex.sub c_el1 el2;
+               Gsl.Matrix_complex.scale c_el1 conv;
+               Gsl.Matrix_complex.sub c_el1 el2;
                stack#push (RpcComplexMatrixUnit (c_el1, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
@@ -179,15 +179,15 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
    |RpcComplexMatrixUnit (el1, u1) -> (
       match gen_el2 with 
       |RpcFloatMatrixUnit (el2, u2) ->
-         let dim1 = (Gsl_matrix_complex.dims el1) and
-         dim2     = (Gsl_matrix.dims el2) in
+         let dim1 = (Gsl.Matrix_complex.dims el1) and
+         dim2     = (Gsl.Matrix.dims el2) in
          if dim1 = dim2 then
             try
                let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
                let c_el2 = cmat_of_fmat el2 in
-               let result = Gsl_matrix_complex.copy el1 in
-               Gsl_matrix_complex.scale result conv;
-               Gsl_matrix_complex.sub result c_el2;
+               let result = Gsl.Matrix_complex.copy el1 in
+               Gsl.Matrix_complex.scale result conv;
+               Gsl.Matrix_complex.sub result c_el2;
                stack#push (RpcComplexMatrixUnit (result, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
@@ -198,14 +198,14 @@ let sub (stack : rpc_stack) (evaln : int -> unit) =
             stack#push gen_el2;
             raise (Invalid_argument "incompatible matrix dimensions for subtraction"))
       |RpcComplexMatrixUnit (el2, u2) ->
-         let dim1 = (Gsl_matrix_complex.dims el1) and
-         dim2     = (Gsl_matrix_complex.dims el2) in
+         let dim1 = (Gsl.Matrix_complex.dims el1) and
+         dim2     = (Gsl.Matrix_complex.dims el2) in
          if dim1 = dim2 then
             try
                let conv = c_of_f (Units.conversion_factor u1 u2 !Rcfile.unit_table) in
-               let result = Gsl_matrix_complex.copy el1 in
-               Gsl_matrix_complex.scale result conv;
-               Gsl_matrix_complex.sub result el2;
+               let result = Gsl.Matrix_complex.copy el1 in
+               Gsl.Matrix_complex.scale result conv;
+               Gsl.Matrix_complex.sub result el2;
                stack#push (RpcComplexMatrixUnit (result, u2))
             with Units.Units_error s ->
                stack#push gen_el1;
