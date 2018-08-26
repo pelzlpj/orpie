@@ -1,0 +1,74 @@
+#!/usr/bin/env ocaml
+
+(* 
+ * This script computes an installation prefix based on
+ *    1) $PREFIX, if set, or
+ *    2) "opam config var prefix", if available, or
+ *    3) "/usr/local" as a fallback.
+ * The result gets substituted for @prefix@ in the input file, in much
+ * the same way that autoconf does things.
+ *)
+
+#use "topfind";;
+#require "unix";;
+
+
+let opam_prefix () : string option =
+  try
+    let ic = UnixLabels.open_process_in "opam config var prefix" in
+    let prefix = input_line ic in
+    let status = UnixLabels.close_process_in ic in
+    begin match status with
+    | UnixLabels.WEXITED 0 ->
+        Some prefix
+    | _ ->
+        None
+    end
+  with _ ->
+    None
+
+
+let installation_prefix () =
+  match Sys.getenv_opt "PREFIX" with
+  | Some prefix ->
+      prefix
+  | None ->
+      begin match opam_prefix () with
+      | Some prefix ->
+          prefix
+      | None ->
+          "/usr/local"
+      end
+
+
+let sed_escape (input : string) : string =
+  let buf = Buffer.create (String.length input) in
+  for i = 0 to String.length input - 1 do
+    begin if input.[i] == '\\' || input.[i] == '/' then
+      Buffer.add_char buf '\\'
+    end;
+    Buffer.add_char buf input.[i]
+  done;
+  Buffer.contents buf
+
+
+let subst_prefix (in_filename : string) (out_filename : string) : unit =
+  let prefix = installation_prefix () in
+  let cmd = Printf.sprintf "sed 's/@prefix@/%s/g' \"%s\" > \"%s\""
+    (sed_escape prefix) in_filename out_filename in
+  let ec = Sys.command cmd in
+  begin if ec <> 0 then
+    Printf.fprintf stderr "sed substitution failed with exit code %d.\n" ec
+  end;
+  exit ec
+
+
+let () =
+  match Sys.argv with
+  | [| _; in_filename; out_filename |] ->
+      subst_prefix in_filename out_filename
+  | _ ->
+      let () = Printf.fprintf stderr "Usage: subst_prefix.ml in_filename out_filename\n" in
+      exit 2
+
+  
