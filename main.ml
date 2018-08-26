@@ -18,7 +18,6 @@
  *  <pelzlpj@gmail.com>.
  *)
 
-open Interface;;
 open Curses;;
 
 (* load orpierc *)

@@ -262,7 +262,7 @@ let decode_single_key_string key_string =
       and main_key = Str.matched_group 5 key_string in
       if has_meta_ctrl then
          if String.length main_key = 1 then
-            let uc_main_key = String.uppercase main_key in
+            let uc_main_key = String.uppercase_ascii main_key in
             let mc_chtype = ((int_of_char uc_main_key.[0]) + 64) in
             let mc_str = "M-C-" ^ uc_main_key in
             (mc_chtype, mc_str)
@@ -279,7 +279,7 @@ let decode_single_key_string key_string =
                        "octal notation might let you accomplish this.")
       else if has_ctrl then
          if String.length main_key = 1 then
-            let uc_main_key = String.uppercase main_key in
+            let uc_main_key = String.uppercase_ascii main_key in
             let c_chtype = ((int_of_char uc_main_key.[0]) - 64) in
             let c_str = "C-" ^ uc_main_key in
             (c_chtype, c_str)

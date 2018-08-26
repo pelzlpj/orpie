@@ -24,11 +24,8 @@
  * The screen rendering code is found in interface_draw.ml . *)
 
 open Curses;;
-open Printf;;
-open Rpc_calc;;
 open Rpc_stack;;
 open Complex;;
-open Big_int;;
 open Operations;;
 open Interface;;
 open Interface_draw;;

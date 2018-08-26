@@ -123,8 +123,8 @@ let open_or_create_out_gen is_binary filename =
          | d :: tail ->
             begin
                try Sys.chdir d
-               with Sys_error err_msg ->
-                  begin 
+               with Sys_error _ ->
+                  begin
                      let _ = Sys.command ("mkdir " ^ d) in
                      Sys.chdir d
                   end

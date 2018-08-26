@@ -26,8 +26,6 @@
 
 open Curses;;
 open Rpc_calc;;
-open Operations;;
-open Complex;;
 
 exception Not_handled;;
 

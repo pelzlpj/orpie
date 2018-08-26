@@ -40,7 +40,6 @@
  *)
 
 
-open Big_int
 open Big_int_str
 open Printf
 
@@ -727,7 +726,7 @@ class rpc_stack conserve_memory_in =
                let max_width = Array.make cols 0 in
                for m = 0 to pred cols do
                   for n = 0 to pred rows do
-                     let dummy_string = sprintf "%-.15g" fm.{n, m} in
+                     let dummy_string = sprintf "%-20.15g" fm.{n, m} in
                      let ds_len = String.length dummy_string in
                      if ds_len > max_width.(m) then
                         max_width.(m) <- ds_len
@@ -845,13 +844,13 @@ class rpc_stack conserve_memory_in =
                   for n = 0 to pred rows do
                      match calc_modes.complex with
                      |Rect ->
-                        let dummy_re = sprintf "%-.15g" cm.{n, m}.Complex.re in
+                        let dummy_re = sprintf "%-20.15g" cm.{n, m}.Complex.re in
                         let dr_len = String.length dummy_re in
                         if dr_len > max_width.(m).(0) then
                            max_width.(m).(0) <- dr_len
                         else
                            ();
-                        let dummy_im = sprintf "%-.15g" cm.{n, m}.Complex.im in
+                        let dummy_im = sprintf "%-20.15g" cm.{n, m}.Complex.im in
                         let di_len = String.length dummy_im in
                         if di_len > max_width.(m).(1) then
                            max_width.(m).(1) <- di_len
@@ -862,7 +861,7 @@ class rpc_stack conserve_memory_in =
                         and ii = cm.{n, m}.Complex.im in
                         let r = sqrt (rr *. rr +. ii *. ii)
                         and theta = atan2 ii rr in
-                        let dummy_r = sprintf "%-.15g" r in
+                        let dummy_r = sprintf "%-20.15g" r in
                         let r_len = String.length dummy_r in
                         if r_len > max_width.(m).(0) then
                            max_width.(m).(0) <- r_len
@@ -870,8 +869,8 @@ class rpc_stack conserve_memory_in =
                            ();
                         let dummy_theta = 
                            match calc_modes.angle with
-                           |Rad -> sprintf "%-.15g" theta
-                           |Deg -> sprintf "%-.15g" (180.0 /. pi *. theta)
+                           |Rad -> sprintf "%-20.15g" theta
+                           |Deg -> sprintf "%-20.15g" (180.0 /. pi *. theta)
                         in
                         let theta_len = String.length dummy_theta in
                         if theta_len > max_width.(m).(1) then

@@ -261,7 +261,7 @@ let unit_rep_of_string (ss : string) (known_units : unit_table_t) : unit_rep_t =
  * (3)*(5_m/s)*(10_m^2)*(0.5_g) -> 75_m^3*g/s . *)
 let collect (terms : float * (unit_def_t SMap.t)) : unit_def_t =
    let (leading_coeff, uncollected) = terms in
-   let collect_single (unit_str : string) (unit_def : unit_def_t)
+   let collect_single (_ : string) (unit_def : unit_def_t)
    (collection : unit_def_t) = {
          coeff      = collection.coeff *. unit_def.coeff;
          comp_units = SMap.fold mult_aux unit_def.comp_units 

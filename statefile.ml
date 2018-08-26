@@ -24,7 +24,6 @@
 
 
 open Rpc_stack
-open Rpc_calc
 
 
 (* save to a datafile using the Marshal module *)

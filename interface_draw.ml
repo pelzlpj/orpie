@@ -25,10 +25,7 @@
 
 open Curses;;
 open Printf;;
-open Rpc_calc;;
 open Rpc_stack;;
-open Complex;;
-open Big_int;;
 open Operations;;
 open Interface;;
 
