@@ -1,9 +1,0 @@
-Orpie makes use of a portion of the GSL bindings provided by Olivier Andrieu's
-OcamlGSL project (v 0.6.0).  This code is released under the GNU GPL; for
-details, see COPYING in the 'gsl' subdirectory.
-
-The OcamlGSL project may be found at http://oandrieu.nerim.net/ocaml/gsl/ .
-
-
-
-# arch-tag: DO_NOT_CHANGE_cac38517-e49e-4a2c-9a2a-7ff33e99eced 

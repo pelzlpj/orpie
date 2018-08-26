@@ -28,16 +28,16 @@
 let cmpx_of_int i   = {Complex.re=Big_int.float_of_big_int i; Complex.im=0.0}
 let cmpx_of_float f = {Complex.re=f; Complex.im=0.0}
 let cmat_of_fmat fm =
-   let rows, cols = Gsl_matrix.dims fm and
-   f_array = Gsl_matrix.to_array fm in
+   let rows, cols = Gsl.Matrix.dims fm and
+   f_array = Gsl.Matrix.to_array fm in
    let c_array = Array.map cmpx_of_float f_array in
-   Gsl_matrix_complex.of_array c_array rows cols
+   Gsl.Matrix_complex.of_array c_array rows cols
 
 
 
 (* 1-norm of matrix *)
 let one_norm mat =
-   let n, m = Gsl_matrix.dims mat in
+   let n, m = Gsl.Matrix.dims mat in
    let maxval = ref (-1.0) in
    let sum = ref 0.0 in
    for j = 0 to pred m do
@@ -56,14 +56,14 @@ let one_norm mat =
 
 (* solve a complex linear system using LU decomposition *)
 let solve_complex_LU ?(protect=true) mat b =
-  let mA = Gsl_vectmat.cmat_convert ~protect mat in
-  let vB = (`CV (Gsl_vector_complex.copy b)) in
-  let (len, _) = Gsl_vectmat.dims mA in
-  let p = Gsl_permut.create len in
-  let _ = Gsl_linalg.complex_LU_decomp mA p in
-  let x = Gsl_vector_complex_flat.create len in
-  Gsl_linalg.complex_LU_solve mA p vB (`CVF x);
-  Gsl_vector_complex_flat.to_complex_array x
+  let mA = Gsl.Vectmat.cmat_convert ~protect mat in
+  let vB = (`CV (Gsl.Vector_complex.copy b)) in
+  let (len, _) = Gsl.Vectmat.dims mA in
+  let p = Gsl.Permut.create len in
+  let _ = Gsl.Linalg.complex_LU_decomp mA p in
+  let x = Gsl.Vector_complex_flat.create len in
+  Gsl.Linalg.complex_LU_solve mA p ~b:vB ~x:(`CVF x);
+  Gsl.Vector_complex_flat.to_complex_array x
 
 
 
