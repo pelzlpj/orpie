@@ -1,0 +1,17 @@
+opam-version: "1.2"
+name: "orpie"
+version: "1.6.0"
+maintainer: "Paul Pelzl <pelzlpj@gmail.com>"
+authors: "Paul Pelzl <pelzlpj@gmail.com>"
+homepage: "https://github.com/pelzlpj/orpie"
+bug-reports: "https://github.com/pelzlpj/orpie/issues"
+license: "GPL-2"
+dev-repo: "https://github.com/pelzlpj/orpie.git"
+build: [
+  ["dune" "build"]
+]
+install: [make "install"]
+remove: ["ocamlfind" "remove" "orpie"]
+depends: [
+  "ocamlfind" {build}
+]

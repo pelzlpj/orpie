@@ -1,0 +1,21 @@
+(executable
+  (name main)
+  (public_name orpie)
+  (preprocess
+    (action
+      (system "camlp5o %{input-file}")))
+  (flags (:standard -w -27-35-52 -thread -unsafe-string))
+  (libraries curses gsl num str threads))
+
+
+;; Use orpie.opam as the authoritative source of version number
+(rule
+  (targets version.ml)
+  (action (system "grep '^version:' %{deps} | sed -E 's/^version: *\"([^\"]*)\"/let version = \"\\1\"/' > %{targets}"))
+  (deps (file orpie.opam)))
+
+
+(ocamllex txtin_lexer)
+
+(ocamlyacc txtin_parser)
+
