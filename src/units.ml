@@ -1,6 +1,6 @@
 (* ocaml-units -- a module for handling standard operations on
  *                physical units
- * 
+ *
  * Copyright (C) 2007 Paul Pelzl
  *
  * This program is free software; you can redistribute it and/or modify
