@@ -12,13 +12,13 @@
 (rule
   (targets version.ml)
   (action (system "grep '^version:' %{deps} | sed -E 's/^version: *\"([^\"]*)\"/let version = \"\\1\"/' > %{targets}"))
-  (deps (file orpie.opam)))
+  (deps (file %{project_root}/orpie.opam)))
 
 
 ; Support $PREFIX for overriding installation location
 (rule
   (targets install.ml)
-  (action (run %{project_root}/subst_prefix %{deps} %{targets}))
+  (action (run %{project_root}/scripts/subst_prefix %{deps} %{targets}))
   (deps (file install.ml.in)))
 
 
