@@ -1,0 +1,5 @@
+(executable
+  (name curses_keys)
+  (public_name orpie-curses-keys)
+  (libraries curses str))
+
