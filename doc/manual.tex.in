@@ -25,9 +25,9 @@
 
 \begin{document}
 %@% IF LATEX %@%
-\title{Orpie v1.5 User Manual}
+\title{Orpie v1.6 User Manual}
 \author{Paul J. Pelzl}
-\date{September 13, 2007}
+\date{August 27, 2018}
 \maketitle
 
 \begin{center}
@@ -64,59 +64,51 @@ GNU Octave\footnote{http://www.octave.org}
 are already very effective for such tasks.  Orpie focuses specifically on
 helping you to crunch numbers quickly.
 
-Orpie is written in 
+Orpie is written in
 %BEGIN LATEX
-Objective Caml (aka OCaml)\footnote{http://caml.inria.fr/},
+OCaml\footnote{http://ocaml.org/}.
 %END LATEX
-%HEVEA \begin{rawhtml} <a href="http://caml.inria.fr">Objective Caml</a> (aka OCaml), \end{rawhtml} 
-a high-performance functional programming language with a whole lot of nice
-features.  I highly recommend it.
+%HEVEA \begin{rawhtml} <a href="http://ocaml.org/">OCaml</a>). \end{rawhtml}
 
 \section{Installation}
-This section describes how to install Orpie by compiling from source.  Volunteers have
-pre-packaged Orpie for several popular operating systems, so you may be able to save
-yourself some time by installing from those packages.  Please check the Orpie website for
-up-to-date package information.
-
-Before installing Orpie, you should have installed the 
+The recommended method to install Orpie is through the
 %BEGIN LATEX
-GNU Scientific Library (GSL)\footnote{http://sources.redhat.com/gsl/} 
+OPAM package manager.\footnote{https://opam.ocaml.org/}
 %END LATEX
-%HEVEA \begin{rawhtml} <a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL) \end{rawhtml} 
-version 1.4 or greater.  You will also need a curses library (e.g.
-%BEGIN LATEX
-ncurses\footnote{http://www.gnu.org/software/ncurses/ncurses.html}), 
-%END LATEX
-%HEVEA \begin{rawhtml} <a href="http://www.gnu.org/software/ncurses/ncurses.html">ncurses</a>), \end{rawhtml} 
-which is almost certainly already installed on your system.  Finally, OCaml
-3.07 or higher is required to compile the sources.  You will need the Nums
-library that is distributed with OCaml; if you install OCaml from binary packages
-distributed by your OS vendor, you may find that separate Nums packages must also be
-installed.
+%HEVEA \begin{rawhtml} <a href="https://opam.ocaml.org/">OPAM package manager</a>. \end{rawhtml}
+``\texttt{opam install orpie}'' should get the job done.
 
-I will assume you have received this program in the form of a source tarball, 
-e.g. ``\texttt{orpie-x.x.tar.gz}''.  You have undoubtedly extracted this archive 
-already (e.g. using ``\texttt{tar xvzf orpie-x.x.tar.gz}'').  Enter the root of 
-the Orpie installation directory, e.g. ``\texttt{cd orpie-x.x}''.  You can compile
-the sources with the following sequence:
+If you want to install without using OPAM, you will need the following OCaml packages installed:
+\begin{itemize}
+   \item OCaml 4.03+
+   \item dune
+   \item camlp5
+   \item ocamlfind
+   \item curses (registered with \texttt{ocamlfind})
+   \item gsl (registered with \texttt{ocamlfind})
+\end{itemize}
+If you have satisfied all the dependencies, then use the Makefile to build:
 \begin{verbatim}
-$ ./configure
+# optionally set an installation prefix (default is /usr/local)
+$ export PREFIX=/usr
+
+# optionally set a staging directory (useful if you're creating a package)
+$ export DESTDIR=/tmp/orpie
+
+# build
 $ make
+
+# install build products (use 'sudo' if installing to a root-owned location)
+$ make install
 \end{verbatim}
-Finally, run ``\texttt{make install}'' (as root) to install the executables.
-``\texttt{configure}'' accepts a number of parameters that you can learn about with
-``\texttt{./configure --help}''.  Perhaps the most common of these is the {\tt
---prefix} option, which lets you install to a non-standard
-directory\footnote{The default installation prefix is \texttt{/usr/local}.  The \texttt{orpierc} file
-will be placed in \texttt{\$(prefix)/etc} by default; use the \texttt{--sysconfdir} option to 
-choose a different location.}.  
+
 %@% ELSE %@%
    %@% IF ORPIERC %@%
 \begin{Name}{5}{orpierc}{Paul J. Pelzl}{configuration file for the Orpie calculator}{orpierc manpage}
    \texttt{orpierc} is the configuration textfile for the \Cmd{orpie}{1} console calculator.
 \end{Name}
    %@% ELSE %@%
-\begin{Name}{1}{orpie}{Paul J. Pelzl}{a console-based RPN calculator}{Orpie 1.0 Manpage}
+\begin{Name}{1}{orpie}{Paul J. Pelzl}{a console-based RPN calculator}{Orpie 1.6 Manpage}
    \Prog{orpie} is a console-based RPN calculator with an interactive visual stack.
 \end{Name}
 
@@ -1921,49 +1913,15 @@ Free Software Foundation.  You should have received a copy of the GPL along
 with this program, in the file ``LICENSE.md''.
 
 
-\section{Credits}
-Orpie includes portions of the
-%@% IF LATEX %@%
-%BEGIN LATEX
-ocamlgsl\footnote{http://oandrieu.nerim.net/ocaml/gsl/} 
-%END LATEX
-%HEVEA \begin{rawhtml} <a href="http://oandrieu.nerim.net/ocaml/gsl/">ocamlgsl</a> \end{rawhtml}
-%@% ELSE %@%
-ocamlgsl [1]
-%@% END-IF %@%
-bindings supplied by Olivier Andrieu, as well as the curses bindings from the
-%@% IF LATEX %@%
-%BEGIN LATEX
-OCaml Text Mode Kit\footnote{http://www.nongnu.org/ocaml-tmk/} 
-%END LATEX
-%HEVEA \begin{rawhtml} <a href="http://www.nongnu.org/ocaml-tmk/">OCaml Text Mode Kit</a> \end{rawhtml}
-%@% ELSE %@%
-OCaml Text Mode Kit [2]
-%@% END-IF %@%
-written by Nicolas George.  I would like to thank these authors for helping to
-make Orpie possible.
-
-
 \section{Contact info}
 Orpie author: Paul Pelzl \texttt{<pelzlpj@gmail.com>} \\
 %@% IF LATEX %@%
-Orpie website: \texttt{http://pessimization.com/software/orpie} \\
+Orpie website: \texttt{https://github.com/pelzlpj/orpie} \\
 %@% ELSE %@%
-Orpie website: \URL{http://pessimization.com/software/orpie} \\
+Orpie website: \URL{https://github.com/pelzlpj/orpie} \\
 %@% END-IF %@%
 
-\noindent
-Feel free to contact me if you have bugs, feature requests, patches, etc.  I 
-would also welcome volunteers interested in packaging Orpie for various platforms.
-
 %@% IF !LATEX && !ORPIERC %@%
-\section{References}
-\begin{Table}{2}
-   [1] & \URL{http://oandrieu.nerim.net/ocaml/gsl/} \\
-   [2] & \URL{http://www.nongnu.org/ocaml-tmk/} 
-   [3] & \URL{http://www.gnu.org/software/gnu-arch/}.
-\end{Table}
-
 \section{See Also}
 \Cmd{orpierc}{5}, \Cmd{orpie-curses-keys}{1}
 %@% END-IF %@%

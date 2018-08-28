@@ -1,6 +1,0 @@
-exclude ^(.arch-ids|\{arch\})$
-junk ^(,.*|requests|traces\.0)$
-precious ^(\+.*|.*\.(dvi|ps|pdf|html|log|aux|[1-7])|output\.0|\.gdbinit|\.#ckpts-lock|=build\.*|=install\.*|RCS|RCSLOG|SCCS|TAGS)$
-backup ^.*(~|\.~[0-9]+~|\.bak|\.orig|\.rej|\.original|\.modified|\.reject)$
-unrecognized ^(.*\.(so|core|so(\.[[:digit:]]+)*)|core)$
-source ^[_=a-zA-Z0-9].*$

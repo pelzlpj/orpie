@@ -1,0 +1,8 @@
+(install
+  (section doc)
+  (files manual.html manual.pdf))
+
+(install
+  (section man)
+  (files orpie.1 orpie-curses-keys.1 orpierc.5))
+
