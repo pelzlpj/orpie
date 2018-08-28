@@ -1,0 +1,1036 @@
+'\" t
+.\" Manual page created with latex2man on Tue Aug 28 01:19:13 PDT 2018
+.\" NOTE: This file is generated, DO NOT EDIT.
+.de Vb
+.ft CW
+.nf
+..
+.de Ve
+.ft R
+
+.fi
+..
+.TH "ORPIERC" "5" "28 August 2018" "configuration file for the Orpie calculator " "configuration file for the Orpie calculator "
+.SH NAME
+
+orpierc is the configuration textfile for the \fIorpie\fP(1)
+console calculator. 
+.PP
+.SH INTRODUCTION
+
+CAUTION: while this manpage should be suitable as a quick reference, it may 
+be subject to miscellaneous shortcomings in typesetting. The definitive 
+documentation is the user manual provided with Orpie in PDF format. 
+.PP
+Orpie reads a run\-configuration textfile (generally /etc/orpierc or 
+/usr/local/etc/orpierc) to determine key and command bindings. You can 
+create a personalized configuration file in $HOME/.orpierc, and select 
+bindings that match your usage patterns. The recommended procedure is to ``include\&'' 
+the orpierc file provided with Orpie 
+(see INCLUDING OTHER RCFILES), 
+and add or remove settings as desired. 
+.PP
+.SH ORPIERC SYNTAX
+
+You may notice that the orpierc syntax is similar to the syntax used in 
+the configuration file for the Mutt email client (muttrc). 
+.PP
+Within the orpierc file, strings should be enclosed in double quotes ("). 
+A double quote character inside a string may be represented by 
+\\" \&. 
+The backslash character must be represented by doubling it 
+(\\\\).
+.PP
+.SS INCLUDING OTHER RCFILES
+Syntax: include \fIfilename_string\fP
+.br
+.br
+This syntax can be used to include one run\-configuration file within another. 
+This command could be used to load the default orpierc file (probably 
+found in /etc/orpierc) within your personalized rcfile, 
+ {/.orpierc}. The filename string should be enclosed in quotes. 
+.PP
+.SS SETTING CONFIGURATION VARIABLES
+Syntax: set \fIvariable\fP=\fIvalue_string\fP
+.br
+.br
+Several configuration variables can be set using this syntax; check 
+the CONFIGURATION VARIABLES description 
+to see a list. The variables are unquoted, but the values should be quoted strings. 
+.PP
+.SS CREATING KEY BINDINGS
+Syntax: bind \fIkey_identifier operation\fP
+.br
+.br
+This command will bind a keypress to execute a calculator operation. 
+The various operations, which should not be enclosed in quotes, 
+may be found in 
+the section on CALCULATOR OPERATIONS. 
+Key identifiers may be specified by strings that represent a single keypress, 
+for example "m" (quotes included). The key may be prefixed with 
+"\\\\C" or "\\\\M" 
+to represent Control or Meta (Alt) modifiers, respectively; note that the 
+backslash must be doubled. A number of special keys lack single\-character 
+representations, so the following strings may be used to represent them: 
+.TP
+.B *
+"<esc>" 
+.TP
+.B *
+"<tab>" 
+.TP
+.B *
+"<enter>" 
+.TP
+.B *
+"<return>" 
+.TP
+.B *
+"<insert>" 
+.TP
+.B *
+"<home>" 
+.TP
+.B *
+"<end>" 
+.TP
+.B *
+"<pageup>" 
+.TP
+.B *
+"<pagedown>" 
+.TP
+.B *
+"<space>" 
+.TP
+.B *
+"<left>" 
+.TP
+.B *
+"<right>" 
+.TP
+.B *
+"<up>" 
+.TP
+.B *
+"<down>" 
+.TP
+.B *
+"<f1>" to "<f12>" 
+.PP
+Due to differences between various terminal emulators, this key identifier syntax may 
+not be adequate to describe every keypress. As a workaround, Orpie will also accept key 
+identifiers in octal notation. As an example, you could use 
+\\024 
+(do \fInot\fP
+enclose it in quotes) to represent Ctrl\-T. 
+.PP
+Orpie includes a secondary executable, orpie\-curses\-keys, that prints out 
+the key identifiers associated with keypresses. You may find it useful when customizing 
+orpierc. 
+.PP
+Multiple keys may be bound to the same operation, if desired. 
+.PP
+.SS REMOVING KEY BINDINGS
+Syntax: 
+.br
+unbind_function \fIkey_identifier\fP
+.br
+unbind_command \fIkey_identifier\fP
+.br
+unbind_edit \fIkey_identifier\fP
+.br
+unbind_browse \fIkey_identifier\fP
+.br
+unbind_abbrev \fIkey_identifier\fP
+.br
+unbind_variable \fIkey_identifier\fP
+.br
+unbind_integer \fIkey_identifier\fP
+.br
+.br
+These commands will remove key bindings associated with the various entry 
+modes (functions, commands, editing operations, etc.). The key identifiers 
+should be defined using the syntax described in the previous section. 
+.PP
+.SS CREATING KEY AUTO\-BINDINGS
+Syntax: autobind \fIkey_identifier\fP
+.br
+.br
+In order to make repetitive calculations more pleasant, Orpie offers an automatic key 
+binding feature. When a function or command is executed using its abbreviation, 
+one of the keys selected by the autobind syntax will be 
+automatically bound to that operation (unless the operation has already been bound 
+to a key). The current set of autobindings can be viewed in the help panel by executing 
+command_cycle_help (bound to \&'h\&' by default). 
+.PP
+The syntax for the key identifiers is provided in the previous section. 
+.PP
+.SS CREATING OPERATION ABBREVIATIONS
+Syntax: abbrev \fIoperation_abbreviation operation\fP
+.br
+.br
+You can use this syntax to set the abbreviations used within Orpie to represent the 
+various functions and commands. A list of available operations may be found in 
+the CALCULATOR OPERATIONS section. 
+The operation abbreviations should be quoted strings, for example "sin" 
+or "log". 
+.PP
+Orpie performs autocompletion on these abbreviations, allowing you to type 
+usually just a few letters in order to select the desired command. The order of the 
+autocompletion matches will be the same as the order in which the abbreviations are 
+registered by the rcfile\-\-so you may wish to place the more commonly used operation 
+abbreviations earlier in the list. 
+.PP
+Multiple abbreviations may be bound to the same operation, if desired. 
+.PP
+.SS REMOVING OPERATION ABBREVIATIONS
+Syntax: unabbrev \fIoperation_abbreviation\fP
+.br
+.br
+This syntax can be used to remove an operation abbreviation. The operation abbreviations 
+should be quoted strings, as described in the previous section. 
+.PP
+.SS CREATING MACROS
+Syntax: macro \fIkey_identifier macro_string\fP
+.br
+.br
+You can use this syntax to cause a single keypress (the \fIkey_identifier\fP)
+to be interpreted as the series of keypresses listed in \fImacro_string\fP\&.
+The syntax for defining a keypress is the same as that defined in 
+the section on CREATING KEY BINDINGS. 
+The macro string should be a list of whitespace\-separated keypresses, e.g. 
+"2 <return> 2 +" (including quotes). 
+.PP
+This macro syntax provides a way to create small programs; by way of example, 
+the default orpierc file includes macros for the base 2 logarithm and the 
+binary entropy function (bound to L and H, respectively), 
+as well as ``register\&'' variable shortcuts (<f1> to <f12>). 
+.PP
+Macros may call other macros recursively. However, take care that a macro does 
+not call \fIitself\fP
+recursively; Orpie will not trap the infinite loop. 
+.PP
+Note that operation abbreviations may be accessed within macros. For example, 
+macro "A" "\&' a b o u t <return>" would bind A to display 
+the ``about Orpie\&'' screen. 
+.PP
+.SS CREATING UNITS
+Syntax: 
+.br
+base_unit \fIunit_symbol preferred_prefix\fP
+.br
+unit \fIunit_symbol unit_definition\fP
+.br
+.br
+Units are defined in a two\-step process: 
+.TP
+1.
+Define a set of orthogonal ``base units.\&'' All other units must be expressible 
+in terms of these base units. The base units can be given a preferred SI prefix, 
+which will be used whenever the units are standardized (e.g. via ustand). 
+The unit symbols and preferred prefixes should all be quoted strings; to prefer 
+\fIno\fP
+prefix, use the empty string (""). 
+.PP
+It is expected that most users will use the fundamental SI units for base units. 
+.TP
+2.
+Define all other units in terms of either base units or previously\-defined units. 
+Again, the unit symbol and unit definition should be quoted strings. The definition 
+should take the form of a numeric value followed by a units string, e.g. 
+"2.5_kN*m/s". See 
+the UNITS FORMATTING section 
+for more details on the unit string format. 
+.PP
+.SS CREATING CONSTANTS
+Syntax: constant \fIconstant_symbol constant_definition\fP
+.br
+.br
+This syntax can be used to define a physical constant. Both the constant symbol 
+and definition must be quoted strings. The constant definition should be a 
+numeric constant followed by a units string e.g. "1.60217733e\-19_C". 
+All units used in the constant definition must already have been defined. 
+.PP
+.SH CONFIGURATION VARIABLES
+
+The following configuration variables may be set as described in the SETTING 
+CONFIGURATION VARIABLES section. 
+.TP
+.B *
+datadir 
+.br 
+This variable should be set to the full path of the Orpie data directory, 
+which will contain the calculator state save file, temporary buffers, etc. 
+The default directory is 
+"\\~/.orpie/". 
+.TP
+.B *
+editor 
+.br 
+This variable may be set to the fullscreen editor of your choice. The default 
+value is "vi". It is recommended that you choose an editor that offers 
+horizontal scrolling in place of word wrapping, so that the columns of large 
+matrices can be properly aligned. (The Vim editor could be used in this fashion 
+by setting editor to "vim \-c \&'set nowrap\&'".) 
+.TP
+.B *
+hide_help 
+.br 
+Set this variable to "true" to hide the left help/status panel, or leave 
+it on the default of "false" to display the help panel. 
+.TP
+.B *
+conserve_memory 
+.br 
+Set this variable to "true" to minimize memory usage, or leave it on 
+the default of "false" to improve rendering performance. (By default, 
+Orpie caches multiple string representations of all stack elements. Very large 
+integers in particular require significant computation for string representation, 
+so caching these strings can make display updates much faster.) 
+.PP
+.SH CALCULATOR OPERATIONS
+
+Every calculator operation can be made available to the interface using the syntax 
+described in 
+the sections on CREATING KEY BINDINGS and CREATING OPERATION ABBREVIATIONS. 
+The following is a list of every available operation. 
+.PP
+.SS FUNCTIONS
+The following operations are functions\-\-that is, they will consume at least one 
+argument from the stack. Orpie will generally abort the computation and 
+provide an informative error message if a function cannot be successfully applied (for 
+example, if you try to compute the transpose of something that is not a matrix). 
+.PP
+For the exact integer data type, basic arithmetic operations will yield an exact 
+integer result. Division of two exact integers will yield the quotient of 
+the division. The more complicated functions will generally promote the integer 
+to a real number, and as such the arithmetic will no longer be exact. 
+.TP
+.B *
+function_10_x 
+.br 
+Raise 10 to the power of the last stack element (inverse of function_log10). 
+.TP
+.B *
+function_abs 
+.br 
+Compute the absolute value of the last stack element. 
+.TP
+.B *
+function_acos 
+.br 
+Compute the inverse cosine of the last stack element. For real numbers, 
+The result will be provided either in degrees or radians, depending on 
+the angle mode of the calculator. 
+.TP
+.B *
+function_acosh 
+.br 
+Compute the inverse hyperbolic cosine of the last stack element. 
+.TP
+.B *
+function_add 
+.br 
+Add last two stack elements. 
+.TP
+.B *
+function_arg 
+.br 
+Compute the argument (phase angle of complex number) of the last stack 
+element. The value will be provided in either degrees or radians, 
+depending on the current angle mode of the calculator. 
+.TP
+.B *
+function_asin 
+.br 
+Compute the inverse sine of the last stack element. For real numbers, 
+The result will be provided either in degrees or radians, depending on 
+the angle mode of the calculator. 
+.TP
+.B *
+function_asinh 
+.br 
+Compute the inverse hyperbolic sine of the last stack element. 
+.TP
+.B *
+function_atan 
+.br 
+Compute the inverse tangent of the last stack element. For real numbers, 
+The result will be provided either in degrees or radians, depending on 
+the angle mode of the calculator. 
+.TP
+.B *
+function_atanh 
+.br 
+Compute the inverse hyperbolic tangent of the last stack element. 
+.TP
+.B *
+function_binomial_coeff 
+.br 
+Compute the binomial coefficient (``n choose k\&'') formed by the last two 
+stack elements. If these arguments are real, the coefficient is computed 
+using a fast approximation to the log of the gamma function, and therefore 
+the result is subject to rounding errors. For exact integer arguments, 
+the coefficient is computed using exact arithmetic; this has the potential 
+to be a slow operation. 
+.TP
+.B *
+function_ceiling 
+.br 
+Compute the ceiling of the last stack element. 
+.TP
+.B *
+function_convert_units 
+.br 
+Convert stack element 2 to an equivalent expression in the units of 
+element 1. Element 1 should be real\-valued, and its magnitude will 
+be ignored when computing the conversion. 
+.TP
+.B *
+function_cos 
+.br 
+Compute the cosine of the last stack element. If the argument is real, 
+it will be assumed to be either degrees or radians, depending on the 
+angle mode of the calculator. 
+.TP
+.B *
+function_cosh 
+.br 
+Compute the hyperbolic cosine of the last stack element. 
+.TP
+.B *
+function_conj 
+.br 
+Compute the complex conjugate of the last stack element. 
+.TP
+.B *
+function_div 
+.br 
+Divide element 2 by element 1. 
+.TP
+.B *
+function_erf 
+.br 
+Compute the error function of the last stack element. 
+.TP
+.B *
+function_erfc 
+.br 
+Compute the complementary error function of the last stack element. 
+.TP
+.B *
+function_eval 
+.br 
+Obtain the contents of the variable in the last stack position. 
+.TP
+.B *
+function_exp 
+.br 
+Evaluate the exponential function of the last stack element. 
+.TP
+.B *
+function_factorial 
+.br 
+Compute the factorial of the last stack element. For a real argument, 
+this is computed using a fast approximation to the gamma function, 
+and therefore the result may be subject to rounding errors (or overflow). For an 
+exact integer argument, the factorial is computed using exact arithmetic; 
+this has the potential to be a slow operation. 
+.TP
+.B *
+function_floor 
+.br 
+Compute the floor of the last stack element. 
+.TP
+.B *
+function_gamma 
+.br 
+Compute the Euler gamma function of the last stack element. 
+.TP
+.B *
+function_gcd 
+.br 
+Compute the greatest common divisor of the last two stack elements. This operation 
+may be applied only to integer type data. 
+.TP
+.B *
+function_im 
+.br 
+Compute the imaginary part of the last stack element. 
+.TP
+.B *
+function_inv 
+.br 
+Compute the multiplicative inverse of the last stack element. 
+.TP
+.B *
+function_lcm 
+.br 
+Compute the least common multiple of the last two stack elements. This 
+operation may be applied only to integer type data. 
+.TP
+.B *
+function_ln 
+.br 
+Compute the natural logarithm of the last stack element. 
+.TP
+.B *
+function_lngamma 
+.br 
+Compute the natural logarithm of the Euler gamma function of the last 
+stack element. 
+.TP
+.B *
+function_log10 
+.br 
+Compute the base\-10 logarithm of the last stack element. 
+.TP
+.B *
+function_maximum 
+.br 
+Find the maximum values of each of the columns of a real NxM matrix, 
+returning a 1xM matrix as a result. 
+.TP
+.B *
+function_minimum 
+.br 
+Find the minimum values of each of the columns of a real NxM matrix, 
+returning a 1xM matrix as a result. 
+.TP
+.B *
+function_mean 
+.br 
+Compute the sample means of each of the columns of a real NxM matrix, 
+returning a 1xM matrix as a result. 
+.TP
+.B *
+function_mod 
+.br 
+Compute element 2 mod element 1. This operation can be applied only 
+to integer type data. 
+.TP
+.B *
+function_mult 
+.br 
+Multiply last two stack elements. 
+.TP
+.B *
+function_neg 
+.br 
+Negate last stack element. 
+.TP
+.B *
+function_permutation 
+.br 
+Compute the permutation coefficient determined by the last two stack 
+elements \&'n\&' and \&'k\&': the number of ways of obtaining an ordered subset 
+of k elements from a set of n elements. 
+If these arguments are real, the coefficient is computed 
+using a fast approximation to the log of the gamma function, and therefore 
+the result is subject to rounding errors. For exact integer arguments, 
+the coefficient is computed using exact arithmetic; this has the potential 
+to be a slow operation. 
+.TP
+.B *
+function_pow 
+.br 
+Raise element 2 to the power of element 1. 
+.TP
+.B *
+function_purge 
+.br 
+Delete the variable in the last stack position. 
+.TP
+.B *
+function_re 
+.br 
+Compute the real part of the last stack element. 
+.TP
+.B *
+function_sin 
+.br 
+Compute the sine of the last stack element. If the argument is real, it 
+will be assumed to be either degrees or radians, depending on the angle 
+mode of the calculator. 
+.TP
+.B *
+function_sinh 
+.br 
+Compute the hyperbolic sine of the last stack element. 
+.TP
+.B *
+function_solve_linear 
+.br 
+Solve a linear system of the form Ax = b, where A and b are the last 
+two elements on the stack. A must be a square matrix and b must 
+be a matrix with one column. This function does not compute inv(A), 
+but obtains the solution by a more efficient LU decomposition method. 
+This function is recommended over explicitly computing the inverse, 
+especially when solving linear systems with relatively large dimension or 
+with poorly conditioned matrices. 
+.TP
+.B *
+function_sq 
+.br 
+Square the last stack element. 
+.TP
+.B *
+function_sqrt 
+.br 
+Compute the square root of the last stack element. 
+.TP
+.B *
+function_standardize_units 
+.br 
+Convert the last stack element to an equivalent expression using the SI standard 
+base units (kg, m, s, etc.). 
+.TP
+.B *
+function_stdev_unbiased 
+.br 
+Compute the unbiased sample standard deviation of each of the columns of a real NxM 
+matrix, returning a 1xM matrix as a result. (Compare to HP48\&'s sdev 
+function.) 
+.TP
+.B *
+function_stdev_biased 
+.br 
+Compute the biased (population) sample standard deviation of each of the columns 
+of a real NxM matrix, returning a 1xM matrix as a result. (Compare to 
+HP48\&'s psdev function.) 
+.TP
+.B *
+function_store 
+.br 
+Store element 2 in (variable) element 1. 
+.TP
+.B *
+function_sub 
+.br 
+Subtract element 1 from element 2. 
+.TP
+.B *
+function_sumsq 
+.br 
+Sum the squares of each of the columns of a real NxM matrix, returning a 
+1xM matrix as a result. 
+.TP
+.B *
+function_tan 
+.br 
+Compute the tangent of the last stack element. If the argument is real, 
+it will be assumed to be either degrees or radians, depending on the 
+angle mode of the calculator. 
+.TP
+.B *
+function_tanh 
+.br 
+Compute the hyperbolic tangent of the last stack element. 
+.TP
+.B *
+function_to_int 
+.br 
+Convert a real number to an integer type. 
+.TP
+.B *
+function_to_real 
+.br 
+Convert an integer type to a real number. 
+.TP
+.B *
+function_total 
+.br 
+Sum each of the columns of a real NxM matrix, returning a 
+1xM matrix as a result. 
+.TP
+.B *
+function_trace 
+.br 
+Compute the trace of a square matrix. 
+.TP
+.B *
+function_transpose 
+.br 
+Compute the matrix transpose of the last stack element. 
+.TP
+.B *
+function_unit_value 
+.br 
+Drop the units of the last stack element. 
+.TP
+.B *
+function_utpn 
+.br 
+Compute the upper tail probability of a normal distribution. 
+.br
+UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[\-(m\-y)^2/(2 v)], {y, x, Infinity}] 
+.TP
+.B *
+function_var_unbiased 
+.br 
+Compute the unbiased sample variance of each of the columns of a real NxM 
+matrix, returning a 1xM matrix as a result. (Compare to HP48\&'s var 
+function.) 
+.TP
+.B *
+function_var_biased 
+.br 
+Compute the biased (population) sample variance of each of the columns of a 
+real NxM matrix, returning a 1xM matrix as a result. (Compare to HP48\&'s 
+pvar function.) 
+.PP
+.SS COMMANDS
+The following operations are referred to as commands; they differ from functions because 
+they do not take an argument. Many calculator interface settings are implemented as commands. 
+.TP
+.B *
+command_about 
+.br 
+Display a nifty ``about Orpie\&'' credits screen. 
+.TP
+.B *
+command_begin_abbrev 
+.br 
+Begin entry of an operation abbreviation. 
+.TP
+.B *
+command_begin_browsing 
+.br 
+Enter stack browsing mode. 
+.TP
+.B *
+command_begin_constant 
+.br 
+Begin entry of a physical constant. 
+.TP
+.B *
+command_begin_variable 
+.br 
+Begin entry of a variable name. 
+.TP
+.B *
+command_bin 
+.br 
+Set the base of exact integer representation to 2 (binary). 
+.TP
+.B *
+command_clear 
+.br 
+Clear all elements from the stack. 
+.TP
+.B *
+command_cycle_base 
+.br 
+Cycle the base of exact integer representation between 2, 8, 
+10, and 16 (bin, oct, dec, and hex). 
+.TP
+.B *
+command_cycle_help 
+.br 
+Cycle through multiple help pages. The first page displays commonly used 
+bindings, and the second page displays the current autobindings. 
+.TP
+.B *
+command_dec 
+.br 
+Set the base of exact integer representation to 10 (decimal). 
+.TP
+.B *
+command_deg 
+.br 
+Set the angle mode to degrees. 
+.TP
+.B *
+command_drop 
+.br 
+Drop the last element off the stack. 
+.TP
+.B *
+command_dup 
+.br 
+Duplicate the last stack element. 
+.TP
+.B *
+command_enter_pi 
+.br 
+Enter 3.1415\&...
+on the stack. 
+.TP
+.B *
+command_hex 
+.br 
+Set the base of exact integer representation to 16 (hexadecimal). 
+.TP
+.B *
+command_oct 
+.br 
+Set the base of exact integer representation to 8 (octal). 
+.TP
+.B *
+command_polar 
+.br 
+Set the complex display mode to polar. 
+.TP
+.B *
+command_rad 
+.br 
+Set the angle mode to radians. 
+.TP
+.B *
+command_rand 
+.br 
+Generate a random real\-valued number between 0 (inclusive) and 1 (exclusive). The deviates 
+are uniformly distributed. 
+.TP
+.B *
+command_rect 
+.br 
+Set the complex display mode to rectangular (cartesian). 
+.TP
+.B *
+command_refresh 
+.br 
+Refresh the display. 
+.TP
+.B *
+command_swap 
+.br 
+Swap stack elements 1 and 2. 
+.TP
+.B *
+command_quit 
+.br 
+Quit Orpie. 
+.TP
+.B *
+command_toggle_angle_mode 
+.br 
+Toggle the angle mode between degrees and radians. 
+.TP
+.B *
+command_toggle_complex_mode 
+.br 
+Toggle the complex display mode between rectangular and polar. 
+.TP
+.B *
+command_undo 
+.br 
+Undo the last calculator operation. 
+.TP
+.B *
+command_view 
+.br 
+View the last stack element in an external fullscreen editor. 
+.TP
+.B *
+command_edit_input 
+.br 
+Create a new stack element using an external editor. 
+.PP
+.SS EDIT OPERATIONS
+The following operations are related to editing during data entry. These 
+commands cannot be made available as operation abbreviations, since 
+abbreviations are not accessible while entering data. These operations should 
+be made available as single keypresses using the bind keyword. 
+.TP
+.B *
+edit_angle 
+.br 
+Begin entering the phase angle of a complex number. (Orpie will 
+assume the angle is in either degrees or radians, depending on 
+the current angle mode.) 
+.TP
+.B *
+edit_backspace 
+.br 
+Delete the last character entered. 
+.TP
+.B *
+edit_begin_integer 
+.br 
+Begin entering an exact integer. 
+.TP
+.B *
+edit_begin_units 
+.br 
+Begin appending units to a numeric expression. 
+.TP
+.B *
+edit_complex 
+.br 
+Begin entering a complex number. 
+.TP
+.B *
+edit_enter 
+.br 
+Enter the data that is currently being edited. 
+.TP
+.B *
+edit_matrix 
+.br 
+Begin entering a matrix, or begin entering the next 
+row of a matrix. 
+.TP
+.B *
+edit_minus 
+.br 
+Enter a minus sign in input. 
+.TP
+.B *
+edit_scientific_notation_base 
+.br 
+Begin entering the scientific notation exponent of a real number, 
+or the base of an exact integer. 
+.TP
+.B *
+edit_separator 
+.br 
+Begin editing the next element of a complex number or 
+matrix. (This will insert a comma between elements.) 
+.PP
+.SS BROWSING OPERATIONS
+The following list of operations is available only in stack browsing mode. 
+As abbreviations are unavailable while browsing the stack, these operations 
+should be bound to single keypresses using the bind keyword. 
+.TP
+.B *
+browse_echo 
+.br 
+Echo the currently selected element to stack level 1. 
+.TP
+.B *
+browse_end 
+.br 
+Exit stack browsing mode. 
+.TP
+.B *
+browse_drop 
+.br 
+Drop the currently selected stack element. 
+.TP
+.B *
+browse_dropn 
+.br 
+Drop all stack elements below the current selection (inclusive). 
+.TP
+.B *
+browse_keep 
+.br 
+Drop all stack elements \fIexcept\fP
+the current selection. (This is 
+complementary to browse_drop. 
+.TP
+.B *
+browse_keepn 
+.br 
+Drop all stack elements above the current selection (non\-inclusive). (This 
+is complementary to browse_dropn. 
+.TP
+.B *
+browse_next_line 
+.br 
+Move the selection cursor down one line. 
+.TP
+.B *
+browse_prev_line 
+.br 
+Move the selection cursor up one line. 
+.TP
+.B *
+browse_rolldown 
+.br 
+Cyclically ``roll\&'' stack elements downward, below the 
+selected element (inclusive). 
+.TP
+.B *
+browse_rollup 
+.br 
+Cyclically ``roll\&'' stack elements upward, below the selected 
+element (inclusive) \&. 
+.TP
+.B *
+browse_scroll_left 
+.br 
+Scroll the selected element to the left (for viewing very large 
+entries such as matrices). 
+.TP
+.B *
+browse_scroll_right 
+.br 
+Scroll the selected element to the right. 
+.TP
+.B *
+browse_view 
+.br 
+View the currently selected stack element in a fullscreen editor. 
+.TP
+.B *
+browse_edit 
+.br 
+Edit the currently selected stack element using an external editor. 
+.PP
+.SS ABBREVIATION ENTRY OPERATIONS
+The following list of operations is available only while entering a function or 
+command abbreviation, or while entering a physical constant. These operations must 
+be bound to single keypresses using 
+the bind keyword. 
+.TP
+.B *
+abbrev_backspace 
+.br 
+Delete a character from the abbreviation string. 
+.TP
+.B *
+abbrev_enter 
+.br 
+Execute the operation associated with the selected abbreviation. 
+.TP
+.B *
+abbrev_exit 
+.br 
+Cancel abbreviation entry. 
+.PP
+.SS VARIABLE ENTRY OPERATIONS
+The following list of operations is available only while entering a variable 
+name. As abbreviations are unavailable while entering variables, these operations 
+should be bound to single keypresses using the bind keyword. 
+.TP
+.B *
+variable_backspace 
+.br 
+Delete a character from the variable name. 
+.TP
+.B *
+variable_cancel 
+.br 
+Cancel entry of the variable name. 
+.TP
+.B *
+variable_complete 
+.br 
+Autocomplete the variable name. 
+.TP
+.B *
+variable_enter 
+.br 
+Enter the variable name on the stack. 
+.PP
+.SS INTEGER ENTRY OPERATIONS
+The following operation is available only while entering an integer; it can be 
+made accessible by binding it to a single keypress using the bind keyword. 
+.TP
+.B *
+integer_cancel 
+.br 
+Cancel entry of an integer. 
+.PP
+.SH SEE ALSO
+
+\fIorpie\fP(1),
+\fIorpie\-curses\-keys\fP(1)
+.PP
+.SH AUTHOR
+
+This manpage is written by Paul J. Pelzl <pelzlpj@gmail.com>. 
+.\" NOTE: This file is generated, DO NOT EDIT.

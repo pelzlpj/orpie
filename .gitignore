@@ -10,8 +10,3 @@ doc/*.log
 doc/*.ps
 doc/manual.tex
 doc/*.toc
-doc/manual.html
-doc/manual.pdf
-doc/orpie.1
-doc/orpie-curses-keys.1
-doc/orpierc.5

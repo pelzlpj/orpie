@@ -1,0 +1,1815 @@
+'\" t
+.\" Manual page created with latex2man on Tue Aug 28 01:19:13 PDT 2018
+.\" NOTE: This file is generated, DO NOT EDIT.
+.de Vb
+.ft CW
+.nf
+..
+.de Ve
+.ft R
+
+.fi
+..
+.TH "ORPIE" "1" "28 August 2018" "a console\-based RPN calculator " "a console\-based RPN calculator "
+.SH NAME
+
+orpie
+is a console\-based RPN calculator with an interactive visual stack. 
+.PP
+.SH SYNOPSIS
+
+orpie
+.PP
+.SH QUICK START
+
+CAUTION: while this manpage should be suitable as a quick reference, it may 
+be subject to miscellaneous shortcomings in typesetting. The definitive 
+documentation is the user manual provided with Orpie in PDF format. 
+.PP
+This section describes how to use Orpie in its default configuration. After 
+familiarizing yourself with the basic operations as outlined in this section, 
+you may wish to consult 
+the \fIorpierc\fP(5)
+manpage 
+to see how Orpie can be configured to better fit your needs. 
+.PP
+.SS OVERVIEW
+The interface has two 
+panels. The left panel combines status information with context\-sensitive help; 
+the right panel represents the calculator\&'s stack. (Note that the left panel 
+will be hidden if Orpie is run in a terminal with less than 80 columns.) 
+.PP
+In general, you perform calculations by first entering data on to the stack, 
+then executing functions that operate on the stack data. As an example, you can 
+hit 1<enter>2<enter>+ in order to add 1 and 2. 
+.PP
+.SS ENTERING REAL NUMBERS
+To enter a real number, just type the desired digits and hit enter. The space 
+bar will begin entry of a scientific notation exponent. The \&'n\&' key is used 
+for negation. Here are some examples: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+1.23<enter> 
+T}&T{
+1.23 
+T}
+T{
+1.23<space>23n<enter> 
+T}&T{
+1.23e\-23 
+T}
+T{
+1.23n<space>23<enter> 
+T}&T{
+\-1.23e23 
+T}
+T{
+_
+.TE
+.PP
+.SS ENTERING COMPLEX NUMBERS
+Orpie can represent complex numbers using either cartesian (rectangular) or 
+polar coordinates. See 
+PERFORMING BASIC COMMAND OPERATIONS 
+to see how to change the complex number display mode. 
+.PP
+A complex number is entered by first pressing \&'(\&', then entering the real 
+part, then pressing \&',\&' followed by the imaginary part. Alternatively, you 
+can press \&'(\&' followed by the magnitude, then \&'<\&' followed by the 
+phase angle. The angle will be interpreted in degrees or radians, depending on 
+the current setting of the angle mode 
+(see PERFORMING BASIC COMMAND OPERATIONS). 
+Examples: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+(1.23, 4.56<enter> 
+T}&T{
+(1.23, 4.56) 
+T}
+T{
+(0.7072<45<enter> 
+T}&T{
+(0.500065915655126, 0.50006591... 
+T}
+T{
+(1.23n,4.56<space>10<enter> 
+T}&T{
+(\-1.23, 45600000000) 
+T}
+T{
+_
+.TE
+.PP
+.SS ENTERING MATRICES
+You can enter matrices by pressing \&'[\&'\&. The elements of the matrix may then be 
+entered as described in the previous sections, and should be separated using 
+\&',\&'\&. To start a new row of the matrix, press \&'[\&' again. On the 
+stack, each row of the matrix is enclosed in a set of brackets; for example, the 
+matrix 
+.PP
+.TS
+tab(&);
+l l.
+T{
+1 
+T}&T{
+2 
+T}
+T{
+3 
+T}&T{
+4 
+.TE
+.PP
+would appear on the stack as [[1, 2][3, 4]]. 
+.PP
+Examples of matrix entry: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+[1,2[3,4<enter> 
+T}&T{
+[[1, 2][3, 4]] 
+T}
+T{
+[1.2<space>10,0[3n,5n<enter> 
+T}&T{
+[[ 12000000000, 0 ][ \-3, \-5 ]] 
+T}
+T{
+[(1,2,3,4[5,6,7,8<enter> 
+T}&T{
+[[ (1, 2), (3, 4) ][ (5, 6), (... 
+T}
+T{
+_
+.TE
+.PP
+.SS ENTERING DATA WITH UNITS
+Real and complex scalars and matrices can optionally be labeled with units. After typing 
+in the numeric portion of the data, press \&'_\&' followed by a units string. The format 
+of units strings is described in 
+the UNITS FORMATTING section. 
+.PP
+Examples of entering dimensioned data: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+1.234_N*mm^2/s<enter>
+T}&T{
+1.234_N*mm^2*s^\-1
+T}
+T{
+(2.3,5_s^\-4<enter>
+T}&T{
+(2.3, 5)_s^\-4
+T}
+T{
+[1,2[3,4_lbf*in<enter> 
+T}&T{
+[[ 1, 2 ][ 3, 4 ]]_lbf*in 
+T}
+T{
+_nm<enter> 
+T}&T{
+1_nm 
+T}
+T{
+_
+.TE
+.PP
+.SS ENTERING EXACT INTEGERS
+An exact integer may be entered by pressing \&'#\&' followed by the desired 
+digits. The base of the integer will be assumed to be the same as the current 
+calculator base mode (see 
+PERFORMING BASIC COMMAND OPERATIONS 
+to see how to set this mode). 
+Alternatively, the desired base may be specified by pressing space and appending 
+one of {b, o, d, h}, to represent binary, octal, decimal, or hexadecimal, 
+respectively. On the stack, the representation of the integer will be changed 
+to match the current base mode. Examples: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+#123456<enter> 
+T}&T{
+#123456`d 
+T}
+T{
+#ffff<space>h<enter> 
+T}&T{
+#65535`d 
+T}
+T{
+#10101n<space>b<enter> 
+T}&T{
+#\-21`d 
+T}
+T{
+_
+.TE
+.PP
+Note that exact integers may have unlimited length, and the basic arithmetic 
+operations (addition, subtraction, multiplication, division) will be performed 
+using exact arithmetic when both arguments are integers. 
+.PP
+.SS ENTERING VARIABLE NAMES
+A variable name may be entered by pressing \&'@\&' followed by the desired 
+variable name string. The string may contain alphanumeric characters, dashes, and 
+underscores. Example: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keypresses 
+T}&T{
+Resulting Entry 
+T}
+T{
+_
+@myvar 
+T}&T{
+@ myvar
+T}
+T{
+_
+.TE
+.PP
+Orpie also supports autocompletion of variable names. The help panel displays a 
+list of pre\-existing variables that partially match the name currently being entered. 
+You can press \&'<tab>\&' to iterate through the list of matching variables. 
+.PP
+As a shortcut, keys <f1>\-<f4> will enter the variables (``registers\&'') 
+@ r01 through @ r04. 
+.PP
+.SS ENTERING PHYSICAL CONSTANTS
+Orpie includes definitions for a number of fundamental physical constants. To 
+enter a constant, press \&'C\&', followed by the first few letters/digits 
+of the constant\&'s symbol, then hit enter. Orpie offers an autocompletion 
+feature for physical constants, so you only need to type enough of the constant 
+to identify it uniquely. A list of matching constants will appear in the left 
+panel of the display, to assist you in finding the desired choice. 
+.PP
+The following is a list of Orpie\&'s physical constant symbols: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Symbol 
+T}&T{
+Physical Constant 
+T}
+T{
+_
+NA 
+T}&T{
+Avagadro\&'s number 
+T}
+T{
+k 
+T}&T{
+Boltzmann constant 
+T}
+T{
+Vm 
+T}&T{
+molar volume 
+T}
+T{
+R 
+T}&T{
+universal gas constant 
+T}
+T{
+stdT 
+T}&T{
+standard temperature 
+T}
+T{
+stdP 
+T}&T{
+standard pressure 
+T}
+T{
+sigma 
+T}&T{
+Stefan\-Boltzmann constant 
+T}
+T{
+c 
+T}&T{
+speed of light 
+T}
+T{
+eps0 
+T}&T{
+permittivity of free space 
+T}
+T{
+u0 
+T}&T{
+permeability of free space 
+T}
+T{
+g 
+T}&T{
+acceleration of gravity 
+T}
+T{
+G 
+T}&T{
+Newtonian gravitational constant 
+T}
+T{
+h 
+T}&T{
+Planck\&'s constant 
+T}
+T{
+hbar 
+T}&T{
+Dirac\&'s constant 
+T}
+T{
+e 
+T}&T{
+electron charge 
+T}
+T{
+me 
+T}&T{
+electron mass 
+T}
+T{
+mp 
+T}&T{
+proton mass 
+T}
+T{
+alpha 
+T}&T{
+fine structure constant 
+T}
+T{
+phi 
+T}&T{
+magnetic flux quantum 
+T}
+T{
+F 
+T}&T{
+Faraday\&'s constant 
+T}
+T{
+Rinf 
+T}&T{
+``infinity\&'' Rydberg constant 
+T}
+T{
+a0 
+T}&T{
+Bohr radius 
+T}
+T{
+uB 
+T}&T{
+Bohr magneton 
+T}
+T{
+uN 
+T}&T{
+nuclear magneton 
+T}
+T{
+lam0 
+T}&T{
+wavelength of a 1eV photon 
+T}
+T{
+f0 
+T}&T{
+frequency of a 1eV photon 
+T}
+T{
+lamc 
+T}&T{
+Compton wavelength 
+T}
+T{
+c3 
+T}&T{
+Wien\&'s constant 
+T}
+T{
+_
+.TE
+.PP
+All physical constants are defined in the Orpie run\-configuration file; consult 
+the \fIorpierc\fP(5)
+manpage 
+if you wish to define your own constants or change the existing definitions. 
+.PP
+.SS ENTERING DATA WITH AN EXTERNAL EDITOR
+Orpie can also parse input entered via an external editor. You may find this to be 
+a convenient method for entering large matrices. Pressing \&'E\&' will 
+launch the external editor, and the various data types may be entered as illustrated 
+by the examples below: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Data Type 
+T}&T{
+Sample Input String 
+T}
+T{
+_
+exact integer 
+T}&T{
+#12345678`d, where the trailing 
+letter is one of the base characters {b, o, d, h} 
+T}
+T{
+real number 
+T}&T{
+\-123.45e67 
+T}
+T{
+complex number 
+T}&T{
+(1e10, 2) or (1 <90) 
+T}
+T{
+real matrix 
+T}&T{
+[[1, 2][3.1, 4.5e10]] 
+T}
+T{
+complex matrix 
+T}&T{
+[[(1, 0), 5][1e10, (2 <90)]] 
+T}
+T{
+variable 
+T}&T{
+@myvar 
+T}
+T{
+_
+.TE
+.PP
+Real and complex numbers and matrices may have units appended; just add a units 
+string such as ``_N*m/s\&'' immediately following the numeric portion 
+of the expression. 
+.PP
+Notice that the complex matrix input parser is quite flexible; real and complex 
+matrix elements may be mixed, and cartesian and polar complex formats may be 
+mixed as well. 
+.PP
+Multiple stack entries may be specified in the same file, if they are separated 
+by whitespace. For example, entering (1, 2) 1.5 into the editor will cause 
+the complex value (1, 2) to be placed on the stack, followed by the real 
+value 1.5. 
+.PP
+The input parser will discard whitespace where possible, so feel free to add 
+any form of whitespace between matrix rows, matrix elements, real and complex 
+components, etc. 
+.PP
+.SS EXECUTING BASIC FUNCTION OPERATIONS
+Once some data has been entered on the stack, you can apply operations to that 
+data. For example, \&'+\&' will add the last two elements on the stack. By 
+default, the following keys have been bound to such operations: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keys 
+T}&T{
+Operations 
+T}
+T{
+_
++ 
+T}&T{
+add last two stack elements 
+T}
+T{
+\- 
+T}&T{
+subtract element 1 from element 2 
+T}
+T{
+* 
+T}&T{
+multiply last two stack elements 
+T}
+T{
+/ 
+T}&T{
+divide element 2 by element 1 
+T}
+T{
+^T}&T{
+raise element 2 to the power of element 1 
+T}
+T{
+n 
+T}&T{
+negate last element 
+T}
+T{
+i 
+T}&T{
+invert last element 
+T}
+T{
+s 
+T}&T{
+square root function 
+T}
+T{
+a 
+T}&T{
+absolute value function 
+T}
+T{
+e 
+T}&T{
+exponential function 
+T}
+T{
+l 
+T}&T{
+natural logarithm function 
+T}
+T{
+c 
+T}&T{
+complex conjugate function 
+T}
+T{
+! 
+T}&T{
+factorial function 
+T}
+T{
+%T}&T{
+element 2 mod element 1 
+T}
+T{
+S 
+T}&T{
+store element 2 in (variable) element 1 
+T}
+T{
+; 
+T}&T{
+evaluate variable to obtain contents 
+T}
+T{
+_
+.TE
+.PP
+As a shortcut, function operators will automatically enter any data that you 
+were in the process of entering. So instead of the sequence 
+2<enter>2<enter>+, you could type simply 2<enter>2+ and the second number 
+would be entered before the addition operation is applied. 
+.PP
+As an additional shortcut, any variable names used as function arguments will 
+be evaluated before application of the function. In other words, it is not necessary 
+to evaluate variables before performing arithmetic operations on them. 
+.PP
+.SS EXECUTING FUNCTION ABBREVIATIONS
+One could bind nearly all calculator operations to specific keypresses, but this 
+would rapidly get confusing since the PC keyboard is not labeled as nicely as a 
+calculator keyboard is. For this reason, Orpie includes an 
+\fIabbreviation\fP
+syntax. 
+.PP
+To activate an abbreviation, press \&''' (quote key), followed by the 
+first few letters/digits of the abbreviation, then hit enter. Orpie offers an 
+autocompletion feature for abbreviations, so you only need to type enough of 
+the operation to identify it uniquely. The matching abbreviations will appear 
+in the left panel of the display, to assist you in finding the appropriate 
+operation. 
+.PP
+To avoid interface conflicts, abbreviations may be entered only when the 
+entry buffer (the bottom line of the screen) is empty. 
+.PP
+The following functions are available as abbreviations: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Abbreviations 
+T}&T{
+Functions 
+T}
+T{
+_
+inv 
+T}&T{
+inverse function 
+T}
+T{
+pow 
+T}&T{
+raise element 2 to the power of element 1 
+T}
+T{
+sq 
+T}&T{
+square last element 
+T}
+T{
+sqrt 
+T}&T{
+square root function 
+T}
+T{
+abs 
+T}&T{
+absolute value function 
+T}
+T{
+exp 
+T}&T{
+exponential function 
+T}
+T{
+ln 
+T}&T{
+natural logarithm function 
+T}
+T{
+10^
+T}&T{
+base 10 exponential function 
+T}
+T{
+log10 
+T}&T{
+base 10 logarithm function 
+T}
+T{
+conj 
+T}&T{
+complex conjugate function 
+T}
+T{
+sin 
+T}&T{
+sine function 
+T}
+T{
+cos 
+T}&T{
+cosine function 
+T}
+T{
+tan 
+T}&T{
+tangent function 
+T}
+T{
+sinh 
+T}&T{
+hyperbolic sine function 
+T}
+T{
+cosh 
+T}&T{
+hyperbolic cosine function 
+T}
+T{
+tanh 
+T}&T{
+hyperbolic tangent function 
+T}
+T{
+asin 
+T}&T{
+arcsine function 
+T}
+T{
+acos 
+T}&T{
+arccosine function 
+T}
+T{
+atan 
+T}&T{
+arctangent function 
+T}
+T{
+asinh 
+T}&T{
+inverse hyperbolic sine function 
+T}
+T{
+acosh 
+T}&T{
+inverse hyperbolic cosine function 
+T}
+T{
+atanh 
+T}&T{
+inverse hyperbolic tangent function 
+T}
+T{
+re 
+T}&T{
+real part of complex number 
+T}
+T{
+im 
+T}&T{
+imaginary part of complex number 
+T}
+T{
+gamma 
+T}&T{
+Euler gamma function 
+T}
+T{
+lngamma 
+T}&T{
+natural log of Euler gamma function 
+T}
+T{
+erf 
+T}&T{
+error function 
+T}
+T{
+erfc 
+T}&T{
+complementary error function 
+T}
+T{
+fact 
+T}&T{
+factorial function 
+T}
+T{
+gcd 
+T}&T{
+greatest common divisor function 
+T}
+T{
+lcm 
+T}&T{
+least common multiple function 
+T}
+T{
+binom 
+T}&T{
+binomial coefficient function 
+T}
+T{
+perm 
+T}&T{
+permutation function 
+T}
+T{
+trans 
+T}&T{
+matrix transpose 
+T}
+T{
+trace 
+T}&T{
+trace of a matrix 
+T}
+T{
+solvelin 
+T}&T{
+solve a linear system of the form Ax = b 
+T}
+T{
+mod 
+T}&T{
+element 2 mod element 1 
+T}
+T{
+floor 
+T}&T{
+floor function 
+T}
+T{
+ceil 
+T}&T{
+ceiling function 
+T}
+T{
+toint 
+T}&T{
+convert a real number to an integer type 
+T}
+T{
+toreal 
+T}&T{
+convert an integer type to a real number 
+T}
+T{
+add 
+T}&T{
+add last two elements 
+T}
+T{
+sub 
+T}&T{
+subtract element 1 from element 2 
+T}
+T{
+mult 
+T}&T{
+multiply last two elements 
+T}
+T{
+div 
+T}&T{
+divide element 2 by element 1 
+T}
+T{
+neg 
+T}&T{
+negate last element 
+T}
+T{
+store 
+T}&T{
+store element 2 in (variable) element 1 
+T}
+T{
+eval 
+T}&T{
+evaluate variable to obtain contents 
+T}
+T{
+purge 
+T}&T{
+delete a variable 
+T}
+T{
+total 
+T}&T{
+sum the columns of a real matrix 
+T}
+T{
+mean 
+T}&T{
+compute the sample means of the columns of a real matrix 
+T}
+T{
+sumsq 
+T}&T{
+sum the squares of the columns of a real matrix 
+T}
+T{
+var 
+T}&T{
+compute the unbiased sample variances of the columns of a real matrix 
+T}
+T{
+varbias 
+T}&T{
+compute the biased (population) sample variances of the columns of a real matrix 
+T}
+T{
+stdev 
+T}&T{
+compute the unbiased sample standard deviations of the columns of a real matrix 
+T}
+T{
+stdevbias 
+T}&T{
+compute the biased (pop.) sample standard deviations of the columns of a matrix 
+T}
+T{
+min 
+T}&T{
+find the minima of the columns of a real matrix 
+T}
+T{
+max 
+T}&T{
+find the maxima of the columns of a real matrix 
+T}
+T{
+utpn 
+T}&T{
+compute the upper tail probability of a normal distribution 
+T}
+T{
+uconvert 
+T}&T{
+convert element 2 to an equivalent expression with units matching element 1 
+T}
+T{
+ustand 
+T}&T{
+convert to equivalent expression using SI standard base units 
+T}
+T{
+uvalue 
+T}&T{
+drop the units of the last element 
+T}
+T{
+_
+.TE
+.PP
+Entering abbreviations can become tedious when performing repetitive calculations. 
+To save some keystrokes, Orpie will automatically bind recently\-used operations with no prexisting 
+binding to keys <f5>\-<f12>. The current autobindings can be viewed by pressing \&'h\&' 
+to cycle between the various pages of the help panel. 
+.PP
+.SS EXECUTING BASIC COMMAND OPERATIONS
+In addition to the function operations listed in 
+the section EXECUTING BASIC FUNCTION OPERATIONS, 
+a number of basic calculator commands have been bound to single keypresses: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keys 
+T}&T{
+Operations 
+T}
+T{
+_
+\\T}&T{
+drop last element 
+T}
+T{
+| 
+T}&T{
+clear all stack elements 
+T}
+T{
+<pagedown> 
+T}&T{
+swap last two elements 
+T}
+T{
+<enter> 
+T}&T{
+duplicate last element (when entry buffer is empty) 
+T}
+T{
+u 
+T}&T{
+undo last operation 
+T}
+T{
+r 
+T}&T{
+toggle angle mode between degrees and radians 
+T}
+T{
+p 
+T}&T{
+toggle complex display mode between rectangular and polar 
+T}
+T{
+b 
+T}&T{
+cycle base display mode between binary, octal, decimal, hex 
+T}
+T{
+h 
+T}&T{
+cycle through multiple help windows 
+T}
+T{
+v 
+T}&T{
+view last stack element in a fullscreen editor 
+T}
+T{
+E 
+T}&T{
+create a new stack element using an external editor 
+T}
+T{
+P 
+T}&T{
+enter 3.14159265 on the stack 
+T}
+T{
+C\-L 
+T}&T{
+refresh the display 
+T}
+T{
+<up> 
+T}&T{
+begin stack browsing mode 
+T}
+T{
+Q 
+T}&T{
+quit Orpie 
+T}
+T{
+_
+.TE
+.PP
+.SS EXECUTING COMMAND ABBREVIATIONS
+In addition to the function operations listed in 
+the section EXECUTING FUNCTION ABBREVIATIONS, 
+there are a large number of calculator commands that 
+have been implemented using the abbreviation syntax: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Abbreviations 
+T}&T{
+Calculator Operation 
+T}
+T{
+_
+drop 
+T}&T{
+drop last element 
+T}
+T{
+clear 
+T}&T{
+clear all stack elements 
+T}
+T{
+swap 
+T}&T{
+swap last two elements 
+T}
+T{
+dup 
+T}&T{
+duplicate last element 
+T}
+T{
+undo 
+T}&T{
+undo last operation 
+T}
+T{
+rad 
+T}&T{
+set angle mode to radians 
+T}
+T{
+deg 
+T}&T{
+set angle mode to degrees 
+T}
+T{
+rect 
+T}&T{
+set complex display mode to rectangular 
+T}
+T{
+polar 
+T}&T{
+set complex display mode to polar 
+T}
+T{
+bin 
+T}&T{
+set base display mode to binary 
+T}
+T{
+oct 
+T}&T{
+set base display mode to octal 
+T}
+T{
+dec 
+T}&T{
+set base display mode to decimal 
+T}
+T{
+hex 
+T}&T{
+set base display mode to hexidecimal 
+T}
+T{
+view 
+T}&T{
+view last stack element in a fullscreen editor 
+T}
+T{
+edit 
+T}&T{
+create a new stack element using an external editor 
+T}
+T{
+pi 
+T}&T{
+enter 3.14159265 on the stack 
+T}
+T{
+rand 
+T}&T{
+generate a random number between 0 and 1 (uniformly distributed) 
+T}
+T{
+refresh 
+T}&T{
+refresh the display 
+T}
+T{
+about 
+T}&T{
+display a nifty ``About Orpie\&'' screen 
+T}
+T{
+quit 
+T}&T{
+quit Orpie 
+T}
+T{
+_
+.TE
+.PP
+.SS BROWSING THE STACK
+Orpie offers a \fIstack browsing mode\fP
+to assist in viewing and manipulating 
+stack data. Press <up> to enter stack browsing mode; this should 
+highlight the last stack element. You can use the up and down arrow keys to 
+select different stack elements. The following keys are useful in stack 
+browsing mode: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+Keys 
+T}&T{
+Operations 
+T}
+T{
+_
+q 
+T}&T{
+quit stack browsing mode 
+T}
+T{
+<left> 
+T}&T{
+scroll selected entry to the left 
+T}
+T{
+<right> 
+T}&T{
+scroll selected entry to the right 
+T}
+T{
+r 
+T}&T{
+cyclically ``roll\&'' stack elements downward, below the selected element (inclusive) 
+T}
+T{
+R 
+T}&T{
+cyclically ``roll\&'' stack elements upward, below the selected element (inclusive) 
+T}
+T{
+v 
+T}&T{
+view the currently selected element in a fullscreen editor 
+T}
+T{
+E 
+T}&T{
+edit the currently selected element with an external editor 
+T}
+T{
+<enter> 
+T}&T{
+duplicate the currently selected element 
+T}
+T{
+_
+.TE
+.PP
+The left and right scrolling option may prove useful for viewing very lengthy 
+stack entries, such as large matrices. The edit option provides a convenient 
+way to correct data after it has been entered on the stack. 
+.PP
+.SS UNITS FORMATTING
+A units string is a list of units separated by \&'*\&' to indicate multiplication 
+and \&'/\&' to indicate division. Units may be raised to real\-valued powers 
+using the \&'^\&'character. A contrived example of a valid unit string would be 
+"N*nm^2*kg/s/in^\-3*GHz^2.34".
+.PP
+Orpie supports the standard SI prefix set, 
+{y, z, a, f, p, n, u, m, c, d, da, h, k, M, G, T, P, E, Z, Y} 
+(note the use of \&'u\&' for micro\-). These prefixes may be applied 
+to any of the following exhaustive sets of units: 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Length Unit 
+T}
+T{
+_
+m 
+T}&T{
+meter 
+T}
+T{
+ft 
+T}&T{
+foot 
+T}
+T{
+in 
+T}&T{
+inch 
+T}
+T{
+yd 
+T}&T{
+yard 
+T}
+T{
+mi 
+T}&T{
+mile 
+T}
+T{
+pc 
+T}&T{
+parsec 
+T}
+T{
+AU 
+T}&T{
+astronomical unit 
+T}
+T{
+Ang 
+T}&T{
+angstrom 
+T}
+T{
+furlong 
+T}&T{
+furlong 
+T}
+T{
+pt 
+T}&T{
+PostScript point 
+T}
+T{
+pica 
+T}&T{
+PostScript pica 
+T}
+T{
+nmi 
+T}&T{
+nautical mile 
+T}
+T{
+lyr 
+T}&T{
+lightyear 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Mass Unit 
+T}
+T{
+_
+g 
+T}&T{
+gram 
+T}
+T{
+lb 
+T}&T{
+pound mass 
+T}
+T{
+oz 
+T}&T{
+ounce 
+T}
+T{
+slug 
+T}&T{
+slug 
+T}
+T{
+lbt 
+T}&T{
+Troy pound 
+T}
+T{
+ton 
+T}&T{
+(USA) short ton 
+T}
+T{
+tonl 
+T}&T{
+(UK) long ton 
+T}
+T{
+tonm 
+T}&T{
+metric ton 
+T}
+T{
+ct 
+T}&T{
+carat 
+T}
+T{
+gr 
+T}&T{
+grain 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Time Unit 
+T}
+T{
+_
+s 
+T}&T{
+second 
+T}
+T{
+min 
+T}&T{
+minute 
+T}
+T{
+hr 
+T}&T{
+hour 
+T}
+T{
+day 
+T}&T{
+day 
+T}
+T{
+yr 
+T}&T{
+year 
+T}
+T{
+Hz 
+T}&T{
+Hertz 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Temperature Unit 
+T}
+T{
+_
+K 
+T}&T{
+Kelvin 
+T}
+T{
+R 
+T}&T{
+Rankine 
+T}
+T{
+_
+.TE
+.PP
+Note: No, Celsius and Fahrenheit will not be supported. Because these 
+temperature units do not share a common zero point, their behavior is 
+ill\-defined under many operations. 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+``Amount of Substance\&'' Unit 
+T}
+T{
+_
+mol 
+T}&T{
+Mole 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Force Unit 
+T}
+T{
+_
+N 
+T}&T{
+Newton 
+T}
+T{
+lbf 
+T}&T{
+pound force 
+T}
+T{
+dyn 
+T}&T{
+dyne 
+T}
+T{
+kip 
+T}&T{
+kip 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Energy Unit 
+T}
+T{
+_
+J 
+T}&T{
+Joule 
+T}
+T{
+erg 
+T}&T{
+erg 
+T}
+T{
+cal 
+T}&T{
+calorie 
+T}
+T{
+BTU 
+T}&T{
+british thermal unit 
+T}
+T{
+eV 
+T}&T{
+electron volt 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Electrical Unit 
+T}
+T{
+_
+A 
+T}&T{
+Ampere 
+T}
+T{
+C 
+T}&T{
+Coulomb 
+T}
+T{
+V 
+T}&T{
+volt 
+T}
+T{
+Ohm 
+T}&T{
+Ohm 
+T}
+T{
+F 
+T}&T{
+Farad 
+T}
+T{
+H 
+T}&T{
+Henry 
+T}
+T{
+T 
+T}&T{
+Tesla 
+T}
+T{
+G 
+T}&T{
+Gauss 
+T}
+T{
+Wb 
+T}&T{
+Weber 
+T}
+T{
+Mx 
+T}&T{
+Maxwell 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Power Unit 
+T}
+T{
+_
+W 
+T}&T{
+Watt 
+T}
+T{
+hp 
+T}&T{
+horsepower 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Pressure Unit 
+T}
+T{
+_
+Pa 
+T}&T{
+Pascal 
+T}
+T{
+atm 
+T}&T{
+atmosphere 
+T}
+T{
+bar 
+T}&T{
+bar 
+T}
+T{
+Ohm 
+T}&T{
+Ohm 
+T}
+T{
+mmHg 
+T}&T{
+millimeters of mercury 
+T}
+T{
+inHg 
+T}&T{
+inches of mercury 
+T}
+T{
+_
+.TE
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Luminance Unit 
+T}
+T{
+_
+cd 
+T}&T{
+candela 
+T}
+T{
+lm 
+T}&T{
+lumen 
+T}
+T{
+lx 
+T}&T{
+lux 
+T}
+T{
+_
+.TE
+.PP
+Note: Although the lumen is defined by 
+1_lm = 1_cd * sr, Orpie drops the steridian because it is 
+a dimensionless unit and therefore is of questionable use to a calculator. 
+.PP
+.TS
+tab(&);
+l l.
+T{
+_
+String 
+T}&T{
+Volume Unit 
+T}
+T{
+_
+ozfl 
+T}&T{
+fluid ounce (US) 
+T}
+T{
+cup 
+T}&T{
+cup (US) 
+T}
+T{
+pt 
+T}&T{
+pint (US) 
+T}
+T{
+qt 
+T}&T{
+quart (US) 
+T}
+T{
+gal 
+T}&T{
+gallon (US) 
+T}
+T{
+L 
+T}&T{
+liter 
+T}
+T{
+_
+.TE
+.PP
+All units are defined in the Orpie run\-configuration file; consult 
+the \fIorpierc\fP(5)
+manpage 
+if you wish to define your own units or change the existing definitions. 
+.PP
+.SH LICENSING
+
+Orpie is Free Software; you can redistribute it and/or modify it under the 
+terms of the GNU General Public License (GPL), Version 3, as published by the 
+Free Software Foundation. You should have received a copy of the GPL along 
+with this program, in the file ``LICENSE.md\&''\&. 
+.PP
+.SH CONTACT INFO
+
+Orpie author: Paul Pelzl <pelzlpj@gmail.com> 
+.br
+Orpie website: \fBhttps://github.com/pelzlpj/orpie\fP
+.br
+.PP
+.SH SEE ALSO
+
+\fIorpierc\fP(5),
+\fIorpie\-curses\-keys\fP(1)
+.PP
+.\" NOTE: This file is generated, DO NOT EDIT.

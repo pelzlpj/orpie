@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="generator" content="hevea 2.32">
+<style type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.dd-description{margin:0ex 0ex 1ex 4ex;}
+.dt-description{margin:0ex;}
+.toc{list-style:none;}
+.footnotetext{margin:0ex; padding:0ex;}
+div.footnotetext P{margin:0px; text-indent:1em;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.footnoterule{margin:1em auto 1em 0px;width:50%;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+.titlemain{margin:1ex 2ex 2ex 1ex;}
+.titlerest{margin:0ex 2ex;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.flushleft{text-align:left;margin-left:0ex;margin-right:auto;}
+.flushright{text-align:right;margin-left:auto;margin-right:0ex;}
+div table{margin-left:inherit;margin-right:inherit;margin-bottom:2px;margin-top:2px}
+td table{margin:auto;}
+table{border-collapse:collapse;}
+td{padding:0;}
+.cellpadding0 tr td{padding:0;}
+.cellpadding1 tr td{padding:1px;}
+pre{text-align:left;margin-left:0ex;margin-right:auto;}
+blockquote{margin-left:4ex;margin-right:4ex;text-align:left;}
+td p{margin:0px;}
+.boxed{border:1px solid black}
+.textboxed{border:1px solid black}
+.vbar{border:none;width:2px;background-color:black;}
+.hbar{border:none;height:2px;width:100%;background-color:black;}
+.hfill{border:none;height:1px;width:200%;background-color:black;}
+.vdisplay{border-collapse:separate;border-spacing:2px;width:auto; empty-cells:show; border:2px solid red;}
+.vdcell{white-space:nowrap;padding:0px; border:2px solid green;}
+.display{border-collapse:separate;border-spacing:2px;width:auto; border:none;}
+.dcell{white-space:nowrap;padding:0px; border:none;}
+.dcenter{margin:0ex auto;}
+.vdcenter{border:solid #FF8000 2px; margin:0ex auto;}
+.minipage{text-align:left; margin-left:0em; margin-right:auto;}
+.marginpar{border:solid thin black; width:20%; text-align:left;}
+.marginparleft{float:left; margin-left:0ex; margin-right:1ex;}
+.marginparright{float:right; margin-left:1ex; margin-right:0ex;}
+.theorem{text-align:left;margin:1ex auto 1ex 0ex;}
+.part{margin:2ex auto;text-align:center}
+</style>
+<title>Orpie v1.6 User Manual
+</title>
+</head>
+<body >
+<!--HEVEA command line is: hevea -fix manual.tex -->
+<!--CUT STYLE article--><!--CUT DEF section 1 --><table class="title"><tr><td style="padding:1ex"><h1 class="titlemain">Orpie v1.6 User Manual</h1><h3 class="titlerest">Paul J. Pelzl</h3><h3 class="titlerest">August 27, 2018</h3></td></tr>
+</table><div class="center">
+<em>&#X201C;Because the equals key is for the weak.&#X201D;</em>
+</div><!--TOC section id="sec1" Contents-->
+<h2 id="sec1" class="section">Contents</h2><!--SEC END --><ul class="toc"><li class="li-toc">
+<a href="#sec2">1&#XA0;&#XA0;Introduction</a>
+</li><li class="li-toc"><a href="#sec3">2&#XA0;&#XA0;Installation</a>
+</li><li class="li-toc"><a href="#sec4">3&#XA0;&#XA0;Quick Start</a>
+<ul class="toc"><li class="li-toc">
+<a href="#sec5">3.1&#XA0;&#XA0;Overview</a>
+</li><li class="li-toc"><a href="#sec6">3.2&#XA0;&#XA0;Entering Data</a>
+<ul class="toc"><li class="li-toc">
+<a href="#sec7">3.2.1&#XA0;&#XA0;Entering Real Numbers</a>
+</li><li class="li-toc"><a href="#sec8">3.2.2&#XA0;&#XA0;Entering Complex Numbers</a>
+</li><li class="li-toc"><a href="#sec9">3.2.3&#XA0;&#XA0;Entering Matrices</a>
+</li><li class="li-toc"><a href="#sec10">3.2.4&#XA0;&#XA0;Entering Data With Units</a>
+</li><li class="li-toc"><a href="#sec11">3.2.5&#XA0;&#XA0;Entering Exact Integers</a>
+</li><li class="li-toc"><a href="#sec12">3.2.6&#XA0;&#XA0;Entering Variable Names</a>
+</li><li class="li-toc"><a href="#sec13">3.2.7&#XA0;&#XA0;Entering Physical Constants</a>
+</li><li class="li-toc"><a href="#sec14">3.2.8&#XA0;&#XA0;Entering Data With an External Editor</a>
+</li></ul>
+</li><li class="li-toc"><a href="#sec15">3.3&#XA0;&#XA0;Executing Basic Function Operations</a>
+</li><li class="li-toc"><a href="#sec16">3.4&#XA0;&#XA0;Executing Function Abbreviations</a>
+</li><li class="li-toc"><a href="#sec17">3.5&#XA0;&#XA0;Executing Basic Command Operations</a>
+</li><li class="li-toc"><a href="#sec18">3.6&#XA0;&#XA0;Executing Command Abbreviations</a>
+</li><li class="li-toc"><a href="#sec19">3.7&#XA0;&#XA0;Browsing the Stack</a>
+</li><li class="li-toc"><a href="#sec20">3.8&#XA0;&#XA0;Units Formatting</a>
+</li></ul>
+</li><li class="li-toc"><a href="#sec21">4&#XA0;&#XA0;Advanced Configuration</a>
+<ul class="toc"><li class="li-toc">
+<a href="#sec22">4.1&#XA0;&#XA0;<span style="font-family:monospace">orpierc</span> Syntax</a>
+<ul class="toc"><li class="li-toc">
+<a href="#sec23">4.1.1&#XA0;&#XA0;Including Other Rcfiles</a>
+</li><li class="li-toc"><a href="#sec24">4.1.2&#XA0;&#XA0;Setting Configuration Variables</a>
+</li><li class="li-toc"><a href="#sec25">4.1.3&#XA0;&#XA0;Creating Key Bindings</a>
+</li><li class="li-toc"><a href="#sec26">4.1.4&#XA0;&#XA0;Removing Key Bindings</a>
+</li><li class="li-toc"><a href="#sec27">4.1.5&#XA0;&#XA0;Creating Key Auto-Bindings</a>
+</li><li class="li-toc"><a href="#sec28">4.1.6&#XA0;&#XA0;Creating Operation Abbreviations</a>
+</li><li class="li-toc"><a href="#sec29">4.1.7&#XA0;&#XA0;Removing Operation Abbreviations</a>
+</li><li class="li-toc"><a href="#sec30">4.1.8&#XA0;&#XA0;Creating Macros</a>
+</li><li class="li-toc"><a href="#sec31">4.1.9&#XA0;&#XA0;Creating Units</a>
+</li><li class="li-toc"><a href="#sec32">4.1.10&#XA0;&#XA0;Creating Constants</a>
+</li></ul>
+</li><li class="li-toc"><a href="#sec33">4.2&#XA0;&#XA0;Configuration Variables</a>
+</li><li class="li-toc"><a href="#sec34">4.3&#XA0;&#XA0;Calculator Operations</a>
+<ul class="toc"><li class="li-toc">
+<a href="#sec35">4.3.1&#XA0;&#XA0;Functions</a>
+</li><li class="li-toc"><a href="#sec36">4.3.2&#XA0;&#XA0;Commands</a>
+</li><li class="li-toc"><a href="#sec37">4.3.3&#XA0;&#XA0;Edit Operations</a>
+</li><li class="li-toc"><a href="#sec38">4.3.4&#XA0;&#XA0;Browsing Operations</a>
+</li><li class="li-toc"><a href="#sec39">4.3.5&#XA0;&#XA0;Abbreviation Entry Operations</a>
+</li><li class="li-toc"><a href="#sec40">4.3.6&#XA0;&#XA0;Variable Entry Operations</a>
+</li><li class="li-toc"><a href="#sec41">4.3.7&#XA0;&#XA0;Integer Entry Operations</a>
+</li></ul>
+</li></ul>
+</li><li class="li-toc"><a href="#sec42">5&#XA0;&#XA0;Licensing</a>
+</li><li class="li-toc"><a href="#sec43">6&#XA0;&#XA0;Contact info</a>
+</li></ul>
+<!--TOC section id="sec2" Introduction-->
+<h2 id="sec2" class="section">1&#XA0;&#XA0;Introduction</h2><!--SEC END --><p>
+Orpie is a console-based RPN (reverse polish notation) desktop
+calculator. The interface is similar to that of modern
+Hewlett-Packard<sup><span style="font-style:italic">TM</span></sup> calculators, but has been optimized for efficiency on
+a PC keyboard. The design is also influenced to some degree by the 
+ <a href="http://www.mutt.org">Mutt email client</a> 
+and the 
+ <a href="http://vim.sf.net">Vim editor</a>.  </p><p>Orpie does not have graphing capability, nor does it offer much in the way of a
+programming interface; other applications such as 
+ <a href="http://www.octave.org">GNU Octave</a>.  
+are already very effective for such tasks. Orpie focuses specifically on
+helping you to crunch numbers quickly.</p><p>Orpie is written in
+ <a href="http://ocaml.org/">OCaml</a>). </p>
+<!--TOC section id="sec3" Installation-->
+<h2 id="sec3" class="section">2&#XA0;&#XA0;Installation</h2><!--SEC END --><p>
+The recommended method to install Orpie is through the
+ <a href="https://opam.ocaml.org/">OPAM package manager</a>. 
+&#X201C;<span style="font-family:monospace">opam install orpie</span>&#X201D; should get the job done.</p><p>If you want to install without using OPAM, you will need the following OCaml packages installed:
+</p><ul class="itemize"><li class="li-itemize">
+OCaml 4.03+
+</li><li class="li-itemize">dune
+</li><li class="li-itemize">camlp5
+</li><li class="li-itemize">ocamlfind
+</li><li class="li-itemize">curses (registered with <span style="font-family:monospace">ocamlfind</span>)
+</li><li class="li-itemize">gsl (registered with <span style="font-family:monospace">ocamlfind</span>)
+</li></ul><p>
+If you have satisfied all the dependencies, then use the Makefile to build:
+</p><pre class="verbatim"># optionally set an installation prefix (default is /usr/local)
+$ export PREFIX=/usr
+
+# optionally set a staging directory (useful if you're creating a package)
+$ export DESTDIR=/tmp/orpie
+
+# build
+$ make
+
+# install build products (use 'sudo' if installing to a root-owned location)
+$ make install
+</pre>
+<!--TOC section id="sec4" Quick Start-->
+<h2 id="sec4" class="section">3&#XA0;&#XA0;Quick Start</h2><!--SEC END --><p>
+This section describes how to use Orpie in its default configuration. After
+familiarizing yourself with the basic operations as outlined in this section,
+you may wish to consult 
+Section <a href="#advanced">4</a> 
+to see how Orpie can be configured to better fit your needs.</p>
+<!--TOC subsection id="sec5" Overview-->
+<h3 id="sec5" class="subsection">3.1&#XA0;&#XA0;Overview</h3><!--SEC END --><p>
+You can start the calculator by executing <span style="font-family:monospace">orpie</span>.
+The interface has two
+panels. The left panel combines status information with context-sensitive help;
+the right panel represents the calculator&#X2019;s stack. (Note that the left panel
+will be hidden if Orpie is run in a terminal with less than 80 columns.)</p><p>In general, you perform calculations by first entering data on to the stack,
+then executing functions that operate on the stack data. As an example, you can
+hit <span style="font-family:monospace">1&lt;enter&gt;2&lt;enter&gt;+</span> in order to add 1 and 2.</p>
+<!--TOC subsection id="sec6" Entering Data-->
+<h3 id="sec6" class="subsection">3.2&#XA0;&#XA0;Entering Data</h3><!--SEC END -->
+<!--TOC subsubsection id="sec7" Entering Real Numbers-->
+<h4 id="sec7" class="subsubsection">3.2.1&#XA0;&#XA0;Entering Real Numbers</h4><!--SEC END --><p>
+To enter a real number, just type the desired digits and hit enter. The space
+bar will begin entry of a scientific notation exponent. The &#X2019;<span style="font-family:monospace">n</span>&#X2019; key is used
+for negation. Here are some examples:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">1.23&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">1.23</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">1.23&lt;space&gt;23n&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">1.23e-23</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">1.23n&lt;space&gt;23&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">-1.23e23</span> </td></tr>
+</table>
+</div>
+<!--TOC subsubsection id="sec8" Entering Complex Numbers-->
+<h4 id="sec8" class="subsubsection">3.2.2&#XA0;&#XA0;Entering Complex Numbers</h4><!--SEC END --><p>
+Orpie can represent complex numbers using either cartesian (rectangular) or
+polar coordinates. See 
+Section <a href="#rectpolar">3.5</a> 
+to see how to change the complex number display mode.</p><p>A complex number is entered by first pressing &#X2019;<span style="font-family:monospace">(</span>&#X2019;, then entering the real
+part, then pressing &#X2019;<span style="font-family:monospace">,</span>&#X2019; followed by the imaginary part. Alternatively, you
+can press &#X2019;<span style="font-family:monospace">(</span>&#X2019; followed by the magnitude, then &#X2019;<span style="font-family:monospace">&lt;</span>&#X2019; followed by the
+phase angle. The angle will be interpreted in degrees or radians, depending on
+the current setting of the angle mode 
+(see Section <a href="#anglemode">3.5</a>).
+Examples:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">(1.23, 4.56&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">(1.23, 4.56)</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">(0.7072&lt;45&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">(0.500065915655126, 0.50006591...</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">(1.23n,4.56&lt;space&gt;10&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">(-1.23, 45600000000)</span> </td></tr>
+</table>
+</div>
+<!--TOC subsubsection id="sec9" Entering Matrices-->
+<h4 id="sec9" class="subsubsection">3.2.3&#XA0;&#XA0;Entering Matrices</h4><!--SEC END --><p>
+You can enter matrices by pressing &#X2019;<span style="font-family:monospace">[</span>&#X2019;. The elements of the matrix may then be
+entered as described in the previous sections, and should be separated using
+&#X2019;<span style="font-family:monospace">,</span>&#X2019;. To start a new row of the matrix, press &#X2019;<span style="font-family:monospace">[</span>&#X2019; again. On the
+stack, each row of the matrix is enclosed in a set of brackets; for example, the
+matrix
+</p><div class="center"><table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:center;border:solid 1px;white-space:nowrap" >1</td><td style="text-align:center;border:solid 1px;white-space:nowrap" >2 </td></tr>
+<tr><td style="text-align:center;border:solid 1px;white-space:nowrap" >3</td><td style="text-align:center;border:solid 1px;white-space:nowrap" >4 </td></tr>
+</table></div><p>
+would appear on the stack as <span style="font-family:monospace">[[1, 2][3, 4]]</span>.</p><p>Examples of matrix entry:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">[1,2[3,4&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[1, 2][3, 4]]</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">[1.2&lt;space&gt;10,0[3n,5n&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[ 12000000000, 0 ][ -3, -5 ]]</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">[(1,2,3,4[5,6,7,8&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[ (1, 2), (3, 4) ][ (5, 6), (...</span> </td></tr>
+</table>
+</div>
+<!--TOC subsubsection id="sec10" Entering Data With Units-->
+<h4 id="sec10" class="subsubsection">3.2.4&#XA0;&#XA0;Entering Data With Units</h4><!--SEC END --><p>
+Real and complex scalars and matrices can optionally be labeled with units. After typing
+in the numeric portion of the data, press &#X2019;<span style="font-family:monospace">_</span>&#X2019; followed by a units string. The format
+of units strings is described in
+Section <a href="#unitsformat">3.8</a>.
+</p><p>Examples of entering dimensioned data:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">1.234_N*mm^2/s&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">1.234_N*mm^2*s^-1</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">(2.3,5_s^-4&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">(2.3, 5)_s^-4</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[1,2[3,4_lbf*in&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[ 1, 2 ][ 3, 4 ]]_lbf*in</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">_nm&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">1_nm</span> </td></tr>
+</table>
+</div>
+<!--TOC subsubsection id="sec11" Entering Exact Integers-->
+<h4 id="sec11" class="subsubsection">3.2.5&#XA0;&#XA0;Entering Exact Integers</h4><!--SEC END --><p>
+An exact integer may be entered by pressing &#X2019;<span style="font-family:monospace">#</span>&#X2019; followed by the desired
+digits. The base of the integer will be assumed to be the same as the current
+calculator base mode (see 
+Section <a href="#basemode">3.5</a> 
+to see how to set this mode).
+Alternatively, the desired base may be specified by pressing space and appending
+one of {<span style="font-family:monospace">b, o, d, h</span>}, to represent binary, octal, decimal, or hexadecimal,
+respectively. On the stack, the representation of the integer will be changed
+to match the current base mode. Examples:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">#123456&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace"># 123456`d</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">#ffff&lt;space&gt;h&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace"># 65535`d</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">#10101n&lt;space&gt;b&lt;enter&gt;</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace"># -21`d</span> </td></tr>
+</table>
+</div><p>Note that exact integers may have unlimited length, and the basic arithmetic
+operations (addition, subtraction, multiplication, division) will be performed
+using exact arithmetic when both arguments are integers.</p>
+<!--TOC subsubsection id="sec12" Entering Variable Names-->
+<h4 id="sec12" class="subsubsection">3.2.6&#XA0;&#XA0;Entering Variable Names</h4><!--SEC END --><p>
+A variable name may be entered by pressing &#X2019;<span style="font-family:monospace">@</span>&#X2019; followed by the desired
+variable name string. The string may contain alphanumeric characters, dashes, and
+underscores. Example:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keypresses</td><td style="text-align:right;border:solid 1px;white-space:nowrap" >Resulting Entry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">@myvar</span></td><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">@ myvar</span></td></tr>
+</table>
+</div><p>
+Orpie also supports autocompletion of variable names. The help panel displays a
+list of pre-existing variables that partially match the name currently being entered.
+You can press &#X2019;<span style="font-family:monospace">&lt;tab&gt;</span>&#X2019; to iterate through the list of matching variables.</p><p>As a shortcut, keys <span style="font-family:monospace">&lt;f1&gt;-&lt;f4&gt;</span> will enter the variables (&#X201C;registers&#X201D;) 
+<span style="font-family:monospace">@ r01</span> through <span style="font-family:monospace">@ r04</span>.</p>
+<!--TOC subsubsection id="sec13" Entering Physical Constants-->
+<h4 id="sec13" class="subsubsection">3.2.7&#XA0;&#XA0;Entering Physical Constants</h4><!--SEC END --><p>
+Orpie includes definitions for a number of fundamental physical constants. To
+enter a constant, press &#X2019;<span style="font-family:monospace">C</span>&#X2019;, followed by the first few letters/digits
+of the constant&#X2019;s symbol, then hit enter. Orpie offers an autocompletion
+feature for physical constants, so you only need to type enough of the constant
+to identify it uniquely. A list of matching constants will appear in the left
+panel of the display, to assist you in finding the desired choice.</p><p>The following is a list of Orpie&#X2019;s physical constant symbols:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Symbol</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Physical Constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">NA</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Avagadro&#X2019;s number </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">k</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Boltzmann constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Vm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >molar volume </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">R</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >universal gas constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">stdT</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >standard temperature </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">stdP</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >standard pressure </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sigma</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Stefan-Boltzmann constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">c</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >speed of light </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">eps0</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >permittivity of free space </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">u0</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >permeability of free space </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">g</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >acceleration of gravity </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">G</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Newtonian gravitational constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">h</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Planck&#X2019;s constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">hbar</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Dirac&#X2019;s constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">e</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >electron charge </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">me</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >electron mass </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mp</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >proton mass </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">alpha</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >fine structure constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">phi</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >magnetic flux quantum </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">F</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Faraday&#X2019;s constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Rinf</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >&#X201C;infinity&#X201D; Rydberg constant </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">a0</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Bohr radius </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">uB</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Bohr magneton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">uN</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >nuclear magneton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lam0</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >wavelength of a 1eV photon </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">f0</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >frequency of a 1eV photon </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lamc</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Compton wavelength </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">c3</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Wien&#X2019;s constant </td></tr>
+</table>
+</div><p>All physical constants are defined in the Orpie run-configuration file; consult
+Section <a href="#advanced">4</a> 
+if you wish to define your own constants or change the existing definitions.</p>
+<!--TOC subsubsection id="sec14" Entering Data With an External Editor-->
+<h4 id="sec14" class="subsubsection">3.2.8&#XA0;&#XA0;Entering Data With an External Editor</h4><!--SEC END --><p>
+<a id="editor"></a>
+Orpie can also parse input entered via an external editor. You may find this to be
+a convenient method for entering large matrices. Pressing &#X2019;<span style="font-family:monospace">E</span>&#X2019; will
+launch the external editor, and the various data types may be entered as illustrated
+by the examples below:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Data Type</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Sample Input String </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" >exact integer</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">#12345678`d</span>, where the trailing
+letter is one of the base characters {b, o, d, h} </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" >real number</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">-123.45e67</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > complex number</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">(1e10, 2)</span> or <span style="font-family:monospace">(1 &lt;90)</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > real matrix</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[1, 2][3.1, 4.5e10]]</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > complex matrix</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">[[(1, 0), 5][1e10, (2 &lt;90)]]</span> </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > variable</td><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">@myvar</span> </td></tr>
+</table>
+</div><p>
+Real and complex numbers and matrices may have units appended; just add a units
+string such as &#X201C;<span style="font-family:monospace">_N*m/s</span>&#X201D; immediately following the numeric portion
+of the expression.</p><p>Notice that the complex matrix input parser is quite flexible; real and complex
+matrix elements may be mixed, and cartesian and polar complex formats may be
+mixed as well.</p><p>Multiple stack entries may be specified in the same file, if they are separated
+by whitespace. For example, entering <span style="font-family:monospace">(1, 2) 1.5</span> into the editor will cause
+the complex value <span style="font-family:monospace">(1, 2)</span> to be placed on the stack, followed by the real
+value <span style="font-family:monospace">1.5</span>.</p><p>The input parser will discard whitespace where possible, so feel free to add
+any form of whitespace between matrix rows, matrix elements, real and complex
+components, etc. </p>
+<!--TOC subsection id="sec15" Executing Basic Function Operations-->
+<h3 id="sec15" class="subsection">3.3&#XA0;&#XA0;Executing Basic Function Operations</h3><!--SEC END --><p>
+<a id="functionops"></a>
+Once some data has been entered on the stack, you can apply operations to that
+data. For example, &#X2019;<span style="font-family:monospace">+</span>&#X2019; will add the last two elements on the stack. By
+default, the following keys have been bound to such operations:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keys</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Operations </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">+</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >add last two stack elements </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">-</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >subtract element 1 from element 2 </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">*</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >multiply last two stack elements </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">/</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >divide element 2 by element 1 </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">^</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >raise element 2 to the power of element 1 </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">n</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >negate last element </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">i</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >invert last element </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">s</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >square root function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">a</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >absolute value function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">e</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >exponential function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">l</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >natural logarithm function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">c</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >complex conjugate function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">!</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >factorial function </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">%</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >element 2 mod element 1 </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">S</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >store element 2 in (variable) element 1 </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >evaluate variable to obtain contents </td></tr>
+</table>
+</div><p>As a shortcut, function operators will automatically enter any data that you
+were in the process of entering. So instead of the sequence 
+<span style="font-family:monospace">2&lt;enter&gt;2&lt;enter&gt;+</span>, you could type simply <span style="font-family:monospace">2&lt;enter&gt;2+</span> and the second number
+would be entered before the addition operation is applied.</p><p>As an additional shortcut, any variable names used as function arguments will
+be evaluated before application of the function. In other words, it is not necessary
+to evaluate variables before performing arithmetic operations on them.</p>
+<!--TOC subsection id="sec16" Executing Function Abbreviations-->
+<h3 id="sec16" class="subsection">3.4&#XA0;&#XA0;Executing Function Abbreviations</h3><!--SEC END --><p>
+<a id="abbrevfunctions"></a>
+One could bind nearly all calculator operations to specific keypresses, but this
+would rapidly get confusing since the PC keyboard is not labeled as nicely as a
+calculator keyboard is. For this reason, Orpie includes an 
+<em>abbreviation</em> syntax.</p><p>To activate an abbreviation, press &#X2019;<span style="font-family:monospace">&#X2019;</span>&#X2019; (quote key), followed by the
+first few letters/digits of the abbreviation, then hit enter. Orpie offers an
+autocompletion feature for abbreviations, so you only need to type enough of
+the operation to identify it uniquely. The matching abbreviations will appear
+in the left panel of the display, to assist you in finding the appropriate
+operation.</p><p>To avoid interface conflicts, abbreviations may be entered only when the
+entry buffer (the bottom line of the screen) is empty.</p><p>The following functions are available as abbreviations:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > Abbreviations</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Functions </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">inv</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inverse function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">pow</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >raise element 2 to the power of element 1 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sq</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >square last element </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sqrt</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >square root function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">abs</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >absolute value function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">exp</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >exponential function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ln</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >natural logarithm function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">10^</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >base 10 exponential function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">log10</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >base 10 logarithm function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">conj</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >complex conjugate function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sin</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >sine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">cos</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cosine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">tan</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >tangent function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sinh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >hyperbolic sine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">cosh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >hyperbolic cosine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">tanh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >hyperbolic tangent function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">asin</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >arcsine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">acos</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >arccosine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">atan</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >arctangent function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">asinh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inverse hyperbolic sine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">acosh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inverse hyperbolic cosine function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">atanh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inverse hyperbolic tangent function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">re</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >real part of complex number </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">im</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >imaginary part of complex number </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">gamma</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Euler gamma function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lngamma</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >natural log of Euler gamma function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">erf</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >error function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">erfc</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >complementary error function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">fact</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >factorial function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">gcd</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >greatest common divisor function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lcm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >least common multiple function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">binom</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >binomial coefficient function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">perm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >permutation function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">trans</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >matrix transpose </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">trace</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >trace of a matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">solvelin</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >solve a linear system of the form Ax = b </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mod</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >element 2 mod element 1 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">floor</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >floor function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ceil</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >ceiling function </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">toint</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >convert a real number to an integer type </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">toreal</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >convert an integer type to a real number </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">add</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >add last two elements </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sub</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >subtract element 1 from element 2 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mult</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >multiply last two elements </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">div</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >divide element 2 by element 1 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">neg</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >negate last element </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">store</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >store element 2 in (variable) element 1 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">eval</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >evaluate variable to obtain contents </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">purge</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >delete a variable </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">total</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >sum the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mean</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the sample means of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">sumsq</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >sum the squares of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">var</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the unbiased sample variances of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">varbias</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the biased (population) sample variances of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">stdev</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the unbiased sample standard deviations of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">stdevbias</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the biased (pop.) sample standard deviations of the columns of a matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">min</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >find the minima of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">max</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >find the maxima of the columns of a real matrix </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">utpn</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >compute the upper tail probability of a normal distribution </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">uconvert</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >convert element 2 to an equivalent expression with units matching element 1 </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ustand</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >convert to equivalent expression using SI standard base units </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">uvalue</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >drop the units of the last element </td></tr>
+</table>
+</div><p>Entering abbreviations can become tedious when performing repetitive calculations.
+To save some keystrokes, Orpie will automatically bind recently-used operations with no prexisting
+binding to keys <span style="font-family:monospace">&lt;f5&gt;-&lt;f12&gt;</span>. The current autobindings can be viewed by pressing <span style="font-family:monospace">&#X2019;h&#X2019;</span>
+to cycle between the various pages of the help panel.</p>
+<!--TOC subsection id="sec17" Executing Basic Command Operations-->
+<h3 id="sec17" class="subsection">3.5&#XA0;&#XA0;Executing Basic Command Operations</h3><!--SEC END --><p>
+<a id="rectpolar"></a>
+<a id="anglemode"></a>
+<a id="basemode"></a>
+In addition to the function operations listed in 
+Section <a href="#functionops">3.3</a>,
+a number of basic calculator commands have been bound to single keypresses:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keys</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Operations </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > \</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >drop last element </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">|</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >clear all stack elements </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;pagedown&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >swap last two elements </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;enter&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >duplicate last element (when entry buffer is empty) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">u</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >undo last operation </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">r</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >toggle angle mode between degrees and radians </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">p</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >toggle complex display mode between rectangular and polar </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">b</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cycle base display mode between binary, octal, decimal, hex </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">h</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cycle through multiple help windows </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">v</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >view last stack element in a fullscreen editor </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">E</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >create a new stack element using an external editor </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">P</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >enter 3.1415&#X2026;on the stack </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">C-L</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >refresh the display </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;up&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >begin stack browsing mode </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Q</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >quit Orpie </td></tr>
+</table>
+</div>
+<!--TOC subsection id="sec18" Executing Command Abbreviations-->
+<h3 id="sec18" class="subsection">3.6&#XA0;&#XA0;Executing Command Abbreviations</h3><!--SEC END --><p>
+In addition to the function operations listed in 
+Section <a href="#abbrevfunctions">3.4</a>, 
+there are a large number of calculator commands that
+have been implemented using the abbreviation syntax:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > Abbreviations</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Calculator Operation </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">drop</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >drop last element </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">clear</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >clear all stack elements </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">swap</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >swap last two elements </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">dup</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >duplicate last element </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">undo</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >undo last operation </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">rad</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set angle mode to radians </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">deg</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set angle mode to degrees </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">rect</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set complex display mode to rectangular </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">polar</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set complex display mode to polar </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">bin</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set base display mode to binary </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">oct</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set base display mode to octal </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">dec</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set base display mode to decimal </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">hex</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >set base display mode to hexidecimal </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">view</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >view last stack element in a fullscreen editor </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">edit</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >create a new stack element using an external editor </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">pi</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >enter 3.1415&#X2026;on the stack </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" ><span style="font-family:monospace">rand</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >generate a random number between 0 and 1 (uniformly distributed) </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">refresh</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >refresh the display </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">about</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >display a nifty &#X201C;About Orpie&#X201D; screen </td></tr>
+<tr><td style="text-align:left;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">quit</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >quit Orpie </td></tr>
+</table>
+</div>
+<!--TOC subsection id="sec19" Browsing the Stack-->
+<h3 id="sec19" class="subsection">3.7&#XA0;&#XA0;Browsing the Stack</h3><!--SEC END --><p>
+Orpie offers a <em>stack browsing mode</em> to assist in viewing and manipulating
+stack data. Press <span style="font-family:monospace">&lt;up&gt;</span> to enter stack browsing mode; this should
+highlight the last stack element. You can use the up and down arrow keys to
+select different stack elements. The following keys are useful in stack
+browsing mode:
+</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > Keys</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Operations </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">q</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >quit stack browsing mode </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;left&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >scroll selected entry to the left </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;right&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >scroll selected entry to the right </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">r</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cyclically &#X201C;roll&#X201D; stack elements downward, below the selected element (inclusive) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">R</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cyclically &#X201C;roll&#X201D; stack elements upward, below the selected element (inclusive) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">v</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >view the currently selected element in a fullscreen editor </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">E</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >edit the currently selected element with an external editor </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">&lt;enter&gt;</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >duplicate the currently selected element </td></tr>
+</table>
+</div><p>The left and right scrolling option may prove useful for viewing very lengthy
+stack entries, such as large matrices. The edit option provides a convenient
+way to correct data after it has been entered on the stack.</p>
+<!--TOC subsection id="sec20" Units Formatting-->
+<h3 id="sec20" class="subsection">3.8&#XA0;&#XA0;Units Formatting</h3><!--SEC END --><p>
+A units string is a list of units separated by &#X2019;<span style="font-family:monospace">*</span>&#X2019; to indicate multiplication
+and &#X2019;<span style="font-family:monospace">/</span>&#X2019; to indicate division. Units may be raised to real-valued powers
+<a id="unitsformat"></a>
+using the &#X2019;<span style="font-family:monospace">^</span>&#X2019; character. A contrived example of a valid unit string would be 
+"<span style="font-family:monospace">N*nm^2*kg/s/in^-3*GHz^2.34</span>".
+</p><p>Orpie supports the standard SI prefix set, 
+<span style="font-family:monospace">{y, z, a, f, p, n, u, m, c, d, da, h, k, M, G, T, P, E, Z, Y}</span>
+(note the use of &#X2019;<span style="font-family:monospace">u</span>&#X2019; for micro-). These prefixes may be applied
+to any of the following exhaustive sets of units:</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Length Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">m</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >meter </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ft</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >foot </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">in</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inch </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">yd</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >yard </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mi</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >mile </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">pc</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >parsec </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">AU</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >astronomical unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Ang</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >angstrom </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">furlong</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >furlong </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">pt</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >PostScript point </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">pica</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >PostScript pica </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">nmi</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >nautical mile </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lyr</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >lightyear </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Mass Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">g</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >gram </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lb</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >pound mass </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">oz</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >ounce </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">slug</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >slug </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lbt</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Troy pound </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ton</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >(USA) short ton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">tonl</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >(UK) long ton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">tonm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >metric ton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ct</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >carat </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">gr</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >grain </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Time Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">s</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >second </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">min</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >minute </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">hr</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >hour </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">day</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >day </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">yr</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >year </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Hz</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Hertz </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Temperature Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">K</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Kelvin </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">R</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Rankine </td></tr>
+</table>
+</div><p>
+Note: No, Celsius and Fahrenheit will not be supported. Because these
+temperature units do not share a common zero point, their behavior is
+ill-defined under many operations.</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >&#X201C;Amount of Substance&#X201D; Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mol</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Mole </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Force Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">N</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Newton </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lbf</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >pound force </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">dyn</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >dyne </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">kip</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >kip </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Energy Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">J</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Joule </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">erg</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >erg </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">cal</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >calorie </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">BTU</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >british thermal unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">eV</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >electron volt </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Electrical Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">A</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Ampere </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">C</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Coulomb </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">V</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >volt </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Ohm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Ohm </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">F</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Farad </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">H</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Henry </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">T</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Tesla </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">G</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Gauss </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Wb</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Weber </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Mx</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Maxwell </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Power Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">W</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Watt </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">hp</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >horsepower </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Pressure Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Pa</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Pascal </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">atm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >atmosphere </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">bar</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >bar </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">Ohm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Ohm </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">mmHg</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >millimeters of mercury </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">inHg</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >inches of mercury </td></tr>
+</table>
+</div><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Luminance Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">cd</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >candela </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lm</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >lumen </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">lx</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >lux </td></tr>
+</table>
+</div><p>
+Note: Although the lumen is defined by
+<span style="font-family:monospace">1_lm = 1_cd * sr</span>, Orpie drops the steridian because it is
+a dimensionless unit and therefore is of questionable use to a calculator.</p><div class="center">
+<table border=1  style="border-spacing:0;" class="cellpadding1"><tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > String</td><td style="text-align:left;border:solid 1px;white-space:nowrap" >Volume Unit </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">ozfl</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >fluid ounce (US) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">cup</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >cup (US) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">pt</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >pint (US) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">qt</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >quart (US) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">gal</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >gallon (US) </td></tr>
+<tr><td style="text-align:right;border:solid 1px;white-space:nowrap" > <span style="font-family:monospace">L</span></td><td style="text-align:left;border:solid 1px;white-space:nowrap" >liter </td></tr>
+</table>
+</div><p>All units are defined in the Orpie run-configuration file; consult
+Section <a href="#advanced">4</a> 
+if you wish to define your own units or change the existing definitions.</p>
+<!--TOC section id="sec21" Advanced Configuration-->
+<h2 id="sec21" class="section">4&#XA0;&#XA0;Advanced Configuration</h2><!--SEC END --><p>
+<a id="advanced"></a>
+Orpie reads a run-configuration textfile (generally <span style="font-family:monospace">/etc/orpierc</span> or
+<span style="font-family:monospace">/usr/local/etc/orpierc</span>) to determine key and command bindings. You can
+create a personalized configuration file in <span style="font-family:monospace">$HOME/.orpierc</span>, and select
+bindings that match your usage patterns. The recommended procedure is to &#X201C;include&#X201D;
+the <span style="font-family:monospace">orpierc</span> file provided with Orpie 
+(see Section <a href="#include">4.1.1</a>), 
+and add or remove settings as desired.</p>
+<!--TOC subsection id="sec22" <span style="font-family:monospace">orpierc</span> Syntax-->
+<h3 id="sec22" class="subsection">4.1&#XA0;&#XA0;<span style="font-family:monospace">orpierc</span> Syntax</h3><!--SEC END --><p>
+You may notice that the <span style="font-family:monospace">orpierc</span> syntax is similar to the syntax used in
+the configuration file for the Mutt email client (muttrc).</p><p>Within the <span style="font-family:monospace">orpierc</span> file, strings should be enclosed in double quotes (<span style="font-family:monospace">"</span>).
+A double quote character inside a string may be represented by 
+\<span style="font-family:monospace">"</span> .
+The backslash character must be represented by doubling it 
+(\\).
+</p>
+<!--TOC subsubsection id="sec23" Including Other Rcfiles-->
+<h4 id="sec23" class="subsubsection">4.1.1&#XA0;&#XA0;Including Other Rcfiles</h4><!--SEC END --><p>
+<a id="include"></a>
+Syntax: <span style="font-family:monospace">include </span><span style="font-family:monospace"><em>filename_string</em></span> <br>
+<br>
+This syntax can be used to include one run-configuration file within another.
+This command could be used to load the default <span style="font-family:monospace">orpierc</span> file (probably
+found in <span style="font-family:monospace">/etc/orpierc</span>) within your personalized rcfile,
+<span style="font-family:monospace">~/.orpierc</span>. The filename string should be enclosed in quotes.</p>
+<!--TOC subsubsection id="sec24" Setting Configuration Variables-->
+<h4 id="sec24" class="subsubsection">4.1.2&#XA0;&#XA0;Setting Configuration Variables</h4><!--SEC END --><p>
+<a id="setvar"></a>
+Syntax: <span style="font-family:monospace">set </span><span style="font-family:monospace"><em>variable</em></span><span style="font-family:monospace">=</span><span style="font-family:monospace"><em>value_string</em></span> <br>
+<br>
+Several configuration variables can be set using this syntax; check
+Section <a href="#variables">4.2</a>
+to see a list. The variables are unquoted, but the values should be quoted strings.</p>
+<!--TOC subsubsection id="sec25" Creating Key Bindings-->
+<h4 id="sec25" class="subsubsection">4.1.3&#XA0;&#XA0;Creating Key Bindings</h4><!--SEC END --><p>
+<a id="bindings"></a>
+Syntax: <span style="font-family:monospace">bind </span><span style="font-family:monospace"><em>key_identifier operation</em></span> <br>
+<br>
+This command will bind a keypress to execute a calculator operation. 
+The various operations, which should not be enclosed in quotes,
+may be found in 
+Section <a href="#operationslist">4.3</a>. 
+Key identifiers may be specified by strings that represent a single keypress,
+for example <span style="font-family:monospace">"m"</span> (quotes included). The key may be prefixed with 
+<span style="font-family:monospace">"</span>\\<span style="font-family:monospace">C"</span> or <span style="font-family:monospace">"</span>\\<span style="font-family:monospace">M"</span> 
+to represent Control or Meta (Alt) modifiers, respectively; note that the
+backslash must be doubled. A number of special keys lack single-character
+representations, so the following strings may be used to represent them:
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">"&lt;esc&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;tab&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;enter&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;return&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;insert&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;home&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;end&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;pageup&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;pagedown&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;space&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;left&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;right&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;up&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;down&gt;"</span>
+</li><li class="li-itemize"><span style="font-family:monospace">"&lt;f1&gt;"</span> to <span style="font-family:monospace">"&lt;f12&gt;"</span>
+</li></ul><p>
+Due to differences between various terminal emulators, this key identifier syntax may
+not be adequate to describe every keypress. As a workaround, Orpie will also accept key
+identifiers in octal notation. As an example, you could use 
+\<span style="font-family:monospace">024</span> 
+(do <em>not</em> enclose it in quotes) to represent Ctrl-T.</p><p>Orpie includes a secondary executable, <span style="font-family:monospace">orpie-curses-keys</span>, that prints out
+the key identifiers associated with keypresses. You may find it useful when customizing
+<span style="font-family:monospace">orpierc</span>.</p><p>Multiple keys may be bound to the same operation, if desired.</p>
+<!--TOC subsubsection id="sec26" Removing Key Bindings-->
+<h4 id="sec26" class="subsubsection">4.1.4&#XA0;&#XA0;Removing Key Bindings</h4><!--SEC END --><p>
+<a id="unbindings"></a>
+Syntax: <br>
+<span style="font-family:monospace">unbind_function </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_command </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_edit </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_browse </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_abbrev </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_variable </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<span style="font-family:monospace">unbind_integer </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<br>
+These commands will remove key bindings associated with the various entry
+modes (functions, commands, editing operations, etc.). The key identifiers
+should be defined using the syntax described in the previous section.</p>
+<!--TOC subsubsection id="sec27" Creating Key Auto-Bindings-->
+<h4 id="sec27" class="subsubsection">4.1.5&#XA0;&#XA0;Creating Key Auto-Bindings</h4><!--SEC END --><p>
+<a id="autobindings"></a>
+Syntax: <span style="font-family:monospace">autobind </span><span style="font-family:monospace"><em>key_identifier</em></span> <br>
+<br>
+In order to make repetitive calculations more pleasant, Orpie offers an automatic key
+binding feature. When a function or command is executed using its abbreviation, 
+one of the keys selected by the <span style="font-family:monospace">autobind</span> syntax will be 
+automatically bound to that operation (unless the operation has already been bound 
+to a key). The current set of autobindings can be viewed in the help panel by executing
+<span style="font-family:monospace">command_cycle_help</span> (bound to <span style="font-family:monospace">&#X2019;h&#X2019;</span> by default).</p><p>The syntax for the key identifiers is provided in the previous section.</p>
+<!--TOC subsubsection id="sec28" Creating Operation Abbreviations-->
+<h4 id="sec28" class="subsubsection">4.1.6&#XA0;&#XA0;Creating Operation Abbreviations</h4><!--SEC END --><p>
+<a id="abbreviations"></a>
+Syntax: <span style="font-family:monospace">abbrev </span><span style="font-family:monospace"><em>operation_abbreviation operation</em></span> <br>
+<br>
+You can use this syntax to set the abbreviations used within Orpie to represent the 
+various functions and commands. A list of available operations may be found in 
+Section <a href="#operationslist">4.3</a>.
+The operation abbreviations should be quoted strings, for example <span style="font-family:monospace">"sin"</span>
+or <span style="font-family:monospace">"log"</span>.</p><p>Orpie performs autocompletion on these abbreviations, allowing you to type
+usually just a few letters in order to select the desired command. The order of the
+autocompletion matches will be the same as the order in which the abbreviations are
+registered by the rcfile&#X2013;so you may wish to place the more commonly used operation
+abbreviations earlier in the list.</p><p>Multiple abbreviations may be bound to the same operation, if desired.</p>
+<!--TOC subsubsection id="sec29" Removing Operation Abbreviations-->
+<h4 id="sec29" class="subsubsection">4.1.7&#XA0;&#XA0;Removing Operation Abbreviations</h4><!--SEC END --><p>
+<a id="unabbreviations"></a>
+Syntax: <span style="font-family:monospace">unabbrev </span><span style="font-family:monospace"><em>operation_abbreviation</em></span> <br>
+<br>
+This syntax can be used to remove an operation abbreviation. The operation abbreviations
+should be quoted strings, as described in the previous section.</p>
+<!--TOC subsubsection id="sec30" Creating Macros-->
+<h4 id="sec30" class="subsubsection">4.1.8&#XA0;&#XA0;Creating Macros</h4><!--SEC END --><p>
+<a id="macros"></a>
+Syntax: <span style="font-family:monospace">macro </span><span style="font-family:monospace"><em>key_identifier macro_string</em></span> <br>
+<br>
+You can use this syntax to cause a single keypress (the <em>key_identifier</em>)
+to be interpreted as the series of keypresses listed in <em>macro_string</em>.
+The syntax for defining a keypress is the same as that defined in 
+Section <a href="#bindings">4.1.3</a>. 
+The macro string should be a list of whitespace-separated keypresses, e.g.
+<span style="font-family:monospace">"2 &lt;return&gt; 2 +"</span> (including quotes).</p><p>This macro syntax provides a way to create small programs; by way of example,
+the default orpierc file includes macros for the base 2 logarithm and the
+binary entropy function (bound to <span style="font-family:monospace">L</span> and <span style="font-family:monospace">H</span>, respectively),
+as well as &#X201C;register&#X201D; variable shortcuts (<span style="font-family:monospace">&lt;f1&gt;</span> to <span style="font-family:monospace">&lt;f12&gt;</span>).</p><p>Macros may call other macros recursively. However, take care that a macro does
+not call <em>itself</em> recursively; Orpie will not trap the infinite loop.</p><p>Note that operation abbreviations may be accessed within macros. For example,
+<span style="font-family:monospace">macro "A" "&#X2019; a b o u t &lt;return&gt;"</span> would bind <span style="font-family:monospace">A</span> to display
+the &#X201C;about Orpie&#X201D; screen.</p>
+<!--TOC subsubsection id="sec31" Creating Units-->
+<h4 id="sec31" class="subsubsection">4.1.9&#XA0;&#XA0;Creating Units</h4><!--SEC END --><p>
+<a id="units"></a>
+Syntax: <br>
+<span style="font-family:monospace">base_unit </span><span style="font-family:monospace"><em>unit_symbol preferred_prefix</em></span> <br>
+<span style="font-family:monospace">unit </span><span style="font-family:monospace"><em>unit_symbol unit_definition</em></span> <br>
+<br>
+Units are defined in a two-step process: 
+</p><ol class="enumerate" type=1><li class="li-enumerate">
+Define a set of orthogonal &#X201C;base units.&#X201D; All other units must be expressible 
+in terms of these base units. The base units can be given a preferred SI prefix,
+which will be used whenever the units are standardized (e.g. via <span style="font-family:monospace">ustand</span>).
+The unit symbols and preferred prefixes should all be quoted strings; to prefer
+<em>no</em> prefix, use the empty string (<span style="font-family:monospace">""</span>).<p>It is expected that most users will use the fundamental SI units for base units.
+</p></li><li class="li-enumerate">Define all other units in terms of either base units or previously-defined units.
+Again, the unit symbol and unit definition should be quoted strings. The definition
+should take the form of a numeric value followed by a units string, e.g.
+<span style="font-family:monospace">"2.5_kN*m/s"</span>. See
+Section <a href="#unitsformat">3.8</a>
+for more details on the unit string format.
+</li></ol>
+<!--TOC subsubsection id="sec32" Creating Constants-->
+<h4 id="sec32" class="subsubsection">4.1.10&#XA0;&#XA0;Creating Constants</h4><!--SEC END --><p>
+<a id="constants"></a>
+Syntax: <span style="font-family:monospace">constant </span><span style="font-family:monospace"><em>constant_symbol constant_definition</em></span> <br>
+<br>
+This syntax can be used to define a physical constant. Both the constant symbol
+and definition must be quoted strings. The constant definition should be a
+numeric constant followed by a units string e.g. <span style="font-family:monospace">"1.60217733e-19_C"</span>.
+All units used in the constant definition must already have been defined.</p>
+<!--TOC subsection id="sec33" Configuration Variables-->
+<h3 id="sec33" class="subsection">4.2&#XA0;&#XA0;Configuration Variables</h3><!--SEC END --><p>
+<a id="variables"></a>
+The following configuration variables may be set as described in Section <a href="#setvar">4.1.2</a>:
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">datadir</span> <br>
+ This variable should be set to the full path of the Orpie data directory, 
+which will contain the calculator state save file, temporary buffers, etc.
+The default directory is
+<span style="font-family:monospace">"~/.orpie/"</span>.
+</li><li class="li-itemize"><span style="font-family:monospace">editor</span> <br>
+ This variable may be set to the fullscreen editor of your choice. The default
+value is <span style="font-family:monospace">"vi"</span>. It is recommended that you choose an editor that offers
+horizontal scrolling in place of word wrapping, so that the columns of large 
+matrices can be properly aligned. (The Vim editor could be used in this fashion
+by setting <span style="font-family:monospace">editor</span> to <span style="font-family:monospace">"vim -c &#X2019;set nowrap&#X2019;"</span>.)
+</li><li class="li-itemize"><span style="font-family:monospace">hide_help</span> <br>
+ Set this variable to <span style="font-family:monospace">"true"</span> to hide the left help/status panel, or leave
+it on the default of <span style="font-family:monospace">"false"</span> to display the help panel.
+</li><li class="li-itemize"><span style="font-family:monospace">conserve_memory</span> <br>
+ Set this variable to <span style="font-family:monospace">"true"</span> to minimize memory usage, or leave it on
+the default of <span style="font-family:monospace">"false"</span> to improve rendering performance. (By default,
+Orpie caches multiple string representations of all stack elements. Very large
+integers in particular require significant computation for string representation,
+so caching these strings can make display updates much faster.)
+</li></ul>
+<!--TOC subsection id="sec34" Calculator Operations-->
+<h3 id="sec34" class="subsection">4.3&#XA0;&#XA0;Calculator Operations</h3><!--SEC END --><p>
+<a id="operationslist"></a>
+Every calculator operation can be made available to the interface using the syntax
+described in 
+Sections <a href="#bindings">4.1.3</a> and <a href="#abbreviations">4.1.6</a>. 
+The following is a list of every available operation.</p>
+<!--TOC subsubsection id="sec35" Functions-->
+<h4 id="sec35" class="subsubsection">4.3.1&#XA0;&#XA0;Functions</h4><!--SEC END --><p>
+<a id="functions"></a>
+The following operations are functions&#X2013;that is, they will consume at least one
+argument from the stack. Orpie will generally abort the computation and
+provide an informative error message if a function cannot be successfully applied (for
+example, if you try to compute the transpose of something that is not a matrix).</p><p>For the exact integer data type, basic arithmetic operations will yield an exact
+integer result. Division of two exact integers will yield the quotient of
+the division. The more complicated functions will generally promote the integer
+to a real number, and as such the arithmetic will no longer be exact.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">function_10_x</span> <br>
+ Raise 10 to the power of the last stack element (inverse of function_log10).
+</li><li class="li-itemize"><span style="font-family:monospace">function_abs</span> <br>
+ Compute the absolute value of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_acos</span> <br>
+ Compute the inverse cosine of the last stack element. For real numbers,
+The result will be provided either in degrees or radians, depending on
+the angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_acosh</span> <br>
+ Compute the inverse hyperbolic cosine of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_add</span> <br>
+ Add last two stack elements.
+</li><li class="li-itemize"><span style="font-family:monospace">function_arg</span> <br>
+ Compute the argument (phase angle of complex number) of the last stack
+element. The value will be provided in either degrees or radians,
+depending on the current angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_asin</span> <br>
+ Compute the inverse sine of the last stack element. For real numbers,
+The result will be provided either in degrees or radians, depending on
+the angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_asinh</span> <br>
+ Compute the inverse hyperbolic sine of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_atan</span> <br>
+ Compute the inverse tangent of the last stack element. For real numbers,
+The result will be provided either in degrees or radians, depending on
+the angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_atanh</span> <br>
+ Compute the inverse hyperbolic tangent of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_binomial_coeff</span> <br>
+ Compute the binomial coefficient (&#X201C;n choose k&#X201D;) formed by the last two
+stack elements. If these arguments are real, the coefficient is computed
+using a fast approximation to the log of the gamma function, and therefore
+the result is subject to rounding errors. For exact integer arguments,
+the coefficient is computed using exact arithmetic; this has the potential
+to be a slow operation.
+</li><li class="li-itemize"><span style="font-family:monospace">function_ceiling</span> <br>
+ Compute the ceiling of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_convert_units</span> <br>
+ Convert stack element 2 to an equivalent expression in the units of
+element 1. Element 1 should be real-valued, and its magnitude will
+be ignored when computing the conversion.
+</li><li class="li-itemize"><span style="font-family:monospace">function_cos</span> <br>
+ Compute the cosine of the last stack element. If the argument is real,
+it will be assumed to be either degrees or radians, depending on the
+angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_cosh</span> <br>
+ Compute the hyperbolic cosine of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_conj</span> <br>
+ Compute the complex conjugate of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_div</span> <br>
+ Divide element 2 by element 1.
+</li><li class="li-itemize"><span style="font-family:monospace">function_erf</span> <br>
+ Compute the error function of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_erfc</span> <br>
+ Compute the complementary error function of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_eval</span> <br>
+ Obtain the contents of the variable in the last stack position.
+</li><li class="li-itemize"><span style="font-family:monospace">function_exp</span> <br>
+ Evaluate the exponential function of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_factorial</span> <br>
+ Compute the factorial of the last stack element. For a real argument,
+this is computed using a fast approximation to the gamma function,
+and therefore the result may be subject to rounding errors (or overflow). For an 
+exact integer argument, the factorial is computed using exact arithmetic; 
+this has the potential to be a slow operation.
+</li><li class="li-itemize"><span style="font-family:monospace">function_floor</span> <br>
+ Compute the floor of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_gamma</span> <br>
+ Compute the Euler gamma function of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_gcd</span> <br>
+ Compute the greatest common divisor of the last two stack elements. This operation
+may be applied only to integer type data.
+</li><li class="li-itemize"><span style="font-family:monospace">function_im</span> <br>
+ Compute the imaginary part of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_inv</span> <br>
+ Compute the multiplicative inverse of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_lcm</span> <br>
+ Compute the least common multiple of the last two stack elements. This
+operation may be applied only to integer type data.
+</li><li class="li-itemize"><span style="font-family:monospace">function_ln</span> <br>
+ Compute the natural logarithm of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_lngamma</span> <br>
+ Compute the natural logarithm of the Euler gamma function of the last
+stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_log10</span> <br>
+ Compute the base-10 logarithm of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_maximum</span> <br>
+ Find the maximum values of each of the columns of a real NxM matrix,
+returning a 1xM matrix as a result.
+</li><li class="li-itemize"><span style="font-family:monospace">function_minimum</span> <br>
+ Find the minimum values of each of the columns of a real NxM matrix,
+returning a 1xM matrix as a result.
+</li><li class="li-itemize"><span style="font-family:monospace">function_mean</span> <br>
+ Compute the sample means of each of the columns of a real NxM matrix,
+returning a 1xM matrix as a result.
+</li><li class="li-itemize"><span style="font-family:monospace">function_mod</span> <br>
+ Compute element 2 mod element 1. This operation can be applied only
+to integer type data.
+</li><li class="li-itemize"><span style="font-family:monospace">function_mult</span> <br>
+ Multiply last two stack elements.
+</li><li class="li-itemize"><span style="font-family:monospace">function_neg</span> <br>
+ Negate last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_permutation</span> <br>
+ Compute the permutation coefficient determined by the last two stack
+elements &#X2019;n&#X2019; and &#X2019;k&#X2019;: the number of ways of obtaining an ordered subset
+of k elements from a set of n elements.
+If these arguments are real, the coefficient is computed
+using a fast approximation to the log of the gamma function, and therefore
+the result is subject to rounding errors. For exact integer arguments,
+the coefficient is computed using exact arithmetic; this has the potential
+to be a slow operation.
+</li><li class="li-itemize"><span style="font-family:monospace">function_pow</span> <br>
+ Raise element 2 to the power of element 1.
+</li><li class="li-itemize"><span style="font-family:monospace">function_purge</span> <br>
+ Delete the variable in the last stack position.
+</li><li class="li-itemize"><span style="font-family:monospace">function_re</span> <br>
+ Compute the real part of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sin</span> <br>
+ Compute the sine of the last stack element. If the argument is real, it
+will be assumed to be either degrees or radians, depending on the angle
+mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sinh</span> <br>
+ Compute the hyperbolic sine of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_solve_linear</span> <br>
+ Solve a linear system of the form Ax = b, where A and b are the last
+two elements on the stack. A must be a square matrix and b must
+be a matrix with one column. This function does not compute inv(A),
+but obtains the solution by a more efficient LU decomposition method.
+This function is recommended over explicitly computing the inverse,
+especially when solving linear systems with relatively large dimension or
+with poorly conditioned matrices.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sq</span> <br>
+ Square the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sqrt</span> <br>
+ Compute the square root of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_standardize_units</span> <br>
+ Convert the last stack element to an equivalent expression using the SI standard
+base units (kg, m, s, etc.).
+</li><li class="li-itemize"><span style="font-family:monospace">function_stdev_unbiased</span> <br>
+ Compute the unbiased sample standard deviation of each of the columns of a real NxM
+matrix, returning a 1xM matrix as a result. (Compare to HP48&#X2019;s <span style="font-family:monospace">sdev</span>
+function.)
+</li><li class="li-itemize"><span style="font-family:monospace">function_stdev_biased</span> <br>
+ Compute the biased (population) sample standard deviation of each of the columns 
+of a real NxM matrix, returning a 1xM matrix as a result. (Compare to 
+HP48&#X2019;s <span style="font-family:monospace">psdev</span> function.)
+</li><li class="li-itemize"><span style="font-family:monospace">function_store</span> <br>
+ Store element 2 in (variable) element 1.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sub</span> <br>
+ Subtract element 1 from element 2.
+</li><li class="li-itemize"><span style="font-family:monospace">function_sumsq</span> <br>
+ Sum the squares of each of the columns of a real NxM matrix, returning a
+1xM matrix as a result.
+</li><li class="li-itemize"><span style="font-family:monospace">function_tan</span> <br>
+ Compute the tangent of the last stack element. If the argument is real,
+it will be assumed to be either degrees or radians, depending on the
+angle mode of the calculator.
+</li><li class="li-itemize"><span style="font-family:monospace">function_tanh</span> <br>
+ Compute the hyperbolic tangent of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_to_int</span> <br>
+ Convert a real number to an integer type.
+</li><li class="li-itemize"><span style="font-family:monospace">function_to_real</span> <br>
+ Convert an integer type to a real number.
+</li><li class="li-itemize"><span style="font-family:monospace">function_total</span> <br>
+ Sum each of the columns of a real NxM matrix, returning a
+1xM matrix as a result.
+</li><li class="li-itemize"><span style="font-family:monospace">function_trace</span> <br>
+ Compute the trace of a square matrix.
+</li><li class="li-itemize"><span style="font-family:monospace">function_transpose</span> <br>
+ Compute the matrix transpose of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_unit_value</span> <br>
+ Drop the units of the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">function_utpn</span> <br>
+ Compute the upper tail probability of a normal distribution. <br>
+UTPN(m, v, x) = Integrate[ 1/Sqrt[2 Pi v] Exp[-(m-y)<sup>2</sup>/(2 v)], {y, x, Infinity}]
+</li><li class="li-itemize"><span style="font-family:monospace">function_var_unbiased</span> <br>
+ Compute the unbiased sample variance of each of the columns of a real NxM
+matrix, returning a 1xM matrix as a result. (Compare to HP48&#X2019;s <span style="font-family:monospace">var</span>
+function.)
+</li><li class="li-itemize"><span style="font-family:monospace">function_var_biased</span> <br>
+ Compute the biased (population) sample variance of each of the columns of a
+real NxM matrix, returning a 1xM matrix as a result. (Compare to HP48&#X2019;s
+<span style="font-family:monospace">pvar</span> function.)</li></ul>
+<!--TOC subsubsection id="sec36" Commands-->
+<h4 id="sec36" class="subsubsection">4.3.2&#XA0;&#XA0;Commands</h4><!--SEC END --><p>
+<a id="commands"></a>
+The following operations are referred to as commands; they differ from functions because
+they do not take an argument. Many calculator interface settings are implemented as commands.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">command_about</span> <br>
+ Display a nifty &#X201C;about Orpie&#X201D; credits screen.
+</li><li class="li-itemize"><span style="font-family:monospace">command_begin_abbrev</span> <br>
+ Begin entry of an operation abbreviation.
+</li><li class="li-itemize"><span style="font-family:monospace">command_begin_browsing</span> <br>
+ Enter stack browsing mode.
+</li><li class="li-itemize"><span style="font-family:monospace">command_begin_constant</span> <br>
+ Begin entry of a physical constant.
+</li><li class="li-itemize"><span style="font-family:monospace">command_begin_variable</span> <br>
+ Begin entry of a variable name.
+</li><li class="li-itemize"><span style="font-family:monospace">command_bin</span> <br>
+ Set the base of exact integer representation to 2 (binary).
+</li><li class="li-itemize"><span style="font-family:monospace">command_clear</span> <br>
+ Clear all elements from the stack.
+</li><li class="li-itemize"><span style="font-family:monospace">command_cycle_base</span> <br>
+ Cycle the base of exact integer representation between 2, 8,
+10, and 16 (bin, oct, dec, and hex).
+</li><li class="li-itemize"><span style="font-family:monospace">command_cycle_help</span> <br>
+ Cycle through multiple help pages. The first page displays commonly used
+bindings, and the second page displays the current autobindings.
+</li><li class="li-itemize"><span style="font-family:monospace">command_dec</span> <br>
+ Set the base of exact integer representation to 10 (decimal).
+</li><li class="li-itemize"><span style="font-family:monospace">command_deg</span> <br>
+ Set the angle mode to degrees.
+</li><li class="li-itemize"><span style="font-family:monospace">command_drop</span> <br>
+ Drop the last element off the stack.
+</li><li class="li-itemize"><span style="font-family:monospace">command_dup</span> <br>
+ Duplicate the last stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">command_enter_pi</span> <br>
+Enter 3.1415&#X2026;on the stack.
+</li><li class="li-itemize"><span style="font-family:monospace">command_hex</span> <br>
+ Set the base of exact integer representation to 16 (hexadecimal).
+</li><li class="li-itemize"><span style="font-family:monospace">command_oct</span> <br>
+ Set the base of exact integer representation to 8 (octal).
+</li><li class="li-itemize"><span style="font-family:monospace">command_polar</span> <br>
+ Set the complex display mode to polar.
+</li><li class="li-itemize"><span style="font-family:monospace">command_rad</span> <br>
+ Set the angle mode to radians.
+</li><li class="li-itemize"><span style="font-family:monospace">command_rand</span> <br>
+ Generate a random real-valued number between 0 (inclusive) and 1 (exclusive). The deviates
+are uniformly distributed.
+</li><li class="li-itemize"><span style="font-family:monospace">command_rect</span> <br>
+ Set the complex display mode to rectangular (cartesian).
+</li><li class="li-itemize"><span style="font-family:monospace">command_refresh</span> <br>
+ Refresh the display.
+</li><li class="li-itemize"><span style="font-family:monospace">command_swap</span> <br>
+ Swap stack elements 1 and 2.
+</li><li class="li-itemize"><span style="font-family:monospace">command_quit</span> <br>
+ Quit Orpie.
+</li><li class="li-itemize"><span style="font-family:monospace">command_toggle_angle_mode</span> <br>
+ Toggle the angle mode between degrees and radians.
+</li><li class="li-itemize"><span style="font-family:monospace">command_toggle_complex_mode</span> <br>
+ Toggle the complex display mode between rectangular and polar.
+</li><li class="li-itemize"><span style="font-family:monospace">command_undo</span> <br>
+ Undo the last calculator operation.
+</li><li class="li-itemize"><span style="font-family:monospace">command_view</span> <br>
+ View the last stack element in an external fullscreen editor.
+</li><li class="li-itemize"><span style="font-family:monospace">command_edit_input</span> <br>
+ Create a new stack element using an external editor.
+</li></ul>
+<!--TOC subsubsection id="sec37" Edit Operations-->
+<h4 id="sec37" class="subsubsection">4.3.3&#XA0;&#XA0;Edit Operations</h4><!--SEC END --><p>
+<a id="edits"></a>
+The following operations are related to editing during data entry. These
+commands cannot be made available as operation abbreviations, since
+abbreviations are not accessible while entering data. These operations should
+be made available as single keypresses using the <span style="font-family:monospace">bind</span> keyword.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">edit_angle</span> <br>
+ Begin entering the phase angle of a complex number. (Orpie will
+assume the angle is in either degrees or radians, depending on
+the current angle mode.)
+</li><li class="li-itemize"><span style="font-family:monospace">edit_backspace</span> <br>
+ Delete the last character entered.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_begin_integer</span> <br>
+ Begin entering an exact integer.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_begin_units</span> <br>
+ Begin appending units to a numeric expression.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_complex</span> <br>
+ Begin entering a complex number.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_enter</span> <br>
+ Enter the data that is currently being edited.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_matrix</span> <br>
+ Begin entering a matrix, or begin entering the next
+row of a matrix.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_minus</span> <br>
+ Enter a minus sign in input.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_scientific_notation_base</span> <br>
+ Begin entering the scientific notation exponent of a real number,
+or the base of an exact integer.
+</li><li class="li-itemize"><span style="font-family:monospace">edit_separator</span> <br>
+ Begin editing the next element of a complex number or
+matrix. (This will insert a comma between elements.)
+</li></ul>
+<!--TOC subsubsection id="sec38" Browsing Operations-->
+<h4 id="sec38" class="subsubsection">4.3.4&#XA0;&#XA0;Browsing Operations</h4><!--SEC END --><p>
+<a id="browse"></a>
+The following list of operations is available only in stack browsing mode.
+As abbreviations are unavailable while browsing the stack, these operations
+should be bound to single keypresses using the <span style="font-family:monospace">bind</span> keyword.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">browse_echo</span> <br>
+ Echo the currently selected element to stack level 1.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_end</span> <br>
+ Exit stack browsing mode.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_drop</span> <br>
+ Drop the currently selected stack element.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_dropn</span> <br>
+ Drop all stack elements below the current selection (inclusive).
+</li><li class="li-itemize"><span style="font-family:monospace">browse_keep</span> <br>
+ Drop all stack elements <em>except</em> the current selection. (This is
+complementary to <span style="font-family:monospace">browse_drop</span>.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_keepn</span> <br>
+ Drop all stack elements above the current selection (non-inclusive). (This
+is complementary to <span style="font-family:monospace">browse_dropn</span>.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_next_line</span> <br>
+ Move the selection cursor down one line.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_prev_line</span> <br>
+ Move the selection cursor up one line.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_rolldown</span> <br>
+ Cyclically &#X201C;roll&#X201D; stack elements downward, below the 
+selected element (inclusive).
+</li><li class="li-itemize"><span style="font-family:monospace">browse_rollup</span> <br>
+ Cyclically &#X201C;roll&#X201D; stack elements upward, below the selected
+element (inclusive) .
+</li><li class="li-itemize"><span style="font-family:monospace">browse_scroll_left</span> <br>
+ Scroll the selected element to the left (for viewing very large
+entries such as matrices).
+</li><li class="li-itemize"><span style="font-family:monospace">browse_scroll_right</span> <br>
+ Scroll the selected element to the right.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_view</span> <br>
+ View the currently selected stack element in a fullscreen editor.
+</li><li class="li-itemize"><span style="font-family:monospace">browse_edit</span> <br>
+ Edit the currently selected stack element using an external editor.
+</li></ul>
+<!--TOC subsubsection id="sec39" Abbreviation Entry Operations-->
+<h4 id="sec39" class="subsubsection">4.3.5&#XA0;&#XA0;Abbreviation Entry Operations</h4><!--SEC END --><p>
+<a id="abbrevoperations"></a>
+The following list of operations is available only while entering a function or
+command abbreviation, or while entering a physical constant. These operations must 
+be bound to single keypresses using 
+the <span style="font-family:monospace">bind</span> keyword.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">abbrev_backspace</span> <br>
+ Delete a character from the abbreviation string.
+</li><li class="li-itemize"><span style="font-family:monospace">abbrev_enter</span> <br>
+ Execute the operation associated with the selected abbreviation.
+</li><li class="li-itemize"><span style="font-family:monospace">abbrev_exit</span> <br>
+ Cancel abbreviation entry.
+</li></ul>
+<!--TOC subsubsection id="sec40" Variable Entry Operations-->
+<h4 id="sec40" class="subsubsection">4.3.6&#XA0;&#XA0;Variable Entry Operations</h4><!--SEC END --><p>
+<a id="variableoperations"></a>
+The following list of operations is available only while entering a variable
+name. As abbreviations are unavailable while entering variables, these operations
+should be bound to single keypresses using the <span style="font-family:monospace">bind</span> keyword.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">variable_backspace</span> <br>
+ Delete a character from the variable name.
+</li><li class="li-itemize"><span style="font-family:monospace">variable_cancel</span> <br>
+ Cancel entry of the variable name.
+</li><li class="li-itemize"><span style="font-family:monospace">variable_complete</span> <br>
+ Autocomplete the variable name.
+</li><li class="li-itemize"><span style="font-family:monospace">variable_enter</span> <br>
+ Enter the variable name on the stack.
+</li></ul>
+<!--TOC subsubsection id="sec41" Integer Entry Operations-->
+<h4 id="sec41" class="subsubsection">4.3.7&#XA0;&#XA0;Integer Entry Operations</h4><!--SEC END --><p>
+<a id="integeroperations"></a>
+The following operation is available only while entering an integer; it can be
+made accessible by binding it to a single keypress using the <span style="font-family:monospace">bind</span> keyword.
+</p><ul class="itemize"><li class="li-itemize">
+<span style="font-family:monospace">integer_cancel</span> <br>
+ Cancel entry of an integer.
+</li></ul>
+<!--TOC section id="sec42" Licensing-->
+<h2 id="sec42" class="section">5&#XA0;&#XA0;Licensing</h2><!--SEC END --><p>
+Orpie is Free Software; you can redistribute it and/or modify it under the
+terms of the GNU General Public License (GPL), Version 3, as published by the
+Free Software Foundation. You should have received a copy of the GPL along
+with this program, in the file &#X201C;LICENSE.md&#X201D;.</p>
+<!--TOC section id="sec43" Contact info-->
+<h2 id="sec43" class="section">6&#XA0;&#XA0;Contact info</h2><!--SEC END --><p>
+Orpie author: Paul Pelzl <span style="font-family:monospace">&lt;pelzlpj@gmail.com&gt;</span> <br>
+Orpie website: <span style="font-family:monospace">https://github.com/pelzlpj/orpie</span> <br>
+</p><!--CUT END -->
+<!--HTMLFOOT-->
+<!--ENDHTML-->
+<!--FOOTER-->
+<hr style="height:2"><blockquote class="quote"><em>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+</em><a href="http://hevea.inria.fr/index.html"><em>H</em><em><span style="font-size:small"><sup>E</sup></span></em><em>V</em><em><span style="font-size:small"><sup>E</sup></span></em><em>A</em></a><em>.</em></blockquote></body>
+</html>
