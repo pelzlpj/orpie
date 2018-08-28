@@ -1,6 +1,15 @@
 Orpie ChangeLog
 ------------------------------------------------------------------------
 
+v1.6
+
+   2018-08-28        Version 1.6.0 release.
+
+                     This is a maintenance update intended to leverage
+                     OPAM, findlib, dune, and other bits of modern
+                     OCaml tooling.  Hopefully this will be easier for
+                     most people to build and install.
+
 v1.5
 
    2014-04-11        Version 1.5.2 release.
