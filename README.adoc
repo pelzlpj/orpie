@@ -1,0 +1,39 @@
+Orpie README
+============
+
+Orpie is a Curses-based RPN calculator.
+
+== Installation
+=== Using OPAM
+The recommended method for installing Orpie is to use
+https://opam.ocaml.org/[OPAM].  +opam install orpie+ should get the job done.
+
+=== Without using OPAM
+If you want to install manually, you will need the following OCaml packages installed:
+
+* OCaml 4.03+
+* dune
+* camlp5
+* ocamlfind
+* curses (registered with ocamlfind)
+* gsl (registered with ocamlfind)
+
+If you have satisfied all the dependencies, then use the Makefile to build:
+
+----
+# optionally set an installation prefix (default is /usr/local)
+$ export PREFIX=/usr
+
+# optionally set a staging directory (useful if you're creating a package)
+$ export DESTDIR=/tmp/orpie
+
+# build
+$ make
+
+# install build products (use 'sudo' if installing to a root-owned location)
+$ make install
+----
+
+== Usage
+See the 'doc' subdirectory for more extensive documentation.
+
