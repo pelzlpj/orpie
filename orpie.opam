@@ -7,11 +7,11 @@ homepage: "https://github.com/pelzlpj/orpie"
 bug-reports: "https://github.com/pelzlpj/orpie/issues"
 license: "GPL-3"
 dev-repo: "https://github.com/pelzlpj/orpie.git"
-build: [
-  ["dune" "build"]
-]
-install: [make "install"]
-remove: ["ocamlfind" "remove" "orpie"]
+build: ["dune" "build" "-p" "orpie"]
 depends: [
   "ocamlfind" {build}
+  "camlp5" {build}
+  "dune" {build & >= "1.1"}
+  "curses" { >= "1.0.3" }
+  "gsl" { >= "1.22.0" }
 ]
