@@ -1,6 +1,6 @@
 #!/usr/bin/env ocaml
 
-(* 
+(*
  * This script computes an installation prefix based on
  *    1) $PREFIX, if set, or
  *    2) "opam config var prefix", if available, or
@@ -63,12 +63,24 @@ let subst_prefix (in_filename : string) (out_filename : string) : unit =
   exit ec
 
 
-let () =
-  match Sys.argv with
-  | [| _; in_filename; out_filename |] ->
-      subst_prefix in_filename out_filename
-  | _ ->
-      let () = Printf.fprintf stderr "Usage: subst_prefix.ml in_filename out_filename\n" in
-      exit 2
+let abort_usage () =
+  Printf.fprintf stderr "Usage:\n";
+  Printf.fprintf stderr "    compute_prefix eval\n";
+  Printf.fprintf stderr "    compute_prefix subst in_filename out_filename\n";
+  exit 2
 
-  
+
+let () =
+  begin if Array.length Sys.argv < 2 then
+    abort_usage ()
+  end;
+  let command = Sys.argv.(1) in
+  if String.equal command "eval" && Array.length Sys.argv = 2 then
+    print_string (installation_prefix ())
+  else if String.equal command "subst" && Array.length Sys.argv = 4 then
+    let in_filename = Sys.argv.(2) in
+    let out_filename = Sys.argv.(3) in
+    subst_prefix in_filename out_filename
+  else
+    abort_usage ()
+

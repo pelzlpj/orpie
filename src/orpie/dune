@@ -18,7 +18,7 @@
 ; Support $PREFIX for overriding installation location
 (rule
   (targets install.ml)
-  (action (run %{project_root}/scripts/subst_prefix %{deps} %{targets}))
+  (action (run %{project_root}/scripts/compute_prefix subst %{deps} %{targets}))
   (deps (file install.ml.in)))
 
 
