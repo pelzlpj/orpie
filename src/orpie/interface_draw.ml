@@ -781,13 +781,13 @@ let draw_about (iface : interface_state_t) =
    erase ();
    (* draw the box outline *)
    let horiz_line = String.make iface.scr.cols '*' in
-   let vert_line_piece = String.make iface.scr.cols ' ' in
+   let vert_line_piece = Bytes.make iface.scr.cols ' ' in
    vert_line_piece.[0] <- '*';
    vert_line_piece.[pred iface.scr.cols] <- '*';
    assert (mvaddstr 0 0 horiz_line);
    assert (mvaddstr (iface.scr.lines - 2) 0 horiz_line);
    for i = 1 to iface.scr.lines - 3 do
-      assert (mvaddstr i 0 vert_line_piece)
+      assert (mvaddstr i 0 (Bytes.to_string vert_line_piece))
    done;
    (* draw the text *)
    let vert_center  = (iface.scr.lines - 2) / 2

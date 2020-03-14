@@ -722,8 +722,8 @@ let handle_minus (iface : interface_state_t) =
       |IntEntry ->
          (begin
             match iface.int_entry_buffer.[0] with
-            |'-' -> iface.int_entry_buffer.[0] <- '+'
-            |'+' -> iface.int_entry_buffer.[0] <- '-'
+            |'-' -> iface.int_entry_buffer <- Utility.str_replace iface.int_entry_buffer 0 '+'
+            |'+' -> iface.int_entry_buffer <- Utility.str_replace iface.int_entry_buffer 0 '-'
             |_ -> iface.int_entry_buffer <- "-" ^ iface.int_entry_buffer
          end;
          draw_update_entry iface)
@@ -733,16 +733,16 @@ let handle_minus (iface : interface_state_t) =
             if iface.is_entering_exponent then
                if String.length buffer.re_exponent > 0 then
                   match buffer.re_exponent.[0] with
-                  |'-' -> buffer.re_exponent.[0] <- '+'
-                  |'+' -> buffer.re_exponent.[0] <- '-'
+                  |'-' -> buffer.re_exponent <- Utility.str_replace buffer.re_exponent 0 '+'
+                  |'+' -> buffer.re_exponent <- Utility.str_replace buffer.re_exponent 0 '-'
                   |_ -> buffer.re_exponent <- "-" ^ buffer.re_exponent
                else
                   ()
             else
                if String.length buffer.re_mantissa > 0 then
                   match buffer.re_mantissa.[0] with
-                  |'-' -> buffer.re_mantissa.[0] <- '+'
-                  |'+' -> buffer.re_mantissa.[0] <- '-'
+                  |'-' -> buffer.re_mantissa <- Utility.str_replace buffer.re_exponent 0 '+'
+                  |'+' -> buffer.re_mantissa <- Utility.str_replace buffer.re_exponent 0 '-'
                   |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
                else
                   ()
@@ -751,41 +751,46 @@ let handle_minus (iface : interface_state_t) =
       |ComplexEntry | ComplexMatrixEntry ->
          begin
             let buffer = iface.gen_buffer.(iface.curr_buf) in
-            let mantissa = 
-               if iface.is_entering_imag then
-                  buffer.im_mantissa
-               else
-                  buffer.re_mantissa
-            and exponent = 
-               if iface.is_entering_imag then
-                  buffer.im_exponent
-               else
-                  buffer.re_exponent
-            in
             if iface.is_entering_exponent then
-               if String.length exponent > 0 then
-                  match exponent.[0] with
-                  |'-' -> exponent.[0] <- '+'
-                  |'+' -> exponent.[0] <- '-'
-                  |_ -> 
-                     if iface.is_entering_imag then
-                        buffer.im_exponent <- "-" ^ buffer.im_exponent
-                     else
-                        buffer.re_exponent <- "-" ^ buffer.re_exponent
-               else
-                  ()
+               if iface.is_entering_imag then begin
+                  if String.length buffer.im_exponent > 0 then
+                     begin match buffer.im_exponent.[0] with
+                     |'-' -> buffer.im_exponent <- Utility.str_replace buffer.im_exponent 0 '+'
+                     |'+' -> buffer.im_exponent <- Utility.str_replace buffer.im_exponent 0 '-'
+                     |_ -> buffer.im_exponent <- "-" ^ buffer.im_exponent
+                     end
+                  else
+                     ()
+               end else begin
+                  if String.length buffer.re_exponent > 0 then
+                     begin match buffer.re_exponent.[0] with
+                     |'-' -> buffer.re_exponent <- Utility.str_replace buffer.re_exponent 0 '+'
+                     |'+' -> buffer.re_exponent <- Utility.str_replace buffer.re_exponent 0 '-'
+                     |_ -> buffer.re_exponent <- "-" ^ buffer.re_exponent
+                     end
+                  else
+                     ()
+               end
             else
-               if String.length mantissa > 0 then
-                  match mantissa.[0] with
-                  |'-' -> mantissa.[0] <- '+'
-                  |'+' -> mantissa.[0] <- '-'
-                  |_ -> 
-                     if iface.is_entering_imag then
-                        buffer.im_mantissa <- "-" ^ buffer.im_mantissa
-                     else
-                        buffer.re_mantissa <- "-" ^ buffer.re_mantissa
-               else
-                  ()
+               if iface.is_entering_imag then begin
+                  if String.length buffer.im_mantissa > 0 then
+                     begin match buffer.im_mantissa.[0] with
+                     |'-' -> buffer.im_mantissa <- Utility.str_replace buffer.im_mantissa 0 '+'
+                     |'+' -> buffer.im_mantissa <- Utility.str_replace buffer.im_mantissa 0 '-'
+                     |_ -> buffer.im_mantissa <- "-" ^ buffer.im_mantissa
+                     end
+                  else
+                     ()
+               end else begin
+                  if String.length buffer.re_mantissa > 0 then
+                     begin match buffer.re_mantissa.[0] with
+                     |'-' -> buffer.re_mantissa <- Utility.str_replace buffer.re_mantissa 0 '+'
+                     |'+' -> buffer.re_mantissa <- Utility.str_replace buffer.re_mantissa 0 '-'
+                     |_ -> buffer.re_mantissa <- "-" ^ buffer.re_mantissa
+                     end
+                  else
+                     ()
+               end
          end;
          draw_update_entry iface
       |_ ->

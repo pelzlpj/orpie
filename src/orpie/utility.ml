@@ -160,7 +160,10 @@ let expand_open_in_bin filename =
 let expand_open_in_ascii filename =
    expand_open_in_gen false filename
 
-
+let str_replace (s : string) (index : int) (c : char) : string =
+  let copy = Bytes.of_string s in
+  let () = Bytes.set copy index c in
+  Bytes.to_string copy
 
 
 (* arch-tag: DO_NOT_CHANGE_a87790db-2dd0-496c-9620-ed968f3253fd *)
