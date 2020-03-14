@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "orpie"
-version: "1.6.0"
+version: "1.6.1"
 maintainer: "Paul Pelzl <pelzlpj@gmail.com>"
 authors: "Paul Pelzl <pelzlpj@gmail.com>"
 homepage: "https://github.com/pelzlpj/orpie"
@@ -9,7 +9,7 @@ license: "GPL-3.0-only"
 dev-repo: "git+https://github.com/pelzlpj/orpie.git"
 build: ["dune" "build" "-p" "orpie"]
 depends: [
-  "ocaml" {>= "4.03.0" & < "4.10"}
+  "ocaml" {>= "4.03.0"}
   "camlp5" {build}
   "dune" {>= "1.1"}
   "curses" {>= "1.0.3"}
