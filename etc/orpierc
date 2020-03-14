@@ -15,6 +15,7 @@ set conserve_memory="false"
 # is currently being entered
 bind "n"              edit_minus
 bind "<backspace>"    edit_backspace
+bind \177             edit_backspace
 bind "<return>"       edit_enter
 bind "`"              edit_scientific_notation_base
 bind "<space>"        edit_scientific_notation_base
