@@ -6,7 +6,7 @@ Orpie is a Curses-based RPN calculator.
 == Installation
 === Using OPAM
 The recommended method for installing Orpie is to use
-https://opam.ocaml.org/[OPAM].  +opam install orpie+ should get the job done.
+https://opam.ocaml.org/[OPAM].  +opam install orpie+ should get the job done. You need to install +gsl+ and +pkg-config+ first.
 
 === Without using OPAM
 If you want to install manually, you will need the following OCaml packages installed:
