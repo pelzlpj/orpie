@@ -10,6 +10,9 @@ install: _build/install/default/bin/orpie _build/install/default/bin/orpie-curse
 	mkdir -p "$(DESTDIR)/$$ORPIE_PREFIX" && \
 	dune install --prefix="$(DESTDIR)/$$ORPIE_PREFIX"
 
+docker:
+	docker build -t orpie:latest .
+
 clean:
 	dune clean
 
