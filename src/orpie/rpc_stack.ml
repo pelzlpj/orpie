@@ -255,6 +255,28 @@ class rpc_stack conserve_memory_in =
             raise (Invalid_argument "cannot echo nonexistant element")
 
 
+      (* swap element `num` with element down from it (i.e. towards the top
+       * of the stack). *)
+      method swapdown num =
+         if (len - num) < len-1 then
+            let temp = stack.(len - num) in
+            stack.(len - num) <- stack.(len - num + 1);
+            stack.(len - num + 1) <- temp
+         else
+            raise (Stack_error "cannot swap down at bottom");
+
+
+      (* swap element `num` with element up from it (i.e. away from the top
+       * of the stack). *)
+       method swapup num =
+         if (len - num) > 0 then
+            let temp = stack.(len - num) in
+            stack.(len - num) <- stack.(len - num - 1);
+            stack.(len - num - 1) <- temp
+         else
+            raise (Stack_error "cannot swap up at top");
+
+
       (* cyclically roll all stack elements downward (i.e. towards the top
        * of the stack), starting below element number 'num' (inclusive). *)
       method rolldown num =

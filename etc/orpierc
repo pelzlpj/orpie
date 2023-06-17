@@ -76,6 +76,8 @@ bind "<left>"         browse_scroll_left
 bind "<right>"        browse_scroll_right
 bind "<up>"           browse_prev_line
 bind "<down>"         browse_next_line
+bind \1015            browse_swapdown
+bind \1066            browse_swapup
 bind "r"              browse_rolldown
 bind "R"              browse_rollup
 bind "v"              browse_view
