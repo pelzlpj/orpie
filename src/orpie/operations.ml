@@ -49,7 +49,8 @@ type edit_operation_t     = | Digit | Enter | Backspace | Minus | SciNotBase
                             | Separator | Angle | BeginUnits;;
 
 type browse_operation_t   = | EndBrowse
-                            | ScrollLeft | ScrollRight | RollDown | RollUp
+                            | ScrollLeft | ScrollRight
+                            | SwapDown | SwapUp | RollDown | RollUp
                             | PrevLine | NextLine | Echo | ViewEntry
                             | Drop1 | DropN | Keep | KeepN
                             | EditEntry;;

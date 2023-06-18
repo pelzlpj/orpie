@@ -654,25 +654,29 @@ let draw_help_browsing iface win mvwaddstr_safe try_find =
    try_find (Browse ScrollLeft));
    mvwaddstr_safe win 9 2  ("scroll right: " ^
    try_find (Browse ScrollRight));
-   mvwaddstr_safe win 10 2 ("roll down   : " ^
+   mvwaddstr_safe win 10 2 ("swap down   : " ^
+   try_find (Browse SwapDown));
+   mvwaddstr_safe win 11 2 ("swap up     : " ^
+   try_find (Browse SwapUp));
+   mvwaddstr_safe win 12 2 ("roll down   : " ^
    try_find (Browse RollDown));
-   mvwaddstr_safe win 11 2 ("roll up     : " ^
+   mvwaddstr_safe win 13 2 ("roll up     : " ^
    try_find (Browse RollUp));
-   mvwaddstr_safe win 12 2 ("dup         : " ^
+   mvwaddstr_safe win 14 2 ("dup         : " ^
    try_find (Command Dup));
-   mvwaddstr_safe win 13 2 ("view        : " ^
+   mvwaddstr_safe win 15 2 ("view        : " ^
    try_find (Browse ViewEntry));
-   mvwaddstr_safe win 14 2 ("edit        : " ^
+   mvwaddstr_safe win 16 2 ("edit        : " ^
    try_find (Browse EditEntry));
-   mvwaddstr_safe win 15 2 ("drop        : " ^
+   mvwaddstr_safe win 17 2 ("drop        : " ^
    try_find (Browse Drop1));
-   mvwaddstr_safe win 16 2 ("dropn       : " ^
+   mvwaddstr_safe win 18 2 ("dropn       : " ^
    try_find (Browse DropN));
-   mvwaddstr_safe win 17 2 ("keep        : " ^
+   mvwaddstr_safe win 19 2 ("keep        : " ^
    try_find (Browse Keep));
-   mvwaddstr_safe win 18 2 ("keepn       : " ^
+   mvwaddstr_safe win 20 2 ("keepn       : " ^
    try_find (Browse KeepN));
-   mvwaddstr_safe win 20 1 ("exit browsing mode: " ^
+   mvwaddstr_safe win 22 1 ("exit browsing mode: " ^
    try_find (Browse EndBrowse));
    assert (wnoutrefresh win)
 

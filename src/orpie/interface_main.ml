@@ -1081,6 +1081,26 @@ let handle_next_line (iface : interface_state_t) =
       ()
 
 
+(* handle swap up in browsing mode *)
+let handle_swapup (iface : interface_state_t) =
+   if iface.stack_selection < iface.calc#get_stack_size () then
+      (iface.calc#swapup iface.stack_selection;
+      handle_prev_line iface;
+      draw_update_stack iface)
+   else
+      ()
+
+
+(* handle swap down in browsing mode *)
+let handle_swapdown (iface : interface_state_t) =
+   if iface.stack_selection > 1 then
+      (iface.calc#swapdown iface.stack_selection;
+      handle_next_line iface;
+      draw_update_stack iface)
+   else
+      ()
+
+
 (* handle echoing stack selection (browsing mode) *)
 let handle_browse_echo (iface : interface_state_t) =
    iface.calc#echo iface.stack_selection;
@@ -2046,6 +2066,10 @@ let handle_keypress_browse key (iface : interface_state_t) =
          handle_scroll_left iface
       |ScrollRight ->
          handle_scroll_right iface
+      |SwapDown ->
+         handle_swapdown iface
+      |SwapUp ->
+         handle_swapup iface
       |RollDown ->
          handle_rolldown iface
       |RollUp ->
