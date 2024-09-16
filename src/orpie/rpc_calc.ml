@@ -1578,6 +1578,12 @@ class rpc_calc conserve_memory =
       method rollup i =
          stack#rollup i
 
+      method swapdown i =
+         stack#swapdown i
+
+      method swapup i =
+         stack#swapup i
+
       method delete i = 
          stack#delete i
 

@@ -15,6 +15,7 @@ depends: [
   "curses" {>= "1.0.3"}
   "gsl" {>= "1.22.0"}
   "num"
+  "camlp-streams"
 ]
 synopsis: "Curses-based RPN calculator"
 description: """

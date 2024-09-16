@@ -544,6 +544,8 @@ let operation_of_string command_str =
    |"browse_prev_line"              -> (Browse PrevLine)
    |"browse_next_line"              -> (Browse NextLine)
    |"browse_echo"                   -> (Browse Echo)
+   |"browse_swapdown"               -> (Browse SwapDown)
+   |"browse_swapup"                 -> (Browse SwapUp)
    |"browse_rolldown"               -> (Browse RollDown)
    |"browse_rollup"                 -> (Browse RollUp)
    |"browse_view"                   -> (Browse ViewEntry)
