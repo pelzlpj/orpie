@@ -33,7 +33,8 @@ exception Not_handled;;
 type screen_t = {stdscr:window; mutable lines:int; mutable cols:int;
    mutable help_win:window option; mutable hw_lines:int; mutable hw_cols:int;
    mutable stack_win:window; mutable sw_lines:int; mutable sw_cols:int; 
-   mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int};;
+   mutable entry_win:window; mutable ew_lines:int; mutable ew_cols:int;
+   mutable is_paused : bool};;
 
 type entry_t     = | IntEntry | FloatEntry | ComplexEntry 
                    | FloatMatrixEntry | ComplexMatrixEntry | VarEntry;;

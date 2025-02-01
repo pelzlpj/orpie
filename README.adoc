@@ -34,6 +34,10 @@ $ make
 $ make install
 ----
 
+=== Using Docker image
+
+A Dockerfile is available to automatize orpie usage. Image can be built running `make docker` and the command to run is `docker run -it --name orpie --rm orpie:latest`.
+
 == Usage
 See the 'doc' subdirectory for more extensive documentation.
 
